@@ -466,12 +466,7 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	if (!type || !filename)
 		return -100;
 
-	/* Check for native format or temp use of EGG here */
-	if (strcmp(type, "ja") == 0)
-	{
-		return freyjaSaveModel(filename); // FIXME: true or false needed?
-	}
-
+	/* Check for native format. */
 	if (strcmp(type, "freyja") == 0)
 	{
 		SystemIO::TextFileWriter tw; 

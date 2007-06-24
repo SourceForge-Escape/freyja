@@ -656,12 +656,6 @@ extern "C" {
 	 * Post : Serialiser for JA format mesh chunk
 	 ------------------------------------------------------*/
 
-    int32 freyjaMeshSaveChunkJA(mstl::SystemIO::FileWriter &w, index_t mesh);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serialiser for JA format mesh chunk
-	 ------------------------------------------------------*/
-
     bool freyjaMeshSaveChunkTextJA(SystemIO::TextFileWriter &w, index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 

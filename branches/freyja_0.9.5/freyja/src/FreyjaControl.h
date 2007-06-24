@@ -717,6 +717,10 @@ class FreyjaControl : public Control
 	void EvRecentFiles(uint32 value) 
 	{ LoadModel( mRecentModel.GetFilename(value)); }
 
+	void EvRecentLua(uint32 value);
+
+	void EvRecentKeyframe(uint32 value);
+
 	void EvRecentMeshXML(uint32 value) 
 	{ UnserializeMesh( mRecentMesh.GetFilename(value) ); }
 
@@ -1165,6 +1169,10 @@ private:
 	RecentFiles mRecentMesh;
 
 	RecentFiles mRecentSkeleton;
+
+	RecentFiles mRecentKeyframe;
+
+	RecentFiles mRecentLua;
 
 	Texture mTexture;                       /* Collection of Texture utils */	
 

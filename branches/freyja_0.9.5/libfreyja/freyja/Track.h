@@ -69,7 +69,7 @@ public:
 
 	void DeleteKeyFrame(index_t idx)
 	{
-		KeyFrame **array = mKeyFrames.getVectorArray();
+		KeyFrame **array = mKeyFrames.get_array();
 		
 		if ( idx < mKeyFrames.size() && array[idx] )
 		{
@@ -95,7 +95,7 @@ public:
 		mKeyFrames.resize(0);
 		for ( uint32 i = 0, count = GetKeyframeCount(); i < count; ++i )
 		{
-			mKeyFrames.pushBack(NULL);
+			mKeyFrames.push_back(NULL);
 		}
 
 		// FIXME: Since, this design is about to be axed don't bother updating
@@ -114,7 +114,7 @@ public:
 
 	virtual uint32 GetNextKeyframe(uint32 frame)
 	{
-		KeyFrame **array = mKeyFrames.getVectorArray();
+		KeyFrame **array = mKeyFrames.get_array();
 		for ( uint32 count = mKeyFrames.size()-1; frame < count; ++frame )
 		{
 			if (array[frame])
@@ -130,7 +130,7 @@ public:
 	virtual KeyFrame *GetPrevKey(vec_t time)
 	{
 		KeyFrame *key = NULL;
-		KeyFrame **array = mKeyFrames.getVectorArray();
+		KeyFrame **array = mKeyFrames.get_array();
 		uint32 keyframe = GetKeyfameIndexFromTime(time);
 		uint32 size = mKeyFrames.size();
 
@@ -148,7 +148,7 @@ public:
 
 	virtual uint32 GetPrevKeyframe(uint32 keyframe)
 	{
-		KeyFrame **array = mKeyFrames.getVectorArray();
+		KeyFrame **array = mKeyFrames.get_array();
 		for ( ; keyframe > 0; --keyframe )
 		{
 			if (array[keyframe])
@@ -166,7 +166,7 @@ public:
 	{
 		if ( keyframe < mKeyFrames.size() )
 		{
-			KeyFrame **array = mKeyFrames.getVectorArray();
+			KeyFrame **array = mKeyFrames.get_array();
 
 			if ( array[keyframe] == NULL )
 			{
@@ -188,7 +188,7 @@ public:
 
 		if ( keyframe < mKeyFrames.size() )
 		{
-			KeyFrame **array = mKeyFrames.getVectorArray();
+			KeyFrame **array = mKeyFrames.get_array();
 
 			if ( array[keyframe] == NULL )
 				array[keyframe] = NewTrackKeyFrame(time);
@@ -351,7 +351,7 @@ public:
 
 			if (key)
 			{
-				key->Serialize(r);
+				key->Unserialize(r);
 			}
 
 			j = r.ReadInt32();
@@ -439,7 +439,7 @@ public:
 			r.ParseSymbol(); // Key
 			uint32 key = r.ParseInteger();
 			KeyFrame *k = NewKeyframeByIndex(key);
-			if (k) k->Serialize(r);
+			if (k) k->Unserialize(r);
 
 			--count;
 		}
@@ -464,25 +464,7 @@ public:
 };
 
 
-class VertexAnimTrack : public Track
-{
-public:
-	VertexAnimTrack() : Track() { mName = "VertexAnim"; }
-	
-	~VertexAnimTrack() {}
 
-	
-	virtual KeyFrame *NewTrackKeyFrame(vec_t time)
-	{
-		VertexAnimKeyFrame *key = new VertexAnimKeyFrame();
-		return key;
-	}
-
-	virtual VertexAnimKeyFrame *GetKeyframe(index_t idx) 
-	{
-		return (VertexAnimKeyFrame *)Track::GetKeyframe(idx);
-	}
-};
 
 
 class TransformTrack : public Track
@@ -617,82 +599,6 @@ public:
 };
 
 
-#ifdef OBSOLETE
-
-class InterfaceTrack
-{
-	////////////////////////////////////////////////////////////
-	// This class is the base for keyframe 'typing' aggregate.
-	// Notice to add a new kind of transform it must be added 
-	// here first.  This helps encourage more uniform extension.
-	// However feel free to use the interface however works best.
-	//
-	// The methods here should drive your UI / curve control design.
-	// By providing commonly used curve transforms here, you shouldn't
-	// have to hack around anything.  
-	//
-	////////////////////////////////////////////////////////////
-
- public:
-
-	InterfaceTrack() { }
-
-	virtual ~InterfaceTrack() { }
-
-	// Might want to put 'tmp/edit' keyframe support in here instead of UI
-	// for use when creating a keyframe using auto
-
-	// 'Location' interface
-	virtual void SetPosition(vec3_t xyz) {}
-	virtual void SetPositionX(float x) {}
-	virtual void SetPositionY(float y) {}
-	virtual void SetPositionZ(float z) {}
-	virtual void SetDeltaPosition(vec3_t xyz) {}
-	virtual void SetDeltaPositionX(float x) {}
-	virtual void SetDeltaPositionY(float y) {}
-	virtual void SetDeltaPositionZ(float z) {}
-
-	// 'Rotation' Quaternion interface 
-	virtual void SetRotationQuat(vec4_t wxyz) {}
-	virtual void SetDeltaRotationQuat(vec4_t wxyz) {}
-
-	// 'Rotation'Euler angle interface 
-	virtual void SetRotationEuler(vec3_t xyz) {}
-	virtual void SetRotationEulerX(float x) {}
-	virtual void SetRotationEulerY(float y) {}
-	virtual void SetRotationEulerZ(float z) {}
-	virtual void SetDeltaRotationEuler(vec3_t xyz) {}	
-	virtual void SetDeltaRotationEulerX(float x) {}
-	virtual void SetDeltaRotationEulerY(float y) {}
-	virtual void SetDeltaRotationEulerZ(float z) {}
-
-	// 'Size' interface
-	virtual void SetScale(vec_t s) {}
-	virtual void SetScale(vec3_t xyz) {}	
-	virtual void SetScaleX(float x) {}
-	virtual void SetScaleY(float y) {}
-	virtual void SetScaleZ(float z) {}
-	virtual void SetDeltaScale(vec3_t xyz) {}	
-	virtual void SetDeltaScaleX(float x) {}
-	virtual void SetDeltaScaleY(float y) {}
-	virtual void SetDeltaScaleZ(float z) {}
-
-	// 'Color' interface
-	virtual void SetColorARGB(vec4_t argb) {}
-	virtual void SetColorRGB(vec3_t rgb) {}
-	virtual void SetColorRGBA(vec4_t rgba) {}
-	virtual void SetColorR(vec_t r) {}
-	virtual void SetColorB(vec_t b) {}
-	virtual void SetColorG(vec_t g) {}
-	virtual void SetColorA(vec_t a) {}
-	virtual void SetTransparentcy(vec_t t) {}
-	virtual void SetVisibility(vec_t v) {}
-
-	// 'Light' interface
-	virtual void SetFalloff(vec_t d) {}
-
-};
-#endif
 
 
 class Vec3Track : public Track

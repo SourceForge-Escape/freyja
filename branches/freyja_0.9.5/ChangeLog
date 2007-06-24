@@ -6,6 +6,15 @@
 
  Kagura prealpha, 0.9.5.13
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ ? RELEASE DEP freyjaQueryABI for python/lua scripting UI.
+ ? RELEASE DEP Python script integration fix in UI.
+ ? RELEASE DEP Keyframe metadata editor in UI.
+ - Vertex animator fixed.
+ - Update for mstl SystemIO: broke up classes, fixed namespace, C99 types.
+ - New QuatKeyFrame, replacing Euler linear interpolation stand-in.
+ - XML serialization for keyframes.
+ - Minor clean up of keyframe API, minor reduction/refactor.
+ - Decprecated Ja serialization in libfreyja.  ( Now in LegacyABI. )
  - Midgard UI plugin checked into svn. ( aka trashcan plugin, full of test junk )
  - Lua script integration in UI.
  - Cmake update to automatically build support for python and lua if found.

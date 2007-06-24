@@ -26,8 +26,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_KEYFRAME_H_
-#define GUARD__FREYJA_MONGOOSE_KEYFRAME_H_
+#ifndef GUARD__FREYJA_KEYFRAME_H_
+#define GUARD__FREYJA_KEYFRAME_H_
 
 #include <math.h>
 #include <hel/math.h>
@@ -40,8 +40,12 @@
 
 #include "freyja.h"
 
-using namespace mstl;
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif
 
+using namespace mstl;
+using hel::Vec3;
 
 namespace freyja {
 
@@ -49,59 +53,121 @@ class KeyFrame
 {
 public:
 
-	KeyFrame() : mFlags(0x0), mTime(0.0f) { }
+	typedef enum {
+
+		fNone = 0,
+		fTx = 1,
+		fTy = 2,
+		fTz = 4,
+		fRx = 8,
+		fRy = 16,
+		fSx = 32,
+		fSy = 64,
+		fSz = 128
+
+	} Flags;
+
+
+	KeyFrame() : mFlags(fNone), mTime(0.0f), mMetaData("") { }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of KeyFrame
+	 * Post : Constructor.
+	 *
 	 ------------------------------------------------------*/
 
-	KeyFrame(vec_t time) : mFlags(0x0), mTime(time) { }
+	KeyFrame(vec_t time) : mFlags(fNone), mTime(time), mMetaData("") { }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of KeyFrame
+	 * Post : Constructor.
+	 *
 	 ------------------------------------------------------*/
 
 	virtual ~KeyFrame() { }
 	/*------------------------------------------------------
-	 * Pre  : KeyFrame object is allocated
-	 * Post : Deconstructs an object of KeyFrame
+	 * Pre  : 
+	 * Post : Deconstructor.
+	 *
+	 ------------------------------------------------------*/
+
+	const char *GetMetaData() { return mMetaData.c_str(); }
+	void SetMetaData(const char *s) { mMetaData = s; }
+	/*------------------------------------------------------
+	 * Pre  :
+	 * Post : MetaData property.
+	 *
 	 ------------------------------------------------------*/
 
 	vec_t GetTime() { return mTime; }
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : 
-	 ------------------------------------------------------*/
-
 	virtual void SetTime(vec_t time) { mTime = time; }
 	/*------------------------------------------------------
 	 * Pre  :
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	virtual uint32 GetSerializedSize() = 0;
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : 
+	 * Post : Time property.
+	 *
 	 ------------------------------------------------------*/
 
 	virtual bool Serialize(SystemIO::FileWriter &w) = 0;
-	virtual bool Serialize(SystemIO::TextFileWriter &w) = 0;
+	virtual bool Unserialize(SystemIO::FileReader &r) = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Write data from this object to disk
+	 * Post : Text serialization methods.
+	 *
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::FileReader &r) = 0;
-	virtual bool Serialize(SystemIO::TextFileReader &r) = 0;
+	virtual uint32 GetSerializedSize() = 0;
+	virtual bool Serialize(SystemIO::TextFileWriter &w) = 0;
+	virtual bool Unserialize(SystemIO::TextFileReader &r) = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Read data into this object from disk
+	 * Post : Binary serialization methods.
+	 *
 	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+	virtual bool Serialize(TiXmlElement *container) = 0;
+	virtual bool Unserialize(TiXmlElement *container) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : XML serialization methods.
+	 *
+	 ------------------------------------------------------*/
+#endif
+
+ protected:
+
+	virtual bool SerializeBase(SystemIO::FileWriter &w);
+	virtual bool UnserializeBase(SystemIO::FileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Text serialization methods for base attributes.
+	 *
+	 ------------------------------------------------------*/
+
+	virtual uint32 GetSerializedSizeBase();
+	virtual bool SerializeBase(SystemIO::TextFileWriter &w);
+	virtual bool UnserializeBase(SystemIO::TextFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Binary serialization methods for base attributes.
+	 *
+	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+	virtual bool SerializeBase(TiXmlElement *container);
+	virtual bool UnserializeBase(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : XML serialization methods for base attributes.
+	 *
+	 ------------------------------------------------------*/
+#endif
+
 
 	byte mFlags;       /* Used in obsolete code for interface use */
 
 	vec_t mTime;       /* Time offset to this frame in sec */
+
+	String mMetaData;  /* XML metadata for keyframe.  
+						* Not to be confused with XML serialization. */
 };
 
 
@@ -144,14 +210,14 @@ class VecKeyFrame : public KeyFrame
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::FileReader &r) 
+	virtual bool Unserialize(SystemIO::FileReader &r) 
 	{ mData = r.ReadFloat32(); return true; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::TextFileReader &r) 
+	virtual bool Unserialize(SystemIO::TextFileReader &r) 
 	{ 
 		mTime = r.ParseFloat();
 		mFlags = r.ParseInteger();
@@ -162,6 +228,45 @@ class VecKeyFrame : public KeyFrame
 	 * Pre  : 
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+	virtual bool Serialize(TiXmlElement *container)
+	{
+		if (!container)
+			return false;
+
+		TiXmlElement *key = new TiXmlElement("VecKeyFrame");
+		key->SetAttribute("vertex", mFlags);
+		key->SetDoubleAttribute("time", mTime);
+		key->SetDoubleAttribute("v", mData);
+
+		container->LinkEndChild(key);
+
+		return true;
+	}
+
+	virtual bool Unserialize(TiXmlElement *container)
+	{
+		if (!container)
+			return false;
+
+		{
+			int attr = 0;
+			container->QueryIntAttribute("flags", &attr);
+			mFlags = attr;
+		}
+
+		container->QueryFloatAttribute("time", &mTime);
+		container->QueryFloatAttribute("v", &mData);
+
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : XML serialization methods.
+	 *
+	 ------------------------------------------------------*/
+#endif
 
 	vec_t mData;                      /* Keyframe data */
 };
@@ -213,7 +318,7 @@ class Vec3KeyFrame : public KeyFrame
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::FileReader &r) 
+	virtual bool Unserialize(SystemIO::FileReader &r) 
 	{ 
 		mFlags = r.ReadByte();
 		mTime = r.ReadFloat32();
@@ -227,7 +332,7 @@ class Vec3KeyFrame : public KeyFrame
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::TextFileReader &r) 
+	virtual bool Unserialize(SystemIO::TextFileReader &r) 
 	{ 
 		mTime = r.ParseFloat();
 		mFlags = r.ParseInteger();
@@ -240,6 +345,50 @@ class Vec3KeyFrame : public KeyFrame
 	 * Pre  : 
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+	virtual bool Serialize(TiXmlElement *container)
+	{
+		if (!container)
+			return false;
+
+		TiXmlElement *key = new TiXmlElement("Vec3KeyFrame");
+		key->SetAttribute("vertex", mFlags);
+		key->SetDoubleAttribute("time", mTime);
+
+		key->SetDoubleAttribute("x", mData.mVec[0]);
+		key->SetDoubleAttribute("y", mData.mVec[1]);
+		key->SetDoubleAttribute("z", mData.mVec[2]);
+
+		container->LinkEndChild(key);
+
+		return true;
+	}
+
+	virtual bool Unserialize(TiXmlElement *container)
+	{
+		if (!container)
+			return false;
+
+		{
+			int attr = 0;
+			container->QueryIntAttribute("flags", &attr);
+			mFlags = attr;
+		}
+
+		container->QueryFloatAttribute("time", &mTime);
+		container->QueryFloatAttribute("x", &mData.mVec[0]);
+		container->QueryFloatAttribute("y", &mData.mVec[1]);
+		container->QueryFloatAttribute("z", &mData.mVec[2]);
+
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : XML serialization methods.
+	 *
+	 ------------------------------------------------------*/
+#endif
 
 	hel::Vec3 mData;                      /* Keyframe data */
 };
@@ -291,7 +440,7 @@ class Vec3x3KeyFrame : public KeyFrame
 	 * Post : Write data from this object to disk
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::FileReader &r) 
+	virtual bool Unserialize(SystemIO::FileReader &r) 
 	{ 
 		mFlags = r.ReadByte();
 		mTime = r.ReadFloat32();
@@ -308,7 +457,7 @@ class Vec3x3KeyFrame : public KeyFrame
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
 
-	virtual bool Serialize(SystemIO::TextFileReader &r) 
+	virtual bool Unserialize(SystemIO::TextFileReader &r) 
 	{ 
 		mTime = r.ParseFloat();
 		mFlags = r.ParseInteger();
@@ -324,6 +473,67 @@ class Vec3x3KeyFrame : public KeyFrame
 	 * Pre  : 
 	 * Post : Read data into this object from disk
 	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+	virtual bool Serialize(TiXmlElement *container)
+	{
+		if (!container)
+			return false;
+
+		TiXmlElement *key = new TiXmlElement("Vec3x3KeyFrame");
+		key->SetAttribute("vertex", mFlags);
+		key->SetDoubleAttribute("time", mTime);
+
+		key->SetDoubleAttribute("tx", mData[0].mVec[0]);
+		key->SetDoubleAttribute("ty", mData[0].mVec[1]);
+		key->SetDoubleAttribute("tz", mData[0].mVec[2]);
+
+		key->SetDoubleAttribute("rx", mData[1].mVec[0]);
+		key->SetDoubleAttribute("ry", mData[1].mVec[1]);
+		key->SetDoubleAttribute("rz", mData[1].mVec[2]);
+
+		key->SetDoubleAttribute("sx", mData[2].mVec[0]);
+		key->SetDoubleAttribute("sy", mData[2].mVec[1]);
+		key->SetDoubleAttribute("sz", mData[2].mVec[2]);
+
+		container->LinkEndChild(key);
+
+		return true;
+	}
+
+	virtual bool Unserialize(TiXmlElement *container)
+	{
+		if (!container)
+			return false;
+
+		{
+			int attr = 0;
+			container->QueryIntAttribute("flags", &attr);
+			mFlags = attr;
+		}
+
+		container->QueryFloatAttribute("time", &mTime);
+		container->QueryFloatAttribute("tx", &mData[0].mVec[0]);
+		container->QueryFloatAttribute("ty", &mData[0].mVec[1]);
+		container->QueryFloatAttribute("tz", &mData[0].mVec[2]);
+
+		container->QueryFloatAttribute("rx", &mData[1].mVec[0]);
+		container->QueryFloatAttribute("ry", &mData[1].mVec[1]);
+		container->QueryFloatAttribute("rz", &mData[1].mVec[2]);
+
+		container->QueryFloatAttribute("sx", &mData[2].mVec[0]);
+		container->QueryFloatAttribute("sy", &mData[2].mVec[1]);
+		container->QueryFloatAttribute("sz", &mData[2].mVec[2]);
+
+		return true; 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : XML serialization methods.
+	 *
+	 ------------------------------------------------------*/
+#endif
+
 
 	hel::Vec3 mData[3];                    /* Keyframe data */
 };
@@ -361,209 +571,6 @@ class ScaleKeyFrame : public Vec3KeyFrame
 };
 
 
-class MatrixKeyFrame : public KeyFrame
-{
- public:
-
-	MatrixKeyFrame() : KeyFrame(), mData() {}
-
-	virtual ~MatrixKeyFrame() {}
-
-	const hel::Mat44 &GetData() { return mData; }
-
-	virtual void SetData(const hel::Mat44 &m) { mData = m; }
-
-	virtual uint32 GetSerializedSize() { return 4*16; }
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::FileWriter &w) 
-	{
-		for (uint32 i = 0; i < 16; ++i)
-		{
-			w.WriteFloat32(mData.mMatrix[i]);
-		}
-		return true;
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Write data from this object to disk
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::TextFileWriter &w) 
-	{
-		w.Print(" %f", mTime);
-		w.Print(" %u", mFlags);
-		for (uint32 i = 0; i < 16; ++i)
-		{
-			w.Print(" %f", mData.mMatrix[i]);
-		}
-		return true;
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Write data from this object to disk
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::FileReader &r) 
-	{ 
-		for (uint32 i = 0; i < 16; ++i)
-		{
-			mData.mMatrix[i] = r.ReadFloat32();
-		}
-		return true; 
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Read data into this object from disk
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::TextFileReader &r) 
-	{ 
-		mTime = r.ParseFloat();
-		mFlags = r.ParseInteger();
-		for (uint32 i = 0; i < 16; ++i)
-		{
-			mData.mMatrix[i] = r.ParseFloat();
-		}
-		return true; 
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Read data into this object from disk
-	 ------------------------------------------------------*/
-
-
-	hel::Mat44 mData;
-};
-
-
-class VertexAnimKeyFrame : public KeyFrame
-{
-public:
-	VertexAnimKeyFrame() : KeyFrame(), mVertices() { }
-	
-	~VertexAnimKeyFrame() {}
-
-	void ArrayResize(uint32 sz) { mVertices.resize(sz*3); } 
-
-	vec_t *GetArray() { return mVertices.getVectorArray(); }
-
-	uint32 GetArraySize() { return mVertices.size(); }
-
-	hel::Vec3 GetPos(uint32 i)
-	{
-		hel::Vec3 pos(0,0,0);
-
-		if (i < mVertices.end())
-		{
-			vec_t *array = mVertices.getVectorArray();
-			i *= 3;
-			pos.mVec[0] = array[i];
-			pos.mVec[1] = array[i+1];
-			pos.mVec[2] = array[i+2];
-		}
-
-		return pos;
-	}
-
-	void SetPos(uint32 i, hel::Vec3 pos)
-	{
-		if (i < mVertices.end())
-		{
-			vec_t *array = mVertices.getVectorArray();
-			i *= 3;
-			array[i  ] = pos.mVec[0];
-			array[i+1] = pos.mVec[1];
-			array[i+2] = pos.mVec[2];
-		}
-	}
-
-	virtual uint32 GetSerializedSize() { return 4+4*mVertices.end(); }
-	/*------------------------------------------------------
-	 * Pre  :
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::FileWriter &w) 
-	{
-		uint32 sz = mVertices.end();
-		w.WriteInt32U(sz);
-
-		for (uint32 i = 0; i < sz; ++i)
-		{
-			w.WriteFloat32(mVertices[i]);
-		}
-
-		return true;
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Write data from this object to disk
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::TextFileWriter &w) 
-	{
-		w.Print(" %f", mTime);
-		w.Print(" %u", mFlags);
-		w.Print(" %u", mVertices.end());
-		for (uint32 i = 0; i < mVertices.end(); ++i)
-		{
-			w.Print(" %f", mVertices[i]);
-		}
-		return true;
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Write data from this object to disk
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::FileReader &r) 
-	{ 
-		mVertices.clear();
-
-		uint32 sz = r.ReadInt32U();
-
-		for (uint32 i = 0; i < sz; ++i)
-		{
-			mVertices.pushBack(r.ReadFloat32());
-		}
-
-		return true; 
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Read data into this object from disk
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::TextFileReader &r) 
-	{ 
-		mTime = r.ParseFloat();
-		mFlags = r.ParseInteger();
-		uint32 sz = r.ParseInteger();
-
-		for (uint32 i = 0; i < sz; ++i)
-		{
-			mVertices.pushBack(r.ParseFloat());
-		}
-
-		return true; 
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Read data into this object from disk
-	 ------------------------------------------------------*/
-
-	uint32 GetVertexCount() { return mVertices.size()/3; }
- 
-	vec_t *GetVertexArray() {  return mVertices.getVectorArray(); }
-
-	Vector<vec_t> mVertices;
-};
-
-
 } // namespace freyja
 
-#endif
+#endif // GUARD__FREYJA_KEYFRAME_H_

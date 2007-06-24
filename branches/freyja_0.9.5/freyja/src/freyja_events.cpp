@@ -875,7 +875,7 @@ void eGenerateSphere()
 
 void eGenerateCube()
 {
-	FREYJA_INFOMSG(0, "FIXME: Replace obsolete mesh generator.");
+	//FREYJA_INFOMSG(0, "FIXME: Replace obsolete mesh generator.");
 	const char *dialog = "GenerateCubeDialog";
 	int ok = mgtk_execute_query_dialog(dialog);
 

@@ -129,6 +129,8 @@ FreyjaControl::FreyjaControl() :
 	mRecentModel(FREYJA_RECENT_FILES, "eRecentFiles"),
 	mRecentMesh("freyja-dev-recent-mesh_xml", "eRecentMeshXML"),
 	mRecentSkeleton("freyja-dev-recent-skeleton_xml", "eRecentSkeletonXML"),
+	mRecentKeyframe("freyja-dev-recent-keyframe_xml", "eRecentKeyframe"),
+	mRecentLua("freyja-dev-recent-lua", "eRecentLua"),
 
 	mTexture(),
 	mRender(NULL),
@@ -215,6 +217,13 @@ void FreyjaControl::Init()
 	if ( !mRecentSkeleton.LoadResource() )
 	{
 		Print("Failed to load '%s'.", mRecentSkeleton.GetResourceFilename() );
+	}
+
+	Print("Loading %s...", mRecentLua.GetResourceFilename());
+	
+	if ( !mRecentLua.LoadResource() )
+	{
+		Print("Failed to load '%s'.", mRecentLua.GetResourceFilename() );
 	}
 
 	/* Set some basic defaults */
@@ -455,9 +464,10 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eMeshRepack", &FreyjaControl::EvMeshRepack);
 
 	CreateListener1u("eRecentFiles", &FreyjaControl::EvRecentFiles);
-
 	CreateListener1u("eRecentMeshXML", &FreyjaControl::EvRecentMeshXML);
 	CreateListener1u("eRecentSkeletonXML", &FreyjaControl::EvRecentSkeletonXML);
+	CreateListener1u("eRecentKeyframe", &FreyjaControl::EvRecentKeyframe);
+	CreateListener1u("eRecentLua", &FreyjaControl::EvRecentLua);
 
 
 	CreateListener("ePaintWeight", &FreyjaControl::EvPaintWeight);
@@ -557,26 +567,30 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 }
 
 
+void FreyjaControl::EvRecentKeyframe(uint32 value)
+{
+	Print("FIXME: Not fully implemented %s:%i", __FILE__, __LINE__);
+	//mRecentKeyframe.GetFilename(value);
+}
+
+
+void FreyjaControl::EvRecentLua(uint32 value)
+{
+	freyjaLuaScript1s( mRecentLua.GetFilename(value) );
+}
+
+
 void FreyjaControl::EvLoadLuaScript()
 {
-	static String path = freyja_rc_map_string( "plugins/lua/" );
-
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Open Script...", 
-							  path.c_str(), 0,
+							  mRecentLua.GetPath(), 0,
 							  "Lua script (*.lua)", "*.lua");
 
 	if (filename)
 	{
 		freyjaLuaScript1s(filename);
-
-		path = filename;
-		int off = path.find_last_of('/');
-
-		if (off > 0)
-		{
-			path[off] = 0;
-		}
+		mRecentLua.AddFilename(filename);
 	}
 
 	mgtk_filechooser_blocking_free(filename);
@@ -3117,6 +3131,10 @@ bool FreyjaControl::SplitSelectedObject()
 {
 	switch (mObjectMode)
 	{
+	case tFace:
+		EvPolygonSplit();
+		break;
+
 	case tMesh:
 #if 0
 		if (mgtk::ExecuteConfirmationDialog("SplitMeshDialog"))

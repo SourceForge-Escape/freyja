@@ -55,13 +55,6 @@ bool freyjaBoneLoadChunkTextJA(SystemIO::TextFileReader &r)
 }
 
 
-int32 freyjaBoneSaveChunkJA(SystemIO::FileReader &r, index_t bone)
-{
-	//FIXME
-	return 0;
-}
-
-
 int32 freyjaBoneLoadChunkJA(SystemIO::FileReader &r, freyja_file_chunk_t &chunk)
 {
 	//FIXME

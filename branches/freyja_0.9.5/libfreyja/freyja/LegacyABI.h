@@ -543,6 +543,7 @@ extern "C" {
 
 #   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
 #      include <mstl/Vector.h>
+#      include <mstl/SystemIO.h>
 
 #      if FREYJA_OBSOLETE_ABI
 void freyjaVertexListTransform(mstl::Vector<uint32> &list,
@@ -563,7 +564,100 @@ mstl::Vector<unsigned int> *freyjaFindVerticesByBox(vec3_t bbox[2]);
 void freyjaGetVertexPolygonRef1i(index_t vertexIndex, mstl::Vector<long> &polygons);
 void freyjaGetVertexPolygonRef(mstl::Vector<long> &polygons);
 
+
 #      endif // FREYJA_OBSOLETE_ABI
+
+
+int32 freyjaMeshSaveChunkJA(mstl::SystemIO::FileWriter &w, index_t mesh);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Serialiser for JA format mesh chunk
+ ------------------------------------------------------*/
+
+
+int32 freyjaBoneSaveChunkJA(mstl::SystemIO::FileWriter &w, index_t bone);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Serialiser for JA format bone chunk
+ ------------------------------------------------------*/
+
+
+#ifdef OBSOLETE
+
+class InterfaceTrack
+{
+	////////////////////////////////////////////////////////////
+	// This class is the base for keyframe 'typing' aggregate.
+	// Notice to add a new kind of transform it must be added 
+	// here first.  This helps encourage more uniform extension.
+	// However feel free to use the interface however works best.
+	//
+	// The methods here should drive your UI / curve control design.
+	// By providing commonly used curve transforms here, you shouldn't
+	// have to hack around anything.  
+	//
+	////////////////////////////////////////////////////////////
+
+ public:
+
+	InterfaceTrack() { }
+
+	virtual ~InterfaceTrack() { }
+
+	// Might want to put 'tmp/edit' keyframe support in here instead of UI
+	// for use when creating a keyframe using auto
+
+	// 'Location' interface
+	virtual void SetPosition(vec3_t xyz) {}
+	virtual void SetPositionX(float x) {}
+	virtual void SetPositionY(float y) {}
+	virtual void SetPositionZ(float z) {}
+	virtual void SetDeltaPosition(vec3_t xyz) {}
+	virtual void SetDeltaPositionX(float x) {}
+	virtual void SetDeltaPositionY(float y) {}
+	virtual void SetDeltaPositionZ(float z) {}
+
+	// 'Rotation' Quaternion interface 
+	virtual void SetRotationQuat(vec4_t wxyz) {}
+	virtual void SetDeltaRotationQuat(vec4_t wxyz) {}
+
+	// 'Rotation'Euler angle interface 
+	virtual void SetRotationEuler(vec3_t xyz) {}
+	virtual void SetRotationEulerX(float x) {}
+	virtual void SetRotationEulerY(float y) {}
+	virtual void SetRotationEulerZ(float z) {}
+	virtual void SetDeltaRotationEuler(vec3_t xyz) {}	
+	virtual void SetDeltaRotationEulerX(float x) {}
+	virtual void SetDeltaRotationEulerY(float y) {}
+	virtual void SetDeltaRotationEulerZ(float z) {}
+
+	// 'Size' interface
+	virtual void SetScale(vec_t s) {}
+	virtual void SetScale(vec3_t xyz) {}	
+	virtual void SetScaleX(float x) {}
+	virtual void SetScaleY(float y) {}
+	virtual void SetScaleZ(float z) {}
+	virtual void SetDeltaScale(vec3_t xyz) {}	
+	virtual void SetDeltaScaleX(float x) {}
+	virtual void SetDeltaScaleY(float y) {}
+	virtual void SetDeltaScaleZ(float z) {}
+
+	// 'Color' interface
+	virtual void SetColorARGB(vec4_t argb) {}
+	virtual void SetColorRGB(vec3_t rgb) {}
+	virtual void SetColorRGBA(vec4_t rgba) {}
+	virtual void SetColorR(vec_t r) {}
+	virtual void SetColorB(vec_t b) {}
+	virtual void SetColorG(vec_t g) {}
+	virtual void SetColorA(vec_t a) {}
+	virtual void SetTransparentcy(vec_t t) {}
+	virtual void SetVisibility(vec_t v) {}
+
+	// 'Light' interface
+	virtual void SetFalloff(vec_t d) {}
+
+};
+#endif
 
 #   endif // defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
 
