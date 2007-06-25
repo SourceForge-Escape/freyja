@@ -198,14 +198,36 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	const char *GetMetadata(index_t key)
+	{
+		// 'New' will return prev allocated as well with 'old' backend
+		Vec3KeyFrame *keyframe = (Vec3KeyFrame *)mRot.NewKeyframeByIndex(key);
+		return (keyframe) ? keyframe->GetMetaData() : NULL;
+	}
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Gets metadata for keyframe <key>.
+	 *        Can return NULL.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetMetadata(index_t key, const char *s)
+	{
+		// 'New' will return prev allocated as well with 'old' backend
+		Vec3KeyFrame *keyframe = (Vec3KeyFrame *)mRot.NewKeyframeByIndex(key);
+		if (keyframe)
+			keyframe->SetMetaData(s);
+	}
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Sets metadata for keyframe <key>.
+	 *
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
-
-	//mstl::Vector<hel::Mat44> mLocalTransform;
-
-	//mstl::Vector<hel::Mat44> mPose;
 
 	hel::Mat44 mLocal; // Cache last requested time transform here
 

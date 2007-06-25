@@ -9,6 +9,14 @@
  ? RELEASE DEP freyjaQueryABI for python/lua scripting UI.
  ? RELEASE DEP Python script integration fix in UI.
  ? RELEASE DEP Keyframe metadata editor in UI.
+ - FIX Huge bug in Repack() vertex face references using bad index.
+ - Minor style cleanup in Mesh header. ( Should break up the class sooner. )
+ - Lame full mesh subdiv support added with haste.
+ - Various minor Mesh API updates.
+ - Faces... mode can now do face selection.  ( great for paint tool use )
+ - Extruded faces autogen face normal now.
+ - Face extrude using face normals by default in UI again.  pick was confusing.
+ - Keyframe metadata methods for BoneABI.
  - Vertex animator fixed.
  - Update for mstl SystemIO: broke up classes, fixed namespace, C99 types.
  - New QuatKeyFrame, replacing Euler linear interpolation stand-in.

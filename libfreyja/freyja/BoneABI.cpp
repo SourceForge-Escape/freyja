@@ -637,6 +637,33 @@ vec_t freyjaGetBonePosKeyframeTime(index_t bone, index_t track, index_t key)
 }
 
 
+void freyjaBoneKeyframeMetadata(index_t bone, index_t track, index_t key, 
+								const char *metadata)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b && track < b->GetTrackCount())
+	{
+		BoneTrack &t = b->GetTrack(track);
+		return t.SetMetadata(key, metadata);
+	}
+}
+
+
+const char *freyjaGetBoneKeyframeMetadata(index_t bone, index_t track, index_t key)
+{
+	Bone *b = Bone::GetBone(bone);
+
+	if ( b && track < b->GetTrackCount())
+	{
+		BoneTrack &t = b->GetTrack(track);
+		return t.GetMetadata(key);
+	}
+
+	return NULL;
+}
+
+
 void freyjaGetBonePosKeyframe3fv(index_t bone, index_t track, index_t key,
 								 vec3_t xyz)
 {

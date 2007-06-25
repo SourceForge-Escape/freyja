@@ -448,23 +448,23 @@ bool Mesh::Repack()
 					// Only Vertex objects reference vertex buffer directly, so
 					// we can 'tear it up and rebuild' here.
 					{
-						vec3_t pos;
-						GetTripleVec(mVertexPool, v->mVertexIndex, pos);
+						Vec3 pos;
+						GetTripleVec(mVertexPool, v->mVertexIndex, pos.mVec);
 
 						v->mVertexIndex = i;
 						//( !mFreedVertices.empty() ) ? mFreedVertices.pop() : i;
 
-						SetTripleVec(mVertexPool, v->mVertexIndex, pos);
+						SetTripleVec(mVertexPool, v->mVertexIndex, pos.mVec);
 					}
 
 					{
-						vec3_t pos;
-						GetTripleVec(mNormalPool, v->mNormalIndex, pos);
+						Vec3 pos;
+						GetTripleVec(mNormalPool, v->mNormalIndex, pos.mVec);
 
 						v->mNormalIndex = i;
 						//( !mFreedVertices.empty() ) ? mFreedVertices.pop() : i;
 
-						SetTripleVec(mNormalPool, v->mNormalIndex, pos);
+						SetTripleVec(mNormalPool, v->mNormalIndex, pos.mVec);
 					}
 
 					break;
@@ -505,7 +505,7 @@ bool Mesh::Repack()
 
 
 	/* Repack Faces. */
-	
+
 	for (uint32 i = 0; i < mFaces.size(); ++i)
 	{
 		if (mFaces[i] == NULL)
@@ -520,10 +520,9 @@ bool Mesh::Repack()
 					// Update vertex face refs... factor this out later.
 					for (uint32 k = 0; k < mVertices.size(); ++k)
 					{
-						if (mVertices[i])
+						if (mVertices[k])
 						{
-							mstl::Vector<index_t> &refs = 
-							mVertices[i]->GetFaceRefs();
+							mstl::Vector<index_t> &refs = mVertices[k]->GetFaceRefs();
 
 							uint32 r;
 							foreach (refs, r)
@@ -1186,7 +1185,7 @@ bool Mesh::Serialize(SystemIO::TextFileWriter &w)
 }
 
 
-bool Mesh::Serialize(SystemIO::TextFileReader &r)
+bool Mesh::Unserialize(SystemIO::TextFileReader &r)
 {
 	// Currently no parsing/checking done as this is mostly for debugging
 
@@ -1471,6 +1470,16 @@ hel::Vec3 Mesh::GetVertexNormal(index_t idx)
 }
 
 
+void Mesh::SetVertexNormal(index_t idx, hel::Vec3 n)
+{
+	Vertex *vert = mVertices[idx];
+	if ( vert ) 
+	{
+		SetNormal(vert->mNormalIndex, n.mVec);
+	}
+}
+
+
 hel::Vec3 Mesh::GetVertexTexCoord(index_t idx)
 {
 	Vec3 v;
@@ -1481,6 +1490,16 @@ hel::Vec3 Mesh::GetVertexTexCoord(index_t idx)
 	}
 
 	return v;
+}
+
+
+void Mesh::SetVertexTexCoord(index_t idx, hel::Vec3 uv)
+{
+	Vertex *vert = mVertices[idx];
+	if ( vert ) 
+	{
+		SetTexCoord(vert->mTexCoordIndex, uv.mVec);
+	}
 }
 
 
@@ -2350,10 +2369,10 @@ void Mesh::Merge(Mesh *mesh)
 				uint32 j;
 				foreach (face->mTexCoordIndices, j)
 				{
-					vec3_t uvw;
+					Vec3 uvw;
 					index_t idx = face->mTexCoordIndices[j];
-					mesh->GetTexCoord(idx, uvw);
-					newFace->AppendTexCoord(CreateTexCoord(uvw));
+					mesh->GetTexCoord(idx, uvw.mVec);
+					newFace->AppendTexCoord(CreateTexCoord(uvw.mVec));
 				}
 			}
 		}
@@ -2525,7 +2544,17 @@ void Mesh::ExtrudeFace(index_t faceIndex, vec3_t displacement)
 		genFace->mIndices.push_back(B);
 		genFace->mIndices.push_back(C);
 		genFace->mIndices.push_back(D);
+
+		{
+			Vec3 a, b, c;
+			GetVertexPos(genFace->mIndices[0], a.mVec);
+			GetVertexPos(genFace->mIndices[1], b.mVec);
+			GetVertexPos(genFace->mIndices[2], c.mVec);
 		
+			genFace->mNormal = -Vec3::Cross(a - b, c - b);
+			genFace->mNormal.Norm();
+		}
+
 		if (face->mFlags & Face::fPolyMappedTexCoords)
 		{
 			// This will have to change when ploymapping changes
@@ -3517,9 +3546,212 @@ void Mesh::UpdateBoundingVolume()
 }
 
 
+void Mesh::AppendVertexToFace(index_t face, index_t vertex)
+{
+	Face *f = GetFace(face);
+	Vertex *v = GetVertex(vertex);
+
+	if (f && v)
+	{
+		f->AppendVertex(vertex);
+		Vector<index_t> &refs = v->GetFaceRefs();
+		refs.push_back(face);
+	}
+}
+
+
+void Mesh::SubDivLoop()
+{
+	// FIXME: Clean Up And Optimize!
+	// Use the vertices' tempRefs to store shared edges in UpdateEdgeGraph();
+	// for much more speed by avoiding search loops.
+
+
+	// Forced in 0.9.5, since it didn't start with edge support ( not ensured )
+	UpdateEdgeGraph();
+
+	Vector<index_t> vertices; // 'edge' vertices
+	Vector<index_t> centroids; // 'face' vertices
+	Vector<index_t> purge;
+
+	uint32 i;
+
+	// 1. Compute centroid for each face. ( vertex in the 'middle' of the facet )
+	centroids.reserve( mFaces.size() );
+	purge.reserve(mFaces.size()+1);
+	foreach (mFaces, i)
+	{
+		Face *f = mFaces[i];
+		
+		if (f)
+		{
+			purge.push_back(i);
+
+			Vec3 centroid, uv;
+
+			uint32 j;
+			foreach (f->mIndices, j)
+			{
+				uv += GetVertexTexCoord(f->mIndices[j]);
+				centroid += GetVertexPosition(f->mIndices[j]);
+			}
+
+			// Set it's 'pretty' vertex ( normals, uvs, etc are 'correct' )
+			uv /= f->mIndices.size();
+			centroid /= f->mIndices.size();
+			index_t vertex = CreateVertex(centroid);
+			SetVertexNormal(vertex, f->mNormal);
+			SetVertexTexCoord(vertex, uv);
+
+			centroids.push_back(vertex);
+		}		
+	}
+
+	// 2. Compute midpoint vertices for each edge.
+	vertices.reserve( mVertices.size() / 2 );
+	foreach (mEdges, i)
+	{
+		Edge *e = mEdges[i];
+
+		if (!e)
+			continue;
+
+		// Take a lot of midpoints to generate pretty vertices.
+		Vec3 a = GetVertexPosition(e->mA);
+		Vec3 b = GetVertexPosition(e->mB);
+		index_t vertex = CreateVertex( ( a + b ) * 0.5f );
+
+		{
+			Vec3 n0 = GetVertexNormal(e->mA);
+			Vec3 n1 = GetVertexNormal(e->mB);
+			SetVertexNormal(vertex, (n0 + n1) * 0.5f);
+		}
+
+		{
+			Vec3 uv0 = GetVertexTexCoord(e->mA);
+			Vec3 uv1 = GetVertexTexCoord(e->mB);
+			SetVertexTexCoord(vertex, (uv0 + uv1) * 0.5f);
+		}
+
+		vertices.push_back( vertex );
+	}
+
+	// 3. Make new facets with these vertices on a per face pass.
+	foreach (mEdges, i)
+	{
+		Edge *e = mEdges[i];
+
+		if (!e)
+			continue;
+
+		// 1. Get our shared midpoint for this edge. 
+		index_t mid = vertices[i];
+
+		// 2. Generate new facets for each facet using this edge.
+		uint32 j;
+		foreach (e->mFaceRefs, j)
+		{
+			Face *f = mFaces[ e->mFaceRefs[j] ];
+			if (!f) continue;
+
+			index_t centroid = centroids[ e->mFaceRefs[j] ];
+			
+			// 3. We need to *search for the neighbouring edges given no 
+			//    connected graph in this API version.  =(
+
+			uint32 k, count = 0;
+			foreach (mEdges, k)
+			{
+				Edge *e2 = mEdges[k];
+				if (!e2 || e == e2) continue;
+		
+				bool found = false;
+				uint32 l;
+				foreach (e2->mFaceRefs, l)
+				{
+					if (e2->mFaceRefs[l] == e->mFaceRefs[j])
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+					continue;
+				
+				if (e->mA == e2->mA || e->mA == e2->mB)
+				{
+					// centroid, mid, e->mA, e2's mid
+					index_t face = CreateFace();
+					Face *f2 = GetFace(face);
+
+					if (f2)
+					{
+						// FIXME: Handle material, etc
+#if 0
+						f2->AppendVertex(centroid);
+						f2->AppendVertex(mid);
+						f2->AppendVertex(e->mA);
+						f2->AppendVertex( vertices[k] );
+#else
+						AppendVertexToFace(face, centroid);
+						AppendVertexToFace(face, mid);
+						AppendVertexToFace(face, e->mA);
+						AppendVertexToFace(face, vertices[k]);
+#endif
+					}
+
+					++count;
+				}
+				else if (e->mB == e2->mA || e->mB == e2->mB)
+				{
+					// centroid, mid, e->mB, e2's mid
+					index_t face = CreateFace();
+					Face *f2 = GetFace(face);
+
+					if (f2)
+					{
+						// FIXME: Handle material, etc
+#if 0
+						f2->AppendVertex(centroid);
+						f2->AppendVertex(mid);
+						f2->AppendVertex(e->mB);
+						f2->AppendVertex( vertices[k] );
+#else
+						AppendVertexToFace(face, centroid);
+						AppendVertexToFace(face, mid);
+						AppendVertexToFace(face, e->mB);
+						AppendVertexToFace(face, vertices[k]);
+#endif
+					}
+
+					++count;
+				}
+
+				// Up to 2 correct faces can be generated per pass per
+				// edge this way... aka the hard way.
+
+				//if (count == 2)
+				//	break;
+			}
+		}
+	}
+
+	// 4. Purge old faces.
+	foreach(purge, i)
+	{
+		DeleteFace( purge[i] );
+	}
+
+	// 5. This is needed for alignment if called again.
+	//Repack();
+}
+
+
 void Mesh::UpdateEdgeGraph()
 {
 	mEdges.erase();
+	Repack(); // This is needed for alignment
 
 	uint32 i;
 	foreach (mFaces, i)
@@ -3529,15 +3761,19 @@ void Mesh::UpdateEdgeGraph()
 		if (f)
 		{
 			// Iterate over indices list, and find edges
-			for (uint32 j = 1, jn = f->mIndices.size(); j < jn; ++j)
+			uint32 j = 0;
+			uint32 j2 = f->mIndices.size()-1;
+			uint32 jcount = f->mIndices.size();
+			for (; j < jcount; ++j)
 			{
-				Edge *e = new Edge(f->mIndices[j-1], f->mIndices[j-1]);
-				uint32 k;
+				Edge *e = new Edge(f->mIndices[j], f->mIndices[j2]);
 
+				uint32 k;
 				foreach (mEdges, k)
 				{
 					if (*(mEdges[k]) == *e)
 					{
+						mEdges[k]->mFaceRefs.push_back(i);
 						delete e;
 						e = NULL;
 						break;
@@ -3546,9 +3782,14 @@ void Mesh::UpdateEdgeGraph()
 
 				if (e)
 				{
+					e->mFaceRefs.push_back(i);
 					mEdges.push_back(e);
 				}
+
+				j2 = j;
 			}
+
+			// 2007.06: Face neighbours should be obsoleted by edge refs?
 
 			// Could use vertex references to find facet neighbours
 		}

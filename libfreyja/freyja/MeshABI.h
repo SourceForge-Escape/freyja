@@ -182,6 +182,24 @@ extern "C" {
 	 * Post : Sets <mesh> <face> <material>.
 	 ------------------------------------------------------*/
 
+	void freyjaMeshPolygonFlipNormal(index_t mesh, index_t face);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Flips <mesh> <face> normal.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshPolygonComputeNormal(index_t mesh, index_t face);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets <mesh> <face> normal from vertices.
+	 ------------------------------------------------------*/
+
+	void freyjaMeshPolygonNormal(index_t mesh, index_t face, vec3_t normal);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets <mesh> <face> <normal>.
+	 ------------------------------------------------------*/
+
 	void freyjaMeshPolygonClearFlag1u(index_t mesh, index_t face, byte flag);
 	/*------------------------------------------------------
 	 * Pre  : 

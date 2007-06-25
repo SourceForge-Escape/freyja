@@ -568,6 +568,11 @@
 				(toolbar_button	"24x24/mmerge.png"
 					"Merge" "Merge objects" eEvent eMergeObject)
 
+				(toolbar_separator)
+
+				(toolbar_button	"gtk-add"
+					"SubDiv" "SubDiv Mesh" eEvent eMeshSubDivLoop)
+
 			) ; toolbar
 			) ; hbox
 		) ; tab

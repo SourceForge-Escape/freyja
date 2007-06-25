@@ -323,6 +323,7 @@ public:
 	 ------------------------------------------------------*/
 
 	hel::Vec3 GetVertexNormal(index_t idx);
+	void SetVertexNormal(index_t idx, hel::Vec3 n);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -335,6 +336,7 @@ public:
 	 ------------------------------------------------------*/
 
 	hel::Vec3 GetVertexTexCoord(index_t idx);
+	void SetVertexTexCoord(index_t idx, hel::Vec3 uv);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -482,7 +484,7 @@ public:
 							   const char *name, mstl::stack<index_t> &s);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Serializes array gaps (if any) in the mesh to XML.
+	 * Post : XML serialization for array gaps.
 	 *
 	 ------------------------------------------------------*/
 
@@ -492,41 +494,33 @@ public:
 						   const char *name, Vector<vec_t> &array);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Serializes array in the mesh to XML.
+	 * Post : XML serialization for arrays.
 	 *
 	 ------------------------------------------------------*/
 
 	bool Serialize(TiXmlElement *container);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serializes the mesh to XML.
-	 *
-	 ------------------------------------------------------*/
-
 	bool Unserialize(TiXmlElement *container);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Unserializes the mesh from XML.
+	 * Post : XML file serialization.
 	 *
 	 ------------------------------------------------------*/
 #endif
 
 	bool Serialize(SystemIO::TextFileWriter &w);
+	bool Unserialize(SystemIO::TextFileReader &r);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Serializes the mesh to diskfile as a chunk
-	 ------------------------------------------------------*/
-
-	bool Serialize(SystemIO::TextFileReader &r);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serializes the mesh to diskfile as a chunk
+	 * Post : Text file serialization.
+	 *
 	 ------------------------------------------------------*/
 
 	bool Serialize(SystemIO::FileWriter &w);
+	bool Unserialize(SystemIO::FileWriter &w);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Serializes the mesh to diskfile as a chunk
+	 * Post : Binary file serialization.
+	 *
 	 ------------------------------------------------------*/
 
 
@@ -648,12 +642,6 @@ public:
 	 * Post : Sets option flag for <vertex>
 	 ------------------------------------------------------*/
 
-	bool Serialize(SystemIO::FileReader &r);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
 	void Merge(Mesh *mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -719,23 +707,17 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	index_t CreateFace()
-	{
-		Face **array = mFaces.getVectorArray();
-		Face *face = new Face();
+	void AppendVertexToFace(index_t face, index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
 
-		for ( uint32 i = 0, count = mFaces.size(); i < count; ++i )
-		{
-			if (array[i] == NULL)
-			{
-				array[i] = face;
-				return i;
-			}
-		}
-
-		mFaces.pushBack(face);
-		return mFaces.size() - 1;
-	}
+	index_t CreateFace();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 ------------------------------------------------------*/
 
 	index_t CreateTexCoord(const vec3_t uvw)
 	{ return AddTripleVec(mTexCoordPool, mFreedTexCoords, (vec_t*)uvw); }
@@ -785,88 +767,52 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void RemoveWeightSelectedVertices(index_t bone)
-	{
-		for (int32 i = mVertices.size()-1; i > -1; --i)
-		{
-			Vertex *v = mVertices[i];
+	void RemoveWeightSelectedVertices(index_t bone);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-			if (v && v->mFlags & Vertex::fSelected)
-			{
-				RemoveWeight(i, bone);
-			}
-		}
-	}
+	void SetWeightSelectedVertices(index_t bone, vec_t weight);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
+	void SetWeight(index_t vertex, index_t bone, vec_t weight);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 * FIXME: Will make weights maped off actual Vertex later 
+	 *        to speed lookup, and ensure weighting limits
+	 *
+	 * NOTE : This doesn't do 'balancing' of the 1.0f limit
+	 *
+	 ------------------------------------------------------*/
 
-	void SetWeightSelectedVertices(index_t bone, vec_t weight)
-	{
-		for (int32 i = mVertices.size()-1; i > -1; --i)
-		{
-			Vertex *v = mVertices[i];
+	void RemoveWeight(index_t vertex, index_t bone);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-			if (v && v->mFlags & Vertex::fSelected)
-			{
-				SetWeight(i, bone, weight);
-			}
-		}
-	}
+	void RemoveWeight(index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-
-	// FIXME: Will make weights maped off actual Vertex later to speed lookup,
-	//        and ensure weighting limits
-	// NOTE: This doesn't do 'balancing' of the 1.0f limit
-	void SetWeight(index_t vertex, index_t bone, vec_t weight)
-	{
-		for (int32 i = mWeights.size()-1; i > -1; --i)
-		{
-			Weight *w = mWeights[i];
-
-			if (w && w->mVertexIndex == vertex && w->mBoneIndex == bone)
-			{
-				w->mWeight = weight;
-				return;
-			}
-		}
-
-		mWeights.pushBack(new Weight(vertex, bone, weight));
-	}
-
-	void RemoveWeight(index_t vertex, index_t bone)
-	{
-		for (int32 i = mWeights.size()-1; i > -1; --i)
-		{
-			Weight *w = mWeights[i];
-
-			if (w && w->mVertexIndex == vertex && w->mBoneIndex == bone)
-			{
-				delete w;
-				mWeights[i] = NULL;
-				return;
-			}
-		}
-	}
-
-	void RemoveWeight(index_t vertex)
-	{
-		for (int32 i = mWeights.size()-1; i > -1; --i)
-		{
-			Weight *w = mWeights[i];
-
-			if (w && w->mVertexIndex == vertex)
-			{
-				delete w;
-				mWeights[i] = NULL;
-				return;
-			}
-		}
-	}
-
-
-	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
-	{
-		SetWeight(vertexIndex, bone, weight);
-	}
+	void AddWeight(index_t vertexIndex, vec_t weight, index_t bone) ;
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 
 	void SetColor(index_t colorIndex, const vec4_t rgba)
@@ -915,21 +861,18 @@ public:
 	 ------------------------------------------------------*/
 
 
+	void SubDivLoop();
+
 	void ConvertAllFacesToTexCoordPloymapping();
 
 	void ConvertFaceToTexCoordPloymapping(index_t face);
 
-	Face *GetFace(index_t idx)
-	{
-		Face **array = mFaces.getVectorArray();
-		
-		if ( idx < mFaces.size() )
-		{
-			return array[idx];
-		}
-
-		return NULL;
-	}
+	Face *GetFace(index_t idx);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void VertexCleanup();
 	/*------------------------------------------------------
@@ -1356,35 +1299,7 @@ public:
 	 * Post : Erase the gobal mesh store
 	 ------------------------------------------------------*/
 
-	index_t AddToPool()
-	{
-		uint32 i, count;
-		bool found = false;
-
-		if (mUID == INDEX_INVALID)
-		{
-			/* Setup UID and class container reference */
-			mUID = count = mGobalPool.size();
-
-			for (i = 0; i < count; ++i)
-			{
-				if (mGobalPool[i] == NULL)
-				{
-					mUID = i;
-					mGobalPool.assign(mUID, this);
-					found = true;
-					break;
-				}	
-			}
-
-			if (!found)
-			{
-				mGobalPool.pushBack(this);
-			}
-		}
-
-		return mUID;
-	}
+	index_t AddToPool();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Add this mesh to the gobal store
@@ -1397,16 +1312,7 @@ public:
 	 * Post : Returns this mesh's gobal store UID
 	 ------------------------------------------------------*/
 
-	void RemoveFromPool()
-	{
-		if (mUID < mGobalPool.size())
-		{
-			mGobalPool[mUID] = NULL;
-		}
-
-		mUID = INDEX_INVALID;
-	}
-
+	void RemoveFromPool();
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Remove this mesh from gobal store 
@@ -1460,159 +1366,85 @@ protected:
 	 * Post : Serializes the given pool to diskfile as a chunk
 	 ------------------------------------------------------*/
 
-	void ClampVecValues(Vector<vec_t> &v, vec_t min, vec_t max)
-	{
-		vec_t *array = v.getVectorArray();
-		vec_t r;
+	void ClampVecValues(Vector<vec_t> &v, vec_t min, vec_t max);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
-		for ( uint32 i = 0, n = v.size(); i < n; ++i )
-		{
-			r = array[i];
+	index_t AddVec(Vector<vec_t> &v, mstl::stack<index_t>&f, uint32 n, vec_t *u);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
-			if (r < min)
-				array[i] = min;
-			else if (r > max)
-				array[i] = max;
-		}
-	}
+	index_t AppendVec(Vector<vec_t> &v, uint32 n, vec_t *u);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
-	index_t AddVec(Vector<vec_t> &v, mstl::stack<index_t>&f, uint32 n, vec_t *u)
-	{
-		if (f.empty())
-		{
-			return AppendVec(v, n, u);
-		}
+	void GetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
-		index_t tIndex = f.pop();
+	void SetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
-		SetVec(v, n, tIndex, u);
+	index_t AddTripleVec(Vector<vec_t> &v, mstl::stack<index_t> &f, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
-		return tIndex;
-	}
+	index_t AppendTripleVec(Vector<vec_t> &v, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
+	void TripleVec_Addition(Vector<vec_t> &v, const vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 * NOTE : If this is a sparse array ( most of these are ) you operate
+	 *        on more than actually used data, however it doesn't use the class
+	 *        index system ( so it's likely still faster in general case )
+	 *        
+	 ------------------------------------------------------*/
 
-	index_t AppendVec(Vector<vec_t> &v, uint32 n, vec_t *u)
-	{
-		for ( uint32 i = 0; i < n; ++i)
-		{
-			v.pushBack(u[i]);
-		}
+	void TripleVec_Transform(Vector<vec_t> &v, hel::Mat44 &mat);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
-		return (( v.end() / n ) - 1);
-	}
+	void GetTripleVec(Vector<vec_t> &v, index_t tIndex, vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
-
-	void GetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u)
-	{
-		tIndex *= n;
-
-		if (tIndex > v.end())
-			return;
-
-		vec_t *array = v.getVectorArray();
-
-		for ( uint32 i = 0; i < n; ++i)
-		{
-			u[i] = array[tIndex + i];
-		}
-	}
-
-
-	void SetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u)
-	{
-		tIndex *= n;
-
-		if (tIndex > v.end())
-			return;
-
-		vec_t *array = v.getVectorArray();
-
-		for ( uint32 i = 0; i < n; ++i)
-		{
-			array[tIndex + i] = u[i];
-		}
-	}
-
-
-	index_t AddTripleVec(Vector<vec_t> &v, mstl::stack<index_t> &f, vec3_t xyz)
-	{
-		if (f.empty())
-		{
-			return AppendTripleVec(v, xyz);
-		}
-
-		index_t tIndex = f.pop();
-
-		SetTripleVec(v, tIndex, xyz);
-
-		return tIndex;
-	}
-
-
-	index_t AppendTripleVec(Vector<vec_t> &v, vec3_t xyz)
-	{
-		v.push_back(xyz[0]);
-		v.push_back(xyz[1]);
-		v.push_back(xyz[2]);
-
-		return (( v.end() / 3 ) - 1);
-	}
-
-	// NOTE: If this is a sparse array ( most of these are ) you operate
-	// on more than actually used data, however it doesn't use the class
-	// index system ( so it's likely still faster in general case )
-	void TripleVec_Addition(Vector<vec_t> &v, const vec3_t xyz)
-	{
-		uint32 i, size = v.size();
-		vec_t *array = v.getVectorArray();
-
-		for ( i = 0; i < size; i += 3 )
-		{
-			array[i  ] += xyz[0];  
-			array[i+1] += xyz[1];  
-			array[i+2] += xyz[2];  
-		}
-	}
-
-	void TripleVec_Transform(Vector<vec_t> &v, hel::Mat44 &mat)
-	{
-		uint32 i, size = v.size();
-		vec_t *array = v.getVectorArray();
-
-		for ( i = 0; i < size; i += 3 )
-		{
-			mat.Multiply3fv(array + i);
-		}
-	}
-
-	void GetTripleVec(Vector<vec_t> &v, index_t tIndex, vec3_t xyz)
-	{
-		tIndex *= 3;
-
-		if (tIndex > v.end())
-			return;
-
-		vec_t *array = v.getVectorArray();
-
-		xyz[0] = array[tIndex    ];
-		xyz[1] = array[tIndex + 1];
-		xyz[2] = array[tIndex + 2];
-	}
-
-
-	void SetTripleVec(Vector<vec_t> &v, index_t tIndex, const vec3_t xyz)
-	{
-		tIndex *= 3;
-
-		if (tIndex > v.end())
-			return;
-
-		vec_t *array = v.getVectorArray();
-
-		array[tIndex    ] = xyz[0];
-		array[tIndex + 1] = xyz[1];
-		array[tIndex + 2] = xyz[2];
-	}
+	void SetTripleVec(Vector<vec_t> &v, index_t tIndex, const vec3_t xyz);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *        
+	 ------------------------------------------------------*/
 
 	static Vector<Mesh *> mGobalPool; /* Storage for gobal access */
 
@@ -1664,6 +1496,349 @@ protected:
 
 	Vector<Edge *> mEdges;
 };
+
+
+
+////////////////////////////////////////////////////////////
+// Public inline methods.
+////////////////////////////////////////////////////////////
+
+inline
+void Mesh::RemoveWeightSelectedVertices(index_t bone)
+{
+	for (int32 i = mVertices.size()-1; i > -1; --i)
+	{
+		Vertex *v = mVertices[i];
+
+		if (v && v->mFlags & Vertex::fSelected)
+		{
+			RemoveWeight(i, bone);
+		}
+	}
+}
+
+
+inline
+void Mesh::SetWeightSelectedVertices(index_t bone, vec_t weight)
+{
+	for (int32 i = mVertices.size()-1; i > -1; --i)
+	{
+		Vertex *v = mVertices[i];
+
+		if (v && v->mFlags & Vertex::fSelected)
+		{
+			SetWeight(i, bone, weight);
+		}
+	}
+}
+
+
+inline
+void Mesh::SetWeight(index_t vertex, index_t bone, vec_t weight)
+{
+	for (int32 i = mWeights.size()-1; i > -1; --i)
+	{
+		Weight *w = mWeights[i];
+
+		if (w && w->mVertexIndex == vertex && w->mBoneIndex == bone)
+		{
+			w->mWeight = weight;
+			return;
+		}
+	}
+
+	mWeights.pushBack(new Weight(vertex, bone, weight));
+}
+
+
+inline
+void Mesh::RemoveWeight(index_t vertex, index_t bone)
+{
+	for (int32 i = mWeights.size()-1; i > -1; --i)
+	{
+		Weight *w = mWeights[i];
+
+		if (w && w->mVertexIndex == vertex && w->mBoneIndex == bone)
+		{
+			delete w;
+			mWeights[i] = NULL;
+			return;
+		}
+	}
+}
+
+
+inline
+void Mesh::RemoveWeight(index_t vertex)
+{
+	for (int32 i = mWeights.size()-1; i > -1; --i)
+	{
+		Weight *w = mWeights[i];
+
+		if (w && w->mVertexIndex == vertex)
+		{
+			delete w;
+			mWeights[i] = NULL;
+			return;
+		}
+	}
+}
+
+
+inline
+void Mesh::AddWeight(index_t vertexIndex, vec_t weight, index_t bone) 
+{
+	SetWeight(vertexIndex, bone, weight);
+}
+
+
+inline
+Face *Mesh::GetFace(index_t idx)
+{
+	Face **array = mFaces.getVectorArray();
+		
+	if ( idx < mFaces.size() )
+	{
+		return array[idx];
+	}
+
+	return NULL;
+}
+
+
+inline
+index_t Mesh::CreateFace()
+{
+	Face **array = mFaces.getVectorArray();
+	Face *face = new Face();
+
+	for ( uint32 i = 0, count = mFaces.size(); i < count; ++i )
+	{
+		if (array[i] == NULL)
+		{
+			array[i] = face;
+			return i;
+		}
+	}
+
+	mFaces.push_back(face);
+	return mFaces.size() - 1;
+}
+
+
+////////////////////////////////////////////////////////////
+// Protected inline methods.
+////////////////////////////////////////////////////////////
+
+inline
+index_t Mesh::AddToPool()
+{
+	uint32 i, count;
+	bool found = false;
+
+	if (mUID == INDEX_INVALID)
+	{
+		/* Setup UID and class container reference */
+		mUID = count = mGobalPool.size();
+
+		for (i = 0; i < count; ++i)
+		{
+			if (mGobalPool[i] == NULL)
+			{
+				mUID = i;
+				mGobalPool.assign(mUID, this);
+				found = true;
+				break;
+			}	
+		}
+
+		if (!found)
+		{
+			mGobalPool.pushBack(this);
+		}
+	}
+
+	return mUID;
+}
+
+
+inline
+void Mesh::RemoveFromPool()
+{
+	if (mUID < mGobalPool.size())
+	{
+		mGobalPool[mUID] = NULL;
+	}
+
+	mUID = INDEX_INVALID;
+}
+
+
+inline
+void Mesh::ClampVecValues(Vector<vec_t> &v, vec_t min, vec_t max)
+{
+	vec_t *array = v.getVectorArray();
+	vec_t r;
+
+	for ( uint32 i = 0, n = v.size(); i < n; ++i )
+	{
+		r = array[i];
+
+		if (r < min)
+			array[i] = min;
+		else if (r > max)
+			array[i] = max;
+	}
+}
+
+
+inline
+index_t Mesh::AddVec(Vector<vec_t> &v, mstl::stack<index_t>&f, uint32 n, vec_t *u)
+{
+	if (f.empty())
+	{
+		return AppendVec(v, n, u);
+	}
+
+	index_t tIndex = f.pop();
+
+	SetVec(v, n, tIndex, u);
+
+	return tIndex;
+}
+
+
+inline
+index_t Mesh::AppendVec(Vector<vec_t> &v, uint32 n, vec_t *u)
+{
+	for ( uint32 i = 0; i < n; ++i)
+	{
+		v.pushBack(u[i]);
+	}
+
+	return (( v.end() / n ) - 1);
+}
+
+
+inline
+void Mesh::GetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u)
+{
+	tIndex *= n;
+
+	if (tIndex > v.end())
+		return;
+
+	vec_t *array = v.getVectorArray();
+
+	for ( uint32 i = 0; i < n; ++i)
+	{
+		u[i] = array[tIndex + i];
+	}
+}
+
+
+inline
+void SetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u)
+{
+	tIndex *= n;
+
+	if (tIndex > v.end())
+		return;
+
+	vec_t *array = v.getVectorArray();
+
+	for ( uint32 i = 0; i < n; ++i)
+	{
+		array[tIndex + i] = u[i];
+	}
+}
+
+
+inline
+index_t Mesh::AddTripleVec(Vector<vec_t> &v, mstl::stack<index_t> &f, vec3_t xyz)
+{
+	if (f.empty())
+	{
+		return AppendTripleVec(v, xyz);
+	}
+
+	index_t tIndex = f.pop();
+
+	SetTripleVec(v, tIndex, xyz);
+
+	return tIndex;
+}
+
+
+inline
+index_t Mesh::AppendTripleVec(Vector<vec_t> &v, vec3_t xyz)
+{
+	v.push_back(xyz[0]);
+	v.push_back(xyz[1]);
+	v.push_back(xyz[2]);
+
+	return (( v.end() / 3 ) - 1);
+}
+
+
+inline
+void Mesh::TripleVec_Addition(Vector<vec_t> &v, const vec3_t xyz)
+{
+	uint32 i, size = v.size();
+	vec_t *array = v.getVectorArray();
+
+	for ( i = 0; i < size; i += 3 )
+	{
+		array[i  ] += xyz[0];  
+		array[i+1] += xyz[1];  
+		array[i+2] += xyz[2];  
+	}
+}
+
+
+inline
+void Mesh::TripleVec_Transform(Vector<vec_t> &v, hel::Mat44 &mat)
+{
+	uint32 i, size = v.size();
+	vec_t *array = v.getVectorArray();
+
+	for ( i = 0; i < size; i += 3 )
+	{
+		mat.Multiply3fv(array + i);
+	}
+}
+
+
+inline
+void Mesh::GetTripleVec(Vector<vec_t> &v, index_t tIndex, vec3_t xyz)
+{
+	tIndex *= 3;
+
+	if (tIndex > v.end())
+		return;
+
+	vec_t *array = v.getVectorArray();
+
+	xyz[0] = array[tIndex    ];
+	xyz[1] = array[tIndex + 1];
+	xyz[2] = array[tIndex + 2];
+}
+
+
+inline
+void Mesh::SetTripleVec(Vector<vec_t> &v, index_t tIndex, const vec3_t xyz)
+{
+	tIndex *= 3;
+
+	if (tIndex > v.end())
+		return;
+
+	vec_t *array = v.getVectorArray();
+
+	array[tIndex    ] = xyz[0];
+	array[tIndex + 1] = xyz[1];
+	array[tIndex + 2] = xyz[2];
+}
 
 
 } // End namespace freyja
