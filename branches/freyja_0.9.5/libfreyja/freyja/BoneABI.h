@@ -227,6 +227,15 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
+	void freyjaBoneKeyframeMetadata(index_t bone, index_t track, index_t key, 
+									const char *metadata);
+	const char *freyjaGetBoneKeyframeMetadata(index_t bone, index_t track, index_t key);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	void freyjaGetBonePosKeyframe3fv(index_t bone, index_t track, index_t key,
 									 vec3_t xyz);
 	/*------------------------------------------------------

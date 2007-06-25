@@ -53,7 +53,7 @@ public:
 	 ------------------------------------------------------*/
 
 	bool operator ==(const Edge &e) const 
-	{ return (e.mA == mA && e.mB == mB); }
+	{ return ((e.mA == mA && e.mB == mB) || (e.mA == mB && e.mB == mA) ); }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -70,7 +70,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	byte mFlags;
+	byte mFlags; // boundry, edge, etc would be smart to store here
 
 	index_t mA, mB;
 

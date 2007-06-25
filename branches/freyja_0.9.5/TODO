@@ -11,6 +11,10 @@
 
  * Seperate renderer and UI into their own libraries.
 
+ * Rename hel/math.h hel/hel.h for 0.9.6 alpha. ( Breaks API )
+
+ * Mesh should be broken up into subclasses eg 'weightmanager', 'utils'.
+
  * MSTL use - remove anything depending on parsestringliteral allocation.
 
  * Continue to break up ye olde FreyjaControl (legacy UI) by editing mode.
@@ -87,6 +91,7 @@
 	- Type of transform support
 	- Constraints support
 	- Ref weights from vertex to fix blending issues
+	- Possibly force merged bone keyframes.  ( pos+rot )
 
  * Make generic plugin interface for new UI control points.
 

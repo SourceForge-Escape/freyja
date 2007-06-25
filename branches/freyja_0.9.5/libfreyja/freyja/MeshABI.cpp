@@ -68,7 +68,7 @@ bool freyjaMeshLoadChunkTextJA(SystemIO::TextFileReader &r)
 	index_t mesh = freyjaMeshCreate();
 	freyjaPrintMessage("> Reading in mesh %i...", mesh);
 	Mesh *m = freyjaGetMeshClass(mesh);
-	return m ? m->Serialize(r) : false;
+	return m ? m->Unserialize(r) : false;
 }
 
 
@@ -921,8 +921,10 @@ void freyjaMeshPolygonSplit(index_t meshIndex, index_t polygonIndex)
 void freyjaMeshPolygonExtrudeQuad1f(index_t meshIndex, index_t polygonIndex, vec3_t v)
 {
 	Mesh *mesh = freyjaGetMeshClass(meshIndex);
-	if (mesh) 
+	if (mesh)
+	{
 		mesh->ExtrudeFace(polygonIndex, v);
+	}
 }
 
 
@@ -1850,6 +1852,58 @@ index_t freyjaMeshCreateSheet(vec3_t origin, vec_t size,
 }
 
 
+void freyjaMeshPolygonFlipNormal(index_t mesh, index_t face)
+{
+	Mesh *m = Mesh::GetMesh( mesh );
+					
+	if (m)
+	{			 
+		Face *f = m->GetFace( face );
+		if (f) 
+		{
+			f->mNormal = -f->mNormal;
+		}
+	}
+}
+
+
+void freyjaMeshPolygonNormal(index_t mesh, index_t face, vec3_t normal)
+{
+	Mesh *m = Mesh::GetMesh( mesh );
+					
+	if (m)
+	{			 
+		Face *f = m->GetFace( face );
+		if (f) 
+		{
+			f->mNormal.Set( normal );
+		}
+	}
+}
+
+
+void freyjaMeshPolygonComputeNormal(index_t mesh, index_t face)
+{
+	Mesh *m = Mesh::GetMesh( mesh );
+					
+	if (m)
+	{	
+		m->RecomputeFaceNormal(face, false);	 
+	}
+}
+
+
+void freyjaMeshSubDivQuadMesh(index_t mesh)
+{
+	Mesh *m = Mesh::GetMesh( mesh );
+
+	if (!m)
+		return;
+
+	m->SubDivLoop();
+}
+
+
 index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
 {
 	Vector<index_t> vertices, texcoords;
@@ -1941,6 +1995,8 @@ index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[3]);
 	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[4]);
 	freyjaMeshPolygonMaterial(mesh, face, 0);
+	freyjaMeshPolygonComputeNormal(mesh, face);
+	freyjaMeshPolygonFlipNormal(mesh, face);
 
 	face = freyjaMeshPolygonCreate(mesh);
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[4]);
@@ -1952,6 +2008,8 @@ index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[7]);
 	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[2]);
 	freyjaMeshPolygonMaterial(mesh, face, 0);
+	freyjaMeshPolygonComputeNormal(mesh, face);
+	freyjaMeshPolygonFlipNormal(mesh, face);
 
 	face = freyjaMeshPolygonCreate(mesh);
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[8]);
@@ -1963,6 +2021,7 @@ index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[11]);
 	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[7]);
 	freyjaMeshPolygonMaterial(mesh, face, 0);
+	freyjaMeshPolygonComputeNormal(mesh, face);
 
 	face = freyjaMeshPolygonCreate(mesh);
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[12]);
@@ -1974,6 +2033,7 @@ index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[15]);
 	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[3]);
 	freyjaMeshPolygonMaterial(mesh, face, 0);
+	freyjaMeshPolygonComputeNormal(mesh, face);
 
 	face = freyjaMeshPolygonCreate(mesh);
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[16]);
@@ -1985,6 +2045,8 @@ index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[19]);
 	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[5]);
 	freyjaMeshPolygonMaterial(mesh, face, 0);
+	freyjaMeshPolygonComputeNormal(mesh, face);
+	freyjaMeshPolygonFlipNormal(mesh, face);
 
 	face = freyjaMeshPolygonCreate(mesh);
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[20]);
@@ -1996,6 +2058,8 @@ index_t freyjaMeshCreateCube(vec3_t origin, vec_t size)
 	freyjaMeshPolygonAddTexCoord1i(mesh, face, texcoords[23]);
 	freyjaMeshPolygonAddVertex1i(mesh, face, vertices[7]);
 	freyjaMeshPolygonMaterial(mesh, face, 0);
+	freyjaMeshPolygonComputeNormal(mesh, face);
+	freyjaMeshPolygonFlipNormal(mesh, face);
 
 	return mesh;
 }

@@ -75,6 +75,8 @@ extern "C" {
 
 	typedef unsigned char byte;
 
+	typedef void *ptr_t;
+
 #ifdef PROTOTYPE_C_THREAD_SUPPORT_NONGOBALCONTAINER_TYPES
 	typedef struct {
 

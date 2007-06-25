@@ -671,6 +671,8 @@ class FreyjaControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
+	void EvMeshSubDiv();
+
 	void EvMove();
 	void EvRotate();
 	void EvScale();

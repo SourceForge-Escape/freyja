@@ -1049,8 +1049,22 @@ void eBoneNew()
 
 void eExtrude()
 {
+	// FIXME: Give user the option of pick ray and face normal control
 	hel::Vec3 v = FreyjaRender::mTestRay.mDir;
 	v *= -8.0f;
+
+	index_t mesh = FreyjaControl::GetInstance()->GetSelectedMesh();
+	index_t face = FreyjaControl::GetInstance()->GetSelectedFace();
+
+	Mesh *m = Mesh::GetMesh( mesh );
+					
+	if (m)
+	{			 
+		Face *f = m->GetFace( face );
+		v = f ? f->mNormal : v;
+		
+	}
+
 	freyjaMeshPolygonExtrudeQuad1f(FreyjaControl::GetInstance()->GetSelectedMesh(), 
 								   FreyjaControl::GetInstance()->GetSelectedFace(),
 								   v.mVec);

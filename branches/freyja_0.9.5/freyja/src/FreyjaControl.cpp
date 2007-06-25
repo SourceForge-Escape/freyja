@@ -313,174 +313,6 @@ void FreyjaControl::SetZoom(float zoom)
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-void FreyjaControl::AttachMethodListeners()
-{
-	mMaterial.AttachMethodListeners();
-
-	// CreateListener("", &FreyjaControl::);
-
-	//Float events
-	EvMoveXId = CreateListener1f("eMove_X", &FreyjaControl::EvFloatNop);
-	EvMoveYId = CreateListener1f("eMove_Y", &FreyjaControl::EvFloatNop);
-	EvMoveZId = CreateListener1f("eMove_Z", &FreyjaControl::EvFloatNop);
-	EvRotateXId = CreateListener1f("eRotate_X", &FreyjaControl::EvFloatNop);
-	EvRotateYId = CreateListener1f("eRotate_Y", &FreyjaControl::EvFloatNop);
-	EvRotateZId = CreateListener1f("eRotate_Z", &FreyjaControl::EvFloatNop);
-	EvScaleXId = CreateListener1f("eScale_X", &FreyjaControl::EvScaleX);
-	EvScaleYId = CreateListener1f("eScale_Y", &FreyjaControl::EvScaleY);
-	EvScaleZId = CreateListener1f("eScale_Z", &FreyjaControl::EvScaleZ);
-	CreateListener1f("eZoom", &FreyjaControl::SetZoom);
-
-	// Mode events
-	EvModeAutoKeyframeId =
-	CreateListener1u("eModeAnim", &FreyjaControl::EvModeAutoKeyframe);
-	CreateListener("eModeUV", &FreyjaControl::EvModeUV);
-	CreateListener("eModeModel", &FreyjaControl::EvModeModel);
-	CreateListener("eModeMaterial", &FreyjaControl::EvModeMaterial);
-
-	// Iterator/Integer events
-	CreateListener1u("ePolygonIterator", &FreyjaControl::EvPolygonIterator);
-	CreateListener1u("eMeshIterator", &FreyjaControl::EvMeshIterator);
-	EvBoneIteratorId = 
-	CreateListener1u("eBoneIterator", &FreyjaControl::EvBoneIterator);
-	CreateListener1u("eAnimationSlider", &FreyjaControl::EvAnimationSlider);
-
-	eRotateObjectId = 
-	CreateListener1u("eRotateObject", &FreyjaControl::EvRotateObject);
-
-	eScaleObjectId = 
-	CreateListener1u("eScaleObject", &FreyjaControl::EvScaleObject);
-
-	eMoveObjectId = 
-	CreateListener1u("eMoveObject", &FreyjaControl::EvMoveObject);
-
-	eUnselectObjectId = 
-	CreateListener1u("eUnselect", &FreyjaControl::EvUnselectObject);
-
-	eSelectObjectId = 
-	CreateListener1u("eSelect", &FreyjaControl::EvSelectObject);
-
-	eInfoObjectId = 
-	CreateListener1u("eInfoObject", &FreyjaControl::EvInfoObject);
-
-	ePaintObjectId = 
-	CreateListener1u("ePaintObject", &FreyjaControl::EvPaintObject);
-
-	eBoxSelectObjectId = 
-	CreateListener1u("eSelectionByBox", &FreyjaControl::EvBoxSelectObject);
-
-	eAxisJointId = 
-	CreateListener1u("eAxisJoint", &FreyjaControl::EvAxisJoint);
-
-	eSphereJointId = 
-	CreateListener1u("eSphereJoint", &FreyjaControl::EvSphereJoint);
-
-	ePointJointId = 
-	CreateListener1u("ePointJoint", &FreyjaControl::EvPointJoint);
-
-	// Text events
-	CreateListener1s("eSkeletonName", &FreyjaControl::EvSkeletonName);
-	EvSetBoneNameId = 
-	CreateListener1s("eSetBoneName", &FreyjaControl::EvSetBoneName);
-	CreateListener1s("eOpenModel", &FreyjaControl::EvOpenModel);
-
-	// Misc
-	CreateListener2s("eSaveModel", &FreyjaControl::EvSaveModel);
-
-	CreateListener("ePolygonSplit", &FreyjaControl::EvPolygonSplit);
-	CreateListener("eSetMeshTexture", &FreyjaControl::EvSetMeshTexture);
-	CreateListener("eSetFacesMaterial", &FreyjaControl::EvSetFacesMaterial);
-	CreateListener("eSetPolygonTexture", &FreyjaControl::EvSetPolygonTexture);
-
-	CreateListener("eInfo", &FreyjaControl::PrintInfo);
-	CreateListener("eFullscreen", &FreyjaControl::Fullscreen);
-
-	CreateListener("eVertexCombine", &FreyjaControl::VertexCombine);
-	CreateListener("eTexcoordCombine", &FreyjaControl::TexcoordCombine);
-	CreateListener("eSetKeyFrame", &FreyjaControl::SetKeyFrame);
-
-	CreateListener("eCloseFile", &FreyjaControl::CloseFile);
-	CreateListener("eNewFile", &FreyjaControl::NewFile);
-	CreateListener("eSaveFile", &FreyjaControl::SaveFile);
-	CreateListener("eOpenFile", &FreyjaControl::OpenFile);
-	CreateListener("eSaveFileModel", &FreyjaControl::SaveFileModel);
-	CreateListener("eOpenFileModel", &FreyjaControl::OpenFileModel);
-	CreateListener("eRevertFile", &FreyjaControl::RevertFile);
-
-	CreateListener("eUndo", &FreyjaControl::Undo);
-	CreateListener("eRedo", &FreyjaControl::Redo);
-
-	CreateListener("eShutdown", &FreyjaControl::Shutdown);
-
-	CreateListener("eDelete", &FreyjaControl::DeleteSelectedObject);
-	CreateListener("eCreate", &FreyjaControl::CreateObject);
-	CreateListener("eDupeObject", &FreyjaControl::DuplicateSelectedObject);
-	CreateListener("eMergeObject", &FreyjaControl::MergeSelectedObjects);
-	CreateListener("eSplitObject", &FreyjaControl::SplitSelectedObject);
-	CreateListener("ePaste", &FreyjaControl::PasteSelectedObject);
-	CreateListener("eCopy", &FreyjaControl::CopySelectedObject);
-	CreateListener("eCut", &FreyjaControl::Cut);
-
-	CreateListener("eMeshNew", &FreyjaControl::EvMeshNew);
-	CreateListener("eMeshDelete", &FreyjaControl::EvMeshDelete);
-	CreateListener("eMeshSelect", &FreyjaControl::EvMeshSelect);
-
-	CreateListener("eScale", &FreyjaControl::EvScale);
-	CreateListener("eMove", &FreyjaControl::EvMove);
-	CreateListener("eRotate", &FreyjaControl::EvRotate);
-
-	CreateListener("eSelectVerticesByFaces", &FreyjaControl::EvSelectVerticesByFaces);
-
-	CreateListener("eViewportBack", &FreyjaControl::EvViewportBack);
-	CreateListener("eViewportBottom", &FreyjaControl::EvViewportBottom);
-	CreateListener("eViewportRight", &FreyjaControl::EvViewportRight);
-	CreateListener("eViewportFront", &FreyjaControl::EvViewportFront);
-	CreateListener("eViewportTop", &FreyjaControl::EvViewportTop);
-	CreateListener("eViewportLeft", &FreyjaControl::EvViewportLeft);
-	CreateListener("eViewportOrbit", &FreyjaControl::EvViewportOrbit);
-	CreateListener("eViewportUV", &FreyjaControl::EvViewportUV);
-	CreateListener("eViewportCurve", &FreyjaControl::EvViewportCurve);
-	CreateListener("eViewportMaterial", &FreyjaControl::EvViewportMaterial);
-
-	CreateListener("eTransformScene", &FreyjaControl::EvTransformScene);
-	CreateListener("eTransformVertices", &FreyjaControl::EvTransformVertices);
-	CreateListener("eTransformVertex", &FreyjaControl::EvTransformVertex);
-	CreateListener("eTransformMeshes", &FreyjaControl::EvTransformMeshes);
-	CreateListener("eTransformMesh", &FreyjaControl::EvTransformMesh);
-	CreateListener("eTransformFaces", &FreyjaControl::EvTransformFaces);
-	CreateListener("eTransformFace", &FreyjaControl::EvTransformFace);
-	CreateListener("eTransformModel", &FreyjaControl::EvTransformModel);
-	CreateListener("eTransformSkeleton", &FreyjaControl::EvTransformSkeleton);
-	CreateListener("eTransformBone", &FreyjaControl::EvTransformBone);
-	CreateListener("eTransformLight", &FreyjaControl::EvTransformLight);
-
-
-	CreateListener("eMeshToXML", &FreyjaControl::EvSerializeMesh);
-	CreateListener("eXMLToMesh", &FreyjaControl::EvUnserializeMesh);
-
-	CreateListener("eBonesToXML", &FreyjaControl::EvSerializeBones);
-	CreateListener("eXMLToBones", &FreyjaControl::EvUnserializeBones);
-
-	CreateListener("eMeshRepack", &FreyjaControl::EvMeshRepack);
-
-	CreateListener1u("eRecentFiles", &FreyjaControl::EvRecentFiles);
-	CreateListener1u("eRecentMeshXML", &FreyjaControl::EvRecentMeshXML);
-	CreateListener1u("eRecentSkeletonXML", &FreyjaControl::EvRecentSkeletonXML);
-	CreateListener1u("eRecentKeyframe", &FreyjaControl::EvRecentKeyframe);
-	CreateListener1u("eRecentLua", &FreyjaControl::EvRecentLua);
-
-
-	CreateListener("ePaintWeight", &FreyjaControl::EvPaintWeight);
-	CreateListener("ePaintUnweight", &FreyjaControl::EvPaintUnweight);
-	CreateListener("ePaintSelect", &FreyjaControl::EvPaintSelect);
-	CreateListener("ePaintUnselect", &FreyjaControl::EvPaintUnselect);
-	CreateListener("ePaintMaterial", &FreyjaControl::EvPaintMaterial);
-	CreateListener("ePaintHeight", &FreyjaControl::EvPaintHeight);
-	CreateListener("ePaintDmap", &FreyjaControl::EvPaintDmap);
-
-	CreateListener("eLoadLuaScript", &FreyjaControl::EvLoadLuaScript);
-}
-
 
 // Mongoose - 2006.07.31 
 // More crap for old system to be backported then rewritten properly  =/
@@ -3611,6 +3443,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY, bool set)
 		}
 		break;
 
+	case tSelectedFaces:
 	case tFace:
 		{
 			index_t selected = PickFace(FreyjaRender::mTestRay);
@@ -5751,6 +5584,187 @@ index_t FreyjaControl::PickMesh(const hel::Ray &ray)
 	return selected;
 }
 		
+
+//////////////////////////////////////////////////////////////////////////
+// "Event" methods for threaded closures and callbacks.
+//////////////////////////////////////////////////////////////////////////
+
+void FreyjaControl::AttachMethodListeners()
+{
+	mMaterial.AttachMethodListeners();
+
+	//Float events
+	EvMoveXId = CreateListener1f("eMove_X", &FreyjaControl::EvFloatNop);
+	EvMoveYId = CreateListener1f("eMove_Y", &FreyjaControl::EvFloatNop);
+	EvMoveZId = CreateListener1f("eMove_Z", &FreyjaControl::EvFloatNop);
+	EvRotateXId = CreateListener1f("eRotate_X", &FreyjaControl::EvFloatNop);
+	EvRotateYId = CreateListener1f("eRotate_Y", &FreyjaControl::EvFloatNop);
+	EvRotateZId = CreateListener1f("eRotate_Z", &FreyjaControl::EvFloatNop);
+	EvScaleXId = CreateListener1f("eScale_X", &FreyjaControl::EvScaleX);
+	EvScaleYId = CreateListener1f("eScale_Y", &FreyjaControl::EvScaleY);
+	EvScaleZId = CreateListener1f("eScale_Z", &FreyjaControl::EvScaleZ);
+	CreateListener1f("eZoom", &FreyjaControl::SetZoom);
+
+	// Mode events
+	EvModeAutoKeyframeId =
+	CreateListener1u("eModeAnim", &FreyjaControl::EvModeAutoKeyframe);
+	CreateListener("eModeUV", &FreyjaControl::EvModeUV);
+	CreateListener("eModeModel", &FreyjaControl::EvModeModel);
+	CreateListener("eModeMaterial", &FreyjaControl::EvModeMaterial);
+
+	// Iterator/Integer events
+	CreateListener1u("ePolygonIterator", &FreyjaControl::EvPolygonIterator);
+	CreateListener1u("eMeshIterator", &FreyjaControl::EvMeshIterator);
+	EvBoneIteratorId = 
+	CreateListener1u("eBoneIterator", &FreyjaControl::EvBoneIterator);
+	CreateListener1u("eAnimationSlider", &FreyjaControl::EvAnimationSlider);
+
+	eRotateObjectId = 
+	CreateListener1u("eRotateObject", &FreyjaControl::EvRotateObject);
+
+	eScaleObjectId = 
+	CreateListener1u("eScaleObject", &FreyjaControl::EvScaleObject);
+
+	eMoveObjectId = 
+	CreateListener1u("eMoveObject", &FreyjaControl::EvMoveObject);
+
+	eUnselectObjectId = 
+	CreateListener1u("eUnselect", &FreyjaControl::EvUnselectObject);
+
+	eSelectObjectId = 
+	CreateListener1u("eSelect", &FreyjaControl::EvSelectObject);
+
+	eInfoObjectId = 
+	CreateListener1u("eInfoObject", &FreyjaControl::EvInfoObject);
+
+	ePaintObjectId = 
+	CreateListener1u("ePaintObject", &FreyjaControl::EvPaintObject);
+
+	eBoxSelectObjectId = 
+	CreateListener1u("eSelectionByBox", &FreyjaControl::EvBoxSelectObject);
+
+	eAxisJointId = 
+	CreateListener1u("eAxisJoint", &FreyjaControl::EvAxisJoint);
+
+	eSphereJointId = 
+	CreateListener1u("eSphereJoint", &FreyjaControl::EvSphereJoint);
+
+	ePointJointId = 
+	CreateListener1u("ePointJoint", &FreyjaControl::EvPointJoint);
+
+	// Text events
+	CreateListener1s("eSkeletonName", &FreyjaControl::EvSkeletonName);
+	EvSetBoneNameId = 
+	CreateListener1s("eSetBoneName", &FreyjaControl::EvSetBoneName);
+	CreateListener1s("eOpenModel", &FreyjaControl::EvOpenModel);
+
+	// Misc
+	CreateListener2s("eSaveModel", &FreyjaControl::EvSaveModel);
+
+	CreateListener("ePolygonSplit", &FreyjaControl::EvPolygonSplit);
+	CreateListener("eSetMeshTexture", &FreyjaControl::EvSetMeshTexture);
+	CreateListener("eSetFacesMaterial", &FreyjaControl::EvSetFacesMaterial);
+	CreateListener("eSetPolygonTexture", &FreyjaControl::EvSetPolygonTexture);
+
+	CreateListener("eInfo", &FreyjaControl::PrintInfo);
+	CreateListener("eFullscreen", &FreyjaControl::Fullscreen);
+
+	CreateListener("eVertexCombine", &FreyjaControl::VertexCombine);
+	CreateListener("eTexcoordCombine", &FreyjaControl::TexcoordCombine);
+	CreateListener("eSetKeyFrame", &FreyjaControl::SetKeyFrame);
+
+	CreateListener("eCloseFile", &FreyjaControl::CloseFile);
+	CreateListener("eNewFile", &FreyjaControl::NewFile);
+	CreateListener("eSaveFile", &FreyjaControl::SaveFile);
+	CreateListener("eOpenFile", &FreyjaControl::OpenFile);
+	CreateListener("eSaveFileModel", &FreyjaControl::SaveFileModel);
+	CreateListener("eOpenFileModel", &FreyjaControl::OpenFileModel);
+	CreateListener("eRevertFile", &FreyjaControl::RevertFile);
+
+	CreateListener("eUndo", &FreyjaControl::Undo);
+	CreateListener("eRedo", &FreyjaControl::Redo);
+
+	CreateListener("eShutdown", &FreyjaControl::Shutdown);
+
+	CreateListener("eDelete", &FreyjaControl::DeleteSelectedObject);
+	CreateListener("eCreate", &FreyjaControl::CreateObject);
+	CreateListener("eDupeObject", &FreyjaControl::DuplicateSelectedObject);
+	CreateListener("eMergeObject", &FreyjaControl::MergeSelectedObjects);
+	CreateListener("eSplitObject", &FreyjaControl::SplitSelectedObject);
+	CreateListener("ePaste", &FreyjaControl::PasteSelectedObject);
+	CreateListener("eCopy", &FreyjaControl::CopySelectedObject);
+	CreateListener("eCut", &FreyjaControl::Cut);
+
+	CreateListener("eMeshNew", &FreyjaControl::EvMeshNew);
+	CreateListener("eMeshDelete", &FreyjaControl::EvMeshDelete);
+	CreateListener("eMeshSelect", &FreyjaControl::EvMeshSelect);
+
+	CreateListener("eScale", &FreyjaControl::EvScale);
+	CreateListener("eMove", &FreyjaControl::EvMove);
+	CreateListener("eRotate", &FreyjaControl::EvRotate);
+
+	CreateListener("eSelectVerticesByFaces", &FreyjaControl::EvSelectVerticesByFaces);
+
+	CreateListener("eViewportBack", &FreyjaControl::EvViewportBack);
+	CreateListener("eViewportBottom", &FreyjaControl::EvViewportBottom);
+	CreateListener("eViewportRight", &FreyjaControl::EvViewportRight);
+	CreateListener("eViewportFront", &FreyjaControl::EvViewportFront);
+	CreateListener("eViewportTop", &FreyjaControl::EvViewportTop);
+	CreateListener("eViewportLeft", &FreyjaControl::EvViewportLeft);
+	CreateListener("eViewportOrbit", &FreyjaControl::EvViewportOrbit);
+	CreateListener("eViewportUV", &FreyjaControl::EvViewportUV);
+	CreateListener("eViewportCurve", &FreyjaControl::EvViewportCurve);
+	CreateListener("eViewportMaterial", &FreyjaControl::EvViewportMaterial);
+
+	CreateListener("eTransformScene", &FreyjaControl::EvTransformScene);
+	CreateListener("eTransformVertices", &FreyjaControl::EvTransformVertices);
+	CreateListener("eTransformVertex", &FreyjaControl::EvTransformVertex);
+	CreateListener("eTransformMeshes", &FreyjaControl::EvTransformMeshes);
+	CreateListener("eTransformMesh", &FreyjaControl::EvTransformMesh);
+	CreateListener("eTransformFaces", &FreyjaControl::EvTransformFaces);
+	CreateListener("eTransformFace", &FreyjaControl::EvTransformFace);
+	CreateListener("eTransformModel", &FreyjaControl::EvTransformModel);
+	CreateListener("eTransformSkeleton", &FreyjaControl::EvTransformSkeleton);
+	CreateListener("eTransformBone", &FreyjaControl::EvTransformBone);
+	CreateListener("eTransformLight", &FreyjaControl::EvTransformLight);
+
+
+	CreateListener("eMeshToXML", &FreyjaControl::EvSerializeMesh);
+	CreateListener("eXMLToMesh", &FreyjaControl::EvUnserializeMesh);
+
+	CreateListener("eBonesToXML", &FreyjaControl::EvSerializeBones);
+	CreateListener("eXMLToBones", &FreyjaControl::EvUnserializeBones);
+
+	CreateListener("eMeshRepack", &FreyjaControl::EvMeshRepack);
+
+	CreateListener1u("eRecentFiles", &FreyjaControl::EvRecentFiles);
+	CreateListener1u("eRecentMeshXML", &FreyjaControl::EvRecentMeshXML);
+	CreateListener1u("eRecentSkeletonXML", &FreyjaControl::EvRecentSkeletonXML);
+	CreateListener1u("eRecentKeyframe", &FreyjaControl::EvRecentKeyframe);
+	CreateListener1u("eRecentLua", &FreyjaControl::EvRecentLua);
+
+
+	CreateListener("ePaintWeight", &FreyjaControl::EvPaintWeight);
+	CreateListener("ePaintUnweight", &FreyjaControl::EvPaintUnweight);
+	CreateListener("ePaintSelect", &FreyjaControl::EvPaintSelect);
+	CreateListener("ePaintUnselect", &FreyjaControl::EvPaintUnselect);
+	CreateListener("ePaintMaterial", &FreyjaControl::EvPaintMaterial);
+	CreateListener("ePaintHeight", &FreyjaControl::EvPaintHeight);
+	CreateListener("ePaintDmap", &FreyjaControl::EvPaintDmap);
+
+	CreateListener("eLoadLuaScript", &FreyjaControl::EvLoadLuaScript);
+
+	CreateListener("eMeshSubDivLoop", &FreyjaControl::EvMeshSubDiv);
+}
+
+
+void FreyjaControl::EvMeshSubDiv()
+{
+	Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
+	if (m) m->SubDivLoop();
+
+	Print("Non-smoothed loop subdiv requested.");
+}
 
 
 //////////////////////////////////////////////////////////////////////////
