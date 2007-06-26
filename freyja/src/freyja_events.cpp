@@ -1225,6 +1225,42 @@ void eBoneMetadata()
 }
 
 
+void eBoneKeyFrameMetadataText(char *text)
+{
+	index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
+	Bone *b = Bone::GetBone( bone );
+	if (text && b)
+	{
+		BoneTrack &track = b->GetTrack(FreyjaControl::GetInstance()->GetSelectedAnimation());
+		uint32 key = FreyjaControl::GetInstance()->GetSelectedKeyFrame();
+		track.SetMetadata(key, text);
+	}
+}
+
+
+void eBoneKeyFrameMetadata()
+{
+	FreyjaControl *cntrl = FreyjaControl::GetInstance();
+
+	index_t bone = cntrl->GetSelectedBone();
+	Bone *b = Bone::GetBone( bone );
+	if (b)
+	{
+		BoneTrack &track = b->GetTrack(cntrl->GetSelectedAnimation());
+		uint32 k = cntrl->GetSelectedKeyFrame();
+		vec_t time = (vec_t)k / track.GetRate(); 
+		index_t id = track.NewRotKeyframe(time); // returns old if found
+
+		mstl::String s;
+		s.Set("Bone[%u] '%s' keyframe %i metadata.", 
+			  b->GetUID(), b->GetName(), id);
+		uint32 e = ResourceEvent::GetResourceIdBySymbol("eBoneKeyFrameMetadataText");
+		mgtk_create_query_dialog_text("gtk-dialog-question", 
+									  s.c_str(), e, track.GetMetadata(id) );
+	}
+}
+
+
 void FreyjaMiscEventsAttach()
 {
 	// Empty menu events
@@ -1237,6 +1273,8 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallbackString::add("eTestTextViewText", &eTestTextViewText);
 
 	// Misc events
+	ResourceEventCallbackString::add("eBoneKeyFrameMetadataText", &eBoneKeyFrameMetadataText);
+	ResourceEventCallback::add("eBoneKeyFrameMetaData", &eBoneKeyFrameMetadata);
 	ResourceEventCallback::add("eBoneRefreshBindPose", &eBoneRefreshBindPose);
 	ResourceEventCallbackString::add("eBoneMetadataText", &eBoneMetadataText);
 	ResourceEventCallback::add("eBoneMetaData", &eBoneMetadata);

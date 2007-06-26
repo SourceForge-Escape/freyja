@@ -54,6 +54,7 @@
 #include <freyja/LuaABI.h>
 #include <freyja/MaterialABI.h>
 #include <freyja/MeshABI.h>
+#include <freyja/PythonABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/PluginABI.h>
 #include <freyja/QueryABI.h>
@@ -133,6 +134,7 @@ FreyjaControl::FreyjaControl() :
 	mRecentSkeleton("freyja-dev-recent-skeleton_xml", "eRecentSkeletonXML"),
 	mRecentKeyframe("freyja-dev-recent-keyframe_xml", "eRecentKeyframe"),
 	mRecentLua("freyja-dev-recent-lua", "eRecentLua"),
+	mRecentPython("freyja-dev-recent-python", "eRecentPython"),
 
 	mTexture(),
 	mRender(NULL),
@@ -226,6 +228,13 @@ void FreyjaControl::Init()
 	if ( !mRecentLua.LoadResource() )
 	{
 		Print("Failed to load '%s'.", mRecentLua.GetResourceFilename() );
+	}
+
+	Print("Loading %s...", mRecentPython.GetResourceFilename());
+	
+	if ( !mRecentPython.LoadResource() )
+	{
+		Print("Failed to load '%s'.", mRecentPython.GetResourceFilename() );
 	}
 
 
@@ -5534,6 +5543,7 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener1u("eRecentSkeletonXML", &FreyjaControl::EvRecentSkeletonXML);
 	CreateListener1u("eRecentKeyframe", &FreyjaControl::EvRecentKeyframe);
 	CreateListener1u("eRecentLua", &FreyjaControl::EvRecentLua);
+	CreateListener1u("eRecentPython", &FreyjaControl::EvRecentPython);
 
 
 	CreateListener("ePaintWeight", &FreyjaControl::EvPaintWeight);
@@ -5545,6 +5555,7 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("ePaintDmap", &FreyjaControl::EvPaintDmap);
 
 	CreateListener("eLoadLuaScript", &FreyjaControl::EvLoadLuaScript);
+	CreateListener("eLoadPythonScript", &FreyjaControl::EvLoadPythonScript);
 
 	CreateListener("eMeshSubDivLoop", &FreyjaControl::EvMeshSubDiv);
 
@@ -5612,6 +5623,24 @@ void FreyjaControl::EvLoadLuaScript()
 	{
 		freyjaLuaScript1s(filename);
 		mRecentLua.AddFilename(filename);
+	}
+
+	mgtk_filechooser_blocking_free(filename);
+}
+
+
+void FreyjaControl::EvLoadPythonScript()
+{
+
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Script...", 
+							  mRecentPython.GetPath(), 0,
+							  "Python script (*.py)", "*.py");
+
+	if (filename)
+	{
+		freyjaPython1s(filename, "PluginEntry", "DefaultAction");
+		mRecentPython.AddFilename(filename);
 	}
 
 	mgtk_filechooser_blocking_free(filename);
@@ -5689,6 +5718,12 @@ void FreyjaControl::EvRecentKeyframe(uint32 value)
 void FreyjaControl::EvRecentLua(uint32 value)
 {
 	freyjaLuaScript1s( mRecentLua.GetFilename(value) );
+}
+
+
+void FreyjaControl::EvRecentPython(uint32 value)
+{
+	freyjaPython1s( mRecentPython.GetFilename(value), "PluginEntry", "DefaultAction" );
 }
 
 

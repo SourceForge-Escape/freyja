@@ -243,6 +243,8 @@
 				(menu_item "_Unparent"		eBoneUnLinkChild)
 				(menu_item "_Metadata"		eBoneMetaData)
 				(menu_item	"_Update"		eBoneRefreshBindPose)
+
+				(menu_item "_Key Metadata"		eBoneKeyFrameMetaData)
 				;old (menu_item "L_ink mesh"		eBoneLinkMesh)
 				;old (menu_item "U_nlink mesh"		eBoneUnLinkMesh)
 				;(menu_item "_Move"				eBoneMoveJoint)
@@ -252,6 +254,7 @@
 
 		(submenu ePluginMenu "_Plugins..."
 				(submenu eRecentLua "_Lua" "recent_lua_bind" )
+				(submenu eRecentPython "_Python" "recent_python_bind" )
 				(submenu "_Test"
 					(menu_item "_Assert MsgBox"		eTestAssertMsgBox)
 					(menu_item "_Textview"			eTestTextView)))
@@ -325,8 +328,8 @@
 						"recent_lua_bind")
 
 					(toolbar_menu_button "24x24/python.png" "Script"
-						"Open Python Script..." eEvent eNone ;eLoadPyScript
-						)
+						"Open Python Script..." eEvent eLoadPythonScript
+						"recent_python_bind")
 
 				) ; toolbar
 				;) ; hbox

@@ -6,8 +6,9 @@
 
  Kagura prealpha, 0.9.5.13
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- ? RELEASE DEP Python script integration fix in UI.
- ? RELEASE DEP Keyframe metadata editor in UI.
+ - Version number bump.
+ - Keyframe metadata editor hooked up in UI.
+ - Python script integration such as Lua in UI.
  - Select All/Unselect All hooked back up for vertices and faces.
  - Shift+Delete new keystroke for delete object to avoid 'accidents'.
  - Refreshed lua binding -- no query support yet.

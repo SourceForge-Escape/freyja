@@ -600,6 +600,7 @@ class FreyjaControl : public Control
 	void EvPaintDmap() { mPaintMode = ePaintDmap; }
 
 	void EvLoadLuaScript();
+	void EvLoadPythonScript();
 
 	void EvMeshRepack()
 	{
@@ -729,6 +730,7 @@ class FreyjaControl : public Control
 	{ LoadModel( mRecentModel.GetFilename(value)); }
 
 	void EvRecentLua(uint32 value);
+	void EvRecentPython(uint32 value);
 
 	void EvRecentKeyframe(uint32 value);
 
@@ -1184,6 +1186,8 @@ private:
 	RecentFiles mRecentKeyframe;
 
 	RecentFiles mRecentLua;
+
+	RecentFiles mRecentPython;
 
 	Texture mTexture;                       /* Collection of Texture utils */	
 
