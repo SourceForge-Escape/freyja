@@ -11,6 +11,14 @@
 
  * Seperate renderer and UI into their own libraries.
 
+ * Lua QueryABI binding.
+
+ * The way the model graph works in 0.9.5 with all the extensions is 
+   going to have to be redesigned for 0.9.6 alpha.
+	- Edge based editing as a focus instead of vertex.
+	- Better reference graphs so you can tell how vertex/edge/facets are 
+	  connected and interact -- also to give speed boosts for common ops.
+
  * Rename hel/math.h hel/hel.h for 0.9.6 alpha. ( Breaks API )
 
  * Mesh should be broken up into subclasses eg 'weightmanager', 'utils'.
@@ -23,6 +31,7 @@
 	- Move texcoord/object switch UI into their own controls.
 
  * Edge editing.
+	- Replace wireframe renderer with edge renderer.
 	- Mesh::RebuildEdgeGraph()
 	- Mesh::RebuildPlanes()
 	- RELATED Cache s-edge results until light / mesh moves.

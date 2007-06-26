@@ -510,6 +510,13 @@ class FreyjaControl : public Control
 	 *        Returns true if sucessful.
 	 ------------------------------------------------------*/
 
+	void SelectAll(bool set);
+	/*------------------------------------------------------
+	 * Pre  : <set> - true for select, false for unselect
+	 * Post : (un)selects all objects of a certain type.
+	 *        
+	 ------------------------------------------------------*/
+
 	void SetObjectMode(object_type_t m);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -581,6 +588,8 @@ class FreyjaControl : public Control
 	void EvSerializeMesh();
 	void EvUnserializeMesh();
 
+	void EvSelectAll() { SelectAll(true); } 
+	void EvUnselectAll() { SelectAll(false); } 
 
 	void EvPaintWeight() { mPaintMode = ePaintWeight; }
 	void EvPaintUnweight() { mPaintMode = ePaintUnweight; }

@@ -402,6 +402,25 @@ public:
 	 *        Sets no flags on any face.
 	 ------------------------------------------------------*/
 
+	int PickEdge(hel::Ray &r, vec_t &t);
+	/*------------------------------------------------------
+	 * Pre  : <r> the pick ray.
+	 *
+	 * Post : Returns index of first edge encountered or -1 if none.
+	 *        <t> term where ray intersected edge bbox target.
+	 *
+	 ------------------------------------------------------*/
+
+	bool IntersectHitBox(hel::Ray &r, 
+						 const hel::Vec3 &min, const hel::Vec3 &max, vec_t &t);
+	/*------------------------------------------------------
+	 * Pre  : <r> the pick ray.
+	 *
+	 * Post : Returns index of first edge encountered or -1 if missed.
+	 *        <t> where ray intersected generic bbox target.
+	 *
+	 ------------------------------------------------------*/
+
 	bool IntersectPerFace(hel::Ray &r, vec_t &t);
 	/*------------------------------------------------------
 	 * Pre  : 

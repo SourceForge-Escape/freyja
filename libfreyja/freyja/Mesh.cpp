@@ -1579,6 +1579,7 @@ bool Mesh::Intersect(hel::Ray &r, vec_t &t)
 	}
 
 	// Bbox test
+#if 0
 	vec_t bestDist = 99999.0f;
 	vec3_t min, max;
 
@@ -1649,6 +1650,11 @@ bool Mesh::Intersect(hel::Ray &r, vec_t &t)
 			}
 		}
 	}
+#else
+	Vec3 min, max;
+	GetBBox(min.mVec, max.mVec);
+	bool intersect = IntersectHitBox(r, min, max, t);
+#endif
 
 	return intersect;
 }
@@ -1713,6 +1719,107 @@ bool Mesh::IntersectUVFaces(hel::Ray &r, int &face0, bool markAll,
 	return (face0 > -1);
 }
 
+
+bool Mesh::IntersectHitBox(hel::Ray &r, 
+						   const hel::Vec3 &min, const hel::Vec3 &max, vec_t &t)
+{
+	Vec3 v[8];
+	v[0] = max;
+	v[1] = min;
+	v[2] = Vec3(max.mX, min.mY, max.mZ);
+	v[3] = Vec3(min.mX, max.mY, max.mZ);
+	v[4] = Vec3(max.mX, max.mY, min.mZ);
+	v[5] = Vec3(min.mX, min.mY, max.mZ);
+	v[6] = Vec3(min.mX, max.mY, min.mZ);
+	v[7] = Vec3(max.mX, min.mY, min.mZ);
+
+	vec_t bestDist = 99999.0f;
+	bool intersect = false;
+	Vec3 tuv;
+
+	r.mDir.Norm();
+
+	// Quick and dirty hit test that assumes you can pusedo tesselate 
+	// a quad here and always get as good results...
+	for (uint32 i = 0, a, b, c, d, count = 6; i < count; ++i)
+	{
+		switch (i)
+		{
+		case 0:    
+			a = 1, b = 6, c = 4, d = 7;
+			break;
+
+		case 1:
+			a = 6, b = 3, c = 0, d = 4;
+			break;
+
+		case 2:
+			a = 1, b = 5, c = 2, d = 7;
+			break;
+
+		case 3:
+			a = 1, b = 6, c = 3, d = 5;
+			break;
+
+		case 4:
+			a = 4, b = 0, c = 2, d = 7;
+			break;
+
+		case 5:
+			a = 3, b = 0, c = 2, d = 5;
+			break;
+		}
+
+		if (r.IntersectTriangle(v[a].mVec, v[b].mVec, v[c].mVec, tuv.mVec))
+		{
+			intersect = true;
+			
+			if (tuv.mX < bestDist)
+			{
+				t = bestDist = tuv.mX;
+			}
+		}
+		else if (r.IntersectTriangle(v[c].mVec, v[d].mVec, v[a].mVec, tuv.mVec))
+		{
+			intersect = true;
+			
+			if (tuv.mX < bestDist)
+			{
+				t = bestDist = tuv.mX;
+			}
+		}
+	}
+
+	return intersect;
+}
+
+
+int Mesh::PickEdge(hel::Ray &r, vec_t &t)
+{
+	vec_t bestDist = 99999.0f;
+	r.mDir.Norm();
+	int best = -1;
+	const Vec3 n(0.2f, 0.2f, 0.2f); // FIXME: Allow external mutator for size here
+
+	for (uint32 i = 0, iCount = mEdges.size(); i < iCount; ++i)
+	{
+		Edge *e = mEdges[i];
+		
+		if (!e) 
+			continue;
+	
+		Vec3 a = GetVertexPosition(e->mA) + n;
+		Vec3 b = GetVertexPosition(e->mB) - n;
+
+		if ( IntersectHitBox(r, a, b, t) && t < bestDist )
+		{
+			best = i;
+			bestDist = t;
+		}
+	}
+
+	return best;
+}
 
 
 int Mesh::PickFace(Face::Flags flag, hel::Ray &r, hel::Vec3 &tuv)
@@ -3688,6 +3795,8 @@ void Mesh::SubDivLoop()
 					if (f2)
 					{
 						// FIXME: Handle material, etc
+						f2->mMaterial = f->mMaterial;
+						f2->mNormal = f->mNormal;
 #if 0
 						f2->AppendVertex(centroid);
 						f2->AppendVertex(mid);

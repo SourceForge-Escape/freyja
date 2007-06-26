@@ -6,9 +6,16 @@
 
  Kagura prealpha, 0.9.5.13
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- ? RELEASE DEP freyjaQueryABI for python/lua scripting UI.
  ? RELEASE DEP Python script integration fix in UI.
  ? RELEASE DEP Keyframe metadata editor in UI.
+ - Select All/Unselect All hooked back up for vertices and faces.
+ - Shift+Delete new keystroke for delete object to avoid 'accidents'.
+ - Refreshed lua binding -- no query support yet.
+ - New libfreyja QueryABI for python/lua scripting limited UI queries.
+ - FIX for mesh bounding box intersect test.
+ - Mesh util method for edge and generic bbox selection
+ - SelectedVertices mode now allowed to scale with tool.
+ - SelectedVertices mode now allowed to select.
  - FIX Huge bug in Repack() vertex face references using bad index.
  - Minor style cleanup in Mesh header. ( Should break up the class sooner. )
  - Lame full mesh subdiv support added with haste.

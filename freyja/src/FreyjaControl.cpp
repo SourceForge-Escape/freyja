@@ -56,6 +56,7 @@
 #include <freyja/MeshABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/PluginABI.h>
+#include <freyja/QueryABI.h>
 #include <freyja/TextureABI.h>
 
 #include "FreyjaOpenGL.h" // for load_shader
@@ -72,6 +73,7 @@ using hel::Vec3;
 
 int load_texture(const char *filename);
 int load_shader(const char *filename);
+void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array);
 void ePluginImport(ResourceEvent *e);
 void ePluginExport(ResourceEvent *e);
 mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, 
@@ -225,6 +227,11 @@ void FreyjaControl::Init()
 	{
 		Print("Failed to load '%s'.", mRecentLua.GetResourceFilename() );
 	}
+
+
+	/* Set query handler. */
+	freyjaQuerySetCallback( freyjaQueryCallbackHandler );
+
 
 	/* Set some basic defaults */
 	SetControlScheme(eScheme_Model);
@@ -396,36 +403,6 @@ void FreyjaControl::AdjustMouseXYForViewports(vec_t &x, vec_t &y)
 		Print("       x = %f y = %f", x, y);
 #endif
 	}
-}
-
-
-void FreyjaControl::EvRecentKeyframe(uint32 value)
-{
-	Print("FIXME: Not fully implemented %s:%i", __FILE__, __LINE__);
-	//mRecentKeyframe.GetFilename(value);
-}
-
-
-void FreyjaControl::EvRecentLua(uint32 value)
-{
-	freyjaLuaScript1s( mRecentLua.GetFilename(value) );
-}
-
-
-void FreyjaControl::EvLoadLuaScript()
-{
-	char *filename =
-	mgtk_filechooser_blocking("freyja - Open Script...", 
-							  mRecentLua.GetPath(), 0,
-							  "Lua script (*.lua)", "*.lua");
-
-	if (filename)
-	{
-		freyjaLuaScript1s(filename);
-		mRecentLua.AddFilename(filename);
-	}
-
-	mgtk_filechooser_blocking_free(filename);
 }
 
 
@@ -765,57 +742,6 @@ bool FreyjaControl::LoadModel(const char *filename)
 }
 
 
-void FreyjaControl::EvSerializeMesh()
-{
-#if TINYXML_FOUND
-	Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
-
-	if (!m)
-		return;
-
-	char *filename =
-	mgtk_filechooser_blocking("freyja - Save Selected Mesh...", 
-							  mRecentMesh.GetPath(), 1,
-							  "Mesh XML (*.xml)", "*.xml");
-
-	if (!filename)
-		return;
-
-	TiXmlDocument doc;
-	TiXmlDeclaration *decl = new TiXmlDeclaration("1.0", "", "");
-	doc.LinkEndChild(decl);
-
-	TiXmlElement *container = new TiXmlElement("freyja");
-	container->SetAttribute("version", VERSION);
-	container->SetAttribute("build-date", __DATE__);
-	container->SetAttribute("file-version", 1);
-	doc.LinkEndChild(container);
-
-	for (uint32 i = 0, n = freyjaGetMaterialCount(); i < n; ++i)
-	{
-		Material *mat = freyjaGetMaterialClass(i);
-
-		if (mat && i) // skip 'boring material'
-			mat->Serialize(container);
-	}
-
-	m->Repack();
-
-	if (filename &&  m->Serialize(container) && doc.SaveFile(filename))
-	{
-		mRecentMesh.AddFilename(filename);
-		Print("Mesh '%s' Saved", filename);
-	}
-	else if (filename)
-	{
-		Print("Mesh '%s' failed to save.", filename);
-	}
-
-	mgtk_filechooser_blocking_free(filename);
-#endif
-}
-
-
 bool FreyjaControl::UnserializeMesh(const char *filename)
 {
 #if TINYXML_FOUND
@@ -892,24 +818,6 @@ bool FreyjaControl::UnserializeMesh(const char *filename)
 	return true;
 #else
 	return false;
-#endif
-}
-
-void FreyjaControl::EvUnserializeMesh()
-{
-#if TINYXML_FOUND
-	char *filename =
-	mgtk_filechooser_blocking("freyja - Open Selected Mesh...", 
-							  mRecentMesh.GetPath(), 0,
-							  "Mesh XML (*.xml)", "*.xml");
-
-	if ( UnserializeMesh(filename) )
-	{
-		mRecentMesh.SetPathByFilename(filename);
-		Print("Loaded mesh snippet '%s'", filename);
-	}
-
-	mgtk_filechooser_blocking_free(filename);
 #endif
 }
 
@@ -1106,202 +1014,6 @@ bool FreyjaControl::SaveModel(const char *filename)
 	return ret;
 }
 
-
-void FreyjaControl::EvViewportBack()
-{
-	Print("Back view");
-	SetSelectedView(PLANE_BACK);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = PLANE_BACK;
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvViewportBottom()
-{
-	Print("Bottom view");  
-	SetSelectedView(PLANE_BOTTOM);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = PLANE_BOTTOM;
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvViewportRight()
-{
-	Print("Right view");
-	SetSelectedView(PLANE_RIGHT);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = PLANE_RIGHT;
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvViewportFront()
-{
-	Print("Front view");
-	SetSelectedView(PLANE_FRONT);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = PLANE_FRONT;
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvViewportTop()
-{
-	Print("Top view");  
-	SetSelectedView(PLANE_TOP);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = PLANE_TOP;
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvViewportLeft()
-{
-	Print("Left view");
-	SetSelectedView(PLANE_LEFT);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = PLANE_LEFT;
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvViewportOrbit()
-{
-	Print("Orbital view");
-	SetSelectedView(PLANE_FREE);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = PLANE_FREE;
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvViewportUV()
-{
-	Print("UV Editor view");
-	SetSelectedView(DRAW_UV);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = DRAW_UV;
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvViewportCurve()
-{
-	Print("Curve editor view");
-	SetSelectedView(DRAW_CURVE);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = DRAW_CURVE;
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvViewportMaterial()
-{
-	Print("Material preview");
-	SetSelectedView(DRAW_MATERIAL);
-	if (mRender->GetFlags() & FreyjaRender::fViewports)
-		mRender->mViewports[mSelectedViewport].plane = DRAW_MATERIAL;
-	freyja_event_gl_refresh();
-}
-
-
-void FreyjaControl::EvMove()
-{
-	mToken = true;
-
-	Transform(mObjectMode, fTranslate,
-			  freyja_event_get_float(EvMoveXId),
-			  freyja_event_get_float(EvMoveYId),
-			  freyja_event_get_float(EvMoveZId));
-
-	freyja_event_set_float(EvMoveXId, 0.0f);
-	freyja_event_set_float(EvMoveYId, 0.0f);
-	freyja_event_set_float(EvMoveZId, 0.0f);
-	freyja_event_gl_refresh();
-}
-
-
-void FreyjaControl::EvRotate()
-{
-	mToken = true;
-
-	hel::Vec3 rot(freyja_event_get_float(EvRotateXId),
-				  freyja_event_get_float(EvRotateYId),
-				  freyja_event_get_float(EvRotateZId));
-
-	switch (mObjectMode)
-	{
-	case tBone:
-#warning "FIXME box transform for rotate is broken."
-		break;
-
-	default:
-		;
-	}
-
-	Transform(mObjectMode, fRotate, rot.mX, rot.mY, rot.mZ);
-		
-	freyja_event_set_float(EvRotateXId, 0.0f);
-	freyja_event_set_float(EvRotateYId, 0.0f);
-	freyja_event_set_float(EvRotateZId, 0.0f);
-	freyja_event_gl_refresh();
-}
-
-
-void FreyjaControl::EvScale()
-{
-	mToken = true;
-	Transform(mObjectMode, fScale,
-			  freyja_event_get_float(EvScaleXId),
-			  freyja_event_get_float(EvScaleYId),
-			  freyja_event_get_float(EvScaleZId));
-		
-	freyja_event_set_float(EvScaleXId, 1.0f);
-	freyja_event_set_float(EvScaleYId, 1.0f);
-	freyja_event_set_float(EvScaleZId, 1.0f);
-	freyja_event_gl_refresh();
-}
-
-void FreyjaControl::EvModeUV()
-{
-	mRender->SetViewMode(VIEWMODE_TEXTURE_EDIT);
-	freyja_event_gl_refresh();
-	Print("UV Editor Scheme");
-	SetControlScheme(eScheme_UV);
-}
-
-void FreyjaControl::EvModeModel()
-{
-	// Radio button like func for multiple widgets on same event
-	mgtk_toggle_value_set(EvModeAutoKeyframeId, 0);
-
-	mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
-	freyja_event_gl_refresh();
-	Print("Model Editor Scheme");
-	SetControlScheme(eScheme_Model);
-}
-
-void FreyjaControl::EvModeMaterial()
-{
-	mRender->SetViewMode(VIEWMODE_MATERIAL_EDIT);
-	freyja_event_gl_refresh();
-	Print("Material Editor Scheme");
-	SetControlScheme(eScheme_Material);
-}
-
-void FreyjaControl::EvMeshNew()
-{
-	mObjectMode = tMesh;
-	CreateObject();
-	Dirty();
-}
-
-void FreyjaControl::EvMeshDelete()
-{
-	mObjectMode = tMesh;
-	DeleteSelectedObject();
-	Dirty();
-}
-
-void FreyjaControl::EvMeshSelect()
-{
-	mObjectMode = tMesh;
-	mEventMode = aSelect;
-	Print("Select object mesh...");
-}
 
 void FreyjaControl::Undo()
 {
@@ -3372,6 +3084,77 @@ void FreyjaControl::SelectObjectByBox(hel::Vec3 min, hel::Vec3 max)
 }
 
 
+void FreyjaControl::SelectAll(bool set)
+{
+	switch (mObjectMode)
+	{
+	case tPoint:
+	case tSelectedVertices:
+		{
+			Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
+
+			if ( m )
+			{
+				if (set)
+				{
+					for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
+					{
+						m->SetVertexFlags(i, Vertex::fSelected);
+					}
+					
+					Print("Selected all vertices in mesh.");
+				}
+				else
+				{
+					for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
+					{
+						m->ClearVertexFlags(i, Vertex::fSelected);
+					}
+					
+					Print("Unselected all vertices in mesh.");					
+				}
+			}
+		}
+		break;
+
+	case tFace:
+	case tSelectedFaces:
+		{
+			Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
+
+			if ( m )
+			{
+				if (set)
+				{
+					for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+					{
+						m->SetFaceFlags(i, Vertex::fSelected);
+					}
+					
+					Print("Selected all faces in mesh.");
+				}
+				else
+				{
+					for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+					{
+						m->ClearFaceFlags(i, Vertex::fSelected);
+					}
+					
+					Print("Unselected all faces in mesh.");
+				}
+			}
+		}
+		break;
+
+	default:
+		{
+			String s = ObjectTypeToString(mObjectMode);
+			Print("%s() '%s' not supported.", __func__, s.GetCString());
+		}
+	}	
+}
+
+
 // TODO: Break this up per object type x set
 void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY, bool set)
 {
@@ -3503,6 +3286,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY, bool set)
 		}
 		break;
 
+	case tSelectedVertices:
 	case tPoint:
 		{
 			index_t selected = PickVertex(FreyjaRender::mTestRay);
@@ -4697,6 +4481,72 @@ void FreyjaControl::ScaleObject(int x, int y, freyja_plane_t plane)
 		Print("! ScaleObject(): This view (%i) isn't supported.", plane);
 	}
 
+
+	// It's VERY UNUSAL to allow scaling here
+	switch (mObjectMode)
+	{
+	case tSelectedVertices:
+		{
+			Mesh *m = Mesh::GetMesh(GetSelectedMesh());
+
+			if (m)
+			{
+				if (mToken) 
+				{
+					Vector<index_t> list;
+					Vector<hel::Vec3> list2;
+					bool found = false;
+
+					for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
+					{
+						Vertex *v = m->GetVertex(i);
+						
+						if (v && v->mFlags & Vertex::fSelected)
+						{
+							if (!found)
+							{
+								// should be i?
+								mCursor.mPos = m->GetVertexPosition(v->mVertexIndex);
+								found = true;
+							}
+
+							list.pushBack(i);
+							// should be i?
+							list2.pushBack(m->GetVertexPosition(v->mVertexIndex));
+						}
+					}
+
+					
+					Action *a = new ActionVertexListTransformExt(GetSelectedMesh(), list, fTranslate, list2, mCursor.mPos);
+					ActionModelModified(a);
+					return;
+				}
+
+				hel::Vec3 u;
+
+				for (uint32 i = 0, n = m->GetVertexCount(); i < n; ++i)
+				{
+					Vertex *v = m->GetVertex(i);
+	
+					if (v && v->mFlags & Vertex::fSelected)
+					{
+						u = m->GetVertexPosition(v->mVertexIndex);
+
+						u.mX *= mCursor.mScale.mX;
+						u.mY *= mCursor.mScale.mY;
+						u.mZ *= mCursor.mScale.mZ;
+
+						m->SetVertexPos(v->mVertexIndex, u.mVec);
+					}
+				}
+			}
+		}
+		break;
+
+	default:
+		;
+	}
+
 	old_x = x;
 	old_y = y;
 }
@@ -5132,7 +4982,11 @@ void FreyjaControl::PaintObject(vec_t x, vec_t y)
 
 					if (f)
 					{
+#if 1
 						Vec3 r = FreyjaRender::mTestRay.mDir;
+#else
+						Vec3 r = f->mNormal;
+#endif
 						r *= weight;
 
 						uint32 i;
@@ -5146,20 +5000,6 @@ void FreyjaControl::PaintObject(vec_t x, vec_t y)
 						}
 						
 						m->RecomputeFaceNormal(face, true);
-#if 0
-						Vec3 a, b, c;
-						m->GetVertexPos(f->mIndices[0], a.mVec);
-						m->GetVertexPos(f->mIndices[1], b.mVec);
-						m->GetVertexPos(f->mIndices[2], c.mVec);
-						
-						Vec3 n = -Vec3::Cross(a - b, c - b);
-						n.Norm();
-
-						// Auto update with a face normal for now
-						m->SetNormal(f->mIndices[0], n.mVec);
-						m->SetNormal(f->mIndices[1], n.mVec);
-						m->SetNormal(f->mIndices[2], n.mVec);
-#endif
 					}
 				}
 			}
@@ -5378,54 +5218,6 @@ void FreyjaControl::TexCoordSelect(vec_t u, vec_t v)
 	((mTexCoordArrayIndex == INDEX_INVALID) ? 
 	 Print("No UVs selected!") : 
 	 Print("Selected UV[%i].  Move with Right Mouse Button.", mTexCoordArrayIndex));
-}
-
-
-int FreyjaControl::CreateListener(const char *name, MethodPtr ptr)
-{
-	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl>(mInstance, ptr);
-	ResourceEventDelegate::add(name, d);
-	return ResourceEvent::GetResourceIdBySymbol(name);
-}
-
-
-int FreyjaControl::CreateListener(const char *name, MethodPtrB ptr)
-{
-	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, ptr);
-	ResourceEventDelegate::add(name, d);
-	return ResourceEvent::GetResourceIdBySymbol(name);
-}
-
-
-int FreyjaControl::CreateListener1u(const char *name, MethodPtr1u ptr)
-{
-	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, unsigned int>(mInstance, ptr);
-	ResourceEventDelegate::add(name, d);
-	return ResourceEvent::GetResourceIdBySymbol(name);
-}
-
-
-int FreyjaControl::CreateListener1f(const char *name, MethodPtr1f ptr)
-{
-	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, float>(mInstance, ptr);
-	ResourceEventDelegate::add(name, d);
-	return ResourceEvent::GetResourceIdBySymbol(name);
-}
-
-
-int FreyjaControl::CreateListener1s(const char *name, MethodPtr1s ptr)
-{
-	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, char*>(mInstance, ptr);
-	ResourceEventDelegate::add(name, d);
-	return ResourceEvent::GetResourceIdBySymbol(name);
-}
-
-
-int FreyjaControl::CreateListener2s(const char *name, MethodPtr2s ptr)
-{
-	MethodDelegate *d = new MethodDelegateArg2<FreyjaControl, char*, char*>(mInstance, ptr);
-	ResourceEventDelegate::add(name, d);
-	return ResourceEvent::GetResourceIdBySymbol(name);
 }
 
 
@@ -5755,6 +5547,126 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eLoadLuaScript", &FreyjaControl::EvLoadLuaScript);
 
 	CreateListener("eMeshSubDivLoop", &FreyjaControl::EvMeshSubDiv);
+
+	CreateListener("eSelectAll", &FreyjaControl::EvSelectAll);
+	CreateListener("eUnSelectAll", &FreyjaControl::EvUnselectAll);
+}
+
+
+int FreyjaControl::CreateListener(const char *name, MethodPtr ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
+}
+
+
+int FreyjaControl::CreateListener(const char *name, MethodPtrB ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg0<FreyjaControl, bool>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
+}
+
+
+int FreyjaControl::CreateListener1u(const char *name, MethodPtr1u ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, unsigned int>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
+}
+
+
+int FreyjaControl::CreateListener1f(const char *name, MethodPtr1f ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, float>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
+}
+
+
+int FreyjaControl::CreateListener1s(const char *name, MethodPtr1s ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg1<FreyjaControl, char*>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
+}
+
+
+int FreyjaControl::CreateListener2s(const char *name, MethodPtr2s ptr)
+{
+	MethodDelegate *d = new MethodDelegateArg2<FreyjaControl, char*, char*>(mInstance, ptr);
+	ResourceEventDelegate::add(name, d);
+	return ResourceEvent::GetResourceIdBySymbol(name);
+}
+
+
+void FreyjaControl::EvLoadLuaScript()
+{
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Script...", 
+							  mRecentLua.GetPath(), 0,
+							  "Lua script (*.lua)", "*.lua");
+
+	if (filename)
+	{
+		freyjaLuaScript1s(filename);
+		mRecentLua.AddFilename(filename);
+	}
+
+	mgtk_filechooser_blocking_free(filename);
+}
+
+
+
+void FreyjaControl::EvSerializeMesh()
+{
+#if TINYXML_FOUND
+	Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
+
+	if (!m)
+		return;
+
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Save Selected Mesh...", 
+							  mRecentMesh.GetPath(), 1,
+							  "Mesh XML (*.xml)", "*.xml");
+
+	if (!filename)
+		return;
+
+	TiXmlDocument doc;
+	TiXmlDeclaration *decl = new TiXmlDeclaration("1.0", "", "");
+	doc.LinkEndChild(decl);
+
+	TiXmlElement *container = new TiXmlElement("freyja");
+	container->SetAttribute("version", VERSION);
+	container->SetAttribute("build-date", __DATE__);
+	container->SetAttribute("file-version", 1);
+	doc.LinkEndChild(container);
+
+	for (uint32 i = 0, n = freyjaGetMaterialCount(); i < n; ++i)
+	{
+		Material *mat = freyjaGetMaterialClass(i);
+
+		if (mat && i) // skip 'boring material'
+			mat->Serialize(container);
+	}
+
+	m->Repack();
+
+	if (filename &&  m->Serialize(container) && doc.SaveFile(filename))
+	{
+		mRecentMesh.AddFilename(filename);
+		Print("Mesh '%s' Saved", filename);
+	}
+	else if (filename)
+	{
+		Print("Mesh '%s' failed to save.", filename);
+	}
+
+	mgtk_filechooser_blocking_free(filename);
+#endif
 }
 
 
@@ -5767,9 +5679,264 @@ void FreyjaControl::EvMeshSubDiv()
 }
 
 
+void FreyjaControl::EvRecentKeyframe(uint32 value)
+{
+	Print("FIXME: Not fully implemented %s:%i", __FILE__, __LINE__);
+	//mRecentKeyframe.GetFilename(value);
+}
+
+
+void FreyjaControl::EvRecentLua(uint32 value)
+{
+	freyjaLuaScript1s( mRecentLua.GetFilename(value) );
+}
+
+
+void FreyjaControl::EvUnserializeMesh()
+{
+#if TINYXML_FOUND
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Selected Mesh...", 
+							  mRecentMesh.GetPath(), 0,
+							  "Mesh XML (*.xml)", "*.xml");
+
+	if ( UnserializeMesh(filename) )
+	{
+		mRecentMesh.SetPathByFilename(filename);
+		Print("Loaded mesh snippet '%s'", filename);
+	}
+
+	mgtk_filechooser_blocking_free(filename);
+#endif
+}
+
+
+void FreyjaControl::EvViewportBack()
+{
+	Print("Back view");
+	SetSelectedView(PLANE_BACK);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = PLANE_BACK;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportBottom()
+{
+	Print("Bottom view");  
+	SetSelectedView(PLANE_BOTTOM);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = PLANE_BOTTOM;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportRight()
+{
+	Print("Right view");
+	SetSelectedView(PLANE_RIGHT);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = PLANE_RIGHT;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportFront()
+{
+	Print("Front view");
+	SetSelectedView(PLANE_FRONT);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = PLANE_FRONT;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportTop()
+{
+	Print("Top view");  
+	SetSelectedView(PLANE_TOP);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = PLANE_TOP;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportLeft()
+{
+	Print("Left view");
+	SetSelectedView(PLANE_LEFT);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = PLANE_LEFT;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportOrbit()
+{
+	Print("Orbital view");
+	SetSelectedView(PLANE_FREE);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = PLANE_FREE;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportUV()
+{
+	Print("UV Editor view");
+	SetSelectedView(DRAW_UV);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = DRAW_UV;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportCurve()
+{
+	Print("Curve editor view");
+	SetSelectedView(DRAW_CURVE);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = DRAW_CURVE;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportMaterial()
+{
+	Print("Material preview");
+	SetSelectedView(DRAW_MATERIAL);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+		mRender->mViewports[mSelectedViewport].plane = DRAW_MATERIAL;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvMove()
+{
+	mToken = true;
+
+	Transform(mObjectMode, fTranslate,
+			  freyja_event_get_float(EvMoveXId),
+			  freyja_event_get_float(EvMoveYId),
+			  freyja_event_get_float(EvMoveZId));
+
+	freyja_event_set_float(EvMoveXId, 0.0f);
+	freyja_event_set_float(EvMoveYId, 0.0f);
+	freyja_event_set_float(EvMoveZId, 0.0f);
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvRotate()
+{
+	mToken = true;
+
+	hel::Vec3 rot(freyja_event_get_float(EvRotateXId),
+				  freyja_event_get_float(EvRotateYId),
+				  freyja_event_get_float(EvRotateZId));
+
+	switch (mObjectMode)
+	{
+	case tBone:
+#warning "FIXME box transform for rotate is broken."
+		break;
+
+	default:
+		;
+	}
+
+	Transform(mObjectMode, fRotate, rot.mX, rot.mY, rot.mZ);
+		
+	freyja_event_set_float(EvRotateXId, 0.0f);
+	freyja_event_set_float(EvRotateYId, 0.0f);
+	freyja_event_set_float(EvRotateZId, 0.0f);
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvScale()
+{
+	mToken = true;
+	Transform(mObjectMode, fScale,
+			  freyja_event_get_float(EvScaleXId),
+			  freyja_event_get_float(EvScaleYId),
+			  freyja_event_get_float(EvScaleZId));
+		
+	freyja_event_set_float(EvScaleXId, 1.0f);
+	freyja_event_set_float(EvScaleYId, 1.0f);
+	freyja_event_set_float(EvScaleZId, 1.0f);
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvModeUV()
+{
+	mRender->SetViewMode(VIEWMODE_TEXTURE_EDIT);
+	freyja_event_gl_refresh();
+	Print("UV Editor Scheme");
+	SetControlScheme(eScheme_UV);
+}
+
+
+void FreyjaControl::EvModeModel()
+{
+	// Radio button like func for multiple widgets on same event
+	mgtk_toggle_value_set(EvModeAutoKeyframeId, 0);
+
+	mRender->SetViewMode(VIEWMODE_MODEL_EDIT);
+	freyja_event_gl_refresh();
+	Print("Model Editor Scheme");
+	SetControlScheme(eScheme_Model);
+}
+
+
+void FreyjaControl::EvModeMaterial()
+{
+	mRender->SetViewMode(VIEWMODE_MATERIAL_EDIT);
+	freyja_event_gl_refresh();
+	Print("Material Editor Scheme");
+	SetControlScheme(eScheme_Material);
+}
+
+void FreyjaControl::EvMeshNew()
+{
+	mObjectMode = tMesh;
+	CreateObject();
+	Dirty();
+}
+
+
+void FreyjaControl::EvMeshDelete()
+{
+	mObjectMode = tMesh;
+	DeleteSelectedObject();
+	Dirty();
+}
+
+
+void FreyjaControl::EvMeshSelect()
+{
+	mObjectMode = tMesh;
+	mEventMode = aSelect;
+	Print("Select object mesh...");
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // Non-class methods, callbacks, and wrappers
 //////////////////////////////////////////////////////////////////////////
+
+void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
+{
+	FREYJA_ASSERTMSG(false, "FIXME: Query not implemented." __FILE__, __LINE__);
+
+	for (uint32 i = 0; i < size; ++i)
+	{
+		freyja_print("Unhandled query %s %s %p", 
+					 array[i].type, array[i].symbol, array[i].ptr);
+	}
+}
+
 
 int load_texture(const char *filename)
 {
