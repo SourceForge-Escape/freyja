@@ -111,6 +111,8 @@ def StoreWrapperFunction(li):
 		unsupported = True
 	elif name == "freyjaMeshCreateLattice":
 		unsupported = True
+	elif name == "freyjaLuaBindFunc":
+		unsupported = True
 
 
 	for i in range(nameat, len(li)):
@@ -374,7 +376,7 @@ def UpdateBindings():
 		print "#define LUA_FOUND"
 
 	for i in li:
-		if re.match('.*ABI.h', i) and not re.match('(Plugin|Legacy|ControlPoint|.*~)', i):
+		if re.match('.*ABI.h', i) and not re.match('(Plugin|Legacy|QueryABI|ControlPoint|.*~)', i):
 			print "#include \"" + i + '"'
 			sucess = ImportBindings(gPath, i)
 
