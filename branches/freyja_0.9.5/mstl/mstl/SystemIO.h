@@ -29,6 +29,7 @@
 #include <math.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
@@ -248,7 +249,12 @@ typedef int (*AssertCallback)(const char *file, unsigned int line,
 	 *
 	 ------------------------------------------------------*/
 
-
+	static void OpenURLInWebBrowser(const char *url);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 
 ////////////////////////////////////////////////////////////
@@ -783,6 +789,39 @@ void SetLocaleNumericToC()
 	setlocale(LC_NUMERIC, "C");
 }
 
+
+static inline
+void OpenURLInWebBrowser(const char *url)
+{
+#ifdef WIN32
+	ShellExecute(NULL, "open", url, NULL, "C:\\", SW_SHOW );
+#else
+	char *browser = getenv("BROWSER");
+	
+	if (!browser)
+	{
+		if ( File::DoesFileExist("/usr/bin/epiphany") ) 
+			browser = "/usr/bin/epiphany";
+		else if ( File::DoesFileExist("/usr/bin/firefox") ) 
+			browser = "/usr/bin/firefox";
+		else if ( File::DoesFileExist("/usr/bin/opera") ) 
+			browser = "/usr/bin/opera";
+		else 
+			browser = "firefox"; // if it fails no big deal
+	}
+
+	if (browser)
+	{
+		// FIXME: How can this be taken seriously?
+		char buf[512];
+		snprintf(buf, 512, "%s %s &", browser, url);
+		buf[511] = 0;
+
+		//printf("$ %s\n", buf);
+		system(buf);
+	}
+#endif
+}
 
 
 } // namespace SystemIO

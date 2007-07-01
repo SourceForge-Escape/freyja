@@ -28,7 +28,7 @@
 
 #include <string.h>
 
-#include <freyja/LegacyABI.h>  // FIXME: Still using legacy polymesh generator
+//#include <freyja/LegacyABI.h>  // FIXME: Still using legacy polymesh generator
 #include <freyja/MeshABI.h>
 #include <freyja/TextureABI.h>
 #include <freyja/PluginABI.h>
@@ -804,12 +804,13 @@ void eGenerateCone()
 	if (ok)
 	{
 		int count = mgtk_get_query_dialog_int(dialog, "count");
-		//int segments = mgtk_get_query_dialog_int(dialog, "segments");
+		int wedges = mgtk_get_query_dialog_int(dialog, "segments");
 		vec_t height = mgtk_get_query_dialog_float(dialog, "height");
-		//vec_t radius = mgtk_get_query_dialog_float(dialog, "radius")
+		vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
 	
 		hel::Vec3 v;
-		freyjaGenerateConeMesh(v.mVec, height, count);
+		//freyjaGenerateConeMesh(v.mVec, height, count);
+		freyjaMeshCreateCone(v.mVec, height, radius, wedges);
 		FreyjaControl::GetInstance()->Dirty();
 	}
 }
@@ -826,10 +827,11 @@ void eGenerateCylinder()
 		int count = mgtk_get_query_dialog_int(dialog, "count");
 		int segments = mgtk_get_query_dialog_int(dialog, "segments");
 		vec_t height = mgtk_get_query_dialog_float(dialog, "height");
-		//vec_t radius = mgtk_get_query_dialog_float(dialog, "radius")
+		vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
 	
 		hel::Vec3 v;
-		freyjaGenerateCylinderMesh(v.mVec, height, count, segments);
+		//freyjaGenerateCylinderMesh(v.mVec, height, count, segments);
+		freyjaMeshCreateCylinder(v.mVec, height, radius, count, segments);
 		FreyjaControl::GetInstance()->Dirty();
 	}
 }
@@ -845,10 +847,11 @@ void eGenerateTube()
 		int count = mgtk_get_query_dialog_int(dialog, "count");
 		int segments = mgtk_get_query_dialog_int(dialog, "segments");
 		vec_t height = mgtk_get_query_dialog_float(dialog, "height");
-		//vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
+		vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
 
 		hel::Vec3 v;
-		freyjaGenerateTubeMesh(v.mVec, height, count, segments);
+		//freyjaGenerateTubeMesh(v.mVec, height, count, segments);
+		freyjaMeshCreateTube(v.mVec, height, radius, count, segments);
 		FreyjaControl::GetInstance()->Dirty();		
 	}
 }
@@ -856,7 +859,6 @@ void eGenerateTube()
 
 void eGenerateSphere()
 {
-	FREYJA_INFOMSG(0, "FIXME: Replace obsolete mesh generator.");
 	const char *dialog = "GenerateSphereDialog";
 	int ok = mgtk_execute_query_dialog(dialog);
 
@@ -866,8 +868,9 @@ void eGenerateSphere()
 		vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
 
 		hel::Vec3 v;
-		freyjaGenerateSphereMesh(v.mVec, radius * 2.0f, count, count);
-		//FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
+		//freyjaGenerateSphereMesh(v.mVec, radius * 2.0f, count, count);
+		index_t mesh = freyjaMeshCreateSphere(v.mVec, radius * 2.0f, count, count);
+		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
 		FreyjaControl::GetInstance()->Dirty();
 	}
 }

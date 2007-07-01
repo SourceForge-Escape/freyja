@@ -5557,6 +5557,10 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eLoadLuaScript", &FreyjaControl::EvLoadLuaScript);
 	CreateListener("eLoadPythonScript", &FreyjaControl::EvLoadPythonScript);
 
+	CreateListener("eLaunchBugTracker", &FreyjaControl::EvLaunchBugs);
+	CreateListener("eLaunchOnlineHelp", &FreyjaControl::EvLaunchFourms);
+	CreateListener("eLaunchUpdate", &FreyjaControl::EvLaunchUpdate);
+
 	CreateListener("eMeshSubDivLoop", &FreyjaControl::EvMeshSubDiv);
 
 	CreateListener("eSelectAll", &FreyjaControl::EvSelectAll);
@@ -5639,7 +5643,7 @@ void FreyjaControl::EvLoadPythonScript()
 
 	if (filename)
 	{
-		freyjaPython1s(filename, "PluginEntry", "DefaultAction");
+		freyjaPython1s(filename, "DefaultAction", "none");
 		mRecentPython.AddFilename(filename);
 	}
 
@@ -5723,7 +5727,7 @@ void FreyjaControl::EvRecentLua(uint32 value)
 
 void FreyjaControl::EvRecentPython(uint32 value)
 {
-	freyjaPython1s( mRecentPython.GetFilename(value), "PluginEntry", "DefaultAction" );
+	freyjaPython1s( mRecentPython.GetFilename(value), "DefaultAction", "none" );
 }
 
 
@@ -5963,12 +5967,65 @@ void FreyjaControl::EvMeshSelect()
 
 void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
 {
-	FREYJA_ASSERTMSG(false, "FIXME: Query not implemented." __FILE__, __LINE__);
+	QueryDialog d;
+	d.mName = "freyjaQueryCallbackHandler"; 
+	d.mDialogIcon = "gtk-question"; 
+	d.mInformationMessage = "Query Dialog"; 
+	d.mCancelIcon = "gtk-cancel"; 
+	d.mCancelText = "Cancel"; 
+	d.mAcceptIcon = "gtk-ok";
+	d.mAcceptText = "Answer"; 
 
 	for (uint32 i = 0; i < size; ++i)
 	{
-		freyja_print("Unhandled query %s %s %p", 
-					 array[i].type, array[i].symbol, array[i].ptr);
+		const char *type = array[i].type;
+		const char *symbol = array[i].symbol;
+		void *data = array[i].ptr;
+
+		String s = type;
+
+		if (s == "int")
+		{
+			s += " ";
+			s += symbol;
+			QueryDialogValue<int> v(symbol, s.c_str(), *(int *)data);
+			d.mInts.push_back(v);
+		}
+		else if (s == "float")
+		{
+			s += " ";
+			s += symbol;
+			QueryDialogValue<float> v(symbol, s.c_str(), *(float *)data);
+			d.mFloats.push_back(v);
+		}
+		else
+		{
+			FREYJA_INFOMSG(false, "FIXME: Unhandled query '%s' '%s' %p\n", 
+						   type, symbol, data);
+		}
+	}
+
+
+	// If the user chooses to set values, set them.
+	if ( d.Execute() )
+	{
+		for (uint32 i = 0; i < size; ++i)
+		{
+			String s = array[i].type;
+
+			if (s == "int")
+			{
+				(*(int *)array[i].ptr) = d.GetInt( array[i].symbol );
+			}
+			else if (s == "float")
+			{
+				(*(float *)array[i].ptr) = d.GetFloat( array[i].symbol );
+			}
+			else
+			{
+				// Not handled
+			}
+		}	
 	}
 }
 

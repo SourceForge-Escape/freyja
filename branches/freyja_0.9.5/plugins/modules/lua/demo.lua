@@ -109,4 +109,16 @@ freyjaMeshPolygonMaterial(cube0, face, 0)
 -- Create a cube mesh much faster  ;)
 cube1 = freyjaMeshCreateCube(0.0, 8.0, 0.0, 8.0)
 
+-- Create a cube given user input.
+size = freyjaQueryInteger("size")
+cube2 = freyjaMeshCreateCube(0.0, 16.0, 0.0, size)
+
+-- Create a cube given user input.
+sizeR = freyjaQueryFloat("size")
+cube2 = freyjaMeshCreateCube(0.0, 16.0, 0.0, sizeR)
+
+s = freyjaQueryString("test")
+freyjaPrintMessage(s)
+
+
 

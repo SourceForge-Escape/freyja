@@ -31,6 +31,17 @@
 #define FREYJA_RECENT_FILES "recent_files-dev"
 
 
+// Hardcoded URLs so people won't add porn sites to user prefs  =/
+
+#define FREYJA_FORUMS_URL "http://boards.chatbear.com/freyja/"
+
+#define FREYJA_BUGS_URL "https://bugs.launchpad.net/freyja3d/"
+
+#define FREYJA_NEWS_URL "http://mongooseichiban.blogspot.com/"
+
+#define FREYJA_UPDATE_URL "http://icculus.org/freyja/files/update.xml"
+
+
 // Renderer ////////////////////////////////////
 
 #define WIN32_GL_EXT				1

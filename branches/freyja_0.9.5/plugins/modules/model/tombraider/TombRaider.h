@@ -1097,6 +1097,21 @@ class TombRaider
    * Mongoose - Created, based on TRViewer algorithm
    ------------------------------------------------------*/
 
+	unsigned int GetCameraCount()
+	{ return (_num_cameras < 1) ? 0 : _num_cameras; }
+   /*------------------------------------------------------
+    * Pre  : 
+    * Post : 
+    *
+    ------------------------------------------------------*/
+
+	tr2_camera_t  *GetCamera(unsigned int i)
+	{ return &_cameras[i]; }
+   /*------------------------------------------------------
+    * Pre  : 
+    * Post : 
+    *
+    ------------------------------------------------------*/
 
   tr2_staticmesh_t *StaticMesh();
   /*------------------------------------------------------

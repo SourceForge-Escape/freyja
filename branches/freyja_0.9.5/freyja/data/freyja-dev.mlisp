@@ -161,11 +161,11 @@
 
 			;; Transforms
 			(submenu "_Transforms"
-				(menu_item "Move"	eMoveObject		"F5"		"gtk-move")
-				(menu_item "Rotate"	eRotateObject	"F6"	"gtk-rotate")
-				(menu_item "Scale"	eScaleObject		"F7"	"gtk-scale")
-				(menu_item "Select"	eSelect	"F8"			"gtk-select")
-				(menu_item "Unselect"	eUnselect	"F9"		"gtk-unselect")
+				(menu_item "Move"		eMoveObject		"F5"	"gtk-move")
+				(menu_item "Rotate"		eRotateObject	"F6"	"gtk-rotate")
+				(menu_item "Scale"		eScaleObject	"F7"	"gtk-scale")
+				(menu_item "Select"		eSelect			"F8"	"gtk-select")
+				(menu_item "Unselect"	eUnselect		"F9"	"gtk-unselect")
 			)
 
 			(submenu "_UV Mapping"
@@ -290,6 +290,11 @@
 
 		(submenu "_Help"
 			(menu_item "_Contents"	eHelpDialog	"F1"	"gtk-help")
+			(menu_seperator)
+			(menu_item	"Get help online..." eLaunchOnlineHelp "gtk-network")
+			(menu_item	"Report bugs..." eLaunchBugTracker "gtk-edit")
+			(menu_item	"Check for updates..." eLaunchUpdate "gtk-refresh")
+			(menu_seperator)
 			(menu_item "_About"  	eAboutDialog "gtk-about"))))
 
 
@@ -460,8 +465,8 @@
 				(toolbar_button "24x24/sphere.png"	" "	
 					"Polygon sphere"	eEvent	eGenerateSphere)
 
-				(toolbar_button "24x24/patch.png"	" "
-					"Polygon patch"	eEvent	eBezierPolygonPatch)
+				;(toolbar_button "24x24/patch.png"	" "
+				;	"Patch"	eEvent	eBezierPolygonPatch)
 
 				(toolbar_separator)
 
@@ -574,8 +579,14 @@
 
 				(toolbar_separator)
 
-				(toolbar_button	"gtk-add"
-					"SubDiv" "SubDiv Mesh" eEvent eMeshSubDivLoop)
+				;(toolbar_button	"gtk-add"
+				;	"SubDiv" "SubDiv Mesh" eEvent eMeshSubDivLoop)
+
+				(toolbar_menu_button "24x24/subdiv.png" "Subdiv"
+					"Subdivide mesh..." eEvent eMeshSubDivLoop
+						(toggle_menu_item	"Flat"	eNone	1)
+						;(toggle_menu_item	"Catmull-Clark"	eNone	0)
+					)
 
 			) ; toolbar
 			) ; hbox

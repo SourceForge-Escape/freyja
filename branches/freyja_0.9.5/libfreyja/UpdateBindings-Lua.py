@@ -37,6 +37,85 @@ gLuaHeaders = "\n\nextern \"C\" {\n#include \"lua5.1/lua.h\"\n#include \"lua5.1/
 gFuncWrappers = []
 gFuncBindings = []
 
+def PrintOutFreyaQueryBinding():
+	print "// Query hooks"
+	print "extern \"C\" {	"
+	print "	index_t freyjaQueryBegin();"
+	print "	void freyjaQueryEnd(index_t query);"
+	print "	void freyjaQueryInteger(index_t query, const char *symbol, int32 *i);"
+	print "	void freyjaQueryFloat(index_t query, const char *symbol, vec_t *r);"
+	print "	void freyjaQueryString(index_t query, const char *symbol, const char **s);"
+	print "}"
+	print ""
+	print ""
+	print "int lua_freyjaQueryInteger(lua_State *L)"
+	print "{"
+	print "	int stack_count = lua_gettop(L);"
+	print "	if ( stack_count < 1 )"
+	print "		return 0;"
+	print ""
+	print "	const char *symbol = lua_tostring(L, 1);"
+	print ""
+	print "	int integer_value;"
+	print "	index_t q = freyjaQueryBegin();"
+	print "	freyjaQueryInteger(q, symbol, &integer_value);"
+	print "	freyjaQueryEnd(q);"
+	print ""
+	print "	lua_pushnumber(L, integer_value);"
+	print "	return 1;"
+	print "}"
+	print ""
+	print ""
+	print "int lua_freyjaQueryFloat(lua_State *L)"
+	print "{"
+	print "	int stack_count = lua_gettop(L);"
+	print "	if ( stack_count < 1 )"
+	print "		return 0;"
+	print ""
+	print "	const char *symbol = lua_tostring(L, 1);"
+	print ""
+	print "	float real_value;"
+	print "	index_t q = freyjaQueryBegin();"
+	print "	freyjaQueryFloat(q, symbol, &real_value);"
+	print "	freyjaQueryEnd(q);"
+	print ""
+	print "	lua_pushnumber(L, real_value);"
+	print "	return 1;"
+	print "}"
+	print ""
+	print ""
+	print "int lua_freyjaQueryString(lua_State *L)"
+	print "{"
+	print "	int stack_count = lua_gettop(L);"
+	print "	if ( stack_count < 1 )"
+	print "		return 0;"
+	print ""
+	print "	const char *symbol = lua_tostring(L, 1);"
+	print ""
+	print "	const char *string_value;"
+	print "	index_t q = freyjaQueryBegin();"
+	print "	freyjaQueryString(q, symbol, &string_value);"
+	print "	freyjaQueryEnd(q);"
+	print ""
+	print "	lua_pushstring(L, string_value);"
+	print "	return 1;"
+	print "}"
+	print ""
+	print ""
+	print ""
+	print "int lua_freyjaPrintMessage(lua_State *L)"
+	print "{"
+	print "	int stack_count = lua_gettop(L);"
+	print "	if ( stack_count < 1 )"
+	print "		return 0;"
+	print ""
+	print "	const char *msg = lua_tostring(L, 1);"
+	print "	freyjaPrintMessage(msg);"
+	print "	return 0;"
+	print "}"
+	print ""
+	print ""
+
 
 def PrintOutFreyjaLuaABI():
 	print "void freyjaLuaCommand1s(const char *s)"
@@ -376,7 +455,7 @@ def UpdateBindings():
 		print "#define LUA_FOUND"
 
 	for i in li:
-		if re.match('.*ABI.h', i) and not re.match('(Plugin|Legacy|QueryABI|ControlPoint|.*~)', i):
+		if re.match('.*ABI.h', i) and not re.match('(Plugin|Legacy|QueryABI|ControlPoint|LuaABI|PythonABI|.*~)', i):
 			print "#include \"" + i + '"'
 			sucess = ImportBindings(gPath, i)
 
@@ -389,10 +468,13 @@ def UpdateBindings():
 	for i in gFuncWrappers:
 		print i
 
+	PrintOutFreyaQueryBinding()
+
 	print "typedef struct {\n\tconst char *symbol;\n\tint (*func)(lua_State*);\n} lua_freyja_bind_t;\n\n"
 	print "lua_freyja_bind_t gLibFreyja_LuaBinds[] = {"
 	for i in gFuncBindings:
 		print i
+	print "{ \"freyjaQueryInteger\", lua_freyjaQueryInteger },"
 	print "\t{ NULL, NULL }\n};\n\n"
 
 	PrintOutFreyjaBindLua()

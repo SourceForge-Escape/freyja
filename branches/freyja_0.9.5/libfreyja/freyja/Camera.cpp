@@ -39,8 +39,7 @@
 #include <math.h>
 #include "Camera.h"
 
-
-unsigned int FreyjaCamera::mCounter = 0;
+#if OBSOLETE
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -70,52 +69,6 @@ FreyjaCamera::~FreyjaCamera()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-unsigned int FreyjaCamera::getId()
-{
-	return mId;
-}
-
-
-void FreyjaCamera::getPosition(vec3_t pos)
-{
-	pos[0] = mPos[0];
-	pos[1] = mPos[1];
-	pos[2] = mPos[2];
-}
-
-
-void FreyjaCamera::getUp(vec3_t up)
-{
-	up[0] = mUp[0];
-	up[1] = mUp[1];
-	up[2] = mUp[2];
-}
-
-
-void FreyjaCamera::getTarget(vec3_t target)
-{
-	target[0] = mTarget[0];
-	target[1] = mTarget[1];
-	target[2] = mTarget[2];
-}
-
-
-float FreyjaCamera::getYaw()
-{
-	return helRadToDeg(mTheta);
-}
-
-
-double FreyjaCamera::getRadianYaw()
-{
-	return mTheta;
-}
-
-
-double FreyjaCamera::getRadianPitch()
-{
-	return mTheta2;
-}
 
 
 ////////////////////////////////////////////////////////////
@@ -239,42 +192,6 @@ bool FreyjaCamera::isBehind(int x, int z)
 }
 
 
-void FreyjaCamera::setSpeed(vec_t speed)
-{
-	mSpeed = speed;
-}
-
-
-void FreyjaCamera::update()
-{
-	mTarget[2] = (mViewDistance * cos(mTheta)) + mPos[2];
-	mTarget[0] = (mViewDistance * sin(mTheta)) + mPos[0];
-	mTarget[1] = (mViewDistance * sin(mTheta2)) + mPos[1]; // + height_offset;
-}
-
-
-void FreyjaCamera::setPosition(vec3_t pos)
-{
-	mPos[0] = pos[0];
-	mPos[1] = pos[1];
-	mPos[2] = pos[2];
-}
-
-
-void FreyjaCamera::setUp(vec3_t up)
-{
-	mUp[0] = up[0];
-	mUp[1] = up[1];
-	mUp[2] = up[2];
-}
-
-
-void FreyjaCamera::setTarget(vec3_t target)
-{
-	mTarget[0] = target[0];
-	mTarget[1] = target[1];
-	mTarget[2] = target[2];
-}
 
 
 ////////////////////////////////////////////////////////////
@@ -286,3 +203,4 @@ void FreyjaCamera::setTarget(vec3_t target)
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
+#endif // OBSOLETE
