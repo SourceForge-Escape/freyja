@@ -2278,27 +2278,42 @@ index_t freyjaMeshCreateRing(vec3_t origin, vec_t radius,
 }
 
 
+// FIXME: LegacyABI stand-ins
+extern "C" {
+	void freyjaGenerateTubeMesh(vec3_t origin, vec_t height, 
+								int32 count, int32 segments);
+	void freyjaGenerateConeMesh(vec3_t origin, vec_t height, int32 count);
+	void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius, 
+								  int32 count, int32 segments);
+	void freyjaGenerateCylinderMesh(vec3_t origin, vec_t height, 
+									int32 count, int32 segments);
+	index_t freyjaGetFSMMeshIndex();
+}
+
 index_t freyjaMeshCreateCone(vec3_t origin, vec_t height, vec_t radius,
 							 uint32 wedges)
 {
-	MSTL_MSG("Calling stub function");
-	return INDEX_INVALID;
+	FREYJA_INFOMSG(false, "FIXME: Calling LegacyABI...");
+	freyjaGenerateConeMesh(origin, height, wedges);
+	return freyjaGetFSMMeshIndex();
 }
 
 
 index_t freyjaMeshCreateCylinder(vec3_t origin, vec_t height, vec_t radius, 
 								 uint32 sides, uint32 rings)
 {
-	MSTL_MSG("Calling stub function");
-	return INDEX_INVALID;
+	FREYJA_INFOMSG(false, "FIXME: Calling LegacyABI...");
+	freyjaGenerateCylinderMesh(origin, height, sides, rings);
+	return freyjaGetFSMMeshIndex();
 }
 
 
 index_t freyjaMeshCreateSphere(vec3_t origin, vec_t radius, 
 							   int32 sides, int32 rings)
-{
-	MSTL_MSG("Calling stub function");
-	return INDEX_INVALID;
+{		
+	FREYJA_INFOMSG(false, "FIXME: Calling LegacyABI...");
+	freyjaGenerateSphereMesh(origin, radius, sides, rings);
+	return freyjaGetFSMMeshIndex();
 }
 
 
@@ -2306,10 +2321,11 @@ index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius,
 							 int32 sides, int32 rings)
 {
 #if 1
-	FREYJA_ASSERTMSG(0, "Calling stub function");
-	return INDEX_INVALID;
+	FREYJA_INFOMSG(false, "FIXME: Calling LegacyABI...");
+	freyjaGenerateTubeMesh(origin, height, sides, rings);
+	return freyjaGetFSMMeshIndex();
 #else
-	(segments < 1) ? segments = 1 : 0;
+	(rings < 1) ? rings = 1 : 0;
 	(sides < 3) ? sides = 3 : 0;
 
 	index_t mesh = freyjaMeshCreate();
@@ -2317,63 +2333,66 @@ index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius,
 	/* Generate geometery */
 
 	vec_t invCount = 1.0f / (float)sides;
-	hel::Vec3 v, n, t, o(origin);
+	hel::Vec3 p, n, t, o(origin);
 
 	/* Bottom and top */
-	for (uint32 i = 0; i < sides; ++i)
+	for (uint32 i = 0, count = sides; i < count; ++i)
 	{
 		vec_t s = ((float)i * invCount);
-		helSinCosf(helDegToRad(360.0f * s), &v.mZ, &v.mX);
+		helSinCosf(helDegToRad(360.0f * s), &p.mZ, &p.mX);
 
-		v *= s;
-		v.mY = height;
+		p *= s;
+		p.mY = height;
 
-		u = (v.mX < 0) ? (v.mX * 0.25 + 0.25) : (v.mX * 0.25 + 0.25);
-		v = (v.mZ < 0) ? (v.mZ * 0.25 + 0.25) : (v.mZ * 0.25 + 0.25);
+		float u = (p.mX < 0) ? 
+		(p.mX * 0.25 + 0.25) : (p.mX * 0.25 + 0.25);
 
-		n = v * 0.2f;
+		float v = (p.mZ < 0) ? 
+		(p.mZ * 0.25 + 0.25) : (p.mZ * 0.25 + 0.25);
+
+		n = p * 0.2f;
 		n.mY = -0.6;
 
 		t = o;
-		t.mX += v.mX;
-		t.mZ += v.mZ;
+		t.mX += p.mX;
+		t.mZ += p.mZ;
 
-		index_t idx = freyjaMeshVertexCreate3fv(mesh, v.mVec);
-		freyjaMeshVertexNormal3fv(mesh, idx, n.mVec);
-		//vertices[i].push_back(idx);
+		index_t vidx = freyjaMeshVertexCreate3fv(mesh, p.mVec);
+		freyjaMeshVertexNormal3fv(mesh, vidx, n.mVec);
+		//vertices[i].push_back(vidx);
 
-		index_t t = freyjaMeshTexCoordCreate2f(mesh, u, v);
-		//texcoords[j].push_back(t);
+		index_t tidx = freyjaMeshTexCoordCreate2f(mesh, u, v);
+		//texcoords[j].push_back(tidx);
 
 
-		t = o + v;
+		t = o + p;
 		n.mY = -n.mY;
 
-		idx = freyjaMeshVertexCreate3fv(mesh, v.mVec);
-		freyjaMeshVertexNormal3fv(mesh, idx, n.mVec);
-		//vertices[i].push_back(idx);
+		vidx = freyjaMeshVertexCreate3fv(mesh, p.mVec);
+		freyjaMeshVertexNormal3fv(mesh, vidx, n.mVec);
+		//vertices[i].push_back(vidx);
 
-		t = freyjaMeshTexCoordCreate2f(mesh, u, v);
-		//texcoords[j].push_back(t);
+		tidx = freyjaMeshTexCoordCreate2f(mesh, u, v);
+		//texcoords[j].push_back(tidx);
 	}
 
 
 	/* Tube, doesn't have 0th or height-th ring */
-	for (uint32 i = 0; i < segments+1; ++i)
+	for (uint32 i = 0, count = rings+1; i < count; ++i)
 	{
 		/* Reuse bottom vertices for 0th ring */
 		if (!i)
 		{
-			for (uint32 j = 0; j < sides; ++j)
+			for (uint32 j = 0, jcount = sides; j < jcount; ++j)
 			{
-				u = 1.0 * ((float)j/(float)count);
-				v = 0.5 * ((float)i/(float)segments) + 0.5;
+				float u = 1.0 * ((float)j/(float)sides);
+				float v = 0.5 * ((float)i/(float)rings) + 0.5;
 
-				index = vertices[j];
-				segVert.pushBack(index);
+				index_t idx = vertices[j];
+				//segVert.pushBack(index);
 
-				index = freyjaTexCoordCreate2f(u, v);
-				segTex.pushBack(index);
+				idx = freyjaMeshTexCoordCreate2f(mesh, u, v);
+				//segTex.pushBack(index);
 			}
 
 			continue;
@@ -2399,27 +2418,30 @@ index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius,
 
 		for (j = 0; j < count; ++j)
 		{
-			x = cos(helDegToRad(360.0 * ((float)j / (float)count)));
-			z = sin(helDegToRad(360.0 * ((float)j / (float)count)));
-			y = height * ((float)i/(float)segments);
+			float s = ( (float)j / (float)sides );
+			helSinCosf(helDegToRad(360.0f * s), &p.mZ, &p.mX);
+			p.mY = height * ((float)i/(float)rings);
 
-			u = 1.0 * ((float)j/(float)count);
-			v = 0.5 * ((float)i/(float)segments) + 0.5;
+			float u = 1.0 * ((float)j/(float)sides);
+			float v = 0.5 * ((float)i/(float)rings) + 0.5;
 
-			nx = x * 0.5;
-			ny = 0.0;
-			nz = z * 0.5;
+			n.mX = p.mX * 0.5f;
+			n.mY = 0.0f;
+			n.mZ = p.mZ * 0.5f;
 
-			index = freyjaVertexCreate3f(origin[0]+x, origin[1]+y , origin[2]+z);
-			freyjaVertexNormal3f(index, nx, ny, nz);
-			segVert.pushBack(index);
 
-			index = freyjaTexCoordCreate2f(u, v);
-			segTex.pushBack(index);
+			t = o + p;
+			index_t vidx = freyjaMeshVertexCreate3fv(mesh, t.mVec);
+			freyjaMeshVertexNormal3fv(mesh, vidx, n.mVec);
+			//segVert.pushBack(index);
+
+			vidx = freyjaTexCoordCreate2f(u, v);
+			//segTex.pushBack(index);
 		}
 	}
 
-
+segments = rings
+count = sides
 
 	/* Tube */
 	for (i = 0; i < segments; ++i)

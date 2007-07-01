@@ -4,8 +4,27 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
- Kagura prealpha, 0.9.5.13
+ Kagura prealpha, 0.9.5.14 -- "Little things are nice too"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Reworked project planning document, so please read.
+ - freyja_tombraider using freyjaCamera
+ - CameraABI with animation support in backend only.
+ - New Keyframe API slowly being merged in parallel to old keyframe system.
+ - LuaABI: freyjaPrintMessage support, QueryABI support, minor fixes
+ - Minor icon clean-up.
+ - MeshABI using methods with info warnings -- better than stubs for mesh gen.
+ - LegacyABI removal from UI.
+ - Tombraider map loading as plugin option.
+ - Tombraider map plugin import no longer using legacy ABI. 
+ - New list stl, replaces random access list+tree used by old EGG codebase. 
+ - Links to forums / bugs / news. ( Auto network update next release. )
+ - Support for opening urls in browsers for windows and linux.
+ - Reworked various notes, bugs, and todo lists back into project.
+ - Python script fix in UI.
+
+
+ Kagura prealpha, 0.9.5.13
+ 20070625 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Version number bump.
  - Keyframe metadata editor hooked up in UI.
  - Python script integration such as Lua in UI.

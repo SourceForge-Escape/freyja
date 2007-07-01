@@ -203,13 +203,19 @@ void FreyjaRender::DrawCamWindow()
 	freyjaGetLightPosition4v(0, p);
 
 	hel::Vec3 pos(p[0], p[1], p[2]);
-	hel::Vec3 at = cursor.mPos;
+	hel::Vec3 target = cursor.mPos;
 	hel::Vec3 up(0.0f, 1.0f, 0.0f);
 
+	index_t camera = 0; // FIXME: GetCurrentCamera();
+	freyjaGetCameraPos3fv(camera, pos.mVec);
+	freyjaGetCameraTarget3fv(camera, target.mVec);
+	freyjaGetCameraUp3fv(camera, up.mVec);
+	
 
 	gluLookAt(pos.mX, pos.mY, pos.mZ,
-			  at.mX, at.mY, at.mZ,
+			  target.mX, target.mY,target.mZ,
 			  up.mX, up.mY, up.mZ);
+
 
 	glPushMatrix();
 

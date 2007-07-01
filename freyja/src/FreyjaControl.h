@@ -602,6 +602,16 @@ class FreyjaControl : public Control
 	void EvLoadLuaScript();
 	void EvLoadPythonScript();
 
+	void EvLaunchFourms()
+	{ mstl::SystemIO::OpenURLInWebBrowser(FREYJA_FORUMS_URL); }
+
+	void EvLaunchBugs()
+	{ mstl::SystemIO::OpenURLInWebBrowser(FREYJA_BUGS_URL); }
+
+	// FIXME: Later this will do automatic upgrades
+	void EvLaunchUpdate()
+	{ mstl::SystemIO::OpenURLInWebBrowser(FREYJA_NEWS_URL); }
+
 	void EvMeshRepack()
 	{
 		Mesh *m = Mesh::GetMesh( GetSelectedMesh() );

@@ -14,7 +14,9 @@
  A - Serious bugs
  ----------------------------
 
- * Repacking might break aging Undo system for some operations -- unconfirmed.
+ * UNCONFIRMED Repacking might break aging Undo system for some operations.
+
+ * .freyja file format sometimes corrupts with certain animations.
 
  * CRASH on animation scrub with md5 model!  2007.06.15
 
@@ -25,8 +27,6 @@
 
  * Group (faces) selection is broken
 
- * WIN32 python lib is very unstable - need to replace it with ming bin
-
  * Extrude ( legacy replacement ) broken for non-closed mesh
 
  * Render Faces... has no transforms 'previews' (could use vertex blend buffer)
@@ -34,9 +34,6 @@
  * Crash on multiple merge with 'created' objects, but not imported
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor
-
- * Keyframe and cursor transforms 'fight' each other during editing
-   FIX this in FreyjaRender by having a special mode for this case
 
  * Fix UV unwrap
 	- Projection across boundries ( axes ) aren't handled
@@ -57,16 +54,13 @@
  * Model transforms with cursor have 'jump' - temp workaround is to 'tap' cursor
 	after a 'jump'
 
- * Bone rotation
-	- Looks like we're getting a sqrt(-1) and INFINITY passed around
-
  * Cursor reset on undo ( use a freaking seperate undo state system for cursor )
 
 
  C - Annoying bugs
  ----------------------------
 
- * Models loading w/o complete materials often are alpha masked.
+ * Models loading w/o complete materials often are alpha masked. ( plugins issue )
 
  * Mesh rotator for box and cursor are unmatched!
 

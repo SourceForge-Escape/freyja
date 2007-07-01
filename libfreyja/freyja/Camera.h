@@ -5,7 +5,7 @@
  * Author  : Mongoose
  * Website : http://www.westga.edu/~stu7440/
  * Email   : stu7440@westga.edu
- * Object  : FreyjaCamera
+ * Object  : Camera
  * License : No use w/o permission (C) 2001 Mongoose
  * Comments: OpenGL camera class for Freyja
  *
@@ -38,9 +38,6 @@
  *            and algorithms from Yuri Zhivago's trview
  ==========================================================================*/
 
-/* FIXME: Remove vestiges of OpenGL vectors, and 
- *        replace with pure quaternion use internally */
-
 #ifndef GUARD__FREYJA_MONGOOSE_CAMERA_H_
 #define GUARD__FREYJA_MONGOOSE_CAMERA_H_
 
@@ -48,27 +45,203 @@
 #include <hel/Mat44.h>
 #include <hel/Quat.h>
 #include <hel/Vec3.h>
+#include <hel/Ray.h>
 
 #include <mstl/Vector.h>
 
-
-class FreyjaCamera
+namespace freyja
 {
+
+class Camera
+{
+	////////////////////////////////////////////////////////////
+	// Public 
+	////////////////////////////////////////////////////////////
+
  public:
 
-	typedef enum {
-		eFlyByMode = 1,
-		eStationary,
-		eTrack
+	Camera();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructor.
+	 *
+	 ------------------------------------------------------*/
 
-	} mode_t;
+	~Camera();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Destructor.
+	 *
+	 ------------------------------------------------------*/
+
+	const char* GetName();
+	void SetName(const char* name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Camera name position property.
+	 *
+	 ------------------------------------------------------*/
+
+	const hel::Vec3& GetDir();
+	void SetDir(hel::Vec3& dir);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Camera dir position property.
+	 *
+	 ------------------------------------------------------*/
+
+	const hel::Vec3& GetPos();
+	void SetPos(hel::Vec3& pos);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Camera position property.
+	 *
+	 ------------------------------------------------------*/
+
+	const hel::Vec3& GetUp();
+	void SetUp(hel::Vec3& up);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Camera up vector property.
+	 *
+	 ------------------------------------------------------*/
+
+	const hel::Vec3& GetTarget();
+	void SetTarget(hel::Vec3& target);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Camera target position property.
+	 *
+	 ------------------------------------------------------*/
+	
+	bool IsVisible(const hel::Vec3 &min, const hel::Vec3 &max);
+	/*------------------------------------------------------
+	 * Pre  : Given abstract bounding box.
+	 * Post : Returns true if bounding volume is in the view volume.
+	 *
+	 ------------------------------------------------------*/
+
+	bool IsVisible(const hel::Vec3 &pos, const vec_t radius);
+	/*------------------------------------------------------
+	 * Pre  : Given abstract bounding sphere.
+	 * Post : Returns true if bounding volume is in the view volume.
+	 *
+	 ------------------------------------------------------*/
 
 
-	class FlyByNode
+	////////////////////////////////////////////////////////////
+	// Protected  
+	////////////////////////////////////////////////////////////
+
+ protected:
+
+	void Update();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Updates view target
+	 *
+	 ------------------------------------------------------*/
+
+	//unsigned int mId;           /* Unquie id */
+
+	//mode_t mMode;               /* Camera mode */
+
+	mstl::String mName;         /* Name of this camera */
+
+	hel::Ray mView;             /* 'Eye' pos+dir */
+	
+	hel::Vec3 mTarget;          /* Postition we're looking at  */
+	
+	hel::Vec3 mUp;              /* Up vector  */
+	
+	hel::Vec3 mSide;            /* Side vector  */
+
+	hel::Quat mRot;             /* Quaternion for rotation */
+	
+	//vec_t mViewDistance;        /* Distance from target */
+	
+	//bool mUpdate;               /* Check to see if view needs updating */
+
+	//mstl::Vector<> mTracks;     /* Camera view animation tracks. */
+	
+	//mstl::Vector<> mUpTracks;   /* Camera up vector animation tracks. */
+};
+
+	////////////////////////////////////////////////////////////
+	// Inline Methods. 
+	////////////////////////////////////////////////////////////
+	inline
+	Camera::Camera()
+		: mName("camera"),
+		  mView(),
+		  mTarget(),
+		  mUp(0.0f, 1.0f, 0.0f),
+		  mSide(0.0f, 0.0f, 1.0f),
+		  mRot()
+	{ }
+
+
+	inline
+	Camera::~Camera()
+	{ }
+
+
+	inline
+	const char* Camera::GetName()
+	{
+		return this->mName.c_str();
+	}
+
+
+	inline
+	void Camera::SetName(const char* name)
+	{
+		this->mName = name;
+	}
+
+
+	inline
+	const hel::Vec3& Camera::GetDir()
+	{
+		return this->mView.mDir;
+	}
+
+
+	inline
+	void Camera::SetDir(hel::Vec3& dir)
+	{
+		this->mView.mDir = dir;
+	}
+
+
+	inline
+	const hel::Vec3& Camera::GetPos()
+	{
+		return this->mView.mOrigin;
+	}
+
+
+	inline
+	void Camera::SetPos(hel::Vec3& pos)
+	{
+		this->mView.mOrigin = pos;
+	}
+
+
+	////////////////////////////////////////////////////////////
+	// Camera path ( 0.9.3 API )
+	////////////////////////////////////////////////////////////
+
+	class CameraFlyByNode
 	{
 	public:
-		FlyByNode() : orientation(), position(), direction(), 
-					  speed(0.0f), time(0.0f) {}
+		CameraFlyByNode() 
+			: orientation(), 
+			  position(), 
+			  direction(), 
+			  speed(0.0f), 
+			  time(0.0f) 
+		{ }
 
 		hel::Quat orientation;
 		hel::Vec3 position;
@@ -77,279 +250,22 @@ class FreyjaCamera
 		vec_t time;
 	};
 
-	class FlyByPath
+
+	class CameraFlyByPath
 	{ 
 	public:
-		FlyByPath() : path() { }
-		~FlyByPath() { }
+		CameraFlyByPath() 
+			: path() 
+		{ }
 
-		mstl::Vector <FlyByNode *> path;  /* Flyby path */
+		~CameraFlyByPath() 
+		{ }
+
+		mstl::Vector <CameraFlyByNode *> path;  /* Flyby path */
 	};
 
 
-	////////////////////////////////////////////////////////////
-	// Constructors
-	////////////////////////////////////////////////////////////
+} // namespace freyja
 
-	FreyjaCamera();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of FreyjaCamera
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	~FreyjaCamera();
-	/*------------------------------------------------------
-	 * Pre  : Camera object is allocated
-	 * Post : Deconstructs an object of FreyjaCamera
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-	////////////////////////////////////////////////////////////
-	// Public Accessors
-	////////////////////////////////////////////////////////////
-
-	unsigned int getId();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns this camera's id
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void getPosition(vec3_t pos);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns current position
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.06.16:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void getUp(vec3_t up);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns up vector
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void getTarget(vec3_t target);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns target ( look at pos )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-	
-	vec_t getYaw();
-	/*------------------------------------------------------
-	 * Pre  : Get current yaw in degrees
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.06.22:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	double getRadianYaw();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns theta angle/yaw of camera
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.26: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-	
-	vec_t getPitch();
-	/*------------------------------------------------------
-	 * Pre  : Get current pitch in degrees
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.06.22:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	double getRadianPitch();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns phi angle/pitch of camera
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.26: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-	
-	bool isBehind(int x, int z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns true if (x, z) is behind camera eye
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.26: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-	////////////////////////////////////////////////////////////
-	// Public Mutators
-	////////////////////////////////////////////////////////////
-
-	void rotate(vec_t angle, vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : x,y,z axis; angle in radians
-	 * Post : Rotates camera
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.06.04: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void translate(vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Camera position is set to x,y,z
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void reset();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Camera is set to inital state
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-   void setSpeed(vec_t speed);
-   /*------------------------------------------------------
-    * Pre  : 
-    * Post : Sets 'speed'
-    *
-    *-- History ------------------------------------------
-    *
-    * 2002.01.02: 
-    * Mongoose - Created
-    ------------------------------------------------------*/
-
-	void update();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Updates view target
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setPosition(vec3_t pos);
-	/*------------------------------------------------------
-	 * Pre  : Set current position
-	 * Post : 
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2002.06.16:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setUp(vec3_t up);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets up vector
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	void setTarget(vec3_t target);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets target ( look at pos )
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.18: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
- private:
-
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
-
-
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
-
-
-	unsigned int mId;           /* Unquie id */
-
-	mode_t mMode;               /* Camera mode */
-
-	FlyByPath mPath;            /* Camera flyby path */
-
-	hel::Quat mQ;              /* Quaternion for rotation */
-
-	vec4_t mPos;                /* Location in 3 space (aka eye) */
-	
-	vec4_t mTarget;             /* Postition we're looking at  */
-	
-	vec4_t mUp;                 /* Up vector  */
-	
-	vec4_t mSide;               /* Side vector  */
-	
-	vec_t mViewDistance;        /* Distance from target */
-	
-	vec_t mTheta;               /* View angle  Y */
-	
-	vec_t mTheta2;              /* View angle  Z */
-
-	vec_t mSpeed;               /* Movement speed for this camera */
-	
-	bool mUpdate;               /* Check to see if view needs updating */
-
-	static unsigned int mCounter;   /* Id system use */
-};
 
 #endif

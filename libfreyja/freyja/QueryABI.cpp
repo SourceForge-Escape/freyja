@@ -31,7 +31,15 @@ class Query
 {
  public:
 
-	Query() : mSymbols(), mPointers() {}
+	Query() 
+		: mSymbols(), mPointers() 
+	{}
+
+	~Query() 
+	{
+		mPointers.clear();
+		mSymbols.clear();
+	}
 
 	void Append(const char *symbol, const char *type, ptr_t ptr) 
 	{
@@ -52,7 +60,7 @@ class Query
 			uint32 i;
 			foreach (mSymbols, i)
 			{
-				String s = mSymbols[i];
+				String &s = mSymbols[i];
 
 				int off = s.find_last_of('@');
 				
@@ -120,6 +128,8 @@ void freyjaQueryEnd(index_t query)
 	q->Execute();
 
 	delete q;
+
+	gQuery = NULL; // 
 }
 
 
@@ -153,7 +163,7 @@ void freyjaQueryString(index_t query, const char *symbol, const char **s)
 	if (!q)
 		return;
 
-	q->Append(symbol, "char *", (ptr_t)s);
+	q->Append(symbol, "string", (ptr_t)s);
 }
 
 
