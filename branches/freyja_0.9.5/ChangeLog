@@ -7,7 +7,9 @@
  Kagura prealpha, 0.9.5.14 -- "Little things are nice too"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Reworked project planning document, so please read.
+ - Camera support in UI deferered to next release ( power outage due to storm )
  - freyja_tombraider using freyjaCamera
+ - freyja_tombraider.cpp replaced arcachic 'List.h' use.
  - CameraABI with animation support in backend only.
  - New Keyframe API slowly being merged in parallel to old keyframe system.
  - LuaABI: freyjaPrintMessage support, QueryABI support, minor fixes

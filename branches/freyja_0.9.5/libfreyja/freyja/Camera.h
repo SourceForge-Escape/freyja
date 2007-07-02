@@ -83,7 +83,7 @@ class Camera
 	 ------------------------------------------------------*/
 
 	const hel::Vec3& GetDir();
-	void SetDir(hel::Vec3& dir);
+	void SetDir(const hel::Vec3& dir);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Camera dir position property.
@@ -91,15 +91,23 @@ class Camera
 	 ------------------------------------------------------*/
 
 	const hel::Vec3& GetPos();
-	void SetPos(hel::Vec3& pos);
+	void SetPos(const hel::Vec3& pos);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Camera position property.
 	 *
 	 ------------------------------------------------------*/
 
+	const hel::Quat& GetRot();
+	void SetRot(const hel::Quat& q);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Camera orientation property.
+	 *
+	 ------------------------------------------------------*/
+
 	const hel::Vec3& GetUp();
-	void SetUp(hel::Vec3& up);
+	void SetUp(const hel::Vec3& up);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Camera up vector property.
@@ -107,7 +115,7 @@ class Camera
 	 ------------------------------------------------------*/
 
 	const hel::Vec3& GetTarget();
-	void SetTarget(hel::Vec3& target);
+	void SetTarget(const hel::Vec3& target);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Camera target position property.
@@ -208,7 +216,7 @@ class Camera
 
 
 	inline
-	void Camera::SetDir(hel::Vec3& dir)
+	void Camera::SetDir(const hel::Vec3& dir)
 	{
 		this->mView.mDir = dir;
 	}
@@ -222,10 +230,53 @@ class Camera
 
 
 	inline
-	void Camera::SetPos(hel::Vec3& pos)
+	void Camera::SetPos(const hel::Vec3& pos)
 	{
 		this->mView.mOrigin = pos;
 	}
+
+
+	inline
+	const hel::Quat& Camera::GetRot()
+	{
+		return this->mRot;
+	}
+
+
+	inline
+	void Camera::SetRot(const hel::Quat& q)
+	{
+		this->mRot = q;
+	}
+
+
+	inline
+	const hel::Vec3& Camera::GetTarget()
+	{
+		return this->mTarget;
+	}
+
+
+	inline
+	void Camera::SetTarget(const hel::Vec3& pos)
+	{
+		this->mTarget = pos;
+	}
+
+
+	inline
+	const hel::Vec3& Camera::GetUp()
+	{
+		return this->mUp;
+	}
+
+
+	inline
+	void Camera::SetUp(const hel::Vec3& v)
+	{
+		this->mUp = v;
+	}
+
 
 
 	////////////////////////////////////////////////////////////

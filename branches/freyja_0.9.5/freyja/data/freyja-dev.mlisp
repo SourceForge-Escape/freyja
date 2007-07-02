@@ -360,6 +360,7 @@
 				  			(menu_item	"Material"  eViewportMaterial)
 				  			(menu_item	"UV      "	eViewportUV)
 				  			(menu_item	"Curve   "	eViewportCurve)
+				  			(menu_item	"Camera  "	eViewportCamera)
 						) ; optionmenu
 					) ; hbox
 				) ; hbox
