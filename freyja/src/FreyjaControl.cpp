@@ -50,6 +50,7 @@
 #include <freyja/Mesh.h>
 #include <freyja/FreyjaImage.h>
 #include <freyja/Material.h>
+#include <freyja/CameraABI.h>
 #include <freyja/LightABI.h>
 #include <freyja/LuaABI.h>
 #include <freyja/MaterialABI.h>
@@ -118,6 +119,7 @@ uint32 FreyjaControl::EvScaleZId = 0;
 
 FreyjaControl::FreyjaControl() :
 	mGroupBitmap(0x0),
+	mSelectedCamera(0),
 	mSelectedAnimation(0),
 	mSelectedKeyFrame(0),
 	mSelectedModel(0),
@@ -186,6 +188,12 @@ FreyjaControl::FreyjaControl() :
 	freyjaMaterialSpecular(mIndex, rgba);
 	freyjaMaterialShininess(mIndex, 0.0f);
 	freyjaMaterialSetFlag(mIndex, fFreyjaMaterial_Texture); // texture on!
+
+	// 0th camera
+	mIndex = freyjaCameraCreate();
+	freyjaCameraPos3f(mIndex, 64.0f, 64.0f, 64.0f);
+	freyjaCameraTarget3f(mIndex, 0.0f, 32.0f, 0.0f);
+
 
 	/* Hook up the view */
 	mRender = FreyjaRender::GetInstance();
@@ -5515,6 +5523,7 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eViewportOrbit", &FreyjaControl::EvViewportOrbit);
 	CreateListener("eViewportUV", &FreyjaControl::EvViewportUV);
 	CreateListener("eViewportCurve", &FreyjaControl::EvViewportCurve);
+	CreateListener("eViewportCamera", &FreyjaControl::EvViewportCamera);
 	CreateListener("eViewportMaterial", &FreyjaControl::EvViewportMaterial);
 
 	CreateListener("eTransformScene", &FreyjaControl::EvTransformScene);
@@ -5836,6 +5845,19 @@ void FreyjaControl::EvViewportCurve()
 	SetSelectedView(DRAW_CURVE);
 	if (mRender->GetFlags() & FreyjaRender::fViewports)
 		mRender->mViewports[mSelectedViewport].plane = DRAW_CURVE;
+	freyja_event_gl_refresh();
+}
+
+
+void FreyjaControl::EvViewportCamera()
+{
+	Print("Curve editor view");
+	SetSelectedView(DRAW_CURVE);
+	if (mRender->GetFlags() & FreyjaRender::fViewports)
+	{
+		mRender->mViewports[mSelectedViewport].plane = DRAW_CAMERA;
+		mRender->mViewports[mSelectedViewport].camera = GetSelectedCamera();
+	}
 	freyja_event_gl_refresh();
 }
 

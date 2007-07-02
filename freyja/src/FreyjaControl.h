@@ -163,6 +163,15 @@ class FreyjaControl : public Control
 
 	uint32 mGroupBitmap;
 
+	uint32 GetSelectedCamera() { return mSelectedCamera; }
+	void SetSelectedCamera(uint32 i);
+	uint32 mSelectedCamera;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected camera index
+	 *
+	 ------------------------------------------------------*/
+
 	ControlScheme GetControlScheme() { return mControlScheme; }
 	void SetControlScheme(ControlScheme scheme) { mControlScheme = scheme; }
 	/*------------------------------------------------------
@@ -786,6 +795,7 @@ class FreyjaControl : public Control
 	void EvViewportOrbit();
 	void EvViewportUV();
 	void EvViewportCurve();
+	void EvViewportCamera();
 	void EvViewportMaterial();
 
 	void EvMeshNew();

@@ -21,6 +21,9 @@
 #include "CameraABI.h"
 
 using freyja::Camera;
+using hel::Vec3;
+using hel::Quat;
+
 
 mstl::Vector<freyja::Camera *> gCameras;
 
@@ -77,37 +80,76 @@ void freyjaCameraSetFlags(index_t cameraIndex, byte flags)
 
 void freyjaCameraName(index_t cameraIndex, const char *name)
 {	
-	FREYJA_INFOMSG(0, "Not implemented");
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) 
+	{
+		cam->SetName(name);
+	}
+}
+
+
+
+void freyjaGetCameraPos3fv(index_t cameraIndex, vec3_t xyz)
+{
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) 
+	{
+		Vec3 v = cam->GetPos();
+		helCopyVec3(v.mVec, xyz);
+	}
 }
 
 
 void freyjaCameraPos3f(index_t cameraIndex, vec_t x, vec_t y, vec_t z)
 {
-
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) cam->SetPos( Vec3(x, y, z) );
 }
+
 
 void freyjaCameraPos3fv(index_t cameraIndex, vec3_t xyz)
 {
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) cam->SetPos( Vec3(xyz) );
 }
 
 
-void freyjaCameraTargetPos3f(index_t cameraIndex, vec_t x, vec_t y, vec_t z)
+void freyjaGetCameraTarget3fv(index_t cameraIndex, vec3_t xyz)
 {
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) 
+	{
+		Vec3 v = cam->GetTarget();
+		helCopyVec3(v.mVec, xyz);
+	}
 }
 
 
-void freyjaCameraTargetPos3fv(index_t cameraIndex, vec3_t xyz)
+void freyjaCameraTarget3f(index_t cameraIndex, vec_t x, vec_t y, vec_t z)
 {
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) cam->SetTarget( Vec3(x, y, z) );
+}
+
+
+void freyjaCameraTarget3fv(index_t cameraIndex, vec3_t xyz)
+{
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) cam->SetTarget( Vec3(xyz) );
 }
 
 
 void freyjaCameraRotQuat4f(index_t cameraIndex,
 						   vec_t w, vec_t x, vec_t y, vec_t z)
 {
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) cam->SetRot( Quat(w, x, y, z) );
 }
 
 void freyjaCameraRotQuat4fv(index_t cameraIndex, vec4_t wxyz)
 {
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) cam->SetRot( Quat(wxyz) );
 }
 
 void freyjaGetCameraRotQuat4fv(index_t cameraIndex, vec4_t wxyz)
@@ -117,11 +159,24 @@ void freyjaGetCameraRotQuat4fv(index_t cameraIndex, vec4_t wxyz)
 
 const char *freyjaGetCameraNameString(index_t cameraIndex)
 {
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) 
+	{
+		return cam->GetName();
+	}
+
+	return " "; 
 }
 
 
-void freyjaGetCameraPos3fv(index_t cameraIndex, vec3_t xyz)
+void freyjaGetCameraUp3fv(index_t cameraIndex, vec3_t xyz)
 {
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) 
+	{
+		Vec3 v = cam->GetUp();
+		v.Get(xyz);
+	}
 }
 
 	
@@ -137,6 +192,9 @@ const char *freyjaGetCameraMetadata(index_t camera)
 	return " ";
 }
 
+
+
+// Animation
 
 index_t freyjaCameraCreateTrack(index_t camera)
 {

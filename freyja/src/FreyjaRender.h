@@ -70,17 +70,18 @@ typedef enum {
 class Viewport
 {
 public:
-	Viewport()
-	{
-	}
+	Viewport() 
+		: camera(0)
+	{ }
 
 	~Viewport() 
-	{
-	}
+	{ }
 
 	long x, y, w, h;
 
 	freyja_plane_t plane;
+
+	long camera;
 
 	long mode;
 };

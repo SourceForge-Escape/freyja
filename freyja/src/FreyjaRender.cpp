@@ -37,6 +37,7 @@
 #include <time.h>
 #include <assert.h>
 
+#include <freyja/CameraABI.h>
 #include <freyja/LightABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/Bone.h>
@@ -198,12 +199,9 @@ void FreyjaRender::Rotate(int flags, float n)
 void FreyjaRender::DrawCamWindow()
 {
 	// Very hacky quick test for camera 'cursor'
-	Cursor &cursor = FreyjaControl::GetInstance()->GetCursor();
-	vec4_t p;
-	freyjaGetLightPosition4v(0, p);
+	//Cursor &cursor = FreyjaControl::GetInstance()->GetCursor();
 
-	hel::Vec3 pos(p[0], p[1], p[2]);
-	hel::Vec3 target = cursor.mPos;
+	hel::Vec3 pos, target;
 	hel::Vec3 up(0.0f, 1.0f, 0.0f);
 
 	index_t camera = 0; // FIXME: GetCurrentCamera();
@@ -211,19 +209,11 @@ void FreyjaRender::DrawCamWindow()
 	freyjaGetCameraTarget3fv(camera, target.mVec);
 	freyjaGetCameraUp3fv(camera, up.mVec);
 	
-
 	gluLookAt(pos.mX, pos.mY, pos.mZ,
 			  target.mX, target.mY,target.mZ,
 			  up.mX, up.mY, up.mZ);
 
-
 	glPushMatrix();
-
-	// TODO: Replace with Mat44 transform
-	glTranslatef(mScroll[0], mScroll[1]/*+8.0f*/, mScroll[2]);
-	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
-	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
-	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
 	if (mRenderMode & fSolidPlane)
 	{
@@ -279,8 +269,6 @@ void FreyjaRender::DrawCamWindow()
 	}
 
 
-	//glPushMatrix();
-
 	ApplyLights();
 
 	glScalef(mZoom, mZoom, mZoom);
@@ -307,6 +295,20 @@ void FreyjaRender::DrawCamWindow()
 		glColor3fv(DARK_YELLOW);	
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
+
+
+
+		glBegin(GL_POINTS);	
+		glColor3fv(BLUE);	
+		glVertex3fv(pos.mVec);
+		//glVertex3fv(target.mVec);
+		glEnd();
+		glBegin(GL_LINES);	
+		glColor3fv(RED);	
+		glVertex3fv(pos.mVec);
+		glColor3fv(DARK_RED);	
+		glVertex3fv(target.mVec);
+		glEnd();
 		glPointSize(mDefaultPointSize);
 
 		glPopAttrib();
@@ -322,12 +324,14 @@ void FreyjaRender::DrawCamWindow()
 	glPopMatrix();
 
 
+	// FIXME: Use camera data to fix projections and status...
+
 #if PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
 	glTranslatef(-mScaleEnv + 2.5f, -mScaleEnv + 2.5f, 10.0);
-	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
-	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
-	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
+	//glRotatef(mAngles[0], 1.0, 0.0, 0.0);
+	//glRotatef(mAngles[1], 0.0, 1.0, 0.0);
+	//glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
 	glClear(GL_DEPTH_BUFFER_BIT);
 	mglDrawEditorAxis();
@@ -340,7 +344,8 @@ void FreyjaRender::DrawCamWindow()
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);
-	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, "ORBIT");
+	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, 
+					 freyjaGetCameraNameString(camera) );
 	glPopAttrib();
 }
 
@@ -437,7 +442,32 @@ void FreyjaRender::DrawFreeWindow()
 		glColor3fv(DARK_YELLOW);	
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
-		glPointSize(mDefaultPointSize);
+		//glPointSize(mDefaultPointSize);
+
+		{	
+			hel::Vec3 pos, target;
+			index_t camera = FreyjaControl::GetInstance()->GetSelectedCamera();
+			freyjaGetCameraPos3fv(camera, pos.mVec);
+			freyjaGetCameraTarget3fv(camera, target.mVec);
+
+			//glBegin(GL_POINTS);	
+			glColor3fv(BLUE);	
+			//glVertex3fv(pos.mVec);
+			glPushMatrix();
+			glTranslatef(pos.mX, pos.mY, pos.mZ);
+			mglDrawControlPoint();
+			glPopMatrix();
+
+			//glVertex3fv(target.mVec);
+			glEnd();
+			glBegin(GL_LINES);	
+			glColor3fv(RED);	
+			glVertex3fv(pos.mVec);
+			glColor3fv(DARK_RED);	
+			glVertex3fv(target.mVec);
+			glEnd();
+			glPointSize(mDefaultPointSize);
+		}
 
 		glPopAttrib();
 	}

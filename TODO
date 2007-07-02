@@ -6,9 +6,6 @@
  -----------------------------------------------------------------------------
 
  * Animation Track / Keyframe snippets in UI
- * Camera, CameraABI, CameraKeyframe, CameraTrack
- * freyja_tombraider.cpp: Replace arcachic 'List.h' use.
- * template Track needs TrackInstance/KeyframeInstance to hold 'tween'
 
 
 
@@ -22,7 +19,11 @@
 	- BONUS rewrite FreyjaImage, rename as Image, update everything using it.
  * FIX bone name rendering trashing 'icon' colors.
 
+ * Camera editing support.
+ * Editor mode support for camera views.
+ * Camera animation editor.
  * Finish up new keyframing + bones ( UI + renderer ).
+	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
  	- Keyframes using list + vector ( TLB index:iterators for random access )
 	- Bone undo support ( maybe store state from edit mode chord )
  	- (Un)Parenting for bones 
