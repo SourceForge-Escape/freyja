@@ -1,6 +1,6 @@
-libmgtk (0.1.0-2) edgy; urgency=low
+libmgtk (0.1.1.1) feisty; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Generated release
 
- -- Terry Hendrix (Mongoose) <mongooseichiban@gmail.com>  Thu, 14 Dec 2006 15:29:27 -0500
+ -- Terry Hendrix (Mongoose) <mongooseichiban@gmail.com>  Thu, 14 Dec 2006 15:52:34 -0500
 

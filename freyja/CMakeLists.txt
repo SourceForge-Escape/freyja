@@ -3,7 +3,7 @@ set(Name freyja)
 set(Major 0)
 set(Minor 9)
 set(Micro 5)
-set(Revision 13)
+set(Revision 14)
 set(Email mongooseichiban@gmail.com)
 set(Website http://icculus.org/freyja)
 set(BuildHost `uname -n -m -s`)
@@ -73,5 +73,15 @@ set(Objs
 
 
 add_executable( ${Name} ${Objs} )
+
+FILE( WRITE debian/changelog "freyja (${Version}) feisty; urgency=low\n\n" )
+FILE( APPEND debian/changelog "  * Generated release\n\n" )
+FILE( APPEND debian/changelog " -- Terry Hendrix (Mongoose) <mongooseichiban@gmail.com>  Thu, 14 Dec 2006 15:52:34 -0500\n\n" )
+FILE( APPEND debian/changelog "" )
+
+
+INSTALL( TARGETS ${Name} RUNTIME DESTINATION /usr/bin )
+INSTALL( FILES data/freyja-dev.mlisp data/vera.ttf DESTINATION /usr/share/freyja )
+INSTALL( DIRECTORY data/icons data/shaders DESTINATION /usr/share/freyja )
 
 

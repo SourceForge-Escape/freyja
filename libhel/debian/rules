@@ -34,8 +34,10 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) -f Makefile.Linux
+	#$(MAKE) -f Makefile.Linux
 	#docbook-to-man debian/libhel.sgml > libhel.1
+	cmake .
+	$(MAKE)
 
 	touch $@
 
@@ -45,7 +47,8 @@ clean:
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) -f Makefile.Linux clean
+	#-$(MAKE) -f Makefile.Linux clean
+	$(MAKE) clean
 
 	dh_clean 
 
@@ -56,8 +59,8 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/libhel.
-	$(MAKE) install DESTDIR=$(CURDIR)/debian/libhel
-
+	#$(MAKE) -f Makefile.Linux install DESTDIR=$(CURDIR)/debian/libhel
+	$(MAKE) install DESTDIR="$(CURDIR)/debian/libhel"
 
 # Build architecture-independent files here.
 binary-indep: build install

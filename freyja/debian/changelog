@@ -1,6 +1,6 @@
-freyja (0.9.5.10) edgy; urgency=low
+freyja (0.9.5.14) feisty; urgency=low
 
-  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+  * Generated release
 
  -- Terry Hendrix (Mongoose) <mongooseichiban@gmail.com>  Thu, 14 Dec 2006 15:52:34 -0500
 

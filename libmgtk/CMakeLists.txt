@@ -110,5 +110,14 @@ add_library( ${Name}-${Major}.${Minor}.${Micro} SHARED ${Objs} )
 
 # Unit tests
 
+# Generate a new debian/changelog.
+FILE( WRITE debian/changelog "libmgtk (${Major}.${Minor}.${Micro}.${Revision}) feisty; urgency=low\n\n" )
+FILE( APPEND debian/changelog "  * Generated release\n\n" )
+FILE( APPEND debian/changelog " -- Terry Hendrix (Mongoose) <mongooseichiban@gmail.com>  Thu, 14 Dec 2006 15:52:34 -0500\n\n" )
+FILE( APPEND debian/changelog "" )
+
+
+INSTALL( TARGETS ${Name}-${Major}.${Minor}.${Micro} LIBRARY DESTINATION /usr/lib )
+
 
 
