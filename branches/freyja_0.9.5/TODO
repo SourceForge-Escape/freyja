@@ -5,6 +5,7 @@
  Freyja 0.9.5.15	TBD
  -----------------------------------------------------------------------------
 
+ * FIX camera up vector when target/pos changes.
  * FIX TTF renderer ( glyph settings aren't used )
  	- Add back typesetting for GLPrinter.
  * FIX perlinoise crash.

@@ -189,15 +189,17 @@ debian:
 
 
 deb:
-	@-cd libhel; make deb
+	@-cd libhel; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd libmgtk; make deb
+	@-cd libmgtk; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd libfreyja; make deb
+	@-cd libfreyja; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd plugins; make deb
+	@-cd tinyxml; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd freyja; make deb
+	@-cd plugins; fakeroot dpkg-buildpackage 
+	@-cd ..
+	@-cd freyja; fakeroot dpkg-buildpackage 
 	@-cd ..
 
 apt:

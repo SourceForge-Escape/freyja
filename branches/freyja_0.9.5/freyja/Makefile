@@ -37,7 +37,7 @@ CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 CMAKE_SOURCE_DIR = /home/mongoose/Projects/freyja_0.9.5/freyja
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja_0.9.5/freyja
+CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja/freyja_0.9.5/freyja
 
 # Include the progress variables for this target.
 include CMakeFiles/progress.make
@@ -88,9 +88,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/freyja/CMakeFiles $(CMAKE_ALL_PROGRESS)
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja/freyja_0.9.5/freyja/CMakeFiles $(CMAKE_ALL_PROGRESS)
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/freyja/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja/freyja_0.9.5/freyja/CMakeFiles 0
 
 # The main clean target
 clean:
