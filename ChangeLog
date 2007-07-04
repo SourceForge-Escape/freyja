@@ -11,6 +11,7 @@
 
  Kagura prealpha, 0.9.5.14 -- "Little things are nice too"
  20070702 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Top level make can autogenerate debian packages with deb rule again.
  - FIX for cmake/debian package generation for entire project.
  - Removed pythonplug UI plugin, obsoleted by File shelf python macros.
  - Made a Lua51.dll for win32 users.
