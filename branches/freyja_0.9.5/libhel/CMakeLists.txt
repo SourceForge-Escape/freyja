@@ -48,8 +48,8 @@ if (WIN32)
 #    -Wl,--whole-archive $(OBJS) \
 #    -Wl,--no-whole-archive $(LIBS)
 
-	cmake_cxx_compiler("i586-mingw32msvc-g++ -mms-bitfields")
-	add_definitions(-Wl,--export-all-symbols -Wl,--enable-auto-import)
+	#cmake_cxx_compiler("i586-mingw32msvc-g++ -mms-bitfields")
+	#add_definitions(-Wl,--export-all-symbols -Wl,--enable-auto-import)
 
 #elseif(OSX)
 #	@-mkdir -p $(BUILD_DEBUG_DIR)
@@ -97,14 +97,19 @@ add_test(vec3 vec3_test)
 
 #If the ENABLE_TESTING command has been run, this command adds a test target to the current directory. If ENABLE_TESTING has not been run, this command does nothing. The tests are run by the testing subsystem by executing Exename with the specified arguments. Exename can be either an executable built by this project or an arbitrary executable on the system (like tclsh). The test will be run with the current working directory set to the CMakeList.txt files corresponding directory in the binary tree. 
 
-
-
 # ADD_LIBRARY(foo SHARED ${foo_sources})
 # ADD_LIBRARY(foo-static STATIC ${foo_sources})
 # // The library target "foo" already has a default OUTPUT_NAME of "foo", so we don't need to change it.
 # // The library target "foo-static" has a default OUTPUT_NAME of "foo-static", so change it.
 # SET_TARGET_PROPERTIES(foo-static PROPERTIES OUTPUT_NAME "foo")
 
+# Generate a new debian/changelog.
+FILE( WRITE debian/changelog "libhel (${Major}.${Minor}.${Micro}.${Revision}) feisty; urgency=low\n\n" )
+FILE( APPEND debian/changelog "  * Generated release\n\n" )
+FILE( APPEND debian/changelog " -- Terry Hendrix (Mongoose) <mongooseichiban@gmail.com>  Thu, 14 Dec 2006 15:52:34 -0500\n\n" )
+FILE( APPEND debian/changelog "" )
 
+# Generate install rule.
+INSTALL( TARGETS ${Name}-${Major}.${Minor}.${Micro} LIBRARY DESTINATION /usr/lib )
 
 

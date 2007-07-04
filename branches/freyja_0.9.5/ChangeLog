@@ -7,11 +7,12 @@
  Kagura prealpha, 0.9.5.15
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - 
- - Removed pythonplug UI plugin, obsoleted by File shelf python macros.
 
 
  Kagura prealpha, 0.9.5.14 -- "Little things are nice too"
  20070702 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX for cmake/debian package generation for entire project.
+ - Removed pythonplug UI plugin, obsoleted by File shelf python macros.
  - Made a Lua51.dll for win32 users.
  - Win32 tinyxml build fix.
  - Basis for camera editing mode, icons render based on mode.

@@ -1,1 +1,1 @@
-shlibs:Depends=libc6 (>= 2.4-1), libgcc1 (>= 1:4.1.1-12)
+shlibs:Depends=libatk1.0-0 (>= 1.13.1), libc6 (>= 2.5-0ubuntu1), libcairo2 (>= 1.4.2), libfontconfig1 (>= 2.4.0), libgcc1 (>= 1:4.1.2), libgl1-mesa-glx | libgl1, libglib2.0-0 (>= 2.12.9), libglu1-mesa | libglu1, libgtk2.0-0 (>= 2.10.3), libgtkglext1, libice6 (>= 1:1.0.0), libpango1.0-0 (>= 1.16.2), libsm6, libstdc++6 (>= 4.1.2), libx11-6, libxcursor1 (>> 1.1.2), libxext6, libxfixes3 (>= 1:4.0.1), libxi6, libxinerama1, libxmu6, libxrandr2 (>= 2:1.2.0), libxrender1, libxt6
