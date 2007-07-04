@@ -204,14 +204,24 @@ void FreyjaRender::DrawCamWindow()
 	hel::Vec3 pos, target;
 	hel::Vec3 up(0.0f, 1.0f, 0.0f);
 
-	index_t camera = 0; // FIXME: GetCurrentCamera();
+	// FIXME: Use viewport's selected camera.
+	index_t camera = FreyjaControl::GetInstance()->GetSelectedCamera();
 	freyjaGetCameraPos3fv(camera, pos.mVec);
 	freyjaGetCameraTarget3fv(camera, target.mVec);
 	freyjaGetCameraUp3fv(camera, up.mVec);
 	
+	//glLoadIdentity();
+
+	glMatrixMode(GL_PROJECTION); 
+	glLoadIdentity(); 
+	gluPerspective(90.0f, ((GLdouble)mWidth)/((GLdouble)mHeight), 4.0f, 9000.0f);
+
 	gluLookAt(pos.mX, pos.mY, pos.mZ,
 			  target.mX, target.mY,target.mZ,
 			  up.mX, up.mY, up.mZ);
+
+	
+	glMatrixMode(GL_MODELVIEW);
 
 	glPushMatrix();
 
@@ -337,6 +347,8 @@ void FreyjaRender::DrawCamWindow()
 	mglDrawEditorAxis();
 	glPopMatrix();
 #endif
+
+	ResizeContext(mWidth, mHeight); // reset for other windows
 
 	// OpenGLPrinter test
 	glPushAttrib(GL_ENABLE_BIT);
@@ -524,16 +536,48 @@ void FreyjaRender::DrawIcons()
 		glPushMatrix();
 		glTranslatef(pos[0], pos[1], pos[2]);
 
-
 		glColor4f(1.0f, 1.0f, 1.0f, 0.0f);
-
 		mglDrawControlPoint();
 
-		glPopAttrib();
 		glPopMatrix();
 	}
 
 	FreyjaControl::GetInstance()->GetCursor().Display();
+
+	/* Special edit modes. */
+	switch ( FreyjaControl::GetInstance()->GetObjectMode() )
+	{
+	case FreyjaControl::tCamera:
+		for (uint32 i = 0, n = freyjaGetCameraCount(); i < n; ++i)
+		{
+			Vec3 target, pos;
+			freyjaGetCameraTarget3fv(i, target.mVec);
+			freyjaGetCameraPos3fv(i, pos.mVec);
+			
+			glBegin(GL_LINES);
+			glColor3fv(RED);
+			glVertex3fv(pos.mVec);
+			glColor3fv(DARK_RED);
+			glVertex3fv(target.mVec);
+			glEnd();
+
+			glPushMatrix();
+			glTranslatef(pos.mX, pos.mY, pos.mZ);
+			glColor3fv(RED);
+			mglDrawControlPoint();
+			glPopMatrix();
+			
+			glPushMatrix();
+			glTranslatef(target.mX, target.mY, target.mZ);
+			glColor3fv(DARK_RED);
+			mglDrawControlPoint();
+			glPopMatrix();
+		}
+		break;
+
+	default:
+		;
+	}
 
 	glPopAttrib();
 }

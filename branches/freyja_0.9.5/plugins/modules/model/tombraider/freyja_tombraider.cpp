@@ -105,7 +105,7 @@ int freyja_model__tombraider_check(char *filename)
     return -1;
   }
 
-	u_int32_t version;
+	uint32 version;
 #ifdef ENDIAN
   FreadSmallU_Int(&version, f);
 #else
@@ -144,7 +144,7 @@ int load_mesh(TombRaider &tombraider, Map<int, int> &textureIds,
 	tr2_mesh_t *meshes = tombraider.Mesh();
 
 	// Assert common sense, try to skip sprites and FX placeholders
-	if (index >= 0 && meshes[idx].num_vertices < 1)
+	if (idx >= 0 && meshes[idx].num_vertices < 1)
 	{
 		printf("x");
 		fflush(stdout);
@@ -850,19 +850,22 @@ int tombraider_map_import(TombRaider *tombraider, Map<int, int> &textureIds)
 
 			if (camera)
 			{
-				Vec3 v(camera->x, -camera->y, camera->z); // -Y up
+				Vec3 v(camera->x, -camera->y, camera->z); 
 #if 0
 			/*	I honestly can't remember if these are in world or 
 				'room' coordinates.  If they are just use this snippet:
 			*/
 				tr2_room_t &room = rooms[camera->room];
-				Vec3 t(room.info.x * scale,
-					    room.info.y_top - room.info.y_bottom) * scale, 
-					    room.info.z * scale);
+				Vec3 t(room.info.x,
+					    -(room.info.y_top - room.info.y_bottom), 
+					    room.info.z);
 				v += t;
 #endif
+				v *= scale;
+				
 				index_t cameraIdx = freyjaCameraCreate();
 				freyjaCameraPos3f(cameraIdx, v.mX, v.mY, v.mZ);
+				freyjaCameraTarget3f(cameraIdx, v.mX+1, v.mY+1, v.mZ+1);
 				freyjaCameraMetadata(cameraIdx, "<tombraider></tombraider>");
 			}			
 		}

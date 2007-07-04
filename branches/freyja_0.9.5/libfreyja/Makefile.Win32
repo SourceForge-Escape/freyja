@@ -35,7 +35,7 @@ BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/win32/test
 ################################################################
 
 LD_FLAGS=-shared -lstdc++ -lm $(WIN32_LIB_DIR) -lpthreadGC2 \
-	$(WIN32_LIBHEL)
+	$(WIN32_LIBHEL) -ltinyxml2 -llua51
 
 RELEASE_CFLAGS=$(COMMON_CFLAGS) \
 	-Wall \

@@ -2,13 +2,6 @@
  TODO
  =============================================================================
 
- Freyja 0.9.5.14	2007.07.02
- -----------------------------------------------------------------------------
-
- * Animation Track / Keyframe snippets in UI
-
-
-
  Freyja 0.9.5.15	TBD
  -----------------------------------------------------------------------------
 
@@ -19,6 +12,7 @@
 	- BONUS rewrite FreyjaImage, rename as Image, update everything using it.
  * FIX bone name rendering trashing 'icon' colors.
 
+ * Animation Track / Keyframe snippets in UI
  * Camera editing support.
  * Editor mode support for camera views.
  * Camera animation editor.

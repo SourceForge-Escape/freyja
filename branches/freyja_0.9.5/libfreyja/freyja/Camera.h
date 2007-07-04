@@ -82,6 +82,14 @@ class Camera
 	 *
 	 ------------------------------------------------------*/
 
+	const char* GetMetadata();
+	void SetMetadata(const char* name);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Camera metadata position property.
+	 *
+	 ------------------------------------------------------*/
+
 	const hel::Vec3& GetDir();
 	void SetDir(const hel::Vec3& dir);
 	/*------------------------------------------------------
@@ -156,6 +164,8 @@ class Camera
 
 	mstl::String mName;         /* Name of this camera */
 
+	mstl::String mMetadata;     /* XML metadata. */
+
 	hel::Ray mView;             /* 'Eye' pos+dir */
 	
 	hel::Vec3 mTarget;          /* Postition we're looking at  */
@@ -181,6 +191,7 @@ class Camera
 	inline
 	Camera::Camera()
 		: mName("camera"),
+		  mMetadata(" "),
 		  mView(),
 		  mTarget(),
 		  mUp(0.0f, 1.0f, 0.0f),
@@ -205,6 +216,20 @@ class Camera
 	void Camera::SetName(const char* name)
 	{
 		this->mName = name;
+	}
+
+
+	inline
+	const char* Camera::GetMetadata()
+	{
+		return this->mMetadata.c_str();
+	}
+
+
+	inline
+	void Camera::SetMetadata(const char* metadata)
+	{
+		this->mMetadata = metadata;
 	}
 
 
