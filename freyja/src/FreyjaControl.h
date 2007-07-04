@@ -164,7 +164,7 @@ class FreyjaControl : public Control
 	uint32 mGroupBitmap;
 
 	uint32 GetSelectedCamera() { return mSelectedCamera; }
-	void SetSelectedCamera(uint32 i);
+	void SetSelectedCamera(uint32 i) { mSelectedCamera = i; }
 	uint32 mSelectedCamera;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -745,6 +745,8 @@ class FreyjaControl : public Control
 
 	void EvTransformLight() { SetObjectMode(tLight); }
 
+	void EvTransformCamera() { SetObjectMode(tCamera); }
+
 	void EvRecentFiles(uint32 value) 
 	{ LoadModel( mRecentModel.GetFilename(value)); }
 
@@ -1177,6 +1179,8 @@ private:
 
 	index_t PickFace(const hel::Ray &ray);
 	index_t PickBone(const hel::Ray &ray);
+	index_t PickCameraPos(const hel::Ray &ray);
+	index_t PickCameraTarget(const hel::Ray &ray);
 	index_t PickLight(const hel::Ray &ray);
 	index_t PickMesh(const hel::Ray &ray);
 	index_t PickMeshes(const hel::Ray &ray);

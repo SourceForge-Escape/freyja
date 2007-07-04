@@ -37,7 +37,8 @@ BUILD_ROOT_DIR=../bin/libfreyja
 # Common precompiler defines
 ################################################################
 
-COMMON_INCLUDES=-I. -I../libfreyja/ -I../libhel/ -I../mstl/
+COMMON_INCLUDES=-I. -I../libfreyja/ -I../libhel/ -I../mstl/ -I../tinyxml/ \
+	-I../lua/lua
 COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
 		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
@@ -45,9 +46,9 @@ COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DMODEL_PLUGINS -DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
 
-COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES)
+COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES) -DTINYXML_FOUND -DLUA_FOUND
 
-COMMON_LD_FLAGS=-lhel-0.0.2
+COMMON_LD_FLAGS=-lhel-0.0.2 -ltinyxml2
 
 ################################################################
 # Object targets
@@ -58,12 +59,14 @@ OBJS = \
 	$(BUILDDIR)/Bone.o \
 	$(BUILDDIR)/BoneABI.o \
 	$(BUILDDIR)/Camera.o \
+	$(BUILDDIR)/CameraABI.o \
 	$(BUILDDIR)/FreyjaFSM.o \
 	$(BUILDDIR)/FreyjaImage.o \
 	$(BUILDDIR)/FreyjaPakReader.o \
 	$(BUILDDIR)/FreyjaTexture.o \
 	$(BUILDDIR)/KeyFrame.o \
 	$(BUILDDIR)/LegacyABI.o \
+	$(BUILDDIR)/LuaABI.o \
 	$(BUILDDIR)/Light.o \
 	$(BUILDDIR)/LightABI.o \
 	$(BUILDDIR)/Material.o \
@@ -78,6 +81,7 @@ OBJS = \
 	$(BUILDDIR)/Plugin.o \
 	$(BUILDDIR)/Printer.o \
 	$(BUILDDIR)/PythonABI.o \
+	$(BUILDDIR)/QueryABI.o \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o \
 	$(BUILDDIR)/Track.o \

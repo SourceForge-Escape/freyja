@@ -248,6 +248,7 @@ bool VertexAnimKeyFrame::Unserialize(SystemIO::TextFileReader &r)
 }
 
 
+#if TINYXML_FOUND
 inline 
 bool VertexAnimKeyFrame::Serialize(TiXmlElement *container)
 {
@@ -309,6 +310,7 @@ bool VertexAnimKeyFrame::Unserialize(TiXmlElement *keyframe)
 	return true; 
 }
 
+#endif // TINYXML_FOUND
 
 
 } // namespace freyja

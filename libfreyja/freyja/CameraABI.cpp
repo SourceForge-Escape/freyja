@@ -182,14 +182,23 @@ void freyjaGetCameraUp3fv(index_t cameraIndex, vec3_t xyz)
 	
 void freyjaCameraMetadata(index_t camera, const char *metadata)
 {
-	FREYJA_INFOMSG(0, "Not implemented");
+	Camera* cam = freyjaGetCameraObject(camera);
+	if (cam) 
+	{
+		return cam->SetMetadata(metadata);
+	}
 }
 
 
 const char *freyjaGetCameraMetadata(index_t camera)
 {
-	FREYJA_INFOMSG(0, "Not implemented");
-	return " ";
+	Camera* cam = freyjaGetCameraObject(camera);
+	if (cam) 
+	{
+		return cam->GetMetadata();
+	}
+
+	return " "; 
 }
 
 

@@ -50,7 +50,7 @@
 #ifndef __OPENRAIDER_MONGOOSE_TOMBRAIDER_H_
 #define __OPENRAIDER_MONGOOSE_TOMBRAIDER_H_
 
-#ifdef WIN32
+#ifdef MSVC //WIN32
 // Have to remove GCC packing, by removing in preprocessor
 #define __attribute__(packed)
 
@@ -840,7 +840,7 @@ typedef struct tr4_object_texture_s
 }  __attribute__ ((packed)) tr4_object_texture_t;
 
 
-#ifdef WIN32
+#ifdef MSVC //WIN32
 #pragma pack(pop, tr2_h, 1)
 #endif
 

@@ -450,7 +450,7 @@ bool BufferedFileReader::OpenChunk(const char *filename,
 	{
 		fseek(mFileHandle, 0, SEEK_END);
 
-		if (offset + size > ftell(mFileHandle))
+		if (offset + size > (unsigned int)ftell(mFileHandle))
 			return false;
 
 		mEnd = offset + size;

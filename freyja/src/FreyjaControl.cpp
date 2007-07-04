@@ -429,6 +429,10 @@ String FreyjaControl::ObjectTypeToString(object_type_t t)
 
 	switch (t)
 	{
+	case tCamera:
+		s = String("tCamera");
+		break;
+
 	case tNone:
 		s = String("tNone");
 		break;
@@ -3243,6 +3247,24 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY, bool set)
 		}
 		break;
 
+	case tCamera:
+		{
+			index_t selected = PickCameraPos(FreyjaRender::mTestRay);
+
+			if (selected != INDEX_INVALID )
+			{
+				if (!set)  // There is no unselect for this object type.
+					return;
+
+				Vec3 p;
+				SetSelectedCamera(selected);
+				freyjaGetCameraPos3fv(selected, p.mVec);
+				mCursor.mPos = p;
+				Print("! Camera[%i] selected by pick ray.", selected);
+			}
+		}
+		break;
+
 	case tSelectedFaces:
 	case tFace:
 		{
@@ -3950,6 +3972,16 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	switch (mObjectMode)
 	{
+	case tCamera:
+		{
+			Vec3 p;
+			freyjaGetCameraPos3fv(GetSelectedCamera(), p.mVec);
+			mCursor.mLastPos = p;
+			freyjaCameraPos3f(GetSelectedCamera(), 
+							  mCursor.mPos.mX, mCursor.mPos.mY, mCursor.mPos.mZ);
+		}
+		break;
+
 	case tLight:
 		{
 			vec3_t pos;
@@ -5281,6 +5313,54 @@ index_t FreyjaControl::PickVertex(const hel::Ray &ray)
 }
 		
 
+index_t FreyjaControl::PickCameraTarget(const hel::Ray &ray)
+{
+	hel::Vec3 p;
+	vec_t t, closest = 9999.0f;
+	index_t selected = INDEX_INVALID;
+
+	for (uint32 i = 0, count = freyjaGetCameraCount(); i < count; ++i)
+	{
+		freyjaGetCameraTarget3fv(i, p.mVec);
+		
+		if (FreyjaRender::mTestRay.IntersectSphere(p.mVec, 5.0f, t))
+		{
+			if (selected == INDEX_INVALID || t < closest)
+			{
+				selected = i;
+				closest = t;
+			}
+		}
+	}
+
+	return selected;
+}
+		
+
+index_t FreyjaControl::PickCameraPos(const hel::Ray &ray)
+{
+	hel::Vec3 p;
+	vec_t t, closest = 9999.0f;
+	index_t selected = INDEX_INVALID;
+
+	for (uint32 i = 0, count = freyjaGetCameraCount(); i < count; ++i)
+	{
+		freyjaGetCameraPos3fv(i, p.mVec);
+		
+		if (FreyjaRender::mTestRay.IntersectSphere(p.mVec, 5.0f, t))
+		{
+			if (selected == INDEX_INVALID || t < closest)
+			{
+				selected = i;
+				closest = t;
+			}
+		}
+	}
+
+	return selected;
+}
+		
+
 index_t FreyjaControl::PickLight(const hel::Ray &ray)
 {
 	hel::Vec3 xyz;
@@ -5537,6 +5617,7 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eTransformSkeleton", &FreyjaControl::EvTransformSkeleton);
 	CreateListener("eTransformBone", &FreyjaControl::EvTransformBone);
 	CreateListener("eTransformLight", &FreyjaControl::EvTransformLight);
+	CreateListener("eTransformCamera", &FreyjaControl::EvTransformCamera);
 
 
 	CreateListener("eMeshToXML", &FreyjaControl::EvSerializeMesh);

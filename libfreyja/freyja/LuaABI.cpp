@@ -3528,7 +3528,7 @@ void freyjaLuaCommand1s(const char *s)
 		gLuaVM.ExecuteCommandSilently(s);
 	
 #else
-	freyjaPrintError("[Module '%s' failed to load.  Rebuild with Lua support.]", plugin);
+	freyjaPrintError("[Module '%s' failed to load.  Rebuild with Lua support.]", s);
 #endif // LUA_FOUND
 }
 
@@ -3544,7 +3544,7 @@ void freyjaLuaScript1s(const char *s)
 		gLuaVM.ExecuteFile(s);
 	
 #else
-	freyjaPrintError("[Module '%s' failed to load.  Rebuild with Lua support.]", plugin);
+	freyjaPrintError("[Module '%s' failed to load.  Rebuild with Lua support.]", s);
 #endif // LUA_FOUND
 }
 
