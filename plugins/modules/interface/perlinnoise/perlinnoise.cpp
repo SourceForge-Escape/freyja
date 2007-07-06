@@ -69,7 +69,6 @@ void ePerlinNoiseGen()
 	PerlinNoise perlin;
 	uint32 seed = 257, w = 256, h = 256, clamp = 1;
 	vec_t iA = 1.0f, iB = 2.0f, d = 20.0f;
-	byte *image;
 
 	seed = gPerlinNoiseSeed;
 	w = gPerlinNoiseW;
@@ -79,7 +78,7 @@ void ePerlinNoiseGen()
 	iB = gPerlinNoiseIB; 
 	d = gPerlinNoiseD; 
 
-	image = perlin.generateBuffer(w, h, seed);
+	byte *image = perlin.generateBuffer(w, h, seed);
 
 	if (!image)
 	{
@@ -91,6 +90,7 @@ void ePerlinNoiseGen()
 		perlin.clampBufferIntensity(image, w, h, iA, iB, d);
 
 	/* Modulate by a color and add a base half intensity */
+#if 0
  	FreyjaImage img;
 	byte *rgb;
 	uint32 i, n;
@@ -102,9 +102,21 @@ void ePerlinNoiseGen()
 		mgtk_print("ePerlinNoiseGen: Invalid image after color conversion");
 		return;
 	}
+#else
+	byte *rgb = new byte[w*h*3];
+	
+	// Greyscale -> RGB 
+	for (uint32 i = 0, n = w*h, idx; i < n; ++i)
+	{
+		byte c = image[i];
+		idx = i*3;
+		rgb[idx] = rgb[idx+1] = rgb[idx+2] = c; 
+	}
+#endif
+
 
 	// hahaha it's 0600 no sleep -- can't wait to clean this prototype!
-	for (i = 0, n = w * h * 3; i < n; ++i)
+	for (uint32 i = 0, n = w * h * 3; i < n; ++i)
 	{
 		/* NOTE: No clamping or scaling of colors, however there is a 
 		         weakened 50 / 50 add in the sense that ADD can only contrib

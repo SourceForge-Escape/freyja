@@ -1888,6 +1888,7 @@ void FreyjaRender::RenderModel(index_t model)
 	/* Render bone names */
 	if (mRenderMode & fBoneName)
 	{
+		
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 		glDisable(GL_LIGHTING);
@@ -1913,6 +1914,9 @@ void FreyjaRender::RenderModel(index_t model)
 							 0.05f, 
 							 freyjaGetBoneNameString(i));
 		}
+
+		
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 	
 	//if (mRenderMode & fBones || mRenderMode & fBones2

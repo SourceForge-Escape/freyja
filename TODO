@@ -8,10 +8,7 @@
  * FIX camera up vector when target/pos changes.
  * FIX TTF renderer ( glyph settings aren't used )
  	- Add back typesetting for GLPrinter.
- * FIX perlinoise crash.
-	- I bet it's the new FreyjaImage 8bit support causing it.
-	- BONUS rewrite FreyjaImage, rename as Image, update everything using it.
- * FIX bone name rendering trashing 'icon' colors.
+ * FIX lua plugin crash in Windows. ( Nonconfirmed bug )
 
  * Animation Track / Keyframe snippets in UI
  * Camera editing support.
@@ -38,6 +35,10 @@
  * Metadata object eg for map objects ( currently bones are used )
  * Mesh replace stack use with list (as [ordered] queue/stack).
  * SystemIO StringLiteral should not allocate -- verify everything using it 
+
+ * gconf support as dl linked module for checking keys.
+	- Use for getting prefered browser, etc
+	- /desktop/gnome/applications/browser/exec  "epiphany"
 
 
  Freyja, Development branch 0.9.5 ( Current )
