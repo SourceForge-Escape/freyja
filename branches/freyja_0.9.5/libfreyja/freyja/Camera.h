@@ -257,6 +257,10 @@ class Camera
 	inline
 	void Camera::SetPos(const hel::Vec3& pos)
 	{
+		// Do we want to maintain same up vector or force other side to update?
+		//mUp += pos - this->mView.mOrigin;
+		//mUp.Norm();
+
 		this->mView.mOrigin = pos;
 	}
 
