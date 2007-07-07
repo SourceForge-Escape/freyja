@@ -2017,6 +2017,12 @@ int main(int argc, char *argv[])
 	mstl::String s = freyja_rc_map_string(FREYJA_LOG_FILE);
 	ControlPrinter::StartLogging(s.c_str());
 
+	/* Report library versions to log. */	
+	ControlPrinter::Log("@ freyja: %s", VERSION);
+	ControlPrinter::Log("@ libfreyja: %s", libfreyjaVersion() );
+	ControlPrinter::Log("@ libhel: %s", helVersionInfo() );
+	ControlPrinter::Log("@ libmgtk: %s", mgtk_version() );
+
 	/* Hookup assert handlers, note freyja assert is also used by this layer */
 	freyjaAssertHandler(FreyjaAssertCallbackHandler);
 	mgtk_assert_handler(FreyjaAssertCallbackHandler);

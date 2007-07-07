@@ -5,40 +5,51 @@
  Freyja 0.9.5.15	TBD
  -----------------------------------------------------------------------------
 
- * FIX camera up vector when target/pos changes.
  * FIX TTF renderer ( glyph settings aren't used )
  	- Add back typesetting for GLPrinter.
- * FIX lua plugin crash in Windows. ( Nonconfirmed bug )
 
- * Animation Track / Keyframe snippets in UI
- * Camera editing support.
- * Editor mode support for camera views.
- * Camera animation editor.
+ * Improve Camera editing.
+	- Editor mode support for camera view.
+ 	- Camera animation editor.
+
  * Finish up new keyframing + bones ( UI + renderer ).
+	- Slerp for QuatKeyframe
+	- Animation Track / Keyframe snippets in UI once NEW keyframing is done.	
 	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
  	- Keyframes using list + vector ( TLB index:iterators for random access )
+		- No more NULL 'gaps' and only store 'true count'.
+		- Allows *Next() [list] and *ElementAt() [vector] ABI access.
 	- Bone undo support ( maybe store state from edit mode chord )
- 	- (Un)Parenting for bones 
+ 	- (Un)Parenting for bones with dashed line UI.
+
  * Remove LegacyABI use in MeshABI mesh generators.
 	- Time for Catmull-Clark 'spheres'?
- * Slerp for QuatKeyframe
- * Light options with drop down menu button: dir/pos/spot?
- * Grid view options with drop down menu button. eg: wire/solid
- * Bone names options with drop down?
- * mgtk Query string support.
- * Lua Widgets: lua mgtk wrapper to allow full interface plugins.
- * Lua binary file I/O wrapper.
- * Rename hel/math.h hel/hel.h for 0.9.6 alpha.
- * mstl SystemIO - remove anything depending on parsestringliteral allocation.
- * Automatic online updates from the modeler itself.
- * Reports: library versions, build dates, etc for easier bug reports.
- * Metadata object eg for map objects ( currently bones are used )
- * Mesh replace stack use with list (as [ordered] queue/stack).
- * SystemIO StringLiteral should not allocate -- verify everything using it 
 
- * gconf support as dl linked module for checking keys.
-	- Use for getting prefered browser, etc
-	- /desktop/gnome/applications/browser/exec  "epiphany"
+ * mgtk Query string support.
+
+ * Lua
+ 	- Widgets: lua mgtk wrapper to allow full interface plugins.
+ 	- Binary file I/O wrapper.
+
+ * Metadata object eg for map objects ( currently bones w/ metadata are used )
+
+ * Mesh replace stack use with list (as [ordered] queue/stack).
+
+ * HID
+	- 'Size' cursor has interesting recentering... it's correct, but 
+	  maybe it should floor on a y value to avoid confusing people?
+	- Bones type visibility 'hard set' by edit mode.
+	- Moving out of 'this is for developers' to 'this is for users'.
+		. Time to start hiding debugging toggles instead of on front shelf.
+	- View mode toggles ( chords ) into edit modes ( radio type ).
+	- Shading for editing flat / face normal / etc
+	- Grouping to reduce number of widgets.
+ 		. Light options with drop down menu button: dir/pos/spot?
+ 		. Grid view options with drop down menu button. eg: wire/solid
+ 		. Bone names option as drop down for bone visibily?
+
+ * Render Faces... has no transforms 'previews'.
+	- Use vertex blend buffer perhaps to avoid 'state write'.
 
 
  Freyja, Development branch 0.9.5 ( Current )
@@ -55,14 +66,25 @@
 	- Make sure everything is using col hel::Mat44 correctly now.
 		- 'Raypick vs FK'
 	- Make sure everything is converting between types properly.
-	- Use this as a chance to rework types for 0.9.6
+	- Use this as a chance to rework types for 0.9.6.
+		- Rename hel/math.h hel/hel.h for 0.9.6.
 		- Quat to become XYZW order, so there will be world peace.
+
+ * UV unwrap
+	- Projection across boundries ( axes ) aren't handled
+	- Fitting functionality
+	- Overlap 'fixup'
 
  * Edge editing.
 	- Replace wireframe renderer with edge renderer.
 	- Mesh::RebuildEdgeGraph()
 	- Mesh::RebuildPlanes()
 	- RELATED Cache s-edge results until light / mesh moves.
+
+ * gconf support as dl linked module or DBUS for checking keys.
+	- http://developer.gnome.org/doc/API/gconf
+	- Use for getting prefered browser, etc
+	- /desktop/gnome/applications/browser/exec  "epiphany"
 
  * Single joint animation shishi odoshi tutorial demo.
 
@@ -94,8 +116,6 @@
 	- Add unwrap to cyn uvmap ( no overlayed uv polygons, fill quad, etc )
 
  * Add the simple Bezier patch polygon mesh back.
-
- * Shading for editing flat / face normal / etc
 
  * Merge pak vfs into main UI.  Currently it's an awkward UI plugin.
 	- Change vfs file list to have mixed dir/files in one pane to follow HIG.
@@ -132,6 +152,8 @@
 	- Ref weights from vertex to fix blending issues
 
  * Make generic plugin interface for new UI control points.
+
+ * Automatic online updates from the modeler itself.
 
  * ZIP file based pak format for freyja format models w/ textures, etc?
 	
@@ -191,6 +213,9 @@
 
  * Scenegraph: requires 'view' mode vs 'edit' mode
 
+ * Plugins using cmake build system.
+
+
 
  Freyja, Dancer/Kagura 0.9.6 (Public Alpha-Beta, TBD)
  -----------------------------------------------------------------------------
@@ -202,12 +227,13 @@
  * Seperate renderer and UI into their own libraries.
 
  * MSTL review for rewrite.  Wish: generic container item, opt, etc.
+ 	- Remove anything depending on parsestringliteral string allocation.
 	- It might be a good idea to have true vector and vectorarray containers.
 	- hash
 	- avl_tree
 	- splay_tree for cache mostly
 	- Allow API compatibility breaks as needed.
-	- Rewrite Map and RedBlackTree as map and rb_tree.
+	- Rewrite Map and RedBlackTree as map and rb_tree.  ( use stl like methods )
 
  * APIs / designs to be finalized
 	- Optmize Mesh to avoid wasting texCoords when unused by vertices

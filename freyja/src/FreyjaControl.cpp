@@ -6079,6 +6079,8 @@ void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
 	d.mAcceptIcon = "gtk-ok";
 	d.mAcceptText = "Answer"; 
 
+	bool any = false;
+
 	for (uint32 i = 0; i < size; ++i)
 	{
 		const char *type = array[i].type;
@@ -6093,6 +6095,7 @@ void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
 			s += symbol;
 			QueryDialogValue<int> v(symbol, s.c_str(), *(int *)data);
 			d.mInts.push_back(v);
+			any = true;
 		}
 		else if (s == "float")
 		{
@@ -6100,6 +6103,7 @@ void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
 			s += symbol;
 			QueryDialogValue<float> v(symbol, s.c_str(), *(float *)data);
 			d.mFloats.push_back(v);
+			any = true;
 		}
 		else
 		{
@@ -6110,7 +6114,7 @@ void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
 
 
 	// If the user chooses to set values, set them.
-	if ( d.Execute() )
+	if ( any && d.Execute() )
 	{
 		for (uint32 i = 0; i < size; ++i)
 		{
