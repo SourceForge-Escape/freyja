@@ -34,6 +34,7 @@
 
 #include <stdio.h>
 
+#include "FreyjaOpenGL.h"
 
 class Texture
 {
@@ -337,7 +338,7 @@ class Texture
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	unsigned int *mTextureIds;		/* GL texture list */
+	GLuint *mTextureIds;		/* GL texture list */
 
 	unsigned int mTextureCount;	    /* Texture counter */
 	

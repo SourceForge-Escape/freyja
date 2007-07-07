@@ -237,7 +237,7 @@ void Texture::setMaxTextureCount(unsigned int n)
 {
 	mTextureLimit = n;
 
-	mTextureIds = new unsigned int[n];
+	mTextureIds = new GLuint[n];
 
 	glGenTextures(n, mTextureIds);
 }
