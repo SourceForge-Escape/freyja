@@ -53,6 +53,7 @@ include_directories( /usr/include/freetype2 )
 link_libraries(	-lfreetype -lz )
 
 
+
 # OpenGL Framework and freetype2 for MacOS
 #if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 if(APPLE)

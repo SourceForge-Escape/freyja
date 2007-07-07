@@ -98,21 +98,26 @@ osx:
 	@-printf "       * Look in freyja/Makefile for options to disable\n"
 	@-printf "\n\n o Now 'make user-install' as a user\n\n"
 
+.PHONY : win32
+
 win32:
-	@-printf "Building libhel\n" && \
-	cd libhel && make -f Makefile.Win32 && cd .. && \
-	\
-	printf "Building libfreyja\n" && \
-	cd libfreyja && ./autogen.sh && make -f Makefile.Win32 && cd .. && \
-	\
-	printf "Building libmgtk\n" && \
-	cd libmgtk && ./autogen.sh && make -f Makefile.Win32 && cd .. && \
-	\
-	printf "Building plugins\n" && \
-	cd plugins && make -f Makefile.Win32 && cd .. && \
-	\
-	printf "Building freyja\n" && \
-	cd freyja && ./autogen.sh && make -f Makefile.Win32
+	@-printf "Building libhel\n" 
+	cd libhel && rm -f depend.win32 && make -f Makefile.Win32
+
+	@-printf "Building libtinyxml\n" 
+	cd tinyxml && rm -f depend.win32 && make -f Makefile.Win32 
+
+	@-printf "Building libfreyja\n" 
+	cd libfreyja && rm -f depend.win32 && make -f Makefile.Win32 
+	
+	@-printf "Building libmgtk\n" 
+	cd libmgtk && rm -f depend.win32 && make -f Makefile.Win32 
+	
+	@-printf "Building freyja\n" 
+	cd freyja && rm -f depend.win32 && make -f Makefile.Win32 
+	
+	@-printf "Building plugins\n" 
+	cd plugins && make win32
 
 	@-printf "\n\n o If your build failed:\n"
 	@-printf "       * Make sure you have a complete glext.h header\n"

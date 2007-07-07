@@ -8,7 +8,8 @@
  * FIX TTF renderer ( glyph settings aren't used )
  	- Add back typesetting for GLPrinter.
 
- * Improve Camera editing.
+ * Improve Camera.
+	- Add more options such as perspective settings.
 	- Editor mode support for camera view.
  	- Camera animation editor.
 
@@ -36,20 +37,24 @@
  * Mesh replace stack use with list (as [ordered] queue/stack).
 
  * HID
-	- 'Size' cursor has interesting recentering... it's correct, but 
-	  maybe it should floor on a y value to avoid confusing people?
-	- Bones type visibility 'hard set' by edit mode.
-	- Moving out of 'this is for developers' to 'this is for users'.
-		. Time to start hiding debugging toggles instead of on front shelf.
-	- View mode toggles ( chords ) into edit modes ( radio type ).
-	- Shading for editing flat / face normal / etc
 	- Grouping to reduce number of widgets.
  		. Light options with drop down menu button: dir/pos/spot?
  		. Grid view options with drop down menu button. eg: wire/solid
  		. Bone names option as drop down for bone visibily?
 
- * Render Faces... has no transforms 'previews'.
-	- Use vertex blend buffer perhaps to avoid 'state write'.
+	- Render Faces... has no transforms 'previews'.
+		. Use vertex blend buffer perhaps to avoid 'state write'.
+
+	- Moving out of 'this is for developers' to 'this is for users'.
+		. Time to start hiding debugging toggles instead of on front shelf.
+
+	- 'Size' cursor 'recenters' -- floor on Y value to avoid confusing people?
+
+	- Bones type visibility 'hard set' by edit mode.
+
+	- View mode toggles ( chords ) into edit modes ( radio type ).
+
+	- Shading for editing flat / face normal / etc
 
 
  Freyja, Development branch 0.9.5 ( Current )

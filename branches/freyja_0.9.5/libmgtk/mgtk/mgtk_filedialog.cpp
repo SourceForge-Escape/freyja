@@ -473,9 +473,8 @@ GtkWidget *mgtk_link_filechooser_from_rc(int event, const char *title, const cha
 				{
 					if (strcmp(value, "true") == 0)
 					{
-#if WIN32 || __APPLE__
-#else
-						// FIXME: Doesn't seem to have this feature in win32 env build
+
+#if GTK_MAJOR_VERSION == 2 && GTK_MINOR_VERSION >= 8
 						gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), TRUE);
 #endif
 					}
