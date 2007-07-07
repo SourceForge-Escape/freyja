@@ -505,8 +505,8 @@ class OpenGL
 	////////////////////////////////////////////////////////////
 
 	/* Hardware/driver limits */
-	int32 mTextureUnitCount;
-	int32 mMaxLightsCount;
+	GLint mTextureUnitCount;
+	GLint mMaxLightsCount;
 
 	/* Extentions */
 	static bool arb_multitexture;
@@ -539,7 +539,7 @@ class OpenGL
 
 	uint32 mFlags;              /* Options */
 
-	uint32 *mTextureIds;		/* GL texture list */
+	GLuint *mTextureIds;		/* GL texture list */
 
 	uint32 mTextureCount;	    /* Texture counter */
 	
