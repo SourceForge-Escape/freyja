@@ -44,6 +44,12 @@ add_definitions( -DDEBUG -Wall -g )
 # RELEASE
 #add_definitions( -DRELEASE -DMGTK_ASSERTS -Wall -O2 -finline-functions -fomit-frame-pointer -funroll-loops )
 
+# libhel
+add_definitions( -DHEL_FOUND -DHAVE_LIBHEL -DHAVE_HEL )
+include_directories( ../libhel )
+link_directories( ../libhel )
+link_libraries(	-lhel-0.2.2 )
+
 # OpenGL
 include(FindOpenGL)
 if (NOT OPENGL_FOUND)
@@ -84,7 +90,7 @@ include_directories( ${GTKGLEXT_INCLUDE_DIR} )
 
 
 
-include_directories( ../mstl ../libhel .  )
+include_directories( ../mstl .  )
 
 
 set(Objs
