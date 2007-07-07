@@ -6,7 +6,8 @@
 
  Kagura prealpha, 0.9.5.15 -- "Bugfix quickfix"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com> 
- - FIX for libfreyja CMakeLists.txt for explict libhel linking.
+ - Thanks to dtm for testing OS X builds.
+ - FIX for CMakeLists.txt for explict libhel linking.
  - BUGS updated.
  - Downloads page build instructions updated -- thanks dtm for the report.
  - Library versions recorded in log file to aid bug reporting.
