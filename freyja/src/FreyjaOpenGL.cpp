@@ -161,7 +161,7 @@ OpenGL::OpenGL() :
 	// Depends on class Texture replacement
 	//SetMaxTextureCount(mTextureLimit);
 
-	int stencil;
+	GLint stencil;
 	glGetIntegerv(GL_STENCIL_BITS, &stencil);
 	freyja_print("\tGL_STENCIL_BITS            \t\t[%i]", stencil);
 
@@ -371,7 +371,7 @@ void OpenGL::SetMaxTextureCount(uint32 max)
 	if (mTextureIds) 
 		delete [] mTextureIds;
 
-	mTextureIds = new uint32[max];
+	mTextureIds = new GLuint[max];
 	glGenTextures(max, mTextureIds);
 }
 
@@ -1647,7 +1647,11 @@ void mglDrawGrid(vec3_t color, vec_t size, vec_t step, vec_t scale)
 
 void mglGetOpenGLViewport(int *viewportXYWH) // int[4]
 {
-	glGetIntegerv(GL_VIEWPORT, viewportXYWH);
+	GLint v[4];
+	glGetIntegerv(GL_VIEWPORT, v);
+
+	for (uint32 i = 0; i < 4; ++i)
+		viewportXYWH[i] = v[i];
 }
 
 
