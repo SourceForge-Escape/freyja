@@ -53,13 +53,14 @@ include_directories( /usr/include/freetype2 )
 link_libraries(	-lfreetype -lz )
 
 
-# OpenGL Framework
-if(OSX)
+# OpenGL Framework and freetype2 for MacOS
+#if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+if(APPLE)
 FIND_LIBRARY( OPENGL_LIBRARIES NAMES OpenGL)
 link_libraries( ${OPENGL_LIBRARIES} )
 include_directories(  /usr/X11R6/include  /usr/X11R6/include/freetype2  )
 link_directories( /usr/X11R6/lib )
-endif(OSX)
+endif(APPLE)
 
 
 include_directories( ../mstl ../libfreyja ../libhel ../libmgtk ../tinyxml .  )
