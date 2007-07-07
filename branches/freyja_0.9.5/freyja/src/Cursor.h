@@ -55,7 +55,9 @@ class Cursor
 	} axis_t;
 
 
-	const static vec_t min = 0.5f, mid = 2.4f, max = 1.744f;
+	static vec_t min;
+	static vec_t mid;
+	static vec_t max;
 
 
 	////////////////////////////////////////////////////////////

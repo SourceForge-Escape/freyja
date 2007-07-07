@@ -27,7 +27,7 @@
 
 
 #ifdef HAVE_OPENGL
-#   ifdef MACOSX
+#   ifdef __APPLE__ //MACOSX
 #      include <OpenGL/OpenGL.h>
 #      include <OpenGL/gl.h>
 #      include <OpenGL/glu.h>

@@ -6,7 +6,8 @@
 
  Kagura prealpha, 0.9.5.15 -- "Bugfix quickfix"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com> 
- - Thanks to dtm for testing OS X builds.
+ - Thanks to dtm for testing OS X builds, and acting as my compiler.  ;)
+ - FIX for OSX mgtk gtk+ build.
  - FIX for CMakeLists.txt for explict libhel linking.
  - BUGS updated.
  - Downloads page build instructions updated -- thanks dtm for the report.
