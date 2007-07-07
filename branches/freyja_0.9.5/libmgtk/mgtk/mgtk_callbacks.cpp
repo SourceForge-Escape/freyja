@@ -1325,6 +1325,12 @@ void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
 }
 
 
+const char *mgtk_version()
+{
+	return VERSION;
+}
+
+
 int mgtk_init(int argc, char *argv[])
 {
 #ifdef ENABLE_NLS

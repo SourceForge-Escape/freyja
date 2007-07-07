@@ -3255,7 +3255,11 @@ int lua_freyjaPrintMessage(lua_State *L)
 		return 0;
 
 	const char *msg = lua_tostring(L, 1);
-	freyjaPrintMessage(msg);
+
+	if (msg)
+	{
+		freyjaPrintMessage(msg);
+	}
 	return 0;
 }
 

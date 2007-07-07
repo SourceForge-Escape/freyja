@@ -16,29 +16,16 @@
 
  * UNCONFIRMED Repacking might break aging Undo system for some operations.
 
- * .freyja file format sometimes corrupts with certain animations.
-
- * CRASH on animation scrub with md5 model!  2007.06.15
+ * File corruption with .freyja format with certain animations.
+	- This should be 'fixed' when the old keyframe system is replaced.
 
  * File export may be broken in some event paths 
-	- explict freyja filter won't save -- prob due to it not being a module
+	- Explict freyja filter won't save -- prob due to it not being a module
 
- * *.smd import bug ( Canceling attempts to open Open... extention. )
-
- * Group (faces) selection is broken
-
- * Extrude ( legacy replacement ) broken for non-closed mesh
-
- * Render Faces... has no transforms 'previews' (could use vertex blend buffer)
-
- * Crash on multiple merge with 'created' objects, but not imported
+ * Import *.smd dialog bug.
+	- Canceling attempts to open "Open..."'s extention.
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor
-
- * Fix UV unwrap
-	- Projection across boundries ( axes ) aren't handled
-	- No fitting functionality
-	- No overlap fixup provided
 
 
  B - Moderate bugs
@@ -46,37 +33,36 @@
 
  * Save As.. dialog triggers twice with text entry event.
 
- * 'Size' cursor has interesting recentering... it's correct, but maybe it
-   should floor on a y value to avoid confusing people?
-
  * Extruding faces can cause invalid mesh pieces for odd topologies
 
  * Model transforms with cursor have 'jump' - temp workaround is to 'tap' cursor
 	after a 'jump'
 
- * Cursor reset on undo ( use a freaking seperate undo state system for cursor )
+ * Cursor reset on undo 
+	- Use a seperate undo state system for cursor, or store extra state.
 
 
  C - Annoying bugs
  ----------------------------
 
- * Models loading w/o complete materials often are alpha masked. ( plugins issue )
+ * Models loading w/o complete materials often are alpha masked.
+	- This is a plugin bug caused by plugins not requesting enough material ids.
 
  * Mesh rotator for box and cursor are unmatched!
 
- * May not build in OS X anymore.  ( No longer have access to a mac. )
-
- * Actual bug report: 'generated sphere looks retarded' it's true too
-   just needs to be subdiv with quads
+ * May not build in OS X anymore.  
+	- No longer have access to a mac, so feel free to donate a mini.
 
  * Plugins
-	- I guess I forgot to port some plugins to support 64bit/big endian oops
-	- Halflife is broken ( looks like a deformed umbra loader, 
-	  which now we 'expand' deformed ( skinned ) meshes an collaspe back later )
-	- PSK skeleton broken
-	- GRN skeleton broken
+	- Some plugins don't support 64bit/big endian still.
+	- Halflife
+		. Freyja 0.9.5 takes unweighted mesh, so unweight the mesh. 
+	- PSK
+		. Skeleton incorrect.
+	- GRN 
+		. Skeleton incorrect.
 
- * Reverse engineer plugin spin buttons don't always update
+ * Reverse engineer plugin spinbuttons don't always update
 	- Tabbing always updates
 	- Sometimes typing space and enter updates.. weird Gtk+ events
 
@@ -84,8 +70,8 @@
 Regression notes
 ---------------------------------------------------
 
-* Modal dialogs fail to cancel.
-	- Likely caused by build optimazations.
+* When modal dialogs fail to cancel.
+	- Likely caused by build optimazations with gtk+ wrapper.
 
 
 

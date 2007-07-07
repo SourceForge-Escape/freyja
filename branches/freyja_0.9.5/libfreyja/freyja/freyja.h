@@ -378,6 +378,14 @@ extern "C" {
 	 * Post : Imports model using the exact module passed in...
 	 *        Returns 0 on sucess
 	 ------------------------------------------------------*/
+
+	const char *libfreyjaVersion();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : String version info.
+	 *        
+	 ------------------------------------------------------*/
+
 }
 
 

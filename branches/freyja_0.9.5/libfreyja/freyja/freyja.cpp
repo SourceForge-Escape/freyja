@@ -424,6 +424,13 @@ const char *freyjaActionToString(freyja_transform_action_t action)
 }
 
 
+const char *libfreyjaVersion()
+{
+	return VERSION;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////
 // Freyja Memory management and logging
 // Based on mtk_mememory, however I removed the expensive RBTree 

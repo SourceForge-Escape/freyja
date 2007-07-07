@@ -4,9 +4,12 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
- Kagura prealpha, 0.9.5.15
- TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
+ Kagura prealpha, 0.9.5.15 -- "Bugfix quickfix"
+ TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com> 
+ - BUGS updated.
+ - Downloads page build instructions updated -- thanks dtm for the report.
+ - Library versions recorded in log file to aid bug reporting.
+ - FIX for lua (Win32) plugin crash. lua's freyjaPrintMessage was passing nil.
  - FIX for bone name rendering trashing 'icon' colors.
  - FIX for perlinoise crash.
 
