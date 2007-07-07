@@ -14,18 +14,20 @@
  A - Serious bugs
  ----------------------------
 
- * UNCONFIRMED Repacking might break aging Undo system for some operations.
+ * [UNCONFIRMED] Repacking might break aging Undo system for some operations.
+	- This is bug is only a theory based on how undo works for objects.
 
  * File corruption with .freyja format with certain animations.
 	- This should be 'fixed' when the old keyframe system is replaced.
 
  * File export may be broken in some event paths 
-	- Explict freyja filter won't save -- prob due to it not being a module
+	- Explicit freyja filter won't save -- prob due to it not being a module
 
  * Import *.smd dialog bug.
-	- Canceling attempts to open "Open..."'s extention.
+	- Canceling attempts to open "Open..."'s extension.
 
- * UV viewmode in Model tab editor doesn't work the same as UV tab editor
+ * UV viewmode in Model tab editor doesn't work the same as UV tab editor.
+	- Clicking in the viewport must reset edit mode for this to work.
 
 
  B - Moderate bugs
@@ -33,13 +35,13 @@
 
  * Save As.. dialog triggers twice with text entry event.
 
- * Extruding faces can cause invalid mesh pieces for odd topologies
+ * Extruding faces can cause invalid mesh pieces for open mesh topologies.
 
  * Model transforms with cursor have 'jump' - temp workaround is to 'tap' cursor
 	after a 'jump'
 
  * Cursor reset on undo 
-	- Use a seperate undo state system for cursor, or store extra state.
+	- Use a separate undo state system for cursor, or store extra state.
 
 
  C - Annoying bugs
@@ -50,9 +52,6 @@
 
  * Mesh rotator for box and cursor are unmatched!
 
- * May not build in OS X anymore.  
-	- No longer have access to a mac, so feel free to donate a mini.
-
  * Plugins
 	- Some plugins don't support 64bit/big endian still.
 	- Halflife
@@ -62,16 +61,16 @@
 	- GRN 
 		. Skeleton incorrect.
 
- * Reverse engineer plugin spinbuttons don't always update
-	- Tabbing always updates
-	- Sometimes typing space and enter updates.. weird Gtk+ events
+ * ReverseEngineer plugin's spinbuttons don't always update value.
+	- Tabbing always updates.
+	- Sometimes typing space and enter updates.. weird Gtk+ events.
 
 
 Regression notes
 ---------------------------------------------------
 
 * When modal dialogs fail to cancel.
-	- Likely caused by build optimazations with gtk+ wrapper.
+	- This is caused by build optimizations with Gtk+ wrapper.
 
 
 
