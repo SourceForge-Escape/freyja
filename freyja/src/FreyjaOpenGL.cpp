@@ -40,7 +40,7 @@
 using namespace hel;
 
 
-#ifdef USING_OPENGL_EXT
+#if USING_OPENGL_EXT && !__APPLE__
 PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB = NULL;
 PFNGLMULTITEXCOORD2FARBPROC h_glMultiTexCoord2fARB = NULL;
 PFNGLMULTITEXCOORD3FARBPROC h_glMultiTexCoord3fARB = NULL;
@@ -166,7 +166,7 @@ OpenGL::OpenGL() :
 	freyja_print("\tGL_STENCIL_BITS            \t\t[%i]", stencil);
 
 	// Hook up functions
-#ifdef USING_OPENGL_EXT
+#if USING_OPENGL_EXT && !__APPLE__
 	h_glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");
 	h_glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)mglGetProcAddress("glMultiTexCoord2fARB");
 	h_glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)mglGetProcAddress("glMultiTexCoord3fARB");
@@ -398,7 +398,7 @@ bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 	}
 
 
-#ifdef USING_OPENGL_EXT
+#if USING_OPENGL_EXT && !__APPLE__
 	if (!h_glGenProgramsARB || !h_glBindProgramARB || !h_glProgramStringARB ||
 		!h_glGetProgramivARB)
 	{
@@ -451,7 +451,7 @@ bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 
 void OpenGL::BindFragmentARB(int32 fragmentId)
 {
-#ifdef USING_OPENGL_EXT
+#if USING_OPENGL_EXT && !__APPLE__
 	if (fragmentId < 0)
 	{
 		glDisable(GL_FRAGMENT_PROGRAM_ARB);
@@ -524,7 +524,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 		return false;
 	}
 
-#ifdef USING_OPENGL_EXT
+#if USING_OPENGL_EXT && !__APPLE__
 	if (!h_glCreateProgramObjectARB || !h_glCreateShaderObjectARB ||
 		!h_glCompileShaderARB || !h_glLinkProgramARB || !h_glGetObjectParameterivARB || !h_glUseProgramObjectARB)
 	{
@@ -602,7 +602,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 
 void OpenGL::BindFragmentGLSL(int32 fragmentId)
 {
-#ifdef USING_OPENGL_EXT
+#if USING_OPENGL_EXT && !__APPLE__
 	if (h_glUseProgramObjectARB)
 	{
 		GLhandleARB prog = fragmentId;
@@ -614,7 +614,7 @@ void OpenGL::BindFragmentGLSL(int32 fragmentId)
 
 void OpenGL::DeleteFragmentGLSL(int32 obj)
 {
-#ifdef USING_OPENGL_EXT
+#if USING_OPENGL_EXT && !__APPLE__
 	if (h_glDeleteObjectARB)
 	{
 		GLhandleARB object = obj;
@@ -626,7 +626,7 @@ void OpenGL::DeleteFragmentGLSL(int32 obj)
 
 void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 {
-#ifdef USING_OPENGL_EXT
+#if USING_OPENGL_EXT && !__APPLE__
 	if (h_glGetInfoLogARB == NULL)
 		return;
 

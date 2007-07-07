@@ -52,6 +52,16 @@ include_directories( /usr/include/freetype2 )
 #$(shell freetype-config --libs)
 link_libraries(	-lfreetype -lz )
 
+
+# OpenGL Framework
+if(OSX)
+FIND_LIBRARY( OPENGL_LIBRARIES NAMES OpenGL)
+link_libraries( ${OPENGL_LIBRARIES} )
+include_directories(  /usr/X11R6/include  /usr/X11R6/include/freetype2  )
+link_directories( /usr/X11R6/lib )
+#endif(OSX)
+
+
 include_directories( ../mstl ../libfreyja ../libhel ../libmgtk ../tinyxml .  )
 
 link_directories( ../libfreyja ../libhel ../libmgtk ../tinyxml )
