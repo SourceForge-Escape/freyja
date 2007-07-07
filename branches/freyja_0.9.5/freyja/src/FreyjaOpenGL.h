@@ -117,7 +117,7 @@ typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONARBPROC) (GLhandleARB programObj
 #   error "This module requires an OpenGL SDK"
 #endif
 
-#if defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT)
+#if defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT) && !__APPLE__
 extern PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB;
 extern PFNGLMULTITEXCOORD2FARBPROC h_glMultiTexCoord2fARB;
 extern PFNGLMULTITEXCOORD3FARBPROC h_glMultiTexCoord3fARB;
