@@ -38,6 +38,12 @@ include_directories( ../tinyxml )
 link_directories( ../tinyxml )
 link_libraries(	-ltinyxml )
 
+# libhel
+add_definitions( -DHEL_FOUND -DHAVE_LIBHEL -DHAVE_HEL )
+include_directories( ../libhel )
+link_directories( ../libhel )
+link_libraries(	-lhel-0.2.2 )
+
 # Lua
 FIND_LIBRARY(LUA_FOUND lua5.1)
 if (LUA_FOUND)
@@ -56,7 +62,7 @@ if (PYTHON_FOUND)
 endif (PYTHON_FOUND)
 
 
-include_directories( ../mstl ../libhel .  )
+include_directories( ../mstl .  )
 
 set(Objs
 	freyja/freyja
