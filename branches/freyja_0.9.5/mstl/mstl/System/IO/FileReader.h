@@ -95,28 +95,28 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void ReadInt16Array(long size, short array[]);
+	virtual void ReadInt16Array(unsigned long size, short array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Read an array of 16bit ints.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void ReadInt32Array(long size, int array[]);
+	virtual void ReadInt32Array(unsigned long size, int array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Read an array of 32bit ints.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void ReadLongArray(long size, long array[]);
+	virtual void ReadLongArray(unsigned long size, long array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Read an array of 32bit ints.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void ReadFloat32Array(long size, float array[]);
+	virtual void ReadFloat32Array(unsigned long size, float array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Read an array of 32bit floats.
@@ -250,14 +250,14 @@ void FileReader::ReadFloat32(float &f)
 
 
 inline
-void FileReader::ReadInt16Array(long size, short array[])
+void FileReader::ReadInt16Array(unsigned long size, short array[])
 {
 	fread(array, size*2, 1, mFileHandle);
 }
 
 
 inline
-void FileReader::ReadInt32Array(long size, int array[])
+void FileReader::ReadInt32Array(unsigned long size, int array[])
 {	
 	for (unsigned int i = 0; i < size; ++i)
 	{
@@ -267,7 +267,7 @@ void FileReader::ReadInt32Array(long size, int array[])
 
 
 inline
-void FileReader::ReadLongArray(long size, long array[])
+void FileReader::ReadLongArray(unsigned long size, long array[])
 {	
 	for (unsigned int i = 0; i < size; ++i)
 	{
@@ -277,7 +277,7 @@ void FileReader::ReadLongArray(long size, long array[])
 
 
 inline
-void FileReader::ReadFloat32Array(long size, float array[])
+void FileReader::ReadFloat32Array(unsigned long size, float array[])
 {	
 	for (unsigned int i = 0; i < size; ++i)
 	{

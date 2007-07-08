@@ -27,10 +27,34 @@
 
 
 #ifdef HAVE_OPENGL
-#   ifdef __APPLE__ //MACOSX
+#   if defined( __APPLE__ ) 
 #      include <OpenGL/OpenGL.h>
 #      include <OpenGL/gl.h>
 #      include <OpenGL/glu.h>
+
+/* APPLE get proc address routine that should work on all OS X versions. */
+#      include <mach-o/dyld.h>
+#      include <stdlib.h>
+#      include <string.h>
+
+inline
+void *NSGLGetProcAddress(const char *name)
+{
+    // Prepend a '_' for the Unix C symbol mangling convention
+    char *symbolName = new char[strlen (name) + 2];
+    strcpy(symbolName + 1, name);
+    symbolName[0] = '_';
+
+    NSSymbol symbol = NULL;
+    if (NSIsSymbolNameDefined(symbolName))
+       symbol = NSLookupAndBindSymbol(symbolName);
+
+	delete [] symbolName;
+    return symbol ? NSAddressOfSymbol(symbol) : NULL;
+}
+
+#         define mglGetProcAddress(string) NSGLGetProcAddress( string )
+
 #   elif WIN32
 #      include <GL/gl.h>
 #      include <GL/glu.h>
@@ -90,7 +114,7 @@ typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONARBPROC) (GLhandleARB programObj
 #      undef USING_OPENGL_EXT
 #   endif  // WIN32_GL_EXT
 
-#   else
+#   else // ! WIN32 && ! APPLE --> GLX
 #      include <GL/gl.h>
 #      include <GL/glu.h>
 #      include <GL/glext.h>
@@ -98,6 +122,7 @@ typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONARBPROC) (GLhandleARB programObj
 #      include <GL/glx.h>
 #      include <GL/glxext.h>
 #      define mglGetProcAddress(string) glXGetProcAddressARB((GLubyte *)string)
+
 #   endif
 
 #if CHECK_FOR_OPENGL_ERRORS
@@ -117,7 +142,7 @@ typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONARBPROC) (GLhandleARB programObj
 #   error "This module requires an OpenGL SDK"
 #endif
 
-#if defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT) && !__APPLE__
+#if defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT)
 extern PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB;
 extern PFNGLMULTITEXCOORD2FARBPROC h_glMultiTexCoord2fARB;
 extern PFNGLMULTITEXCOORD3FARBPROC h_glMultiTexCoord3fARB;

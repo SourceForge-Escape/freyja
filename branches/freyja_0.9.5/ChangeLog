@@ -6,8 +6,11 @@
 
  Kagura prealpha, 0.9.5.15 -- "Bugfix quickfix"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com> 
+ - mstl file I/O warnings clean up.
+ - OS X OpenGL extensions enabled again. 
  - Documentation overload on website for how to build this project.
  - FIX for win32 cross compiling meta make.
+ - FIX for pre Gtk+ 2.8 builds for file chooser overwrite. 
  - Thanks to dtm for testing OS X builds, and acting as my compiler.  ;)
  - FIX for OSX build. ( No cmake build based plugins yet. )
  - FIX for CMakeLists.txt for explict libhel linking.

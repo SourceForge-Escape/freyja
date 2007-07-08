@@ -192,21 +192,21 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void ReadInt32Array(long size, int array[]);
+	virtual void ReadInt32Array(unsigned long size, int array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void ReadLongArray(long size, long array[]);
+	virtual void ReadLongArray(unsigned long size, long array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void ReadFloat32Array(long size, float array[]);
+	virtual void ReadFloat32Array(unsigned long size, float array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -450,7 +450,8 @@ bool BufferedFileReader::OpenChunk(const char *filename,
 	{
 		fseek(mFileHandle, 0, SEEK_END);
 
-		if (offset + size > (unsigned int)ftell(mFileHandle))
+		long tmp = ftell(mFileHandle);
+		if ( (offset + size) > (unsigned long)tmp || tmp < 0)
 			return false;
 
 		mEnd = offset + size;
@@ -543,7 +544,7 @@ void BufferedFileReader::ReadFloat32(float &f)
 
 
 inline
-void BufferedFileReader::ReadInt32Array(long size, int array[])
+void BufferedFileReader::ReadInt32Array(unsigned long size, int array[])
 {	
 	for (unsigned int i = 0; i < size; ++i)
 	{
@@ -553,7 +554,7 @@ void BufferedFileReader::ReadInt32Array(long size, int array[])
 
 
 inline
-void BufferedFileReader::ReadLongArray(long size, long array[])
+void BufferedFileReader::ReadLongArray(unsigned long size, long array[])
 {	
 	for (unsigned int i = 0; i < size; ++i)
 	{
@@ -563,7 +564,7 @@ void BufferedFileReader::ReadLongArray(long size, long array[])
 
 
 inline
-void BufferedFileReader::ReadFloat32Array(long size, float array[])
+void BufferedFileReader::ReadFloat32Array(unsigned long size, float array[])
 {	
 	for (unsigned int i = 0; i < size; ++i)
 	{
