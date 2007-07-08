@@ -42,9 +42,9 @@ add_definitions(
 	-DHAVE_OPENGL 
 	-DHAVE_GTKGL 
 	-DHAVE_HEL
-	-DUSING_OPENGL_EXT
 	-DHAVE_FREETYPE2 
 	-DTINYXML_FOUND
+	-DHAVE_GTKGLEXT
 )
 
 #$(shell freetype-config --cflags)
@@ -57,12 +57,12 @@ link_libraries(	-lfreetype -lz )
 # OpenGL Framework and freetype2 for MacOS
 #if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 if(APPLE)
-FIND_LIBRARY( OPENGL_LIBRARIES NAMES OpenGL)
-link_libraries( ${OPENGL_LIBRARIES} )
-include_directories(  /usr/X11R6/include  /usr/X11R6/include/freetype2  )
-link_directories( /usr/X11R6/lib )
+	FIND_LIBRARY( OPENGL_LIBRARIES NAMES OpenGL)
+	link_libraries( ${OPENGL_LIBRARIES} )
+	include_directories(  /usr/X11R6/include  /usr/X11R6/include/freetype2  )
+	link_directories( /usr/X11R6/lib )
 else(APPLE)
-add_definitions( -DHAVE_GTKGLEXT )
+	add_definitions( -DUSING_OPENGL_EXT )
 endif(APPLE)
 
 
