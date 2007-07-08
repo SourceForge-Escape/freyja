@@ -27,7 +27,7 @@ add_definitions(
 	-DPROGRAM_NAME=\"\\\"${Name}\\\"\" 
 
 	-DUSING_GTK_2_0 -DHAVE_FREYJA_IMAGE -DHAVE_OPENGL
-	-DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR -DMGTKEXPORTSCLASS 
+	-DFORCE_ICON_TOOLBAR -DMGTKEXPORTSCLASS 
 )
 
 # DEBUG
@@ -61,6 +61,8 @@ FIND_LIBRARY( OPENGL_LIBRARIES NAMES OpenGL)
 link_libraries( ${OPENGL_LIBRARIES} )
 include_directories(  /usr/X11R6/include  /usr/X11R6/include/freetype2  )
 link_directories( /usr/X11R6/lib )
+else(APPLE)
+add_definitions( -DHAVE_GTKGLEXT )
 endif(APPLE)
 
 
