@@ -8,10 +8,32 @@
  * FIX TTF renderer ( glyph settings aren't used )
  	- Add back typesetting for GLPrinter.
 
+ * Metadata object eg for map objects ( currently bones w/ metadata are used )
+
+
+ Freyja 0.9.5.16	TBD
+ -----------------------------------------------------------------------------
+
+ * Lua
+	- Expose things like control points via libfreyja backend.
+ 	- Widgets: lua mgtk wrapper to allow full interface plugins.
+ 	- Binary file I/O wrapper.
+
  * Improve Camera.
 	- Add more options such as perspective settings.
 	- Editor mode support for camera view.
  	- Camera animation editor.
+
+ * Mesh replace stack use with list (as [ordered] queue/stack).
+
+ * mgtk Query string support.
+
+ * Remove LegacyABI use in MeshABI mesh generators.
+	- Time for Catmull-Clark 'spheres'?
+
+
+ Freyja 0.9.5.17	TBD
+ -----------------------------------------------------------------------------
 
  * Finish up new keyframing + bones ( UI + renderer ).
 	- Slerp for QuatKeyframe
@@ -22,20 +44,6 @@
 		- Allows *Next() [list] and *ElementAt() [vector] ABI access.
 	- Bone undo support ( maybe store state from edit mode chord )
  	- (Un)Parenting for bones with dashed line UI.
-
- * Remove LegacyABI use in MeshABI mesh generators.
-	- Time for Catmull-Clark 'spheres'?
-
- * mgtk Query string support.
-
- * Lua
- 	- Widgets: lua mgtk wrapper to allow full interface plugins.
- 	- Binary file I/O wrapper.
-
- * Metadata object eg for map objects ( currently bones w/ metadata are used )
-
- * Mesh replace stack use with list (as [ordered] queue/stack).
-
 
 
  Freyja, Development branch 0.9.5 ( Current )
@@ -89,14 +97,11 @@
 	- Reduce the import/export test.
 	- Likely go with the popular 'guesser' for open and native for save.
 
- * Fix mouse cursor control.
+ * Cursor
  	- Quat based rotation cursor?
 	- Rotation modifier can 'lock' and may want bigger targets for general use.
 	- Rotation not reset before object creation/selection sometimes causing bug.
 	- Transform has a 'pop' or 'jump' in model mode.
-
- * Basic geometry previews using blend vertices buffer - avoid data mutators.
-	- Faces/Face should use blend vertices buffer, then 'write' results later
 
  * UV unwrap improvements.
 	- Add unwrap to cyn uvmap ( no overlayed uv polygons, fill quad, etc )
@@ -137,8 +142,6 @@
 	- Constraints support
 	- Ref weights from vertex to fix blending issues
 
- * Make generic plugin interface for new UI control points.
-
  * Automatic online updates from the modeler itself.
 
  * ZIP file based pak format for freyja format models w/ textures, etc?
@@ -165,9 +168,6 @@
 
  * paint support for vertex weld?
 
- * mstl hash, splay_tree
-	 - Texture / GLSL Shader instance manager ( as cache )
-
  * Vertex extrude
 
  * Separate grid toggle for the non-orbit windows ( should center on axis too )
@@ -188,8 +188,10 @@
  * sphere brush for paint tool
 
  * XML link support eg <link name="miko-weight.xml" type="weight" />
+	- This XML file depends upon another one to be loaded as well.
 
  * Texture buffer expansion:
+	- Texture / GLSL Shader instance manager ( as cache )
  	- Options to rotate pixmaps? 
 	- diffuse, heightmap, normalmap, specular map, decal map, etc
 
@@ -204,7 +206,7 @@
  		. Bone names option as drop down for bone visibily?
 
 	- Render Faces... has no transforms 'previews'.
-		. Use vertex blend buffer perhaps to avoid 'state write'.
+		. Use vertex blend buffer while editing and 'state write' with token.
 
 	- Moving out of 'this is for developers' to 'this is for users'.
 		. Time to start hiding debugging toggles instead of on front shelf.

@@ -138,7 +138,7 @@ void Texture::disableMultiTexture()
 
 	glDisable(GL_TEXTURE_2D);
 
-#if USING_OPENGL_EXT && !__APPLE__
+#if USING_OPENGL_EXT 
 	if (h_glActiveTextureARB)
 	{
 		h_glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -152,7 +152,7 @@ void Texture::useMultiTexture(float aU, float aV, float bU, float bV)
 	if (!(mFlags & fUseMultiTexture))
 		return;
 
-#if USING_OPENGL_EXT && !__APPLE__
+#if USING_OPENGL_EXT 
 	if (h_glMultiTexCoord2fARB)
 	{
 		h_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, aU, aV);
@@ -167,7 +167,7 @@ void Texture::useMultiTexture(float u, float v)
 	if (!(mFlags & fUseMultiTexture))
 		return;
 
-#if USING_OPENGL_EXT && !__APPLE__
+#if USING_OPENGL_EXT 
 	if (h_glMultiTexCoord2fARB)
 	{
 		h_glMultiTexCoord2fARB(GL_TEXTURE0_ARB, u, v);
@@ -179,7 +179,7 @@ void Texture::useMultiTexture(float u, float v)
 
 void freyja_renders_old_multi(int texture, int texture2)
 {
-#if USING_OPENGL_EXT && !__APPLE__
+#if USING_OPENGL_EXT 
 	if (h_glActiveTextureARB)
 	{
 		h_glActiveTextureARB(GL_TEXTURE0_ARB);
@@ -218,7 +218,7 @@ void Texture::bindMultiTexture(int texture0, int texture1)
 	mTextureId  = texture0;
 	mTextureId2 = texture1;
 
-#if USING_OPENGL_EXT && !__APPLE__
+#if USING_OPENGL_EXT 
 	if (h_glActiveTextureARB)
 	{
 		h_glActiveTextureARB(GL_TEXTURE0_ARB);
