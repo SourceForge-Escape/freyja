@@ -36,25 +36,6 @@
 
  * Mesh replace stack use with list (as [ordered] queue/stack).
 
- * HID
-	- Grouping to reduce number of widgets.
- 		. Light options with drop down menu button: dir/pos/spot?
- 		. Grid view options with drop down menu button. eg: wire/solid
- 		. Bone names option as drop down for bone visibily?
-
-	- Render Faces... has no transforms 'previews'.
-		. Use vertex blend buffer perhaps to avoid 'state write'.
-
-	- Moving out of 'this is for developers' to 'this is for users'.
-		. Time to start hiding debugging toggles instead of on front shelf.
-
-	- 'Size' cursor 'recenters' -- floor on Y value to avoid confusing people?
-
-	- Bones type visibility 'hard set' by edit mode.
-
-	- View mode toggles ( chords ) into edit modes ( radio type ).
-
-	- Shading for editing flat / face normal / etc
 
 
  Freyja, Development branch 0.9.5 ( Current )
@@ -195,8 +176,6 @@
 
  * Combine single/group object modes eg faces... + face = face mode
 
- * 2 window view mode
-
  * toolbar down left side for generic edit modes?
 
  * Freyja bone editing grouping ala vertices... 
@@ -208,8 +187,6 @@
 
  * sphere brush for paint tool
 
- * Auto build system for win32
-
  * XML link support eg <link name="miko-weight.xml" type="weight" />
 
  * Texture buffer expansion:
@@ -219,6 +196,28 @@
  * Scenegraph: requires 'view' mode vs 'edit' mode
 
  * Plugins using cmake build system.
+
+ * HID
+	- Grouping to reduce number of widgets.
+ 		. Light options with drop down menu button: dir/pos/spot?
+ 		. Grid view options with drop down menu button. eg: wire/solid
+ 		. Bone names option as drop down for bone visibily?
+
+	- Render Faces... has no transforms 'previews'.
+		. Use vertex blend buffer perhaps to avoid 'state write'.
+
+	- Moving out of 'this is for developers' to 'this is for users'.
+		. Time to start hiding debugging toggles instead of on front shelf.
+
+	- Two window view mode
+
+	- 'Size' cursor 'recenters' -- floor on Y value to avoid confusing people?
+
+	- Bones type visibility 'hard set' by edit mode.
+
+	- View mode toggles ( chords ) into edit modes ( radio type ).
+
+	- Shading for editing flat / face normal / etc
 
 
 

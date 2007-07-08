@@ -387,7 +387,8 @@ bool BufferedTextFileReader::OpenChunk(const char *filename,
 	{
 		fseek(mFileHandle, 0, SEEK_END);
 
-		if (offset + size > ftell(mFileHandle))
+		long tmp = ftell(mFileHandle);
+		if ( (offset + size) > (unsigned long)tmp || tmp < 0 )
 			return false;
 
 		mEnd = offset + size;

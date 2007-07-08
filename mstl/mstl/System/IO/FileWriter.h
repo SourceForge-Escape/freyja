@@ -74,21 +74,21 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool WriteInt16Array(long size, short int array[]);
+	bool WriteInt16Array(unsigned long size, short int array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	bool WriteInt32Array(long size, int array[]);
+	bool WriteInt32Array(unsigned long size, int array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	bool WriteFloat32Array(long size, float array[]);
+	bool WriteFloat32Array(unsigned long size, float array[]);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -213,7 +213,7 @@ bool FileWriter::WriteString(unsigned int length, char *buffer)
 
 
 inline
-bool FileWriter::WriteInt16Array(long size, short int array[])
+bool FileWriter::WriteInt16Array(unsigned long size, short int array[])
 {	
 	bool t = false;
 	for (unsigned int i = 0; i < size; ++i)
@@ -225,7 +225,7 @@ bool FileWriter::WriteInt16Array(long size, short int array[])
 
 
 inline
-bool FileWriter::WriteInt32Array(long size, int array[])
+bool FileWriter::WriteInt32Array(unsigned long size, int array[])
 {	
 	bool t = false;
 	for (unsigned int i = 0; i < size; ++i)
@@ -237,7 +237,7 @@ bool FileWriter::WriteInt32Array(long size, int array[])
 
 
 inline
-bool FileWriter::WriteFloat32Array(long size, float array[])
+bool FileWriter::WriteFloat32Array(unsigned long size, float array[])
 {
 	bool t = false;
 	for (unsigned int i = 0; i < size; ++i)

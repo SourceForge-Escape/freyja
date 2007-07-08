@@ -154,8 +154,9 @@ win32:
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
 	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
 	@-mkdir -p $(BUILD_INSTALL_DIR)/win32/
-	@-cp $(BUILD_WIN32_DIR)/$(NAME).dll $(BUILD_INSTALL_DIR)/win32/
 	@-cp $(NAME).mlisp $(BUILD_INSTALL_DIR)/win32/
+
+#	@-cp $(BUILD_WIN32_DIR)/$(NAME).dll $(BUILD_INSTALL_DIR)/win32/
 
 osx:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
