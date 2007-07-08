@@ -31,6 +31,7 @@
 #      include <OpenGL/OpenGL.h>
 #      include <OpenGL/gl.h>
 #      include <OpenGL/glu.h>
+#      include <OpenGL/glext.h>
 
 /* APPLE get proc address routine that should work on all OS X versions. */
 #      include <mach-o/dyld.h>

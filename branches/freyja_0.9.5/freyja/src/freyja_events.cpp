@@ -803,7 +803,7 @@ void eGenerateCone()
 
 	if (ok)
 	{
-		int count = mgtk_get_query_dialog_int(dialog, "count");
+		//int count = mgtk_get_query_dialog_int(dialog, "count");
 		int wedges = mgtk_get_query_dialog_int(dialog, "segments");
 		vec_t height = mgtk_get_query_dialog_float(dialog, "height");
 		vec_t radius = mgtk_get_query_dialog_float(dialog, "radius");
