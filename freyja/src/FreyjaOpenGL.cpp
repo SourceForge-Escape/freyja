@@ -39,8 +39,10 @@
 
 using namespace hel;
 
+#if defined(__APPLE__)
+   // Nothing to see here
 
-#if USING_OPENGL_EXT
+#elif USING_OPENGL_EXT
 PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB = NULL;
 PFNGLMULTITEXCOORD2FARBPROC h_glMultiTexCoord2fARB = NULL;
 PFNGLMULTITEXCOORD3FARBPROC h_glMultiTexCoord3fARB = NULL;
@@ -167,6 +169,10 @@ OpenGL::OpenGL() :
 
 	// Hook up functions
 #if USING_OPENGL_EXT
+#   if defined(__APPLE__)
+	// No function pointer mapping needed iirc... but I don't have a test machine or even up-to-date AGL documentation.
+
+#   else
 	h_glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");
 	h_glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)mglGetProcAddress("glMultiTexCoord2fARB");
 	h_glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)mglGetProcAddress("glMultiTexCoord3fARB");
@@ -190,6 +196,7 @@ OpenGL::OpenGL() :
 	h_glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)mglGetProcAddress("glDeleteObjectARB");
 	h_glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)mglGetProcAddress("glGetObjectParameterivARB");
 	h_glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)mglGetProcAddress("glGetUniformLocationARB");
+#   endif // defined(__APPLE__)
 #endif
 
 	mSingleton = this;
