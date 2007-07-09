@@ -3,7 +3,7 @@ set(Name freyja)
 set(Major 0)
 set(Minor 9)
 set(Micro 5)
-set(Revision 14)
+set(Revision 15)
 set(Email mongooseichiban@gmail.com)
 
 #enable_testing()
