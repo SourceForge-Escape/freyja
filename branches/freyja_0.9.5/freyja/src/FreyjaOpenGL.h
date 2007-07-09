@@ -143,7 +143,8 @@ typedef GLint (APIENTRYP PFNGLGETUNIFORMLOCATIONARBPROC) (GLhandleARB programObj
 #   error "This module requires an OpenGL SDK"
 #endif
 
-#if defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT)
+
+#if defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT) && !defined(__APPLE__)
 extern PFNGLMULTITEXCOORD1FARBPROC h_glMultiTexCoord1fARB;
 extern PFNGLMULTITEXCOORD2FARBPROC h_glMultiTexCoord2fARB;
 extern PFNGLMULTITEXCOORD3FARBPROC h_glMultiTexCoord3fARB;
@@ -167,6 +168,33 @@ extern	PFNGLGETINFOLOGARBPROC h_glGetInfoLogARB;
 extern  PFNGLDELETEOBJECTARBPROC h_glDeleteObjectARB;
 extern  PFNGLGETOBJECTPARAMETERIVARBPROC h_glGetObjectParameterivARB;
 extern  PFNGLGETUNIFORMLOCATIONARBPROC h_glGetUniformLocationARB;
+
+#elif defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT) && defined(__APPLE__)
+
+#   define h_glMultiTexCoord1fARB glMultiTexCoord1fARB
+#   define h_glMultiTexCoord2fARB glMultiTexCoord2fARB
+#   define h_glMultiTexCoord3fARB glMultiTexCoord3fARB
+#   define h_glMultiTexCoord4fARB glMultiTexCoord4fARB
+#   define h_glActiveTextureARB glActiveTextureARB
+#   define h_glClientActiveTextureARB glClientActiveTextureARB
+
+#   define h_glGenProgramsARB glGenProgramsARB
+#   define h_glBindProgramARB glBindProgramARB
+#   define h_glProgramStringARB glProgramStringARB
+#   define h_glGetProgramivARB glGetProgramivARB
+
+#   define h_glCreateShaderObjectARB glCreateShaderObjectARB
+#   define h_glShaderSourceARB glShaderSourceARB
+#   define h_glCompileShaderARB glCompileShaderARB
+#   define h_glCreateProgramObjectARB glCreateProgramObjectARB
+#   define h_glAttachObjectARB glAttachObjectARB
+#   define h_glLinkProgramARB glLinkProgramARB
+#   define h_glUseProgramObjectARB glUseProgramObjectARB
+#   define h_glGetInfoLogARB glGetInfoLogARB
+#   define h_glDeleteObjectARB glDeleteObjectARB
+#   define h_glGetObjectParameterivARB glGetObjectParameterivARB
+#   define h_glGetUniformLocationARB glGetUniformLocationARB
+
 
 #else
 extern void *h_glMultiTexCoord1fARB;

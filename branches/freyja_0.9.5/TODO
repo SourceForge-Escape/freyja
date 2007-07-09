@@ -2,16 +2,37 @@
  TODO
  =============================================================================
 
- Freyja 0.9.5.15	TBD
+ Freyja 0.9.5.16	TBD
  -----------------------------------------------------------------------------
+
+ * FIX Save As.. dialog triggers twice with text entry event.
+	- Make this *.freyja only and using the one-off choosers to fix.
+	- Related fix the material Save As... also
+		. Also add recent files for material for the hell of it.
 
  * FIX TTF renderer ( glyph settings aren't used )
  	- Add back typesetting for GLPrinter.
 
+ * XML freyja file format.
+	- Repacking required.
+	- Save IDs with objects if needed.
+	- Native format should be very stable.
+	- Make external plugins for older text based freyja/ja formats.
+
  * Metadata object eg for map objects ( currently bones w/ metadata are used )
 
+ * Edit modes setting visual mode for things like skeletal 'bone' animation
 
- Freyja 0.9.5.16	TBD
+ * mgtk Query string support.
+
+ * Edge editing.
+	- Select and transform edges in UI.
+	- Replace wireframe renderer with edge renderer?
+	- Mesh::RebuildPlanes()
+	- RELATED Cache s-edge results until light / mesh moves.
+
+
+ Freyja 0.9.5.17	TBD
  -----------------------------------------------------------------------------
 
  * Lua
@@ -26,13 +47,11 @@
 
  * Mesh replace stack use with list (as [ordered] queue/stack).
 
- * mgtk Query string support.
-
  * Remove LegacyABI use in MeshABI mesh generators.
 	- Time for Catmull-Clark 'spheres'?
 
 
- Freyja 0.9.5.17	TBD
+ Freyja 0.9.5.18	TBD
  -----------------------------------------------------------------------------
 
  * Finish up new keyframing + bones ( UI + renderer ).
@@ -48,6 +67,8 @@
 
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
+
+ * Swap file for crash recovery and very, very large undo.
 
  * The way the model graph works in 0.9.5 with all the extensions is 
    going to have to be redesigned for 0.9.6 alpha.
@@ -68,12 +89,6 @@
 	- Projection across boundries ( axes ) aren't handled
 	- Fitting functionality
 	- Overlap 'fixup'
-
- * Edge editing.
-	- Replace wireframe renderer with edge renderer.
-	- Mesh::RebuildEdgeGraph()
-	- Mesh::RebuildPlanes()
-	- RELATED Cache s-edge results until light / mesh moves.
 
  * gconf support as dl linked module or DBUS for checking keys.
 	- http://developer.gnome.org/doc/API/gconf

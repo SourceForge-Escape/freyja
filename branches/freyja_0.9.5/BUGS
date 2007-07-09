@@ -33,8 +33,6 @@
  B - Moderate bugs
  ----------------------------
 
- * Save As.. dialog triggers twice with text entry event.
-
  * Extruding faces can cause invalid mesh pieces for open mesh topologies.
 
  * Model transforms with cursor have 'jump' - temp workaround is to 'tap' cursor
