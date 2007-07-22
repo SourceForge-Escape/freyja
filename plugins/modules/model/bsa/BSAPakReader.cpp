@@ -325,7 +325,7 @@ int runBSAPakReaderUnitTest(int argc, char *argv[])
 		return -1;
 	}
 
-	if (!bsa.load(argv[1]) || !r.Open(argv[1]))
+	if (!bsa.Load(argv[1]) || !r.Open(argv[1]))
 	{
 		printf("Couldn't load pakfile %s \n", argv[1]);
 		return -1;

@@ -126,7 +126,7 @@ TESTS=$(BUILDDIR)/$(NAME).test
 # Build rules
 ################################################################
 
-tools: freyjautil.test raw2riff.test cull.test freyjaimageutil.test lineageIIextract.test bsa.test UTPackage.test
+tools: freyjautil.test freyjaimageutil.test lineageIIextract.test bsa.test UTPackage.test raw2riff.test cull.test 
 
 tools-win32: freyjautil.exe UTPackage.exe lineageIIextract.exe
 
@@ -315,21 +315,21 @@ freyjaimageutil.test:
 	$(MAKE) test NAME=freyjaimageutil BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/freyjaimageutil.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_DDS2TGA $(BASE_CFLAGS)" \
-	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++ -lhel-0.2.2 -lfreyja-0.9.5"
 
 cull.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=cull BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/cull.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_CULL $(BASE_CFLAGS)" \
-	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++"
 
 raw2riff.test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) test NAME=raw2riff BUILDDIR=$(BUILD_TEST_DIR) \
 	OBJS="$(BUILD_TEST_DIR)/raw2riff.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_EGG $(BASE_CFLAGS)" \
-	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="$(LOCAL_LIBS) -lm -ldl -lstdc++"
 
 UTPackage.test.old:
 	@-mkdir -p $(BUILD_TEST_DIR)

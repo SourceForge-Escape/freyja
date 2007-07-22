@@ -1671,27 +1671,30 @@ int runUTPackageUnitTest(int argc, char *argv[])
 			switch (argv[1][i])
 			{
 			case 'p':
-				utpak.load(argv[2]);
+				utpak.Load(argv[2]);
 				break;
+
 			case 'x':  /* Bindump UTX to disk decrypted */
-				utpak.setFlags(UTPackage::fDecryptOnly);
+				utpak.SetFlag(UTPackage::fDecryptOnly);
 				
 				if (argc > 3)
 				{
 					utpak.mDecyrptFilename = argv[3];
 				}
 
-				utpak.load(argv[2]);
+				utpak.Load(argv[2]);
 				return 0;
 				break;
+
 			case 'd':  /* Bindump UTX to disk */
-				utpak.setFlags(UTPackage::fDiskDump);
-				utpak.load(argv[2]);
+				utpak.SetFlag(UTPackage::fDiskDump);
+				utpak.Load(argv[2]);
 				return 0;
 				break;
+
 			case 'h':  /* Hexdump UTX to stdout */
-				utpak.setFlags(UTPackage::fHexDump);
-				utpak.load(argv[2]);
+				utpak.SetFlag(UTPackage::fHexDump);
+				utpak.Load(argv[2]);
 				return 0;
 				break;
 			}
