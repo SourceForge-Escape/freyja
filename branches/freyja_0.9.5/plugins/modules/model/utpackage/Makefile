@@ -206,10 +206,12 @@ $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 
 test:
 	@-mkdir -p $(BUILD_TEST_DIR)
+	printf $(FREYJA_LIB)
 	$(MAKE) targets NAME=utpackage SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
 	PROG_OBJS="$(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
-	LD_FLAGS="$(FREYJA_LIB) $(HEL_LIB) -lm -ldl -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="-L$(LIB_FREYJA_DIR) -l$(LIB_FREYJA) -L$(LIB_TINYXML_DIR) -l$(LIB_TINYXML) -L$(LIB_HEL_DIR) -l$(LIB_HEL) -lm -ldl -lstdc++"
+	
 
 
 ##########################################################################

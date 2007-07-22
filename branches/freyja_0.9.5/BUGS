@@ -20,14 +20,15 @@
  * File corruption with .freyja format with certain animations.
 	- This should be 'fixed' when the old keyframe system is replaced.
 
- * File export may be broken in some event paths 
-	- Explicit freyja filter won't save -- prob due to it not being a module
+ * File export won't work for virtual modules.
+	- Explicit *.freyja filter won't save for example.
 
- * Import *.smd dialog bug.
+ * Import model dialog bug.
 	- Canceling attempts to open "Open..."'s extension.
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor.
 	- Clicking in the viewport must reset edit mode for this to work.
+	- This depends on the viewport UI redesign.
 
 
  B - Moderate bugs

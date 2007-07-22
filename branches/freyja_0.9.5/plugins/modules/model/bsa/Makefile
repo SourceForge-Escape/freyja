@@ -207,7 +207,7 @@ test:
 	$(MAKE) targets NAME=bsa SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
 	PROG_OBJS="$(BUILD_TEST_DIR)/BSAPakReader.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_BSAPAKREADER $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+	LD_FLAGS="-lm -ldl -lstdc++ -L$(LIB_FREYJA_DIR) -l$(LIB_FREYJA) -L$(LIB_TINYXML_DIR) -l$(LIB_TINYXML) -L$(LIB_HEL_DIR) -l$(LIB_HEL)"
 
 
 ##########################################################################

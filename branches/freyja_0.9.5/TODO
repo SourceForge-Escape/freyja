@@ -13,7 +13,11 @@
  * FIX TTF renderer ( glyph settings aren't used )
  	- Add back typesetting for GLPrinter.
 
- * XML freyja file format.
+ * FIX Lineage II import from pak vfs.
+
+ * FIX win32 model import crash?
+
+ * New XML based freyja file format.
 	- Repacking required.
 	- Save IDs with objects if needed.
 	- Native format should be very stable.
