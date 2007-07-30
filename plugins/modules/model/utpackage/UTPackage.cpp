@@ -1910,7 +1910,7 @@ int freyja_model__utpackage_export(char *filename)
 
 	return -1;
 }
-#endif
+#endif // FREYJA_PLUGINS
 
 
 

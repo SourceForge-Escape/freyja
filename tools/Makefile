@@ -147,17 +147,8 @@ freyjautil.exe:
 
 UTPackage.exe:
 	@-mkdir -p $(BUILD_WIN32_DIR)
-	$(MAKE) targets BUILDDIR=$(BUILD_WIN32_DIR) \
-	NAME="UTPackage" \
-	MODULE="UTPackage" \
-	SHLIBEXT=".exe" \
-	PROG_OBJS="$(BUILD_WIN32_DIR)/UTPackage.o $(BUILD_WIN32_DIR)/URTexture.o" \
-	CC=$(WIN32_CC) \
-	CPP=$(WIN32_CPP) \
-	LD=$(WIN32_LD) \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(LOCAL_INCLUDES) $(WIN32_INC_DIR)" \
-	LD_FLAGS="$(CONFIGURE_LNK)  -lm" \
-	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
+	cd ../plugins/modules/model/utpackage && $(MAKE) test-win32
+	cp ../bin/plugins/model/utpackage/win32/utpackage.exe ../win32/freyja/
 
 
 lineageIIextract.exe:
