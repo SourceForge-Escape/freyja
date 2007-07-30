@@ -179,6 +179,9 @@ $(BUILDDIR)/$(MODULE) : $(PROG_OBJS)
 $(BUILDDIR)/$(MODULE).test : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(PROG_OBJS)
 
+$(BUILDDIR)/$(MODULE).exe : $(PROG_OBJS)
+	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(PROG_OBJS) 
+
 $(BUILDDIR)/$(MODULE).so : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(SHLIBLDFLAGS) -o $@ $(PROG_OBJS)
 
@@ -204,6 +207,15 @@ $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 
 #tools:
 
+test-win32:
+	@-mkdir -p $(BUILD_WIN32_DIR)/test
+	$(MAKE) targets NAME=utpackage MODULE=$(NAME) SHLIBEXT=.exe \
+	BUILDDIR=$(BUILD_WIN32_DIR)/test \
+	PROG_OBJS="$(BUILD_WIN32_DIR)/test/UTPackage.o $(BUILD_WIN32_DIR)/test/URTexture.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE $(MSTL_INC)" \
+	LD_FLAGS="$(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_TINYXML) -lm -ldl -lstdc++ "
+
+
 test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	printf $(FREYJA_LIB)
@@ -211,7 +223,6 @@ test:
 	PROG_OBJS="$(BUILD_TEST_DIR)/UTPackage.o $(BUILD_TEST_DIR)/URTexture.o" \
 	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA $(BASE_CFLAGS)" \
 	LD_FLAGS="-L$(LIB_FREYJA_DIR) -l$(LIB_FREYJA) -L$(LIB_TINYXML_DIR) -l$(LIB_TINYXML) -L$(LIB_HEL_DIR) -l$(LIB_HEL) -lm -ldl -lstdc++"
-	
 
 
 ##########################################################################
@@ -245,6 +256,7 @@ clean-win32:
 	@-rm -f $(BUILD_WIN32_DIR)/*.o
 	@-rm -f $(BUILD_WIN32_DIR)/*.a
 	@-rm -f $(BUILD_WIN32_DIR)/*.dll
+	@-rm -f $(BUILD_WIN32_DIR)/*.exe
 	@-echo "[done]"
 
 clean-emacs:
