@@ -359,7 +359,7 @@ void Assert(bool expr)
 #elif defined(__powerpc__)
 	/* Trap on any condition */
 	asm(
-		 "tw 31, r1, r1 \n"
+		 "tw 31, 0, 0 \n"
 	);
 #else
 #   warning "No soft breakpoint can be inserted for this machine language"

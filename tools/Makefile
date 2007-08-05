@@ -145,10 +145,11 @@ freyjautil.exe:
 	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA)"
 
 
-UTPackage.exe:
+utpackage.exe:
 	@-mkdir -p $(BUILD_WIN32_DIR)
-	cd ../plugins/modules/model/utpackage && $(MAKE) test-win32
-	cp ../bin/plugins/model/utpackage/win32/utpackage.exe ../win32/freyja/
+	@-cd ../plugins/modules/model/utpackage && $(MAKE) utpackage.exe
+	@-cp ../bin/plugins/model/utpackage/win32/test/utpackage.exe ../win32/freyja/
+	@-$(WIN32_STRIP) ../win32/freyja/utpackage.exe
 
 
 lineageIIextract.exe:

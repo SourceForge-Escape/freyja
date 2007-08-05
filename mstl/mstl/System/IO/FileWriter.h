@@ -253,7 +253,7 @@ bool FileWriter::WriteFloat32(float r)
 {	
 	void *ptr = &r;
 #if __BIG_ENDIAN__
-	FIX_FLOAT(*ptr)
+	FIX_FLOAT(ptr);
 #endif
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
@@ -288,7 +288,7 @@ bool FileWriter::WriteInt16(short i)
 	int16_t ii = i;
 	void *ptr = &ii;
 #ifdef __BIG_ENDIAN__
-	FIX_SHORT(*ptr)
+	FIX_SHORT(ptr);
 #endif
 	size_t sz = fwrite(ptr, 2, 1, mFileHandle);
 
@@ -302,7 +302,7 @@ bool FileWriter::WriteInt16U(unsigned short u)
 	uint16_t uu = u;
 	void *ptr = &uu;
 #ifdef __BIG_ENDIAN__
-	FIX_SHORT(*ptr)
+	FIX_SHORT(ptr);
 #endif
 	size_t sz = fwrite(ptr, 2, 1, mFileHandle);
 
@@ -316,7 +316,7 @@ bool FileWriter::WriteInt32(int i)
 	int32_t ii = i;
 	void *ptr = &ii;
 #ifdef __BIG_ENDIAN__
-	FIX_INT(*ptr)
+	FIX_INT(ptr);
 #endif
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
@@ -330,7 +330,7 @@ bool FileWriter::WriteInt32U(unsigned int u)
 	uint32_t uu = u;
 	void *ptr = &uu;
 #ifdef __BIG_ENDIAN__
-	FIX_INT(*ptr)
+	FIX_INT(ptr);
 #endif
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 
@@ -346,7 +346,7 @@ bool FileWriter::WriteLong(long l)
 	size_t sz;
 
 #ifdef __BIG_ENDIAN__
-	FIX_INT(*ptr)
+	FIX_INT(ptr);
 #endif
 
 	sz = fwrite(ptr, 4, 1, mFileHandle);
@@ -361,7 +361,7 @@ bool FileWriter::WriteLongU(unsigned long ul)
 	uint32_t ll = ul;
 	void *ptr = &ll;
 #ifdef __BIG_ENDIAN__
-	FIX_INT(*ptr)
+	FIX_INT(ptr);
 #endif
 	size_t sz = fwrite(ptr, 4, 1, mFileHandle);
 

@@ -15,9 +15,7 @@
 
  * FIX Lineage II import from pak vfs.
 
- * FIX win32 model import crash?
-
- * Tools bin update for win32.
+ * FIX win32 OpenGL crash on model import.
 
  * New XML based freyja file format.
 	- Repacking required.
