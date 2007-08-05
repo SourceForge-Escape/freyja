@@ -6,8 +6,8 @@
 
  Kagura prealpha, 0.9.5.16 () -- "On the roadmap again"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - FIX for powerpc arch 
- - FIX for big endian machine builds 
+ - FIX for powerpc arch (1045)
+ - FIX for big endian machine builds (1045) 
  - FIX for win32 build of utpackage.exe ( It was making ELF binaries! )
  - FIX Tools build.
 
