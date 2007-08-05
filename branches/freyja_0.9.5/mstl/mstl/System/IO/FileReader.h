@@ -297,7 +297,7 @@ float FileReader::ReadFloat32()
 		printf("FreyjaFileReader: ERROR failed to read 32bit float\n");
 
 #if __BIG_ENDIAN__
-	FIX_FLOAT(*ptr)
+	FIX_FLOAT(ptr);
 #endif
 
 	return r;
@@ -342,7 +342,7 @@ short FileReader::ReadInt16()
 		printf("FreyjaFileReader: ERROR failed to read 16bit int\n");
 
 #ifdef __BIG_ENDIAN__
-	FIX_SHORT(*ptr)
+	FIX_SHORT(ptr);
 #endif
 	return i;
 }
@@ -359,7 +359,7 @@ unsigned short FileReader::ReadInt16U()
 		printf("FreyjaFileReader: ERROR failed to read 16bit uint\n");
 
 #ifdef __BIG_ENDIAN__
-	FIX_SHORT(*ptr)
+	FIX_SHORT(ptr);
 #endif
 	return u;
 }
@@ -376,7 +376,7 @@ int FileReader::ReadInt32()
 		printf("FreyjaFileReader: ERROR failed to read 32bit int\n");
 
 #ifdef __BIG_ENDIAN__
-	FIX_INT(*ptr)
+	FIX_INT(ptr);
 #endif
 	return i;
 }
@@ -393,7 +393,7 @@ unsigned int FileReader::ReadInt32U()
 		printf("FreyjaFileReader: ERROR failed to read 32bit uint\n");
 
 #ifdef __BIG_ENDIAN__
-	FIX_INT(*ptr)
+	FIX_INT(ptr);
 #endif
 	return u;
 }
@@ -411,7 +411,7 @@ long FileReader::ReadLong()
 
 #ifdef __BIG_ENDIAN__
 	if (mHostOrder == LITTLE)
-		FIX_INT(*ptr);
+		FIX_INT(ptr);
 #else
 	if (mHostOrder == BIG)
 		FIX_INT(*(unsigned int*)ptr);//i = SWAP_4(i);
@@ -432,7 +432,7 @@ unsigned long FileReader::ReadLongU()
 
 #ifdef __BIG_ENDIAN__
 	if (!mHostOrder == LITTLE)
-		FIX_INT(*ptr);
+		FIX_INT(ptr);
 #else
 	if (mHostOrder == BIG)
 		u = SWAP_4(u);

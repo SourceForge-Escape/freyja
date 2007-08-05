@@ -207,13 +207,19 @@ $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
 
 #tools:
 
-test-win32:
+#strip-exe:
+#	@-$(WIN32_STRIP)
+
+utpackage.exe:
 	@-mkdir -p $(BUILD_WIN32_DIR)/test
-	$(MAKE) targets NAME=utpackage MODULE=$(NAME) SHLIBEXT=.exe \
+	$(MAKE) targets NAME="utpackage" module="utpackage" SHLIBEXT=".exe" \
+	CC=$(WIN32_CC) \
+	CPP=$(WIN32_CPP)  \
+	LD=$(WIN32_LD)  \
 	BUILDDIR=$(BUILD_WIN32_DIR)/test \
 	PROG_OBJS="$(BUILD_WIN32_DIR)/test/UTPackage.o $(BUILD_WIN32_DIR)/test/URTexture.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE $(MSTL_INC)" \
-	LD_FLAGS="$(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_TINYXML) -lm -ldl -lstdc++ "
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_UTPACKAGE -DHAVE_FREYJA  $(MSTL_INC)" \
+	LD_FLAGS="$(WIN32_LIB_DIR) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_TINYXML) -lm -lstdc++ "
 
 
 test:
@@ -257,6 +263,8 @@ clean-win32:
 	@-rm -f $(BUILD_WIN32_DIR)/*.a
 	@-rm -f $(BUILD_WIN32_DIR)/*.dll
 	@-rm -f $(BUILD_WIN32_DIR)/*.exe
+	@-rm -f $(BUILD_WIN32_DIR)/test/*.exe
+	@-rm -f $(BUILD_WIN32_DIR)/test/*.o
 	@-echo "[done]"
 
 clean-emacs:

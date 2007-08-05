@@ -581,7 +581,7 @@ float BufferedFileReader::ReadFloat32()
 	MemRead(ptr, 4);
 
 #if __BIG_ENDIAN__
-	FIX_FLOAT(*ptr)
+	FIX_FLOAT(ptr);
 #endif
 
 	return r;
@@ -623,7 +623,7 @@ short BufferedFileReader::ReadInt16()
 	MemRead(ptr, 2);
 
 #ifdef __BIG_ENDIAN__
-	FIX_SHORT(*ptr)
+	FIX_SHORT(ptr);
 #endif
 	return i;
 }
@@ -637,7 +637,7 @@ unsigned short BufferedFileReader::ReadInt16U()
 	MemRead(ptr, 2);
 
 #ifdef __BIG_ENDIAN__
-	FIX_SHORT(*ptr)
+	FIX_SHORT(ptr);
 #endif
 	return u;
 }
@@ -651,7 +651,7 @@ int BufferedFileReader::ReadInt32()
 	MemRead(ptr, 4);
 
 #ifdef __BIG_ENDIAN__
-	FIX_INT(*ptr)
+	FIX_INT(ptr);
 #endif
 	return i;
 }
@@ -665,7 +665,7 @@ unsigned int BufferedFileReader::ReadInt32U()
 	MemRead(ptr, 4);
 
 #ifdef __BIG_ENDIAN__
-	FIX_INT(*ptr)
+	FIX_INT(ptr);
 #endif
 	return u;
 }
@@ -680,7 +680,7 @@ long BufferedFileReader::ReadLong()
 
 #ifdef __BIG_ENDIAN__
 	if (mHostOrder == LITTLE)
-		FIX_INT(*ptr);
+		FIX_INT(ptr);
 #else
 	if (mHostOrder == BIG)
 		FIX_INT(*(uint32_t*)ptr);//i = SWAP_4(i);
@@ -698,7 +698,7 @@ unsigned long BufferedFileReader::ReadLongU()
 
 #ifdef __BIG_ENDIAN__
 	if (!mHostOrder == LITTLE)
-		FIX_INT(*ptr);
+		FIX_INT(ptr);
 #else
 	if (mHostOrder == BIG)
 		u = SWAP_4(u);
