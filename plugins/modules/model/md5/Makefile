@@ -148,8 +148,8 @@ osx:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
 	SHLIBEXT=".dynlib" \
-	CFLAGS="$(DEBUG_CFLAGS)" \
-	LD_FLAGS="$(CONFIGURE_LNK) -lm -ldl"
+	CFLAGS="$(DEBUG_CFLAGS) $(STD_PLUGIN_INC)" \
+	LD_FLAGS="$(CONFIGURE_LNK) -lm -ldl $(STD_PLUGIN_LIBS)"
 
 
 ################################################################
@@ -190,7 +190,7 @@ $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
 	-Wl,--no-whole-archive $(LIBS)
 
 $(BUILDDIR)/$(MODULE).dynlib : $(PROG_OBJS)
-	$(CC) $(LD_FLAGS) -L/usr/local/lib -lhel0 \
+	$(CC) $(LD_FLAGS) \
 	-L/usr/lib -lstdc++ -fPIC -dynamiclib \
 	-o $(BUILDDIR)/$(MODULE).dynlib \
 	$(PROG_OBJS)
