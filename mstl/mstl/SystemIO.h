@@ -705,7 +705,7 @@ const char *GetModuleExt()
 #ifdef WIN32
 	return ".dll";
 #elif __APPLE__
-	return ".dylib";
+	return ".bundle";
 #else
 	return ".so";
 #endif
@@ -718,7 +718,7 @@ bool CheckModuleExt(const char *filename)
 #ifdef WIN32
 	return (File::CompareFilenameExtention(filename, ".dll") == 0);
 #elif __APPLE__
-	return (File::CompareFilenameExtention(filename, ".dylib") == 0);
+	return (File::CompareFilenameExtention(filename, ".bundle") == 0);
 #else
 	return (File::CompareFilenameExtention(filename, ".so") == 0);
 #endif
@@ -755,7 +755,7 @@ void *ModuleLoad(const char *module)
 #else
 
 #   if __APPLE__
-	if (File::CompareFilenameExtention(module, ".dylib") != 0)
+	if (File::CompareFilenameExtention(module, ".bundle") != 0)
 	{
 		return NULL;
 	}
