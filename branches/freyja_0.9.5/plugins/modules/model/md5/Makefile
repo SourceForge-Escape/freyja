@@ -147,7 +147,7 @@ win32:
 osx:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE) targets BUILDDIR=$(BUILD_DEBUG_DIR) \
-	SHLIBEXT=".dylib" \
+	SHLIBEXT=".bundle" \
 	CFLAGS="$(DEBUG_CFLAGS) $(STD_PLUGIN_INC)" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm -ldl $(STD_PLUGIN_LIBS)"
 
@@ -189,10 +189,10 @@ $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
 	-Wl,--whole-archive $(PROG_OBJS) \
 	-Wl,--no-whole-archive $(LIBS)
 
-$(BUILDDIR)/$(MODULE).dylib : $(PROG_OBJS)
+$(BUILDDIR)/$(MODULE).bundle : $(PROG_OBJS)
 	$(CC) $(LD_FLAGS) \
-	-L/usr/lib -lstdc++ -fPIC -dynamiclib \
-	-o $(BUILDDIR)/$(MODULE).dylib \
+	-L/usr/lib -lstdc++ -bundle -flat_namespace -undefined suppress \
+	-o $(BUILDDIR)/$(MODULE).bundle \
 	$(PROG_OBJS)
 
 

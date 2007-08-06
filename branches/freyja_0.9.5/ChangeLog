@@ -6,8 +6,8 @@
 
  Kagura prealpha, 0.9.5.16 () -- "On the roadmap again"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - ?FIX? for md5 plugin for OS X build... not confirmed by someone on OSX
- - New setup script installs so/dylib plugins for the user. (1048)
+ - FIX for md5 plugin for OS X build. (1051)
+ - New setup script installs so/dylib plugins for the user. (1050)
  - FIX for powerpc arch (1045)
  - FIX for big endian machine builds (1045) 
  - FIX for win32 build of utpackage.exe ( It was making ELF binaries! )
