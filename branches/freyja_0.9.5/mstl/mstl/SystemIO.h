@@ -705,7 +705,7 @@ const char *GetModuleExt()
 #ifdef WIN32
 	return ".dll";
 #elif __APPLE__
-	return ".dynlib"
+	return ".dynlib";
 #else
 	return ".so";
 #endif

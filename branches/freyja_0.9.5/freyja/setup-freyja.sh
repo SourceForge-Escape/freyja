@@ -20,10 +20,10 @@ mkdir -p ~/.freyja/plugins/model/
 mkdir -p ~/.freyja/plugins/python/
 
 # Plugins 
-#cp ../bin/freyja/debug/plugins/ui/*.so ~/.freyja/plugins/
-#cp ../bin/freyja/debug/plugins/ui/*.mlisp ~/.freyja/plugins/
-#cp ../bin/plugins/model/debug/*.so ~/.freyja/plugins/model/
-#cp ../bin/plugins/image/debug/*.so ~/.freyja/plugins/image/
+cp ../bin/plugins/ui/*/*.mlisp ~/.freyja/plugins/
+cp ../bin/plugins/ui/*/*.{so,dylib} ~/.freyja/plugins/
+cp ../bin/plugins/model/*/*.{so,dylib} ~/.freyja/plugins/model/
+cp ../bin/plugins/image/*/*.{so,dylib} ~/.freyja/plugins/image/
 
 # Main data
 cp ./data/freyja-dev.mlisp ~/.freyja/
