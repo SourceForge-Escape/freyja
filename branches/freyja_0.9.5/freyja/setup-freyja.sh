@@ -20,10 +20,10 @@ mkdir -p ~/.freyja/plugins/model/
 mkdir -p ~/.freyja/plugins/python/
 
 # Plugins 
-cp ../bin/plugins/ui/*/*.mlisp ~/.freyja/plugins/
-cp ../bin/plugins/ui/*/*.{so,dylib} ~/.freyja/plugins/
-cp ../bin/plugins/model/*/*.{so,dylib} ~/.freyja/plugins/model/
-cp ../bin/plugins/image/*/*.{so,dylib} ~/.freyja/plugins/image/
+cp ../bin/plugins/ui/debug/*.mlisp ~/.freyja/plugins/
+cp ../bin/plugins/ui/debug/*.{so,dylib} ~/.freyja/plugins/
+cp ../bin/plugins/model/debug/*.{so,dylib} ~/.freyja/plugins/model/
+cp ../bin/plugins/image/debug/*.{so,dylib} ~/.freyja/plugins/image/
 
 # Main data
 cp ./data/freyja-dev.mlisp ~/.freyja/
@@ -36,11 +36,12 @@ cp ./data/icons/*.png ~/.freyja/icons/
 cp ./data/icons/24x24/*.png ~/.freyja/icons/24x24/
 
 # GNOME Setup
-#cp ./data/freyja.desktop /usr/share/applications/
-#cp ./data/freyja.desktop /usr/share/applnk/Graphics/
-#cp ./data/freyja.desktop ~/.gnome2/vfolders/applications/
-cp ./data/freyja.desktop ~/.local/share/applications/
+mkdir -p ~/.icons/
 cp ./data/icons/freyja.png ~/.icons/
+
+mkdir -p ~/.local/share/applications/
+cp ./data/freyja.desktop ~/.local/share/applications/
+
 
 #cp ./data/freyja.desktop ~/Desktop
 
@@ -54,3 +55,10 @@ cp ./data/icons/freyja.png ~/.icons/
 #	*)
 #		;;
 #esac
+
+
+
+
+
+
+

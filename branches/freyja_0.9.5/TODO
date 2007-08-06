@@ -15,7 +15,7 @@
 
  * FIX Lineage II import from pak vfs.
 
- * FIX dynlib -> dylib shared target names.
+ * FIX dynlib -> dylib shared target names. 
 
  * FIX win32 OpenGL crash on model import.
 
