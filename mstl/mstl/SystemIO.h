@@ -704,6 +704,8 @@ const char *GetModuleExt()
 {
 #ifdef WIN32
 	return ".dll";
+#elif __APPLE__
+	return ".dynlib"
 #else
 	return ".so";
 #endif
@@ -715,6 +717,8 @@ bool CheckModuleExt(const char *filename)
 {
 #ifdef WIN32
 	return (File::CompareFilenameExtention(filename, ".dll") == 0);
+#elif __APPLE__
+	return (File::CompareFilenameExtention(filename, ".dynlib") == 0);
 #else
 	return (File::CompareFilenameExtention(filename, ".so") == 0);
 #endif
@@ -747,12 +751,20 @@ void *ModuleLoad(const char *module)
 						  errbuf, 512, NULL);
 		loaderror = errbuf;
 	}
+
 #else
 
+#   if __APPLE__
+	if (File::CompareFilenameExtention(module, ".dynlib") != 0)
+	{
+		return NULL;
+	}
+#   else
 	if (File::CompareFilenameExtention(module, ".so") != 0)
 	{
 		return NULL;
 	}
+#   endif
 
 	handle = dlopen(module, RTLD_NOW);
 	loaderror = (char *)dlerror();
