@@ -13,11 +13,9 @@
  * FIX TTF renderer ( glyph settings aren't used )
  	- Add back typesetting for GLPrinter.
 
- * FIX Lineage II import from pak vfs.
+ * FIX Lineage II import directly from pak vfs.
 
- * FIX dynlib -> dylib shared target names. 
-
- * FIX win32 OpenGL crash on model import.
+ * OS X UI plugins.
 
  * New XML based freyja file format.
 	- Repacking required.
@@ -31,20 +29,22 @@
 
  * mgtk Query string support.
 
- * Edge editing.
-	- Select and transform edges in UI.
-	- Replace wireframe renderer with edge renderer?
-	- Mesh::RebuildPlanes()
-	- RELATED Cache s-edge results until light / mesh moves.
+ * Lua
+	- LibLuaWrapper for mgtk and libfreyja usage.  (ensures liblua instance = 1)
+	- MGtkLua container wrapper to emulate mlisp wrappers.
+	- Expose things like control points via libfreyja backend.
+ 	- Widgets: lua mgtk wrapper to allow full interface plugins.
+ 	- Binary file I/O wrapper.
 
 
  Freyja 0.9.5.17	TBD
  -----------------------------------------------------------------------------
 
- * Lua
-	- Expose things like control points via libfreyja backend.
- 	- Widgets: lua mgtk wrapper to allow full interface plugins.
- 	- Binary file I/O wrapper.
+ * Edge editing.
+	- Select and transform edges in UI.
+	- Replace wireframe renderer with edge renderer?
+	- Mesh::RebuildPlanes()
+	- RELATED Cache s-edge results until light / mesh moves.
 
  * Improve Camera.
 	- Add more options such as perspective settings.
