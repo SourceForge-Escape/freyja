@@ -17,6 +17,9 @@
  * [UNCONFIRMED] Repacking might break aging Undo system for some operations.
 	- This is bug is only a theory based on how undo works for objects.
 
+ * Crash in win32 OpenGL on md5 model import in VMWare.
+	- Need more information.
+
  * File corruption with .freyja format with certain animations.
 	- This should be 'fixed' when the old keyframe system is replaced.
 

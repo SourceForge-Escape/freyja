@@ -226,6 +226,8 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 			glyphs[i].y = pen_y - slot->bitmap_top;
 			glyphs[i].w = slot->bitmap.width;
 			glyphs[i].h = slot->bitmap.rows;
+
+			printf("%i, %c -> %i - %i, %i\n", pt, text[i], pen_y, slot->bitmap_top, slot->metrics.vertBearingY);
 		}
 
 		pen_x += slot->bitmap.width + x_padding;
