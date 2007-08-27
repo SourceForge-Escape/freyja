@@ -140,7 +140,7 @@ class Lua
 	 *
 	 ------------------------------------------------------*/
 
-	void RegisterFunction(const char *symbol, Lua::FuncPtr func)
+	void RegisterFunction(const char *symbol, Lua::FuncPtr func) const
 	{ lua_register(mState, symbol, func); }
 	/*------------------------------------------------------
 	 * Pre  : 

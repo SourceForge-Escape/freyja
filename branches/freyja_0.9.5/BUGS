@@ -10,6 +10,21 @@
    a lot of useful information including your GPU info and event log.
  =====================================================================
 
+ Scheduled fixes.
+ ----------------------------
+
+ * FIX Save As.. dialog triggers twice with text entry event.
+	- Make this *.freyja only and using the one-off choosers to fix.
+	- Related fix the material Save As... also
+		. Also add recent files for material for the hell of it.
+
+ * FIX TTF renderer.
+ 	- Add back typesetting for GLPrinter.
+	- This should be fixed using the drawlist, and not altering the texture.
+
+ * FIX Lineage II import directly from pak vfs.
+
+
  
  A - Serious bugs
  ----------------------------

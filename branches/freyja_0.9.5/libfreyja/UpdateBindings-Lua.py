@@ -480,7 +480,11 @@ def UpdateBindings():
 	PrintOutFreyjaBindLua()
 
 	# Temp build-in
-	print "#include \"Lua.cpp\""
+	print "#   ifdef LUAWRAPPER_FOUND"
+	print "#       include \"Lua.cpp\""
+	print "#   else"
+	print "#       include \"Lua.cpp\""
+	print "#   endif // LUAWRAPPER_FOUND"
 
 	print "#endif // LUA_FOUND\n\n"
 

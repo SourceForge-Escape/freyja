@@ -45,6 +45,7 @@ add_definitions(
 	-DHAVE_FREETYPE2 
 	-DTINYXML_FOUND
 	-DHAVE_GTKGLEXT
+	-DLUAWRAPPER_FOUND
 )
 
 #$(shell freetype-config --cflags)
@@ -66,7 +67,7 @@ else(APPLE)
 endif(APPLE)
 
 
-include_directories( ../mstl ../libfreyja ../libhel ../libmgtk ../tinyxml .  )
+include_directories( ../mstl ../libfreyja ../libhel ../libmgtk ../tinyxml ../lua .  )
 
 link_directories( ../libfreyja ../libhel ../libmgtk ../tinyxml )
 link_libraries(	-lfreyja-0.9.5 -lhel-0.2.2 -lmgtk-0.1.1 -ltinyxml )

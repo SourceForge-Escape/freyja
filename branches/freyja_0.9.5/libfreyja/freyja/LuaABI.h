@@ -49,4 +49,14 @@ extern "C" {
 	 ------------------------------------------------------*/
 }
 
+#   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
+#      include <lua/Lua.h>
+
+    const Lua &freyjaGetLuaVM();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns pointer to Lua VM used by libfreyja.
+	 ------------------------------------------------------*/
+
+#   endif // __cplusplus
 #endif // GUARD__FREYJA_LUAABI_H_

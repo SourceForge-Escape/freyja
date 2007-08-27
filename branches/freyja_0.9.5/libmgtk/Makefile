@@ -34,10 +34,10 @@ RM = /usr/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/mongoose/Projects/freyja/freyja_0.9.5/libmgtk
+CMAKE_SOURCE_DIR = /home/mongoose/Projects/freyja_0.9.5/libmgtk
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja/freyja_0.9.5/libmgtk
+CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja_0.9.5/libmgtk
 
 # Include the progress variables for this target.
 include CMakeFiles/progress.make
@@ -88,9 +88,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja/freyja_0.9.5/libmgtk/CMakeFiles $(CMAKE_ALL_PROGRESS)
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/libmgtk/CMakeFiles $(CMAKE_ALL_PROGRESS)
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja/freyja_0.9.5/libmgtk/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/libmgtk/CMakeFiles 0
 
 # The main clean target
 clean:
@@ -133,6 +133,18 @@ mgtk/ConfirmationDialog.i:
 # target to generate assembly for a file
 mgtk/ConfirmationDialog.s:
 	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.s
+
+# target to build an object file
+mgtk/MGtkLua.o:
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MGtkLua.o
+
+# target to preprocess a source file
+mgtk/MGtkLua.i:
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MGtkLua.i
+
+# target to generate assembly for a file
+mgtk/MGtkLua.s:
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MGtkLua.s
 
 # target to build an object file
 mgtk/MLisp.o:
@@ -269,6 +281,9 @@ help::
 	@echo "... mgtk/ConfirmationDialog.o"
 	@echo "... mgtk/ConfirmationDialog.i"
 	@echo "... mgtk/ConfirmationDialog.s"
+	@echo "... mgtk/MGtkLua.o"
+	@echo "... mgtk/MGtkLua.i"
+	@echo "... mgtk/MGtkLua.s"
 	@echo "... mgtk/MLisp.o"
 	@echo "... mgtk/MLisp.i"
 	@echo "... mgtk/MLisp.s"

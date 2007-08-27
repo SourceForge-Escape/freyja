@@ -1,72 +1,193 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: t; c-basic-offset: 4 -*- */
-/*===========================================================================
- * 
- * Project : Freyja
- * Author  : Mongoose
- * Website : http://icculus.org/freyja
- * Email   : mongoose@icculus.org
- * Object  : perlinnoise plugin
- * License : No use without permission (c) 2000-2005 Mongoose
- * Comments: This is the backend of the modeler
- *
- *
- *           This file was generated using Mongoose's C++ 
- *           template generator script.  <mongoose@icculus.org>
- * 
- *-- History ------------------------------------------------- 
- *
- * 2005.07.23:
- * Mongoose - Created, Based on freyja prototype
- ==========================================================================*/
+--------------------------------------------------------------------------
+-- Project: Freyja
+-- Author : Terry 'Mongoose' Hendrix II
+-- Website: http://icculus.org/freyja
+-- Email  : mongooseichiban@gmail.com
+-- Comment: Interface plugin for perlin noise and texture generator.
+--------------------------------------------------------------------------
 
-#include <string.h>
-#include <math.h>
-#include <hel/math.h>
-#include <mstl/SystemIO.h>
-#include <freyja/PerlinNoise.h>
-#include <freyja/FreyjaImage.h>
-#include <freyja/PluginABI.h>
-#include <freyja/TextureABI.h>
-#include <mgtk/ResourceEvent.h>
-#include <mgtk/mgtk_events.h>
+-- Create a cube mesh as a load test.
+--cube1 = freyjaMeshCreateCube(0.0, 8.0, 0.0, 8.0)
 
-using namespace mstl;
-using namespace mgtk;
-
-extern "C" {
-
-	void freyja_perlinnoise_init(void (*func)(const char*, void*));
-}
-
-unsigned int gPerlinNoiseSeed = 257;
-unsigned int gPerlinNoiseW = 256;
-unsigned int gPerlinNoiseH = 256;
-unsigned int gPerlinNoiseClamp = 1;
-vec_t gPerlinNoiseIA = 1.0f;
-vec_t gPerlinNoiseIB = 2.0f;
-vec_t gPerlinNoiseD = 20.0f;
-vec4_t gColorPerlinAdd = {0.51, 0.51, 0.29, 1.0};
-vec4_t gColorPerlinMult = {0.61, 0.51, 0.35, 1.0};
-
-void PerlinNoiseEventsAttach();
-void PerlinNoiseGUIAttach();
-void perlinnoise_draw();
+function ePerlinSeed(i)
+	gPerlinNoiseSeed = i
+end
 
 
-/* This hooks up the plugin to the appliciation */
-//ResourceAppPluginTest PerlinNoisePlugin(PerlinNoiseEventsAttach,
-//										PerlinNoiseGUIAttach);
-
-void *perlinnoise_captured1 = 0x0;
+function ePerlinNoiseW(i)
+	gPerlinNoiseW = i
+end
 
 
-void freyja_perlinnoise_init(void (*func)(const char*, void*))
-{
-	ResourcePlugin *plugin;
-	plugin = new ResourcePlugin(PerlinNoiseEventsAttach, PerlinNoiseGUIAttach);	
+function ePerlinNoiseH(i)
+	gPerlinNoiseH = i
+end
 
-	plugin->mDrawCB = perlinnoise_draw;
-}
+
+function ePerlinNoiseClamp(i)
+	gPerlinNoiseClamp = i;
+end
+
+
+function ePerlinNoiseIA(v)
+	gPerlinNoiseIA = v
+end
+
+
+function ePerlinNoiseIB(v)
+	gPerlinNoiseIB = v
+end
+
+
+function ePerlinNoiseD(v)
+	gPerlinNoiseD = v
+end
+
+function texture_plugin_init_gui()
+
+	window = mgtk_window("Lua plugin test", "icon.png")
+
+	--embedded_frame = mgtk_summonbox( "FirstPartyPluginSlot" )
+
+	--handlebox = mgtk_handlebox( 1 )
+	--mgtk_box_pack( embedded_frame, handlebox )
+
+	--vbox = mgtk_vbox( true, 1 )
+	--mgtk_box_pack( handlebox, vbox )
+
+	--expander = mgtk_expander( "TextureGen [Lua]", false )
+	--mgtk_box_pack( vbox, expander )
+
+	vbox = mgtk_vbox( true, 1 )
+	mgtk_box_pack( window, vbox )
+
+	menubar = mgtk_menubar()
+	mgtk_box_pack( vbox, menubar )
+	mgtk_append_menu( menubar, mgtk_submenu(ePerlinNoiseMenu, "_Tools") )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( vbox, hbox ) 
+	mgtk_box_pack( hbox, mgtk_label("Perlin Noise", 0.0, 0.5) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( vbox, hbox) 
+	mgtk_box_pack( hbox, mgtk_label("Seed", 0.0, 0.5) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_unit(257, 0, 1000, ePerlinNoiseSeed) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( hbox, mgtk_label("Width", 0.0, 0.5) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_unit(256, 8, 1024, ePerlinNoiseW) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( hbox, mgtk_label("Height", 0.0, 0.5) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_unit(256, 8, 1024, ePerlinNoiseH) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( hbox, mgtk_label("Clamping on?", 0.0, 0.5) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_unit(1, 0, 1, ePerlinNoiseClamp) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( hbox, mgtk_label("iA", 0.0, 0.5) ) 
+	mgtk_box_pack( hbox, mgtk_spinbutton_float(1.0, 0.0, 99999.0, 1.0, 1.0, 1.0, 1, ePerlinNoiseIA) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( hbox, mgtk_label("iB", 0.0, 0.5) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float(2.0, 0.0, 99999.0, 1.0, 1.0, 1.0, 1, ePerlinNoiseIB) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( hbox, mgtk_label("d", 0.0, 0.5) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float(20.0, 0.0, 100.0, 1.0, 1.0, 1.0, 3, ePerlinNoiseD) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( hbox, mgtk_label("Modulate color", 0.0, 0.5) )
+	mgtk_box_pack( hbox, mgtk_colorbutton(1, eColorPerlinMult) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( hbox, mgtk_label("Add color", 0.0, 0.5) )
+	mgtk_box_pack( hbox, mgtk_colorbutton(1, eColorPerlinAdd) )
+
+	hbox = mgtk_hbox( true, 0 )
+	mgtk_box_pack( hbox, mgtk_button("Generate texture", eMode, ePerlinNoiseGen) )
+
+end
+
+texture_plugin_init_gui()
+
+
+
+function TexturePlugin:Spawn()
+	self:Spawn()
+	texture_plugin_init_gui()
+end
+
+
+function TexturePlugin:Draw()
+	if self.draw_func then
+		self:draw_func()
+	end
+end
+
+
+function TexturePlugin:New(id)
+    -- Create a new, empty table as in instance of the object
+    local instance = { }
+
+    -- Initialize any members
+    instance.id = plugin_create(id)
+	instance.timer = 0.0
+	instance.task = nil
+	instance.client = nil
+	instance.signalhandler_func = nil
+	instance.uiregister_func = nil
+	instance.draw_func = nil
+
+	instance.seed = 257
+	instance.width = 256
+	instance.height = 256
+	instance.clamp = 1
+	instance.ia = 1.0
+	instance.ib = 2.0
+	instance.d = 20.0
+	instance.add_color = { 0.51,	0.51,	0.29,	1.0 }
+	instance.mult_color = { 0.61,	0.51,	0.35,	1.0 }
+
+    -- Set the object as the metatable and
+    -- __index table of the instance. This way
+    -- the object is searched for any member
+    -- (typically methods) the instance doesn't have.
+    setmetatable(instance,self)
+    self.__index = self
+    -- Return the instance
+    return instance
+end
+
+
+
+
+
+function eColorPerlinMult(c, count)
+	for i = 0, 4 do
+		gColorPerlinMult[i] = c[i]
+	end
+
+--	mgtk_event_set_color(Resource::mInstance->getIntByName("eColorPerlinMult"), c[0], c[1], c[2], c[3]);
+--	mgtk_event_gl_refresh();
+end
+
+
+function eColorPerlinAdd(c, count)
+	for i = 0, 4 do
+		gColorPerlinAdd[i] = c[i];
+	end
+
+--	mgtk_event_set_color(Resource::mInstance->getIntByName("eColorPerlinAdd"), c[0], c[1], c[2], c[3]);
+--	mgtk_event_gl_refresh();
+end
+
+
+
+--[[
+
 
 
 void ePerlinNoiseGen()
@@ -95,19 +216,6 @@ void ePerlinNoiseGen()
 		perlin.clampBufferIntensity(image, w, h, iA, iB, d);
 
 	/* Modulate by a color and add a base half intensity */
-#if 0
- 	FreyjaImage img;
-	byte *rgb;
-	uint32 i, n;
-	img.loadPixmap(image, w, h, FreyjaImage::INDEXED_8);
-	img.getImage(&rgb);
-
-	if (!rgb)
-	{
-		mgtk_print("ePerlinNoiseGen: Invalid image after color conversion");
-		return;
-	}
-#else
 	byte *rgb = new byte[w*h*3];
 	
 	// Greyscale -> RGB 
@@ -117,8 +225,6 @@ void ePerlinNoiseGen()
 		idx = i*3;
 		rgb[idx] = rgb[idx+1] = rgb[idx+2] = c; 
 	}
-#endif
-
 
 	// hahaha it's 0600 no sleep -- can't wait to clean this prototype!
 	for (uint32 i = 0, n = w * h * 3; i < n; ++i)
@@ -157,78 +263,6 @@ void ePerlinNoiseGen()
 	freyjaTextureDelete(tid);
 #endif
 
-	mgtk_event_gl_refresh();
-}
-
-
-void ePerlinNoiseSeed(unsigned int i)
-{
-	gPerlinNoiseSeed = i;
-}
-
-
-void ePerlinNoiseW(unsigned int i)
-{
-	gPerlinNoiseW = i;
-}
-
-
-void ePerlinNoiseH(unsigned int i)
-{
-	gPerlinNoiseH = i;
-}
-
-
-void ePerlinNoiseClamp(unsigned int i)
-{
-	gPerlinNoiseClamp = i;
-}
-
-
-void ePerlinNoiseIA(vec_t v)
-{
-	gPerlinNoiseIA = v;
-}
-
-
-void ePerlinNoiseIB(vec_t v)
-{
-	gPerlinNoiseIB = v;
-}
-
-
-void ePerlinNoiseD(vec_t v)
-{
-	gPerlinNoiseD = v;
-}
-
-
-void eDialogPerlinNoise()
-{
-	mgtk_event_dialog_visible_set(Resource::mInstance->getIntByName("eDialogPerlinNoise"), 1);
-} 
-
-
-void eColorPerlinMult(float *c, unsigned long count)
-{
-	uint32 i;
-
-	for (i = 0; i < 4; ++i)
-		gColorPerlinMult[i] = c[i];
-
-	mgtk_event_set_color(Resource::mInstance->getIntByName("eColorPerlinMult"), c[0], c[1], c[2], c[3]);
-	mgtk_event_gl_refresh();
-}
-
-
-void eColorPerlinAdd(float *c, unsigned long count)
-{
-	uint32 i;
-
-	for (i = 0; i < 4; ++i)
-		gColorPerlinAdd[i] = c[i];
-
-	mgtk_event_set_color(Resource::mInstance->getIntByName("eColorPerlinAdd"), c[0], c[1], c[2], c[3]);
 	mgtk_event_gl_refresh();
 }
 
@@ -449,7 +483,7 @@ void PerlinNoiseGUIAttach()
 void perlinnoise_draw()
 {
 	// FIXME: You need some kind of token or setting to control this draw.
-#if 0
+
 	mgtk_draw_color3f(1.0f, 1.0f, 0.0f);
 	mgtk_draw_line6f(-10.0f, 3.0f, 0.0f,
 					 10.0f, 3.0f, 0.0f);
@@ -458,10 +492,7 @@ void perlinnoise_draw()
 	mgtk_draw_color3f(1.0f, 0.0f, 0.0f);
 	mgtk_draw_point3f(-10.0f, 3.0f, 0.0f);
 	mgtk_draw_point3f(10.0f, 3.0f, 0.0f);
-#endif
 }
 
-
-
-
+]]
 

@@ -45,9 +45,12 @@ public:
 
 	~ResourcePlugin();
 
+	void Draw();
+
 	static mstl::Vector<ResourcePlugin*> mPlugins;
 	void (*mEventsAttach)();
 	void (*mGUIAttach)();
+	void (*mDrawCB)();
 };
 
 } // End namespace mgtk

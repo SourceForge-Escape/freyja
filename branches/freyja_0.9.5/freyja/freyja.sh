@@ -9,7 +9,7 @@ then
 	FBIN=${FPATH}/freyja/freyja
 fi
 
-export LD_LIBRARY_PATH=${FPATH}/tinyxml:${FPATH}/libhel:${FPATH}/libfreyja:${FPATH}/libmgtk
+export LD_LIBRARY_PATH=${FPATH}/lua:${FPATH}/tinyxml:${FPATH}/libhel:${FPATH}/libfreyja:${FPATH}/libmgtk
 
 # Show which libraries we're linking to from here.
 ldd ${FBIN} | grep ${FPATH}

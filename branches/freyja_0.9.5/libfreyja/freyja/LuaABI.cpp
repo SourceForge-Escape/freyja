@@ -35,9 +35,20 @@ extern "C" {
 #include "lua5.1/lauxlib.h"
 }
 
-#include "Lua.h"
+#   ifdef LUAWRAPPER_FOUND
+#       include "Lua.h"
+#   else
+#       include "Lua.cpp"
+#   endif // LUAWRAPPER_FOUND
 
- Lua gLuaVM;
+Lua gLuaVM;
+
+
+
+const Lua &freyjaGetLuaVM()
+{
+	return gLuaVM;
+}
 
 
 int lua_freyjaSkeletonCreate(lua_State *L)
