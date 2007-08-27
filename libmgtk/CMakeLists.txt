@@ -44,6 +44,12 @@ add_definitions( -DDEBUG -Wall -g )
 # RELEASE
 #add_definitions( -DRELEASE -DMGTK_ASSERTS -Wall -O2 -finline-functions -fomit-frame-pointer -funroll-loops )
 
+# LuaWrapper 
+add_definitions( -DLUAWRAPPER_FOUND )
+include_directories( ../lua )
+link_directories( ../lua )
+link_libraries(	-lluawrapper )
+
 # libhel
 add_definitions( -DHEL_FOUND -DHAVE_LIBHEL -DHAVE_HEL )
 include_directories( ../libhel )
@@ -95,8 +101,9 @@ include_directories( ../mstl .  )
 
 set(Objs
 	mgtk/ConfirmationDialog
-	mgtk/QueryDialog
+	mgtk/MGtkLua
 	mgtk/MLisp
+	mgtk/QueryDialog
 	mgtk/Resource
 	mgtk/ResourceEvent
 	mgtk/mgtk_callbacks

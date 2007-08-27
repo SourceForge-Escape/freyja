@@ -7,8 +7,14 @@
  Kagura prealpha, 0.9.5.16 () -- "On the roadmap again"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - 
- - FIX for freyja.env lib/include paths on DARWIN (1053)
- - Roadmap changes as discussed, See TODO
+ - New octree plugin.
+ - New freyja updated to bind new lua mgtk exports.
+ - New freyja and mgtk OpenGL draw functions for interface plugin use.
+ - New libluawrapper debian package.
+ - New libmgtk and libfreyja updated to use new lua wrapper library.
+ - New libluawrapper library.
+ - FIX for freyja.env lib/include paths on DARWIN. (1053)
+ - Roadmap changes as discussed, See TODO.
  - FIX plugins are now built as bundles on OS X. (1052)
  - New setup script installs so/dylib plugins for the user. (1050)
  - FIX for powerpc arch (1045)

@@ -420,6 +420,21 @@ const char *mgtk_version();
  ------------------------------------------------------*/
 
 
+void mgtk_draw_point_size1f(float size);
+
+void mgtk_draw_color3f(float r, float g, float b);
+
+void mgtk_draw_line6f(float x, float y, float z,
+					  float x2, float y2, float z2);
+
+void mgtk_draw_point3f(float x, float y, float z);
+/*------------------------------------------------------
+ * Pre  : These can only be used inside Draw callbacks!
+ * Post : OpenGL draw test functions.
+ ------------------------------------------------------*/
+
+
+
 // mgtk_tree refactor
 
 //int mgtk_tree_new(const char *types, int wigdet_id);

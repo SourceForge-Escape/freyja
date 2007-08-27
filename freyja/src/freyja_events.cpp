@@ -49,6 +49,10 @@
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/ConfirmationDialog.h>
 
+// mgtk Lua
+#include <freyja/LuaABI.h>
+#include <mgtk/MGtkLua.h>
+
 #include "freyja_events.h"
 
 arg_list_t *freyja_rc_color(arg_list_t *args);
@@ -1520,6 +1524,19 @@ void freyja_handle_resource_start()
 }
 
 
+void freyja_plugins_draw()
+{
+	/* FreyjaAppPlugin prototype testing... */
+	for (uint32 i = 0, n = mgtk::ResourcePlugin::mPlugins.size(); i < n; ++i)
+	{
+		if (mgtk::ResourcePlugin::mPlugins[i] != 0x0)
+		{
+			mgtk::ResourcePlugin::mPlugins[i]->Draw();
+		}
+	}
+}
+
+
 void freyja_append_eventid(char *symbol, int eventid)
 {
 	FreyjaControl::GetInstance()->GetResource().RegisterInt(symbol, eventid);
@@ -2030,6 +2047,9 @@ int main(int argc, char *argv[])
 
 	/* Hookup resource to event system */
 	ResourceEvent::setResource(&FreyjaControl::GetInstance()->GetResource());
+
+	/* Export Lua mgtk functions to libfreyja VM. */
+	mgtk_lua_register_functions( freyjaGetLuaVM() );
 
 	mgtk_init(argc, argv);
 

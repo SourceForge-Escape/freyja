@@ -58,6 +58,44 @@
 #include "mgtk_events.h"
 
 
+void mgtk_draw_point_size1f(float size)
+{
+#ifdef HAVE_OPENGL
+	glPointSize(size);
+#endif
+}
+
+
+void mgtk_draw_color3f(float r, float g, float b)
+{
+#ifdef HAVE_OPENGL
+	glColor3f(r, g, b);
+#endif
+}
+
+
+void mgtk_draw_line6f(float x, float y, float z,
+					  float x2, float y2, float z2)
+{
+#ifdef HAVE_OPENGL
+	glBegin(GL_LINES);
+	glVertex3f(x, y, z);
+	glVertex3f(x2, y2, z2);
+	glEnd();
+#endif
+}
+
+
+void mgtk_draw_point3f(float x, float y, float z)
+{
+#ifdef HAVE_OPENGL
+	glBegin(GL_POINTS);
+	glVertex3f(x, y, z);
+	glEnd();
+#endif
+}
+
+
 #if HAVE_GTKGLEXT
 void mgtk_refresh_glarea(GtkWidget *widget)
 {
@@ -843,12 +881,8 @@ GtkWidget *mgtk_create_spinbutton2(GtkWidget *master, char *name,
 								   float step, float page, float page_sz, 
 								   int digits)
 {  
-	GtkObject *spinbutton_adj;
-	GtkWidget *spinbutton;
-
-
-	spinbutton_adj = gtk_adjustment_new(val, min, max, step, page, page_sz);
-	spinbutton = gtk_spin_button_new(GTK_ADJUSTMENT(spinbutton_adj), 1, digits);
+	GtkObject *spinbutton_adj = gtk_adjustment_new(val, min, max, step, page, page_sz);
+	GtkWidget *spinbutton = gtk_spin_button_new(GTK_ADJUSTMENT(spinbutton_adj), 1, digits);
 	gtk_widget_ref(spinbutton);
 	gtk_object_set_data_full(GTK_OBJECT(master), name, spinbutton,
 							 (GtkDestroyNotify)gtk_widget_unref);
@@ -868,10 +902,7 @@ GtkWidget *mgtk_create_spinbutton(GtkWidget *master, char *name,
 GtkWidget *mgtk_create_label(GtkWidget *master, char *name, 
 							 char *text, float x_align, float y_align)
 {
-  GtkWidget *label;
-
-
-  label = gtk_label_new(text);
+  GtkWidget *label = gtk_label_new(text);
 
   gtk_widget_ref(label);
   gtk_object_set_data_full(GTK_OBJECT(master), name, label,
@@ -1021,11 +1052,7 @@ GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar, int is_menu,
 
 GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_name)
 {
-	GtkWidget *window;
-	GdkPixbuf *icon;
-
-
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_object_set_data(GTK_OBJECT(window), "window", window);
 	gtk_window_set_policy(GTK_WINDOW(window), FALSE, TRUE, FALSE);
 	gtk_window_set_wmclass(GTK_WINDOW(window), wmclass, wmclass);
@@ -1035,7 +1062,7 @@ GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_name)
 	gtk_widget_set_events(GTK_WIDGET(window),
 						  GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK);
 
-	icon = mgtk_create_pixbuf(icon_name);
+	GdkPixbuf *icon = mgtk_create_pixbuf(icon_name);
 	mgtk_create_window_icon(window, icon);
 	//mgtk_destroy_pixbuf(icon);
 

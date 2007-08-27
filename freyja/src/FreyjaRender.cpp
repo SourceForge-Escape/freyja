@@ -579,6 +579,11 @@ void FreyjaRender::DrawIcons()
 		;
 	}
 
+
+	// Draw currently enabled plugin 'icons'.
+	// PluginManager.Draw();
+	freyja_plugins_draw();
+
 	glPopAttrib();
 }
 

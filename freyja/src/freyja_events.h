@@ -340,5 +340,12 @@ void freyja_swap_buffers();
  *
  ------------------------------------------------------*/
 
+void freyja_plugins_draw();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Allows plugins to hook into scene rendering.
+ *
+ ------------------------------------------------------*/
+
 
 #endif // GUARD__FREYJA3D_FREYJA_EVENT_H

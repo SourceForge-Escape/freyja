@@ -5,46 +5,74 @@
  Freyja 0.9.5.16	TBD
  -----------------------------------------------------------------------------
 
- * FIX Save As.. dialog triggers twice with text entry event.
-	- Make this *.freyja only and using the one-off choosers to fix.
-	- Related fix the material Save As... also
-		. Also add recent files for material for the hell of it.
+ * Ubuntu packages for release.
+	- PPC
+	- AMD64
+	- i386
 
- * FIX TTF renderer ( glyph settings aren't used )
- 	- Add back typesetting for GLPrinter.
-
- * FIX Lineage II import directly from pak vfs.
-
- * OS X UI plugins.
-
- * New XML based freyja file format.
-	- Repacking required.
-	- Save IDs with objects if needed.
-	- Native format should be very stable.
-	- Make external plugins for older text based freyja/ja formats.
+ * New plugin subsystems.
+	- Octree plugin XML import/export.
+	- OpenGL scripting from lua will allow plugins to generate their own widgets
+	- No 2d projections allowed.
+	- (de)coupling routines for ogl func pointers.
+		- Textured sprites for 'icon' use.
+		- PluginDrawMaterial()
+		- PluginDrawArray( mesh | points | lines )
+		- PluginDrawEnable(bool)
+	- Emitters.
+	- Projectors.
+	- Physics material paint.
+	- Editing.
+		- Modify : Control Points || libfreyja ControlPoints
+		- Control point creation/deletion/control in plugins.
+	- Separate OpenGL subsystem from freyja.
+	- IK solver.
+		- Boxes for collision w/ centered control point.
+		- Walkmesh generation can be done in octree cooker?
+		- Walkmesh can be subbed by IK over rendered mesh.
 
  * Metadata object eg for map objects ( currently bones w/ metadata are used )
-
- * Edit modes setting visual mode for things like skeletal 'bone' animation
-
- * mgtk Query string support.
+	- This will become a 'new' ui plugin.
+	- Prop: icon, name, type, metadata ( data )
+	- Sprite 'icons'
+	- Alchemy (raw) test set.
 
  * Lua
-	- LibLuaWrapper for mgtk and libfreyja usage.  (ensures liblua instance = 1)
+	- Remove OpenGL test from C/C++ perlinnoise
+	- mgtk lua unit test using exe linking to mgtk
+	- Allow for calling lua functions instead of freyja events as well.
+		- Perhaps just hookup freyja events to lua functions?
+	- It's own thing or part of the Mlisp system?
+		- Let's give Lua it's own symbol table using a 'table'.
+	- Mlisp <-> XML <-> Lua UI script translator.
+	- Mlisp symbol table exposed to Lua for event system use.
 	- MGtkLua container wrapper to emulate mlisp wrappers.
 	- Expose things like control points via libfreyja backend.
  	- Widgets: lua mgtk wrapper to allow full interface plugins.
  	- Binary file I/O wrapper.
+	- OpenGL wrapper with lua draw() callback.
 
 
  Freyja 0.9.5.17	TBD
  -----------------------------------------------------------------------------
+
+ * Port cross compile build system to Cmake.
+	- Depends on the release of Cmake 2.6.0. ( Current release is 2.4. )
+	- Depends on proper Cmake support of cross compiler(s).
+	- Possibly support generic strip and package rules too.
+	- http://www.cmake.org/Wiki/CMake_Cross_Compiling
 
  * Edge editing.
 	- Select and transform edges in UI.
 	- Replace wireframe renderer with edge renderer?
 	- Mesh::RebuildPlanes()
 	- RELATED Cache s-edge results until light / mesh moves.
+
+ * New XML based freyja file format.
+	- Repacking required.
+	- Save IDs with objects if needed.
+	- Native format should be very stable.
+	- Make external plugins for older text based freyja/ja formats.
 
  * Improve Camera.
 	- Add more options such as perspective settings.
@@ -55,6 +83,10 @@
 
  * Remove LegacyABI use in MeshABI mesh generators.
 	- Time for Catmull-Clark 'spheres'?
+
+ * Edit modes setting visual mode for things like skeletal 'bone' animation
+
+ * mgtk Query string support.
 
 
  Freyja 0.9.5.18	TBD

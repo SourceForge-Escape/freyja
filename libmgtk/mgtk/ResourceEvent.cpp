@@ -38,7 +38,9 @@ Vector<ResourceEvent*>  ResourceEvent::mEvents;
 ////////////////////////////////////////////////////////////
 
 ResourcePlugin::ResourcePlugin(void (*rc_func)(), void (*gui_func)()) : 
-	mEventsAttach(rc_func),	mGUIAttach(gui_func)
+	mEventsAttach(rc_func),	
+	mGUIAttach(gui_func), 
+	mDrawCB(NULL)
 {
 	mPlugins.push_back(this);
 }
@@ -46,6 +48,15 @@ ResourcePlugin::ResourcePlugin(void (*rc_func)(), void (*gui_func)()) :
 
 ResourcePlugin::~ResourcePlugin()
 {
+}
+
+
+void ResourcePlugin::Draw()
+{
+	if (mDrawCB)
+	{
+		mDrawCB();
+	}
 }
 
 
