@@ -300,18 +300,6 @@ void freyja_octree_draw()
 	mgtk_draw_point_size1f(5.0f);
 	mgtk_draw_color3f(1.0f, 0.0f, 0.0f);
 	freyja_octree_draw_faux_control_points(root);
-	
-
-	// Draw test
-#if 0
-	mgtk_draw_line6f(-10.0f, 3.0f, 0.0f,
-					 10.0f, 3.0f, 0.0f);
-
-	mgtk_draw_point_size1f(5.0f);
-	mgtk_draw_color3f(1.0f, 0.0f, 0.0f);
-	mgtk_draw_point3f(-10.0f, 3.0f, 0.0f);
-	mgtk_draw_point3f(10.0f, 3.0f, 0.0f);
-#endif
 }
 
 

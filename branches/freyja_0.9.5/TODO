@@ -10,7 +10,7 @@
 	- AMD64
 	- i386
 
- * New plugin subsystems.
+ * New plugin subsystems.  ( Modular freyja )
 	- Octree plugin XML import/export.
 	- OpenGL scripting from lua will allow plugins to generate their own widgets
 	- No 2d projections allowed.
@@ -23,8 +23,11 @@
 	- Projectors.
 	- Physics material paint.
 	- Editing.
+		- String and Id based control point 'keys' for each plugin.
 		- Modify : Control Points || libfreyja ControlPoints
 		- Control point creation/deletion/control in plugins.
+		- Limit actions on control points via flags.
+			- Translate / Rotate / Scale / etc
 	- Separate OpenGL subsystem from freyja.
 	- IK solver.
 		- Boxes for collision w/ centered control point.
@@ -38,19 +41,18 @@
 	- Alchemy (raw) test set.
 
  * Lua
-	- Remove OpenGL test from C/C++ perlinnoise
+	- New OpenGL wrapper with lua draw() callback as separate library.
+	- New mgtk wrapper as separate library.
 	- mgtk lua unit test using exe linking to mgtk
 	- Allow for calling lua functions instead of freyja events as well.
 		- Perhaps just hookup freyja events to lua functions?
 	- It's own thing or part of the Mlisp system?
 		- Let's give Lua it's own symbol table using a 'table'.
 	- Mlisp <-> XML <-> Lua UI script translator.
-	- Mlisp symbol table exposed to Lua for event system use.
-	- MGtkLua container wrapper to emulate mlisp wrappers.
+	- Mlisp symbol table exposed in Lua for event system use.
 	- Expose things like control points via libfreyja backend.
  	- Widgets: lua mgtk wrapper to allow full interface plugins.
  	- Binary file I/O wrapper.
-	- OpenGL wrapper with lua draw() callback.
 
 
  Freyja 0.9.5.17	TBD
