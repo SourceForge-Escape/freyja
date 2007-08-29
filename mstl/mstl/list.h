@@ -494,6 +494,8 @@ namespace mstl
 				mTail = node;
 			}
 
+			delete mHead; // ??
+
 			mHead = node;
 		}
 	} 
@@ -504,16 +506,15 @@ namespace mstl
 	{
 		listnode<T> *node = new listnode<T>(data);
 
-		if (!mHead)
+		if (!mTail)
 		{
-			mHead = node;
+			mHead = mTail = node;
 		}    
 		else
 		{
 			mTail->SetNext(node);
+			mTail = node;
 		}
-
-		mTail = node;
 	}
 
 
@@ -524,8 +525,7 @@ namespace mstl
 
 		if (!mHead)
 		{
-			mHead = node;
-			mTail = node;
+			mHead = mTail = node;
 		}    
 		else
 		{

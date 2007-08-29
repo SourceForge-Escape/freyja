@@ -24,6 +24,26 @@
 
 #include "Octree.h"
 
+class XMLNode
+{
+public:
+	XMLNode() :
+		mNode(NULL),
+		mElement(NULL)
+	{}
+
+	XMLNode(Octree::Node* node, TiXmlElement* element) :
+		mNode(node),
+		mElement(element)
+	{}
+
+	Octree::Node* mNode;
+	TiXmlElement* mElement;
+};
+
+template<>
+XMLNode* mstl::list<XMLNode*>::mDefault = NULL; 
+
 
 void Octree::Node::SubdivChild(OctreeHelper &helper, hel::Vec3 &min, hel::Vec3 &max)
 {
@@ -50,7 +70,7 @@ void Octree::Node::SubdivChild(OctreeHelper &helper, hel::Vec3 &min, hel::Vec3 &
 
 void Octree::Node::Subdiv(OctreeHelper &helper)
 {
-	helper.GetFacesIndicesInBBox(mMin, mMax, mFaces);
+	//helper.GetFacesIndicesInBBox(mMin, mMax, mFaces);
 
 	// Compute the axis aligned bounding box (AABB) centroid.
 	hel::Vec3 center = (mMin + mMax) * 0.5f;
@@ -137,50 +157,59 @@ bool Octree::Serialize(const char *filename)
 	TiXmlElement *container = new TiXmlElement("freyja");
 	doc.LinkEndChild(container);
 
-	TiXmlElement *octree = new TiXmlElement("octree");
-	container->LinkEndChild(octree);
+	TiXmlElement *root = new TiXmlElement("octree");
+	container->LinkEndChild( root );
 
-#if 0
-	// Append nodes
-	mstl::list<Octree::Node *> q;
-	mstl::list<TiXmlElement *> qx;
-	q.push_front(&mRoot);
-	qx.push_front(octree);
+	// FIXME: Store metadata.
 
-	while ( !q.empty() )
+	// Append nodes to octree
+	mstl::list<XMLNode *> queue;
+
+	queue.push_back( new XMLNode(&mRoot, root) );
+
+	while ( queue.front() )
 	{
-		TiXmlElement *parent = qx.front();
-		qx.pop_front();
+		XMLNode* xmlnode = queue.front();
+		queue.pop_front();
 
-		Octree::Node *node = q.front();
-		q.pop_front();
+		Octree::Node *node = xmlnode->mNode;
+		TiXmlElement *parent = xmlnode->mElement;
+		delete xmlnode;
 
-		TiXmlElement *xmlNode = new TiXmlElement("node");
+		TiXmlElement *child = new TiXmlElement("node");
 
 		TiXmlElement *min = new TiXmlElement("min");
-		min->SetAttribute("x", node.mMin.mX);
-		min->SetAttribute("y", node.mMin.mY);
-		min->SetAttribute("z", node.mMin.mZ);
-		xmlNode->LinkEndChild(min);
+		min->SetDoubleAttribute("x", node->mMin.mX);
+		min->SetDoubleAttribute("y", node->mMin.mY);
+		min->SetDoubleAttribute("z", node->mMin.mZ);
+		child->LinkEndChild(min);
 
 		TiXmlElement *max = new TiXmlElement("max");
-		max->SetAttribute("x", node.mMax.mX);
-		max->SetAttribute("y", node.mMax.mY);
-		max->SetAttribute("z", node.mMax.mZ);
-		xmlNode->LinkEndChild(max);
+		max->SetDoubleAttribute("x", node->mMax.mX);
+		max->SetDoubleAttribute("y", node->mMax.mY);
+		max->SetDoubleAttribute("z", node->mMax.mZ);
+		child->LinkEndChild(max);
 
-		// children
-
+		// children of 'child'
 		for (uint32 i = 0, n = node->mChildren.size(); i < n; ++i)
 		{
-			
+			if ( node->mChildren[i] )
+				queue.push_back( new XMLNode(node->mChildren[i], child) );
 		}
 
-		// faces
+		// faces		
+		TiXmlElement *faces = new TiXmlElement("faces");
+		for (uint32 i = 0, n = node->mFaces.size(); i < n; ++i)
+		{
+			TiXmlElement *face = new TiXmlElement("face");
+			face->SetAttribute("index", node->mFaces[i]);
+			faces->LinkEndChild(face);
+		}
 
-		parent->LinkEndChild(xmlNode);
+		child->LinkEndChild(faces);
+
+		parent->LinkEndChild(child);
 	}
-#endif
 
 	doc.SaveFile(filename);
 
@@ -225,175 +254,64 @@ bool Octree::Unserialize(const char *filename)
 		return false;
 	}
 
-#if 0
-model = root;
+#if 1
 
-		printf("-- model '%s'\n", model->Value());
-		//model->Attribute("type");
-		//model->Attribute("version");
-		//model->Attribute("name");
+	// <octree>
+	TiXmlElement *octree = root->FirstChildElement();
 
-		TiXmlElement *cur = model->FirstChildElement();
 
+	// Append nodes to octree
+	mstl::list<XMLNode *> stack;
+
+	stack.push_front( new XMLNode(&mRoot, octree) );
+
+	while ( stack.front() )
+	{
+		XMLNode* xmlnode = stack.front();
+		TiXmlElement* element = xmlnode->mElement;
+		Octree::Node* node = xmlnode->mNode;
+		stack.pop_front();
+
+		delete xmlnode;
+
+		TiXmlElement *cur = element->FirstChildElement();
 
 		for( ; cur; cur = cur->NextSiblingElement() )
 		{
-			const char *key = cur->Value();
+			if ( !cur->Value() )
+				continue;
 
-			printf("-- ? '%s'\n", cur->Value());
-
-			if (key == NULL)
+			if ( !strncmp("min", cur->Value(), 3) )
 			{
+				cur->QueryFloatAttribute("x", &node->mMin.mX);
+				cur->QueryFloatAttribute("y", &node->mMin.mY);
+				cur->QueryFloatAttribute("z", &node->mMin.mZ);
 			}
-			else if ( !strncmp("skeleton", key, 8) )
-			{						
-				printf("-- skeleton\n");
-				//key->Attribute("version");
-				index_t skeleton = freyjaSkeletonCreate();
-				freyjaModelAddSkeleton(0, skeleton);
-				uint32 numJoints = 0;
-
-				TiXmlElement *bones = cur->FirstChildElement();
-				//if (bones) bones->Attribute("version");
-
-				TiXmlElement *bone = (bones) ? bones->FirstChildElement() : NULL;
-				for( ; bone; bone = bone->NextSiblingElement() )
-				{
-					const char *bsym = bone->Value();
-					if ( strncmp("bone", bsym, 15) == 0 )
-					{
-						++numJoints;
-						int id;
-						cur->QueryIntAttribute("id", &id);
-						const char *name = bone->Attribute("name");
-						index_t bIndex = freyjaBoneCreate(skeleton);
-						freyjaBoneName(bIndex, name);
-						// Map bid, id might be useful
-
-						printf("-- bone '%s'\n", name);
-
-						TiXmlElement *b = bone->FirstChildElement();
-						while (b)
-						{
-							if (b->Value() && !strcmp("position", b->Value()) )
-							{
-								float x, y, z;
-								b->QueryFloatAttribute("x", &x);
-								b->QueryFloatAttribute("y", &y);
-								b->QueryFloatAttribute("z", &z);
-								freyjaBoneTranslate3f(bIndex, x, y, z);
-							}
-							else if (b->Value() && !strcmp("rotation", b->Value()) )
-							{
-								float theta;
-								b->QueryFloatAttribute("angle", &theta);
-								TiXmlElement *axis = b->FirstChildElement();
-								if (axis && !strcmp("axis", axis->Value()) )
-								{
-									float x, y, z;
-									axis->QueryFloatAttribute("x", &x);
-									axis->QueryFloatAttribute("y", &y);
-									axis->QueryFloatAttribute("z", &z);
-
-									printf("-- %f %f %f %f\n", theta, x, y, z);
-#if 1
-					hel::Vec3 v(x, y, z);
-					v.Norm();
-					
-					float alpha, beta; 
-					helSinCosf(theta*0.5f, &beta, &alpha);
-					v *= beta;
-
-					// -alpha <-- convert coord system
-					//freyjaBoneRotateQuat4f(bIndex, -alpha, v.mX, v.mY, v.mZ);
-					freyjaBoneRotateQuat4f(bIndex, -alpha, v.mX, v.mY, v.mZ);//v.mZ, v.mY);
-#else
-									hel::Quat q;
-									q.SetByAxisAngles(theta*57.0f, x, y, z);
-									freyjaBoneRotateQuat4f(bIndex, q.mW, q.mX, q.mY, q.mZ);
-#endif
-
-								}
-							}
-				
-							b = b->NextSiblingElement();
-						}
-					}
-				}
-
-
-				TiXmlElement *h = bones->NextSiblingElement();
-				printf("-- bonehierarchy '%s'\n", h ? h->Value() : NULL);
-				//key->Attribute("version");
-
-				//<boneparent bone="schienagiu" parent="addome"/>
-				TiXmlElement *p = (h) ? h->FirstChildElement() : NULL;
-				for ( ; p; p = p->NextSiblingElement() )
-				{
-					const char *bone = p->Attribute("bone");
-					const char *parent = p->Attribute("parent");
-					int parentIndex = -1, childIndex = -1;
-
-					if (!bone || !parent)
-						continue;
-
-					printf("-- boneparent '%s' = %s, %s\n", p->Value(), bone, parent);
-#if 1
-					for (uint32 j = 0; j < numJoints; ++j)
-					{
-						// If we supported multi-skeleton this would need to be mapped
-						const char *contestant = freyjaGetBoneNameString(j);
-
-						if (contestant && !strcmp(parent, contestant))
-						{
-							parentIndex = j;
-						}
-						else if (contestant && !strcmp(bone, contestant))
-						{
-							childIndex = j;
-						}
-					}
-
-					if (childIndex != parentIndex)
-					{
-						freyjaBoneAddChild(parentIndex, childIndex);
-						freyjaBoneParent(childIndex, parentIndex);
-					}	
-#endif			
-				}
-
-				freyjaSkeletonUpdateBones(skeleton);
-			}
-			else if ( strncmp("weights", key, 7) == 0 )
+			else if ( !strncmp("max", cur->Value(), 3) )
 			{
-				printf("-- weights '%s'\n", cur->Value());
-				//const char *version = cur->Attribute("version");
+				cur->QueryFloatAttribute("x", &node->mMax.mX);
+				cur->QueryFloatAttribute("y", &node->mMax.mY);
+				cur->QueryFloatAttribute("z", &node->mMax.mZ);
+			}
+			else if ( !strncmp("node", cur->Value(), 4) )
+			{
+				Octree::Node* child = new Octree::Node();
+				node->mChildren.push_back( child );
+				stack.push_front( new XMLNode(child, cur) );			
+			}
+			else if ( !strncmp("faces", cur->Value(), 5) )
+			{	
+				TiXmlElement *face = cur->FirstChildElement();
 
-				TiXmlElement *child = cur->FirstChildElement();
-				for( ; child; child = child->NextSiblingElement() )
+				for( ; face; face = face->NextSiblingElement() )
 				{
-					const char *key2 = child->Value();
-					printf("-- vertexweight '%s'\n", child->Value());
-
-					if ( !strncmp("vertexweight", key2, 12) )
-					{
-						int v, b;
-						float w;
-						child->QueryIntAttribute("vertexindex", &v);
-						child->QueryIntAttribute("boneindex", &b);
-						child->QueryFloatAttribute("weight", &w);
-
-						printf("-- %i %i %f\n", v, b, w);
-
-						// FIXME: Import to freyja...
-						freyjaMeshVertexWeight(0, v, b, w);
-					}
+					int idx;
+					face->QueryIntAttribute("index", &idx);
+					node->mFaces.push_back( idx );
 				}
 			}
-
-		
+		}
 	}
-
 #endif 
 
 	return true;

@@ -60,7 +60,7 @@ LOCAL_INCLUDES=-I$(SRC_DIR) -I$(BASE_DIR)/mstl/ -I$(BASE_DIR)/libhel/ -I$(BASE_D
 
 LOCAL_LIBS=-L$(BIN_DIR)/libfreyja/$(BUILD_SELECT)/ -L$(BIN_DIR)/libhel/$(BUILD_SELECT)/ -L$(BIN_DIR)/libmgtk/$(BUILD_SELECT)/ -L$(BIN_DIR)/tinyxml/$(BUILD_SELECT)/
 
-LOCAL_WIN32_LIBS=-L$(BIN_DIR)/libfreyja/win32/ -L$(BIN_DIR)/libhel/win32/ -L$(BIN_DIR)/libmgtk/win32/
+LOCAL_WIN32_LIBS=-L$(BIN_DIR)/libfreyja/win32/ -L$(BIN_DIR)/libhel/win32/ -L$(BIN_DIR)/libmgtk/win32/ -L$(BIN_DIR)/tinyxml/win32/ 
 
 
 ################################################################
@@ -75,7 +75,7 @@ BASE_CFLAGS=-fPIC -Wall -I$(SRC_DIR) \
 	-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 	$(BASE_DEFS) $(LOCAL_INCLUDES)
 
-LDFLAGS=$(CONFIGURE_LNK) -lm -ldl
+LDFLAGS=$(CONFIGURE_LNK) -lm -ldl $(STD_PLUGIN_LIBS)
 #LDFLAGS += -Wl,-z,defs
 #LDFLAGS += -Wl,-O1
 RELEASE_CFLAGS=$(BASE_CFLAGS) -ffast-math -funroll-loops \
