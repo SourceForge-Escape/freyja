@@ -138,6 +138,9 @@ void Octree::Node::Subdiv(OctreeHelper &helper)
 ////////////////////////////////////////////////////////////
 
 Octree::Octree() :
+	mMetadata(),
+	mVertices(),
+	mFaces(),
 	mRoot()
 {
 }
@@ -211,6 +214,55 @@ bool Octree::Serialize(const char *filename)
 		parent->LinkEndChild(child);
 	}
 
+	// <walkmesh>
+	TiXmlElement *walkmesh = new TiXmlElement("walkmesh");
+	root->LinkEndChild( walkmesh );
+
+	TiXmlElement *vertices = new TiXmlElement("vertices");
+	vertices->SetAttribute("count", mVertices.size() );
+	walkmesh->LinkEndChild( vertices );
+
+	if ( mVertices.size() )
+	{
+		mstl::String s;
+		mstl::String tmp;
+
+		for (uint32 i = 0, n = mVertices.size(); i < n; ++i)
+		{
+			tmp.Set("%f ", mVertices[i]);
+			s += tmp.c_str();			
+		} 
+
+		if ( s.c_str() )
+		{
+			TiXmlText *array = new TiXmlText( s.c_str() );
+			vertices->LinkEndChild( array );
+		}
+	}
+
+#if 0
+	TiXmlElement *faces = new TiXmlElement("faces");
+	faces->SetAttribute("count", mFaces.size() );
+	walkmesh->LinkEndChild( faces );
+
+	{
+		mstl::String s;
+		mstl::String tmp;
+
+		for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
+		{
+			tmp.Set("%i ", mFaces[i]);
+			s += tmp.c_str();			
+		} 
+
+		if ( s.c_str() )
+		{
+			TiXmlText *array = new TiXmlText( s.c_str() );
+			faces->LinkEndChild( array );
+		}
+	}
+#endif
+
 	doc.SaveFile(filename);
 
 	return true;
@@ -254,11 +306,10 @@ bool Octree::Unserialize(const char *filename)
 		return false;
 	}
 
-#if 1
+	// FIXME: Abstract octree and walkmesh to functions and test for tags.
 
 	// <octree>
 	TiXmlElement *octree = root->FirstChildElement();
-
 
 	// Append nodes to octree
 	mstl::list<XMLNode *> stack;
@@ -312,7 +363,24 @@ bool Octree::Unserialize(const char *filename)
 			}
 		}
 	}
-#endif 
+
+
+	// <walkmesh>
+	TiXmlElement *walkmesh = root->FirstChildElement();
+
+	TiXmlElement *cur = walkmesh->FirstChildElement();
+
+	for( ; cur; cur = cur->NextSiblingElement() )
+	{
+		if ( !strncmp("faces", cur->Value(), 5) )
+		{
+			// FIXME: scan uints from text, store in mFaces
+		}
+		else if ( !strncmp("vertices", cur->Value(), 8) )
+		{
+			// FIXME: scan floats from text, store in mVertices
+		}
+	}
 
 	return true;
 }

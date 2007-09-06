@@ -122,6 +122,51 @@ void freyja_octree_rebuild()
 
 		gOctreeVisible = true;
 		mgtk_print("Octree generated.");
+
+#if 0
+		// Build walkmesh.
+		// Note that if the mesh isn't 'clean' this will still work, but
+		// waste memory with unused 'gaps' in the array.
+		{
+			mstl::Vector<vec_t>& vertices = gOctree.GetVertices();
+			vertices.clear();
+			vec_t* array = mesh->GetVertexArray(); 
+			uint32 count = mesh->GetVertexArrayCount();
+
+			if ( !array )
+				count = 0;
+
+			if ( count )
+				vertices.resize(count+1);
+
+			for (uint32 i = 0; i < count; ++i)
+			{
+				vertices.push_back( array[i] );
+			}
+		}
+
+		{
+			mstl::Vector<uint16>& faces = gOctree.GetFaces(); 
+			uint32 count = mesh->GetFaceCount();
+
+			if ( count )
+				faces.resize(count+1);
+
+			for (uint32 i = 0; i < count; ++i)
+			{
+				Face* face = mesh->GetFace(i);
+
+				if ( face )
+				{
+					uint32 j = 0;
+					foreach ( face->mIndices, j )
+					{
+						faces.push_back( face->mIndices[j] );
+					}
+				}
+			}
+		}
+#endif
 	}
 	else
 	{

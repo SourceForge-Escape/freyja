@@ -83,6 +83,29 @@ class Octree
 	// Public Properties
 	////////////////////////////////////////////////////////////
 
+	const char *GetMetadata() { return mMetadata.c_str(); }
+	void SetMetadata(const char *s) { mMetadata = s; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	mstl::Vector<vec_t>& GetVertices() { return mVertices; }
+	void SetVertices(mstl::Vector<vec_t> &vertices) { mVertices = vertices; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get/Set optional vertex list for walkmesh.
+	 *
+	 ------------------------------------------------------*/
+
+	mstl::Vector<uint16>& GetFaces() { return mFaces; }
+	void SetFaces(mstl::Vector<uint16> &faces) { mFaces = faces; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get/Set optional face list for walkmesh.
+	 *
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
@@ -144,6 +167,10 @@ class Octree
 	////////////////////////////////////////////////////////////
 
 	mstl::String mMetadata;         /* Useful for linking to geometry, etc. */
+
+	mstl::Vector<vec_t> mVertices;  /* Vertex array */
+
+	mstl::Vector<uint16> mFaces;    /* Face list. ( triangles / tesslated ) */
 
 	Octree::Node mRoot;             /* Root node. */
 };
