@@ -92,9 +92,9 @@ class Entity
 
 	uint32 mId;                /* Unique identifier */
 
-	Vector3d mLastPos;         /* World position */
+	Vec3 mLastPos;             /* World position */
 
-	Quaternion mOrientation;	/* Orientation (Pitch, Yaw, Roll) */
+	Quat mOrientation;	      /* Orientation (Pitch, Yaw, Roll) */
 
 	CollisionObject *obj;		/* Physical representation */
 

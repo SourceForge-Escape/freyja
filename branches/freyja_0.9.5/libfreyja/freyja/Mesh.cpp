@@ -1509,7 +1509,7 @@ bool Mesh::IntersectPerFace(hel::Ray &r, vec_t &t)
 		return false;
 
 	vec_t bestDist = 99999.0f;
-	r.mDir.Norm();
+	r.Norm();
 	int32 face0 = -1;
 	
 	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
@@ -1569,7 +1569,7 @@ bool Mesh::Intersect(hel::Ray &r, vec_t &t)
 	if (GetFlags() & fHidden)
 		return false;
 
-	r.mDir.Norm();
+	r.Norm();
 
 	// Sphere test
 	if (!r.IntersectSphere(mBoundingVolume.mSphere.mCenter, 
@@ -1664,7 +1664,7 @@ bool Mesh::IntersectUVFaces(hel::Ray &r, int &face0, bool markAll,
 							index_t material)
 {
 	vec_t bestDist = 99999.0f;
-	r.mDir.Norm();
+	r.Norm();
 	face0 = -1;
 
 	for (uint32 i = 0, n = GetFaceCount(); i < n; ++i)
@@ -1737,7 +1737,7 @@ bool Mesh::IntersectHitBox(hel::Ray &r,
 	bool intersect = false;
 	Vec3 tuv;
 
-	r.mDir.Norm();
+	r.Norm();
 
 	// Quick and dirty hit test that assumes you can pusedo tesselate 
 	// a quad here and always get as good results...
@@ -1797,7 +1797,7 @@ bool Mesh::IntersectHitBox(hel::Ray &r,
 int Mesh::PickEdge(hel::Ray &r, vec_t &t)
 {
 	vec_t bestDist = 99999.0f;
-	r.mDir.Norm();
+	r.Norm();
 	int best = -1;
 	const Vec3 n(0.2f, 0.2f, 0.2f); // FIXME: Allow external mutator for size here
 
@@ -1825,7 +1825,7 @@ int Mesh::PickEdge(hel::Ray &r, vec_t &t)
 int Mesh::PickFace(Face::Flags flag, hel::Ray &r, hel::Vec3 &tuv)
 {
 	vec_t bestDist = 99999.0f;
-	r.mDir.Norm();
+	r.Norm();
 	int face0 = -1;
 	
 	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
@@ -1879,7 +1879,7 @@ bool Mesh::IntersectFaces(hel::Ray &r, int &face0, bool markAll)
 	//no 'editor side' scale support vec_t t; if (!Intersect(r, t)) return false;
 
 	vec_t bestDist = 99999.0f;
-	r.mDir.Norm();
+	r.Norm();
 	face0 = -1;
 	
 	for (uint32 i = 0, iCount = GetFaceCount(); i < iCount; ++i)
@@ -2060,7 +2060,7 @@ bool Mesh::IntersectClosestVertex(hel::Ray &r, int &vertex0, vec_t radius)
 {
 	// No 'editor side' scale support if (!Intersect(r, t)) return false;
 	vec_t bestDist = 99999.0f;
-	r.mDir.Norm();
+	r.Norm();
 	vertex0 = -1;
 	
 	for (uint32 i = 0, iCount = GetVertexCount(); i < iCount; ++i)

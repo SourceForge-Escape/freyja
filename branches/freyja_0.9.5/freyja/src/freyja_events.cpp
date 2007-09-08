@@ -1057,7 +1057,7 @@ void eBoneNew()
 void eExtrude()
 {
 	// FIXME: Give user the option of pick ray and face normal control
-	hel::Vec3 v = FreyjaRender::mTestRay.mDir;
+	hel::Vec3 v = FreyjaRender::mTestRay.GetDir();
 	v *= -8.0f;
 
 	index_t mesh = FreyjaControl::GetInstance()->GetSelectedMesh();

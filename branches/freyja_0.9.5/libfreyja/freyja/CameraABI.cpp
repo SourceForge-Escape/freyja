@@ -207,10 +207,12 @@ const char *freyjaGetCameraMetadata(index_t camera)
 
 index_t freyjaCameraCreateTrack(index_t camera)
 {
+	return 0;
 }
 
 uint32 freyjaGetCameraTrackCount(index_t camera)
 {
+	return 0;
 }
 
 void freyjaCameraTrackDuration(index_t camera, index_t track, vec_t duration)
@@ -224,15 +226,18 @@ void freyjaCameraTrackRate(index_t camera, index_t track, vec_t fps)
 
 index_t freyjaCameraCreateKeyframe(index_t camera, index_t track, vec_t time)
 {
+	return 0;
 }
 
 uint32 freyjaGetCameraKeyframeCount(index_t camera, index_t track)
 {
+	return 0;
 }
 
 vec_t freyjaGetCameraKeyframeTime(index_t camera, 
 								  index_t track, index_t key)
 {
+	return 0.0f;
 }
 
 void freyjaCameraKeyframeMetadata(index_t camera, 
@@ -244,6 +249,7 @@ void freyjaCameraKeyframeMetadata(index_t camera,
 const char *freyjaGetCameraKeyframeMetadata(index_t camera, 
 											index_t track, index_t key)
 {
+	return NULL;
 }
 
 void freyjaCameraKeyframePos3f(index_t camera, index_t track, index_t key,

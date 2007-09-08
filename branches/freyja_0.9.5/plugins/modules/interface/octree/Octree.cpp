@@ -214,55 +214,6 @@ bool Octree::Serialize(const char *filename)
 		parent->LinkEndChild(child);
 	}
 
-	// <walkmesh>
-	TiXmlElement *walkmesh = new TiXmlElement("walkmesh");
-	root->LinkEndChild( walkmesh );
-
-	TiXmlElement *vertices = new TiXmlElement("vertices");
-	vertices->SetAttribute("count", mVertices.size() );
-	walkmesh->LinkEndChild( vertices );
-
-	if ( mVertices.size() )
-	{
-		mstl::String s;
-		mstl::String tmp;
-
-		for (uint32 i = 0, n = mVertices.size(); i < n; ++i)
-		{
-			tmp.Set("%f ", mVertices[i]);
-			s += tmp.c_str();			
-		} 
-
-		if ( s.c_str() )
-		{
-			TiXmlText *array = new TiXmlText( s.c_str() );
-			vertices->LinkEndChild( array );
-		}
-	}
-
-#if 0
-	TiXmlElement *faces = new TiXmlElement("faces");
-	faces->SetAttribute("count", mFaces.size() );
-	walkmesh->LinkEndChild( faces );
-
-	{
-		mstl::String s;
-		mstl::String tmp;
-
-		for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
-		{
-			tmp.Set("%i ", mFaces[i]);
-			s += tmp.c_str();			
-		} 
-
-		if ( s.c_str() )
-		{
-			TiXmlText *array = new TiXmlText( s.c_str() );
-			faces->LinkEndChild( array );
-		}
-	}
-#endif
-
 	doc.SaveFile(filename);
 
 	return true;

@@ -35,9 +35,10 @@
 		- Walkmesh can be subbed by IK over rendered mesh.
 
  * Metadata object eg for map objects ( currently bones w/ metadata are used )
+	- Control point based
 	- This will become a 'new' ui plugin.
 	- Prop: icon, name, type, metadata ( data )
-	- Sprite 'icons'
+	- Sprite and mesh instance 'icons'
 	- Alchemy (raw) test set.
 
  * Lua

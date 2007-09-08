@@ -7,6 +7,9 @@
  Kagura prealpha, 0.9.5.16 () -- "On the roadmap again"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - 
+ - QuakeWars model support checked in.
+ - Various fixes in libhel thanks to new tests.  ^^
+ - New cmake based unit tests for libhel.
  - Disabled debug output from GLFont texture generator. 
  - New octree plugin. (1054)
  - New freyja updated to bind new lua mgtk exports.

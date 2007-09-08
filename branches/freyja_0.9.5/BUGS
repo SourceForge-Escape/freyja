@@ -13,7 +13,9 @@
  Scheduled fixes.
  ----------------------------
  
- * FIX mstl::list - push_back, etc have bugs
+ * FIX UV selection.
+
+ * FIX mstl::list - push_back, etc have bugs ( need unit tests )
 
  * FIX Save As.. dialog triggers twice with text entry event.
 	- Make this *.freyja only and using the one-off choosers to fix.
