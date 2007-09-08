@@ -204,10 +204,10 @@ $(BUILDDIR)/$(MODULE).bundle : $(PROG_OBJS)
 
 test:
 	@-mkdir -p $(BUILD_TEST_DIR)
-	$(MAKE) targets NAME=ase SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
-	PROG_OBJS="$(BUILD_TEST_DIR)/Ase.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_ASE $(BASE_CFLAGS)" \
-	LD_FLAGS="-lm -ldl -lstdc++ -lhel0 -lfreyja"
+	$(MAKE) targets NAME=md5 SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
+	PROG_OBJS="$(BUILD_TEST_DIR)/Md5.o" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_MD5 $(BASE_CFLAGS)" \
+	LD_FLAGS="-lm -ldl -lstdc++ ${STD_PLUGIN_LIBS}"
 
 
 ##########################################################################

@@ -10,7 +10,7 @@
 #include <mstl/Thread.h>
 
 using namespace hel;
-
+#if 0
 void testLinkageOnly()
 {
 	Vec3 u;
@@ -654,14 +654,42 @@ void helMatrixUnitTest()
 					heading = helRadToDeg(1.343789), 
 					roll = helRadToDeg(0.0));
 }
-
+#endif
 
 int main(int argc, char *argv[])
 {
 	printf("[libhel test]\n");
 	//runLibHelTest(argc, argv);
 
-	helMatrixUnitTest();
+	//helMatrixUnitTest();
+
+	{
+		Vec3 a(3,5,9), b(-9,2,0);
+		a.Norm();
+		b.Norm();
+		vec_t s = Vec3::Dot(a, b);
+		s = acos(s);
+		printf("*** %f\n", s);
+	}
+
+	//Vec3 a(9,1,2), b(1,3,-2), n;
+
+	Vec3 a(-5,6,1), b(1,7,3), n;
+
+	n = Vec3::Cross(a, b);
+	//n.Norm();
+
+	float s = n.Magnitude();
+		printf("*** %f\n", s);
+
+	printf("*** %f, %f, %f\n", n.mX, n.mY, n.mZ);
 
 	return 0;
 }
+
+
+
+
+
+
+

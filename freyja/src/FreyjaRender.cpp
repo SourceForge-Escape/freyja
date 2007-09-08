@@ -292,16 +292,16 @@ void FreyjaRender::DrawCamWindow()
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
 
-		hel::Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
+		hel::Vec3 rayEnd = mTestRay.GetOrigin() + mTestRay.GetDir() * 1000;
 		glPointSize(2.0);
 		glBegin(GL_POINTS);	
 		glColor3fv(GREEN);	
-		glVertex3fv(mTestRay.mOrigin.mVec);
+		glVertex3fv(mTestRay.GetOrigin().mVec);
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
 		glBegin(GL_LINES);	
 		glColor3fv(YELLOW);	
-		glVertex3fv(mTestRay.mOrigin.mVec);
+		glVertex3fv(mTestRay.GetOrigin().mVec);
 		glColor3fv(DARK_YELLOW);	
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
@@ -441,16 +441,16 @@ void FreyjaRender::DrawFreeWindow()
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
 
-		hel::Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
+		hel::Vec3 rayEnd = mTestRay.GetOrigin() + mTestRay.GetDir() * 1000;
 		glPointSize(2.0);
 		glBegin(GL_POINTS);	
 		glColor3fv(GREEN);	
-		glVertex3fv(mTestRay.mOrigin.mVec);
+		glVertex3fv(mTestRay.GetOrigin().mVec);
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
 		glBegin(GL_LINES);	
 		glColor3fv(YELLOW);	
-		glVertex3fv(mTestRay.mOrigin.mVec);
+		glVertex3fv(mTestRay.GetOrigin().mVec);
 		glColor3fv(DARK_YELLOW);	
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
@@ -2681,16 +2681,16 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 		glDisable(GL_BLEND);
 		glDisable(GL_TEXTURE_2D);
 
-		hel::Vec3 rayEnd = mTestRay.mOrigin + mTestRay.mDir * 1000;
+		hel::Vec3 rayEnd = mTestRay.GetOrigin() + mTestRay.GetDir() * 1000;
 		glPointSize(2.0);
 		glBegin(GL_POINTS);	
 		glColor3fv(GREEN);	
-		glVertex3fv(mTestRay.mOrigin.mVec);
+		glVertex3fv(mTestRay.GetOrigin().mVec);
 		glVertex3fv(rayEnd.mVec);
 		glEnd();
 		glBegin(GL_LINES);	
 		glColor3fv(YELLOW);	
-		glVertex3fv(mTestRay.mOrigin.mVec);
+		glVertex3fv(mTestRay.GetOrigin().mVec);
 		glColor3fv(DARK_YELLOW);	
 		glVertex3fv(rayEnd.mVec);
 		glEnd();

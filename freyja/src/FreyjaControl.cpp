@@ -533,11 +533,10 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 	{
 	case eScheme_UV:
 		// FIXME: This doesn't handle UV in sized viewports properly.
-		r.mOrigin = 
-		hel::Vec3(x / mRender->GetWindowWidth(), 
-				  y / mRender->GetWindowHeight(), 
-				  10.0f);
-		r.mDir = hel::Vec3(0.0f, 0.0f, -1.0f);
+		r.SetOrigin( hel::Vec3(x / mRender->GetWindowWidth(), 
+							   y / mRender->GetWindowHeight(), 
+							   10.0f) );
+		r.SetDir( hel::Vec3(0.0f, 0.0f, -1.0f) );
 		break;
 
 	case eScheme_Model:
@@ -560,9 +559,12 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 			hel::Mat44 m;
 			m.Rotate(v);
 			m.Multiply3fv(t.mVec);
-			r.mOrigin = t;
-			r.mDir.Set(0.0f, 0.0f, -1.0f);
-			m.Multiply3fv(r.mDir.mVec);
+			r.SetOrigin(t);
+			r.SetDir(0.0f, 0.0f, -1.0f);
+
+			hel::Vec3 tmp = r.GetDir();
+			m.Multiply3fv(tmp.mVec);
+			r.SetDir(tmp);
 		}
 		else
 		{
@@ -573,33 +575,33 @@ void FreyjaControl::CastPickRay(vec_t x, vec_t y)
 			switch (GetSelectedView())
 			{
 			case PLANE_BACK:
-				r.mOrigin = hel::Vec3(x, y, z - 100);
-				r.mDir = hel::Vec3(0, 0, 1);
+				r.SetOrigin(x, y, z - 100);
+				r.SetDir(0, 0, 1);
 				break;
 
 			case PLANE_FRONT: // Front, XY
-				r.mOrigin = hel::Vec3(x, y, z + 100);
-				r.mDir = hel::Vec3(0, 0, -1);
+				r.SetOrigin(x, y, z + 100);
+				r.SetDir(0, 0, -1);
 				break;
 
 			case PLANE_BOTTOM:
-				r.mOrigin = hel::Vec3(x, y - 100, -z);
-				r.mDir = hel::Vec3(0, 1, 0);
+				r.SetOrigin(x, y - 100, -z);
+				r.SetDir(0, 1, 0);
 				break;
 
 			case PLANE_TOP: // Top, XZ
-				r.mOrigin = hel::Vec3(x, y + 100, -z);
-				r.mDir = hel::Vec3(0, -1, 0);
+				r.SetOrigin(x, y + 100, -z);
+				r.SetDir(0, -1, 0);
 				break;
 
 			case PLANE_RIGHT:
-				r.mOrigin = hel::Vec3(x + 100, y, z);
-				r.mDir = hel::Vec3(-1, 0, 0);
+				r.SetOrigin(x + 100, y, z);
+				r.SetDir(-1, 0, 0);
 				break;
 
 			case PLANE_LEFT: // Side, ZY
-				r.mOrigin = hel::Vec3(x - 100, y, z);
-				r.mDir = hel::Vec3(1, 0, 0);
+				r.SetOrigin(x - 100, y, z);
+				r.SetDir(1, 0, 0);
 				break;
 
 			default:
@@ -5032,7 +5034,7 @@ void FreyjaControl::PaintObject(vec_t x, vec_t y)
 					if (f)
 					{
 #if 1
-						Vec3 r = FreyjaRender::mTestRay.mDir;
+						Vec3 r = FreyjaRender::mTestRay.GetDir();
 #else
 						Vec3 r = f->mNormal;
 #endif

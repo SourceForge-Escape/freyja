@@ -236,21 +236,21 @@ class Camera
 	inline
 	const hel::Vec3& Camera::GetDir()
 	{
-		return this->mView.mDir;
+		return this->mView.GetDir();
 	}
 
 
 	inline
 	void Camera::SetDir(const hel::Vec3& dir)
 	{
-		this->mView.mDir = dir;
+		this->mView.SetDir( dir );
 	}
 
 
 	inline
 	const hel::Vec3& Camera::GetPos()
 	{
-		return this->mView.mOrigin;
+		return this->mView.GetOrigin();
 	}
 
 
@@ -261,7 +261,7 @@ class Camera
 		//mUp += pos - this->mView.mOrigin;
 		//mUp.Norm();
 
-		this->mView.mOrigin = pos;
+		this->mView.SetOrigin( pos );
 	}
 
 

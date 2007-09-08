@@ -6,7 +6,7 @@ set(Minor 2)
 set(Micro 2)
 set(Revision 4)
 
-#enable_testing()
+enable_testing()
 
 add_definitions(
 	-DVERSION=\"\\\"libhel-${Major}.${Minor}.${Micro}.${Revision}\\\"\" 
@@ -84,24 +84,12 @@ set(Objs
 
 add_library( ${Name}-${Major}.${Minor}.${Micro} SHARED ${Objs} )
 
+
+#######################################################################
 # Packaging
+#######################################################################
+
 #add_custom_command(TARGET libhel.deb COMMAND dpkg-buildpackage -rfakeroot)
-
-
-# Unit tests
-add_test(matrix matrix_test)
-add_test(quat quat_test)
-add_test(ray ray_test)
-add_test(vec3 vec3_test)
-
-
-#If the ENABLE_TESTING command has been run, this command adds a test target to the current directory. If ENABLE_TESTING has not been run, this command does nothing. The tests are run by the testing subsystem by executing Exename with the specified arguments. Exename can be either an executable built by this project or an arbitrary executable on the system (like tclsh). The test will be run with the current working directory set to the CMakeList.txt files corresponding directory in the binary tree. 
-
-# ADD_LIBRARY(foo SHARED ${foo_sources})
-# ADD_LIBRARY(foo-static STATIC ${foo_sources})
-# // The library target "foo" already has a default OUTPUT_NAME of "foo", so we don't need to change it.
-# // The library target "foo-static" has a default OUTPUT_NAME of "foo-static", so change it.
-# SET_TARGET_PROPERTIES(foo-static PROPERTIES OUTPUT_NAME "foo")
 
 # Generate a new debian/changelog.
 FILE( WRITE debian/changelog "libhel (${Major}.${Minor}.${Micro}.${Revision}) feisty; urgency=low\n\n" )
@@ -113,7 +101,30 @@ FILE( APPEND debian/changelog "" )
 INSTALL( TARGETS ${Name}-${Major}.${Minor}.${Micro} LIBRARY DESTINATION /usr/lib )
 
 
+#######################################################################
+# Unit tests
+#######################################################################
 
+# Remember to run `export LD_LIBRARY_PATH=.` before running CTest!
+
+# Mat44
+add_executable( mat44 hel/unit/Mat44 )
+set_target_properties( mat44 PROPERTIES OUTPUT_NAME unit/mat44 )
+set_target_properties( mat44 PROPERTIES COMPILE_FLAGS 
+	"-DUNIT_TEST_MAT44" )
+set_target_properties( mat44 PROPERTIES LINK_FLAGS 
+	"-L. -l${Name}-${Major}.${Minor}.${Micro} -lpthread" )
+add_test( mat44 unit/mat44 unit/mat44-results.xml )
+
+
+# Ray
+add_executable( ray hel/unit/Ray )
+set_target_properties( ray PROPERTIES OUTPUT_NAME unit/ray )
+set_target_properties( ray PROPERTIES COMPILE_FLAGS 
+	"-DUNIT_TEST_RAY" )
+set_target_properties( ray PROPERTIES LINK_FLAGS 
+	"-L. -l${Name}-${Major}.${Minor}.${Micro} -lpthread" )
+add_test( ray unit/ray unit/ray-results.xml )
 
 
 

@@ -25,42 +25,92 @@
 
 using namespace hel;
 
-////////////////////////////////////////////////////////////
-// Constructors
-////////////////////////////////////////////////////////////
-
-Ray::Ray() :
-	mOrigin(),
-	mDir()
-{
-}
-
-
-Ray::Ray(const Vec3 &origin, const Vec3 &dir) :
-	mOrigin(mOrigin),
-	mDir(mDir)
-{
-}
-
-
-Ray::Ray(const Ray &ray) :
-	mOrigin(ray.mOrigin),
-	mDir(ray.mDir)
-{
-}
-
-
-Ray::~Ray()
-{
-}
-
 
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
+bool Ray::IntersectBox(vec3_t v0, vec3_t v1, vec3_t v2, vec3_t v3, 
+                       vec3_t v4, vec3_t v5, vec3_t v6, vec3_t v7, vec_t &t)
+{
+	mDir.Norm();
+	vec_t bestDist = 99999.0f;
+	bool intersect = false;
+	Vec3 tuv;
 
-bool Ray::IntersectBox(vec3_t min, vec3_t max, vec_t &t)
+	// Quick and dirty hit tests using tesselated quads for generic box.
+	if ( IntersectTriangle( v1, v6, v4, tuv.mVec ) ||
+	     IntersectTriangle( v4, v7, v1, tuv.mVec ) )
+	{
+		intersect = true;
+			
+		if (tuv.mX < bestDist)
+		{
+			t = bestDist = tuv.mX;
+		}
+	}
+
+	if ( IntersectTriangle( v6, v3, v0, tuv.mVec ) ||
+	     IntersectTriangle( v0, v4, v6, tuv.mVec ) )
+	{
+		intersect = true;
+			
+		if (tuv.mX < bestDist)
+		{
+			t = bestDist = tuv.mX;
+		}
+	}
+
+	if ( IntersectTriangle( v1, v5, v2, tuv.mVec ) ||
+	     IntersectTriangle( v2, v7, v1, tuv.mVec ) )
+	{
+		intersect = true;
+			
+		if (tuv.mX < bestDist)
+		{
+			t = bestDist = tuv.mX;
+		}
+	}
+
+	if ( IntersectTriangle( v1, v6, v3, tuv.mVec ) ||
+	     IntersectTriangle( v3, v5, v1, tuv.mVec ) )
+	{
+		intersect = true;
+			
+		if (tuv.mX < bestDist)
+		{
+			t = bestDist = tuv.mX;
+		}
+	}
+
+	if ( IntersectTriangle( v4, v0, v2, tuv.mVec ) ||
+	     IntersectTriangle( v2, v7, v4, tuv.mVec ) )
+	{
+		intersect = true;
+			
+		if (tuv.mX < bestDist)
+		{
+			t = bestDist = tuv.mX;
+		}
+	}
+
+	if ( IntersectTriangle( v3, v0, v2, tuv.mVec ) ||
+	     IntersectTriangle( v2, v5, v3, tuv.mVec ) )
+	{
+		intersect = true;
+			
+		if (tuv.mX < bestDist)
+		{
+			t = bestDist = tuv.mX;
+		}
+	}
+
+	return intersect;
+}
+
+
+// Need to pick an optimzied algorithm and implement.  Likely will go with Woo's.
+bool Ray::IntersectAABB(vec3_t min, vec3_t max, vec_t &t)
 {
 	mDir.Norm();
 
@@ -111,22 +161,14 @@ bool Ray::IntersectBox(vec3_t min, vec3_t max, vec_t &t)
 			break;
 		}
 
-		if (IntersectTriangle(v[a].mVec, v[b].mVec, v[c].mVec, tuv.mVec))
+		if ( IntersectTriangle(v[a], v[b], v[c], tuv) ||
+		     IntersectTriangle(v[c], v[d], v[a], tuv) )
 		{
 			intersect = true;
 			
-			if (tuv.mVec[0] < bestDist)
+			if (tuv.mX < bestDist)
 			{
-				t = bestDist = tuv.mVec[0];
-			}
-		}
-		else if (IntersectTriangle(v[c].mVec, v[d].mVec, v[a].mVec, tuv.mVec))
-		{
-			intersect = true;
-			
-			if (tuv.mVec[0] < bestDist)
-			{
-				t = bestDist = tuv.mVec[0];
+				t = bestDist = tuv.mX;
 			}
 		}
 	}
@@ -135,9 +177,64 @@ bool Ray::IntersectBox(vec3_t min, vec3_t max, vec_t &t)
 }
 
 
-bool Ray::IntersectAABB(vec3_t min, vec3_t max, vec_t &t)
+bool Ray::IntersectAABB(vec3_t min, vec3_t max)
 {
-	return false; // need to pick an algorithm and implement I guess  =)
+	// FIXME: use plucker coords?
+
+	mDir.Norm();
+	Vec3 v[6];
+
+	v[0] = Vec3(max[0], max[1], max[2]);
+	v[1] = Vec3(min[0], min[1], min[2]);
+	v[2] = Vec3(max[0], min[1], max[2]);
+	v[3] = Vec3(min[0], max[1], max[2]);
+	v[4] = Vec3(max[0], max[1], min[2]);
+	v[5] = Vec3(min[0], min[1], max[2]);
+	v[6] = Vec3(min[0], max[1], min[2]);
+	v[7] = Vec3(max[0], min[1], min[2]);
+
+
+	Vec3 tuv;
+
+	// Quick and dirty hit test that assumes you can pusedo tesselate 
+	// a quad here and always get as good results...
+	for (uint32 i = 0, a, b, c, d; i < 6; ++i)
+	{
+		switch (i)
+		{
+		case 0:    
+			a = 1, b = 6, c = 4, d = 7;
+			break;
+
+		case 1:
+			a = 6, b = 3, c = 0, d = 4;
+			break;
+
+		case 2:
+			a = 1, b = 5, c = 2, d = 7;
+			break;
+
+		case 3:
+			a = 1, b = 6, c = 3, d = 5;
+			break;
+
+		case 4:
+			a = 4, b = 0, c = 2, d = 7;
+			break;
+
+		case 5:
+			a = 3, b = 0, c = 2, d = 5;
+			break;
+		}
+
+		if ( IntersectTriangle(v[a], v[b], v[c], tuv) ||
+		     IntersectTriangle(v[c], v[d], v[a], tuv) )
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 
@@ -174,9 +271,9 @@ bool Ray::IntersectSphere(vec3_t center3, vec_t radius, vec_t &t)
 // NOTE: I've reduced the persision to FLOAT, and made
 //       other changes that will likely affect stability
 //
-//       Computed normal won't agree with defined a normal
+//       Computed normal won't agree with defined normal.
 //
-//       Using the macros to keep it inlined better
+//       Using the macros to keep it inlined better.
 //
 ////////////////////////////////////////////////////////////
 #define EPSILON 0.000001
@@ -194,26 +291,27 @@ bool Ray::IntersectSphere(vec3_t center3, vec_t radius, vec_t &t)
 
 bool Ray::IntersectTriangle(vec3_t vert0, vec3_t vert1, vec3_t vert2, vec3_t tuv)
 {
-	vec3_t edge1, edge2, tvec, pvec, qvec;
 	vec3_t &orig = mOrigin.mVec, &dir = mDir.mVec;
-	vec_t det, inv_det;
 	vec_t &t = tuv[0], &u = tuv[1], &v = tuv[2];
 
 	/* find vectors for two edges sharing vert0 */
+	vec3_t edge1, edge2;
 	SUB(edge1, vert1, vert0);
 	SUB(edge2, vert2, vert0);
 
 	/* begin calculating determinant - also used to calculate U parameter */
+	vec3_t pvec;
 	CROSS(pvec, dir, edge2);
 
 	/* if determinant is near zero, ray lies in plane of triangle */
-	det = DOT(edge1, pvec);
+	vec_t det = DOT(edge1, pvec);
 
 #if TEST_CULL           /* define TEST_CULL if culling is desired */
 	if (det < EPSILON)
 		return false;
 
 	/* calculate distance from vert0 to ray origin */
+	vec3_t tvec;
 	SUB(tvec, orig, vert0);
 
 	/* calculate U parameter and test bounds */
@@ -222,6 +320,7 @@ bool Ray::IntersectTriangle(vec3_t vert0, vec3_t vert1, vec3_t vert2, vec3_t tuv
 		return false;
 
 	/* prepare to test V parameter */
+	vec3_t qvec;
 	CROSS(qvec, tvec, edge1);
 
     /* calculate V parameter and test bounds */
@@ -231,14 +330,17 @@ bool Ray::IntersectTriangle(vec3_t vert0, vec3_t vert1, vec3_t vert2, vec3_t tuv
 
 	/* calculate t, scale parameters, ray intersects triangle */
 	t = DOT(edge2, qvec);
-	inv_det = 1.0 / det;
-	tuv *= inv_det;
+	vec_t inv_det = 1.0 / det;
+	tuv *= inv_det;  // FIXME: tuv is not Vec3
+
 #else                    /* the non-culling branch */
 	if (det > -EPSILON && det < EPSILON)
 		return false;
-	inv_det = 1.0 / det;
+
+	vec_t inv_det = 1.0 / det;
 
 	/* calculate distance from vert0 to ray origin */
+	vec3_t tvec;
 	SUB(tvec, orig, vert0);
 
 	/* calculate U parameter and test bounds */
@@ -247,6 +349,7 @@ bool Ray::IntersectTriangle(vec3_t vert0, vec3_t vert1, vec3_t vert2, vec3_t tuv
 		return false;
 
 	/* prepare to test V parameter */
+	vec3_t qvec;
 	CROSS(qvec, tvec, edge1);
 
 	/* calculate V parameter and test bounds */
@@ -257,6 +360,50 @@ bool Ray::IntersectTriangle(vec3_t vert0, vec3_t vert1, vec3_t vert2, vec3_t tuv
 	/* calculate t, ray intersects triangle */
 	t = DOT(edge2, qvec) * inv_det;
 #endif
+
+	return true;
+}
+
+
+bool Ray::IntersectTriangle(const Vec3& a, const Vec3& b, const Vec3& c, Vec3& tuv)
+{
+	/* Find vectors for two edges sharing vertex <a>. */
+	Vec3 edge1 = b - a;
+	Vec3 edge2 = c - a;
+		
+	/* Begin calculating determinant - also used to calculate U parameter. */
+	Vec3 pvec;
+	Vec3::Cross(mDir, edge2, pvec);
+
+	/* If determinant is near zero, ray lies in plane of triangle. */
+	vec_t det = Vec3::Dot(edge1, pvec);
+
+	/* NO CULL */
+	if ( det > -helEpsilon() && det < helEpsilon() )  // WTF happened here?
+		return false;
+
+	vec_t inv_det = 1.0f / det;
+
+	/* Calculate distance from <a> to ray origin. */
+	Vec3 tvec = mOrigin - a;
+
+	/* Calculate U parameter and test bounds. */
+	tuv.mY = Vec3::Dot(tvec, pvec) * inv_det;
+	if (tuv.mY < 0.0f || tuv.mY > 1.0f)
+		return false;
+
+	/* Prepare to test V parameter. */
+	Vec3 qvec;
+	Vec3::Cross(tvec, edge1, qvec);
+
+	/* Calculate V parameter and test bounds. */
+	tuv.mZ = Vec3::Dot(mDir, qvec) * inv_det;
+	if (tuv.mZ < 0.0f || (tuv.mY + tuv.mZ) > 1.0f)
+		return false;
+
+	/* calculate t, ray intersects triangle */
+	tuv.mX = Vec3::Dot(edge2, qvec) * inv_det;
+
 	return true;
 }
 

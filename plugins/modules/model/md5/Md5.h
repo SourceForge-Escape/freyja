@@ -36,6 +36,7 @@
 
 #include <mstl/String.h>
 #include <mstl/Vector.h>
+#include <mstl/SystemIO.h>
 
 
 class Md5Vertex
@@ -208,6 +209,15 @@ class Md5Model
 	Md5Joint *mJoints;                /* Model skeleton */
 
 	Md5Mesh *mMeshes;                 /* Model geometery */
+
+ private:
+
+	bool LoadQuakeWarsModel(mstl::SystemIO::TextFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 };
 

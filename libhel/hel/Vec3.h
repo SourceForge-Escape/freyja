@@ -88,6 +88,18 @@ class Vec3
 	 *
 	 ------------------------------------------------------*/
 
+	static void Cross(const Vec3& u, const Vec3& v, Vec3& result)	
+	{
+		result.mX = u.mY * v.mZ - u.mZ * v.mY;
+		result.mY = u.mZ * v.mX - u.mX * v.mZ;
+		result.mZ = u.mX * v.mY - u.mY * v.mX;
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns cross product of <u> and <v> vectors.
+	 *
+	 ------------------------------------------------------*/
+
 	static Vec3 Cross(const Vec3 &u, const Vec3 &v)	
 	{
 		return Vec3(u.mY * v.mZ - u.mZ * v.mY,

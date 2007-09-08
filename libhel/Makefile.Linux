@@ -45,7 +45,7 @@ RELEASE_CFLAGS=$(COMMON_CFLAGS) \
 	-ffast-math -funroll-loops \
 	-fomit-frame-pointer -fexpensive-optimizations -O2
 
-DEBUG_CFLAGS=$(COMMON_CFLAGS) -Wall -g -fPIC -DDEBUG -DEXPERIMENTAL
+DEBUG_CFLAGS=$(COMMON_CFLAGS) -Wall -g -fPIC -DDEBUG -DEXPERIMENTAL -I.
 
 BASE_DEFS=-I$(SRC_DIR)
 

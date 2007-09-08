@@ -82,7 +82,6 @@ class MethodDelegate
 };
 
 
-
 // If variable template arguments come to C++ later this code will change.  ;)
 template <class Type, typename ReturnType = void> 
 class MethodDelegateArg0 : public MethodDelegate
@@ -147,6 +146,36 @@ class MethodDelegateArg1 : public MethodDelegate
 };
 
 
+template <class Type, typename Arg, typename ReturnType = void> 
+class MethodClosureArg1 : public MethodDelegate
+{
+public:
+
+	typedef ReturnType (Type::*MethodPtr)( Arg );
+
+	MethodClosureArg1(Type *obj, MethodPtr ptr, Arg a) :
+		mObject(obj), mMethod(ptr), mStoredArgs(a) { }
+
+	virtual ~MethodClosureArg1() { }
+
+	ReturnType Run(Arg arg)	{ return (mObject->*mMethod)(arg); }
+	
+	virtual void PushArg(void *ptr) { }
+
+	virtual void Execute() { return (mObject->*mMethod)(mStoredArgs.mArg); }
+
+	virtual void Execute(ArgList &varg) 
+	{
+		ArgList1<Arg> *v = (ArgList1<Arg>*)&varg;
+		Run(v->mArg); 
+	}
+
+	Type *mObject;             /* The Object calling the method. */
+	MethodPtr mMethod;         /* The method be called. */
+	ArgList1<Arg> mStoredArgs; /* Stored arguments for closure. */
+};
+
+
 
 template <typename Arg, typename Arg2> 
 class ArgList2 : public ArgList 
@@ -188,6 +217,36 @@ class MethodDelegateArg2 : public MethodDelegate
 	MethodPtr mMethod;  /* The method be called. */
 };
 
+
+template <class Type, typename Arg, typename Arg2, typename ReturnType = void> 
+class MethodClosureArg2 : public MethodDelegate
+{
+ public:
+
+	typedef ReturnType (Type::*MethodPtr)( Arg, Arg2 );
+
+	MethodClosureArg2(Type *obj, MethodPtr ptr, Arg a, Arg2 a2) :
+		mObject(obj), mMethod(ptr), mStoredArgs(a, a2) { }
+
+	virtual ~MethodClosureArg2() { }
+
+	ReturnType Run(Arg arg, Arg2 arg2) 
+	{ return (mObject->*mMethod)(arg, arg2); }
+	
+	virtual void PushArg(void *ptr) { }
+
+	virtual void Execute() { return (mObject->*mMethod)(mStoredArgs.mArg); }
+
+	virtual void Execute(ArgList &varg) 
+	{
+		ArgList2<Arg, Arg2> *v = (ArgList2<Arg, Arg2>*)&varg;
+		Run(v->mArg, v->mArg2); 
+	}
+
+	Type *mObject;      /* The Object calling the method. */
+	MethodPtr mMethod;  /* The method be called. */
+	ArgList2<Arg, Arg2> mStoredArgs; /* Stored arguments for closure. */
+};
 
 
 // Opposed to the listening system for ResourceEvent, Delegate events

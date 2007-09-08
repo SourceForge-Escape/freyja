@@ -1175,12 +1175,12 @@ inline
 bool Keyframe<hel::Ray>::Serialize(SystemIO::FileWriter &w) 
 {
 	SerializeBase(w);
-	w.WriteFloat32(mData.mOrigin.mX); 
-	w.WriteFloat32(mData.mOrigin.mY); 
-	w.WriteFloat32(mData.mOrigin.mZ); 
-	w.WriteFloat32(mData.mDir.mX); 
-	w.WriteFloat32(mData.mDir.mY); 
-	w.WriteFloat32(mData.mDir.mZ); 
+	w.WriteFloat32(mData.GetOrigin().mX); 
+	w.WriteFloat32(mData.GetOrigin().mY); 
+	w.WriteFloat32(mData.GetOrigin().mZ); 
+	w.WriteFloat32(mData.GetDir().mX); 
+	w.WriteFloat32(mData.GetDir().mY); 
+	w.WriteFloat32(mData.GetDir().mZ); 
 	return true;
 }
 
@@ -1190,12 +1190,21 @@ inline
 bool Keyframe<hel::Ray>::Unserialize(SystemIO::FileReader &r) 
 { 
 	UnserializeBase(r);
-	mData.mOrigin.mX = r.ReadFloat32();
-	mData.mOrigin.mY = r.ReadFloat32();
-	mData.mOrigin.mZ = r.ReadFloat32();
-	mData.mDir.mX = r.ReadFloat32();
-	mData.mDir.mY = r.ReadFloat32();
-	mData.mDir.mZ = r.ReadFloat32();
+
+	{
+		vec_t x = r.ReadFloat32();
+		vec_t y = r.ReadFloat32();
+		vec_t z = r.ReadFloat32();
+		mData.SetOrigin(x, y, z);
+	}
+
+	{
+		vec_t i = r.ReadFloat32();
+		vec_t j = r.ReadFloat32();
+		vec_t k = r.ReadFloat32();
+		mData.SetDir(i, j, k);
+	}
+
 	return true;
 }
 
@@ -1205,8 +1214,8 @@ inline
 bool Keyframe<hel::Ray>::Serialize(SystemIO::TextFileWriter &w) 
 {
 	SerializeBase(w);
-	w.Print(" %f %f %f ", mData.mOrigin.mX, mData.mOrigin.mY, mData.mOrigin.mZ);
-	w.Print(" %f %f %f\n", mData.mDir.mX, mData.mDir.mY, mData.mDir.mZ);
+	w.Print(" %f %f %f ", mData.GetOrigin().mX, mData.GetOrigin().mY, mData.GetOrigin().mZ);
+	w.Print(" %f %f %f\n", mData.GetDir().mX, mData.GetDir().mY, mData.GetDir().mZ);
 	return true;
 }
 
@@ -1216,12 +1225,21 @@ inline
 bool Keyframe<hel::Ray>::Unserialize(SystemIO::TextFileReader &r) 
 { 
 	UnserializeBase(r);
-	mData.mOrigin.mX = r.ParseFloat();
-	mData.mOrigin.mY = r.ParseFloat();
-	mData.mOrigin.mZ = r.ParseFloat();
-	mData.mDir.mX = r.ParseFloat();
-	mData.mDir.mY = r.ParseFloat();
-	mData.mDir.mZ = r.ParseFloat();
+
+	{
+		vec_t x = r.ParseFloat();
+		vec_t y = r.ParseFloat();
+		vec_t z = r.ParseFloat();
+		mData.SetOrigin(x, y, z);
+	}
+
+	{
+		vec_t i = r.ParseFloat();
+		vec_t j = r.ParseFloat();
+		vec_t k = r.ParseFloat();
+		mData.SetDir(i, j, k);
+	}
+
 	return true; 
 }
 
@@ -1236,12 +1254,12 @@ bool Keyframe<hel::Ray>::Serialize(TiXmlElement *container)
 
 	TiXmlElement *keyframe = new TiXmlElement("RayKeyFrame");
 	SerializeBase(keyframe);
-	keyframe->SetDoubleAttribute("x", mData.mOrigin.mX);
-	keyframe->SetDoubleAttribute("y", mData.mOrigin.mY);
-	keyframe->SetDoubleAttribute("z", mData.mOrigin.mZ);
-	keyframe->SetDoubleAttribute("i", mData.mDir.mX);
-	keyframe->SetDoubleAttribute("j", mData.mDir.mY);
-	keyframe->SetDoubleAttribute("k", mData.mDir.mZ);
+	keyframe->SetDoubleAttribute("x", mData.GetOrigin().mX);
+	keyframe->SetDoubleAttribute("y", mData.GetOrigin().mY);
+	keyframe->SetDoubleAttribute("z", mData.GetOrigin().mZ);
+	keyframe->SetDoubleAttribute("i", mData.GetDir().mX);
+	keyframe->SetDoubleAttribute("j", mData.GetDir().mY);
+	keyframe->SetDoubleAttribute("k", mData.GetDir().mZ);
 
 	container->LinkEndChild(keyframe);
 
@@ -1257,12 +1275,23 @@ bool Keyframe<hel::Ray>::Unserialize(TiXmlElement *keyframe)
 		return false;
 
 	UnserializeBase(keyframe);
-	keyframe->QueryFloatAttribute("x", &mData.mOrigin.mX);
-	keyframe->QueryFloatAttribute("y", &mData.mOrigin.mY);
-	keyframe->QueryFloatAttribute("z", &mData.mOrigin.mZ);
-	keyframe->QueryFloatAttribute("i", &mData.mDir.mX);
-	keyframe->QueryFloatAttribute("j", &mData.mDir.mY);
-	keyframe->QueryFloatAttribute("k", &mData.mDir.mZ);
+
+	{
+		float x, y, z;
+		keyframe->QueryFloatAttribute("x", &x);
+		keyframe->QueryFloatAttribute("y", &y);
+		keyframe->QueryFloatAttribute("z", &z);
+		mData.SetOrigin(x, y, z);
+	}
+
+	{
+		float i, j, k;
+		keyframe->QueryFloatAttribute("i", &i);
+		keyframe->QueryFloatAttribute("j", &j);
+		keyframe->QueryFloatAttribute("k", &k);
+		mData.SetDir(i, j, k);
+	}
+
 	return true; 
 }
 #endif // TINYXML_FOUND
