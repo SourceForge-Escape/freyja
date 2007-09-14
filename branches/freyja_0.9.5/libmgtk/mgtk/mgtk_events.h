@@ -172,6 +172,27 @@ int mgtk_get_query_dialog_int(const char *dialog, const char *symbol);
  *
  ------------------------------------------------------*/
 
+const char* mgtk_get_query_dialog_string(const char *dialog, const char *symbol);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns <symbol> value if found in <dialog> or NULL.
+ *
+ ------------------------------------------------------*/
+
+void mgtk_set_query_dialog_string(const char *dialog, const char *symbol, const char* s);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns <symbol> value if found in <dialog> or NULL.
+ *
+ ------------------------------------------------------*/
+
+void mgtk_set_query_dialog_string_default(const char *dialog, const char *symbol, const char* s);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns <symbol> value if found in <dialog> or NULL.
+ *
+ ------------------------------------------------------*/
+
 float mgtk_event_get_float(int event);
 /*------------------------------------------------------
  * Pre  : 

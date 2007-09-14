@@ -68,6 +68,7 @@ class FreyjaControl : public Control
 		tPoint,
 		tFace,
 		tMesh,
+		tMetadata,
 		tModel,
 		tBone,
 		tSkeleton,
@@ -233,6 +234,14 @@ class FreyjaControl : public Control
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns currently selected face index
+	 ------------------------------------------------------*/
+
+	uint32 GetSelectedMetadata() { return mSelectedMetadata; }
+	void SetSelectedMetadata(uint32 i) { mSelectedMetadata = i; }
+	uint32 mSelectedMetadata;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns currently selected metadata index
 	 ------------------------------------------------------*/
 
 	uint32 GetSelectedKeyFrame() { return mSelectedKeyFrame; }
@@ -419,6 +428,7 @@ class FreyjaControl : public Control
 	 *        normal state system.
 	 ------------------------------------------------------*/
 
+	hel::Ray& CastPickRay2(vec_t x, vec_t y);
 	void CastPickRay(vec_t x, vec_t y);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -733,6 +743,8 @@ class FreyjaControl : public Control
 
 	void EvTransformFace() { SetObjectMode(tFace); }
 
+	void EvTransformMetadata() { SetObjectMode(tMetadata); }
+
 	void EvTransformMesh() { SetObjectMode(tMesh); }
 
 	void EvTransformMeshes() { SetObjectMode(tSelectedMeshes); }
@@ -757,6 +769,8 @@ class FreyjaControl : public Control
 
 	void EvRecentMeshXML(uint32 value) 
 	{ UnserializeMesh( mRecentMesh.GetFilename(value) ); }
+
+	void EvRecentMetadataXML(uint32 value);
 
 	void EvRecentSkeletonXML(uint32 value) 
 	{ UnserializeBones( mRecentSkeleton.GetFilename(value) ); }
@@ -934,6 +948,9 @@ class FreyjaControl : public Control
 	 * Post : Update node graph UI.
 	 *
 	 ------------------------------------------------------*/
+
+	RecentFiles& GetRecentMetadata()
+	{ return mRecentMetadata; }  // Testing
 
 
 	////////////////////////////////////////////////////////////
@@ -1205,6 +1222,8 @@ private:
 
 	RecentFiles mRecentMesh;
 
+	RecentFiles mRecentMetadata; 
+
 	RecentFiles mRecentSkeleton;
 
 	RecentFiles mRecentKeyframe;
@@ -1258,6 +1277,13 @@ private:
 ////////////////////////////////////////////////////////////
 // Inline methods
 ////////////////////////////////////////////////////////////
+
+inline
+hel::Ray& FreyjaControl::CastPickRay2(vec_t x, vec_t y)
+{
+	CastPickRay(x, y);
+	return FreyjaRender::mTestRay;
+}
 
 inline
 void FreyjaControl::Clear()

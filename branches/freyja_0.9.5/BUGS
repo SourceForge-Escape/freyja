@@ -10,10 +10,17 @@
    a lot of useful information including your GPU info and event log.
  =====================================================================
 
- Scheduled fixes.
+ Fix queue.
  ----------------------------
  
+ * FIX Face group assign set/clear has mapping bug. n vs 2^n
+	- Only sets 2^n values now.
+
+ * Fix UV generation causes crash with some OBJ imported meshes.
+
  * FIX UV selection.
+	- Seems to only work from clean 'reset' state of the modeler now.
+	- Likely to be caused by edit mode state -- needs debugging.
 
  * FIX mstl::list - push_back, etc have bugs ( need unit tests )
 
@@ -37,16 +44,16 @@
 	- This is bug is only a theory based on how undo works for objects.
 
  * Crash in win32 OpenGL on md5 model import in VMWare.
-	- Need more information.
+	- Needs more information.
 
  * File corruption with .freyja format with certain animations.
 	- This should be 'fixed' when the old keyframe system is replaced.
 
  * File export won't work for virtual modules.
-	- Explicit *.freyja filter won't save for example.
+	- Explicit *.freyja filter won't save for example, since it's not a module.
 
  * Import model dialog bug.
-	- Canceling attempts to open "Open..."'s extension.
+	- Canceling attempts to open "Open..." dialog's selected extension.
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor.
 	- Clicking in the viewport must reset edit mode for this to work.
@@ -89,6 +96,9 @@
 
 Regression notes
 ---------------------------------------------------
+
+* The OpenGL window is pitch black!
+	- This is caused by corrupted user preferences mlisp. ( rare )
 
 * When modal dialogs fail to cancel.
 	- This is caused by build optimizations with Gtk+ wrapper.

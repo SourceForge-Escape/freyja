@@ -110,9 +110,9 @@ bool Ray::IntersectBox(vec3_t v0, vec3_t v1, vec3_t v2, vec3_t v3,
 
 
 // Need to pick an optimzied algorithm and implement.  Likely will go with Woo's.
-bool Ray::IntersectAABB(vec3_t min, vec3_t max, vec_t &t)
+bool Ray::IntersectAABB_Old(vec3_t min, vec3_t max, vec_t &t)
 {
-	mDir.Norm();
+	//mDir.Norm();
 
 	vec_t bestDist = 99999.0f;
 	const uint32 count = 6;
@@ -177,10 +177,109 @@ bool Ray::IntersectAABB(vec3_t min, vec3_t max, vec_t &t)
 }
 
 
+bool Ray::IntersectAABB_SAT(Vec3 min, Vec3 max, vec_t& t)
+{
+	// U
+    if ( fabsf( mDir.mX ) < helEpsilon() )
+    {
+        if ( ( mOrigin.mX < max.mX && mOrigin.mX > min.mX ) == false )
+			return false;
+    }
+
+    vec_t tfirst = 0.0f;
+    vec_t tlast = 1.0f;
+
+	{
+	    vec_t tmin = (min.mX - mOrigin.mX);
+    	vec_t tmax = (max.mX - mOrigin.mX);
+
+		{
+			vec_t invDir = mDir.mX;
+			tmin *= invDir;
+			tmax *= invDir;
+		}
+
+    	if (tmin > tmax) helSwap2f(tmin, tmax);
+   
+    	if ( !( tmax < tfirst || tmin > tlast ) )
+		{
+    		if (tmin > tfirst) tfirst = tmin;
+    		if (tmax < tlast)  tlast  = tmax;
+
+			t = tfirst;
+    	    return true;
+		}
+	}
+
+	// V
+    if ( fabsf( mDir.mY ) < helEpsilon() )
+    {
+        if ( ( mOrigin.mY < max.mY && mOrigin.mY > min.mY ) == false )
+			return false;
+    }
+
+	{
+	    vec_t tmin = (min.mY - mOrigin.mY);
+    	vec_t tmax = (max.mY - mOrigin.mY);
+
+		{
+			vec_t invDir = mDir.mY;
+			tmin *= invDir;
+			tmax *= invDir;
+		}
+
+    	if (tmin > tmax) helSwap2f(tmin, tmax);
+   
+    	if ( !( tmax < tfirst || tmin > tlast ) )
+    	{
+	    	if (tmin > tfirst) tfirst = tmin;
+    		if (tmax < tlast)  tlast  = tmax;
+
+			t = tfirst;
+			return true;
+		}
+	}
+
+	// W
+    if ( fabsf( mDir.mZ ) < helEpsilon() )
+    {
+        if ( ( mOrigin.mZ < max.mZ && mOrigin.mZ > min.mZ ) == false )
+			return false;
+    }
+
+	{
+	    vec_t tmin = (min.mZ - mOrigin.mZ);
+    	vec_t tmax = (max.mZ - mOrigin.mZ);
+
+		{
+			vec_t invDir = mDir.mZ;
+			tmin *= invDir;
+			tmax *= invDir;
+		}
+
+    	if (tmin > tmax) helSwap2f(tmin, tmax);
+   
+    	if ( !( tmax < tfirst || tmin > tlast ) )
+    	{
+	    	if (tmin > tfirst) tfirst = tmin;
+    		if (tmax < tlast)  tlast  = tmax;
+
+			t = tfirst;
+			return true;
+		}
+	}
+
+    return false;
+}
+
+
 bool Ray::IntersectAABB(vec3_t min, vec3_t max)
 {
 	// FIXME: use plucker coords?
-
+#if 1
+	vec_t t;
+	return IntersectAABB_SAT(min, max, t);
+#else
 	mDir.Norm();
 	Vec3 v[6];
 
@@ -192,7 +291,6 @@ bool Ray::IntersectAABB(vec3_t min, vec3_t max)
 	v[5] = Vec3(min[0], min[1], max[2]);
 	v[6] = Vec3(min[0], max[1], min[2]);
 	v[7] = Vec3(max[0], min[1], min[2]);
-
 
 	Vec3 tuv;
 
@@ -235,6 +333,7 @@ bool Ray::IntersectAABB(vec3_t min, vec3_t max)
 	}
 
 	return false;
+#endif
 }
 
 

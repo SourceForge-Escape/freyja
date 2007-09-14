@@ -44,6 +44,7 @@
 
 #include <hel/math.h>
 #include <hel/Ray.h>
+#include <hel/Quat.h>
 
 #include <freyja/Plugin.h>
 #include <freyja/Bone.h>
@@ -54,6 +55,7 @@
 #include <freyja/LightABI.h>
 #include <freyja/LuaABI.h>
 #include <freyja/MaterialABI.h>
+#include <freyja/Metadata.h>
 #include <freyja/MeshABI.h>
 #include <freyja/PythonABI.h>
 #include <freyja/SkeletonABI.h>
@@ -80,6 +82,7 @@ void ePluginImport(ResourceEvent *e);
 void ePluginExport(ResourceEvent *e);
 mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, 
 										 mgtk_tree_t *tree);
+void metadata_setup( Metadata *metadata );
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
 uint32 FreyjaControl::mSelectedControlPoint = 0;
@@ -121,6 +124,7 @@ FreyjaControl::FreyjaControl() :
 	mGroupBitmap(0x0),
 	mSelectedCamera(0),
 	mSelectedAnimation(0),
+	mSelectedMetadata(0),
 	mSelectedKeyFrame(0),
 	mSelectedModel(0),
 	mSelectedView(PLANE_FREE),
@@ -133,6 +137,7 @@ FreyjaControl::FreyjaControl() :
 
 	mRecentModel(FREYJA_RECENT_FILES, "eRecentFiles"),
 	mRecentMesh("freyja-dev-recent-mesh_xml", "eRecentMeshXML"),
+	mRecentMetadata("freyja-dev-recent-metadata_xml", "eRecentMetadataXML"),
 	mRecentSkeleton("freyja-dev-recent-skeleton_xml", "eRecentSkeletonXML"),
 	mRecentKeyframe("freyja-dev-recent-keyframe_xml", "eRecentKeyframe"),
 	mRecentLua("freyja-dev-recent-lua", "eRecentLua"),
@@ -160,7 +165,7 @@ FreyjaControl::FreyjaControl() :
 {
 	/* Add extra paths for freyja plugins. */
 	String sPluginDir = freyja_rc_map_string("plugins/");
-	freyjaPluginAddDirectory(sPluginDir.GetCString());
+	freyjaPluginAddDirectory(sPluginDir.c_str());
 
 	/* Start up libfreyja backend, and redirect its print/logging. */
 	freyjaSpawn();
@@ -223,6 +228,12 @@ void FreyjaControl::Init()
 	if ( !mRecentMesh.LoadResource() )
 	{
 		Print("Failed to load '%s'.", mRecentMesh.GetResourceFilename() );
+	}
+
+	Print("Loading %s...", mRecentMetadata.GetResourceFilename());
+	if ( !mRecentMetadata.LoadResource() )
+	{
+		Print("Failed to load '%s'.", mRecentMetadata.GetResourceFilename() );
 	}
 
 	Print("Loading %s...", mRecentSkeleton.GetResourceFilename());
@@ -447,6 +458,10 @@ String FreyjaControl::ObjectTypeToString(object_type_t t)
 
 	case tModel:
 		s = String("tModel");
+		break;
+
+	case tMetadata:
+		s = String("tMetadata");
 		break;
 
 	case tMesh:
@@ -756,7 +771,7 @@ bool FreyjaControl::LoadModel(const char *filename)
 
 	String title;
 	title.Set("%s - Freyja", filename);
-	freyja_set_main_window_title(title.GetCString());
+	freyja_set_main_window_title(title.c_str());
 	mRecentModel.AddFilename(filename);
 	mCurrentlyOpenFilename = String(filename);
 	mCleared = false;
@@ -1278,7 +1293,7 @@ void FreyjaControl::SaveFileModel()
 	{
 		Print("No changes to be saved.");
 	}
-	else if (mCurrentlyOpenFilename.Empty())
+	else if (mCurrentlyOpenFilename.empty())
 	{
 		mstl::String s = freyja_rc_map_string("/");
 		char *filename =
@@ -1297,7 +1312,7 @@ void FreyjaControl::SaveFileModel()
 	}
 	else
 	{
-		const char *s = mCurrentlyOpenFilename.GetCString();
+		const char *s = mCurrentlyOpenFilename.c_str();
 
 		if (SaveModel(s))
 		{
@@ -1333,7 +1348,7 @@ void FreyjaControl::OpenFileModel()
 	
 void FreyjaControl::RevertFile()
 {
-	if (mCurrentlyOpenFilename.Empty())
+	if (mCurrentlyOpenFilename.empty())
 	{
 		Print("Revert requires a model being previously loaded");
 	}
@@ -1343,7 +1358,7 @@ void FreyjaControl::RevertFile()
 		Print("Reverting Model...");
 		freyja_set_main_window_title(BUILD_NAME);
 		
-		if (LoadModel(mCurrentlyOpenFilename.GetCString()))
+		if (LoadModel(mCurrentlyOpenFilename.c_str()))
 			mCleared = false;
 	}
 }
@@ -2686,7 +2701,7 @@ bool FreyjaControl::DuplicateSelectedObject()
 
 	default:
 		Print("%s(): type '%s' is not supported.", 
-					 __func__, ObjectTypeToString(mObjectMode).GetCString());
+					 __func__, ObjectTypeToString(mObjectMode).c_str());
 		return false;
 	}
 
@@ -2721,7 +2736,7 @@ bool FreyjaControl::SplitSelectedObject()
 
 	default:
 		Print("%s(): type '%s' is not supported.", 
-					 __func__, ObjectTypeToString(mObjectMode).GetCString());
+					 __func__, ObjectTypeToString(mObjectMode).c_str());
 		return false;
 	}
 
@@ -2772,7 +2787,7 @@ bool FreyjaControl::MergeSelectedObjects()
 
 	default:
 		Print("%s(): type '%s' is not supported.", 
-					 __func__, ObjectTypeToString(mObjectMode).GetCString());
+					 __func__, ObjectTypeToString(mObjectMode).c_str());
 		return false;
 	}
 
@@ -2815,7 +2830,7 @@ bool FreyjaControl::CopySelectedObject()
 
 	default:
 		Print("%s(): type '%s' is not supported.", 
-					 __func__, ObjectTypeToString(mObjectMode).GetCString());
+					 __func__, ObjectTypeToString(mObjectMode).c_str());
 		return false;
 	}
 
@@ -2850,7 +2865,7 @@ bool FreyjaControl::PasteSelectedObject()
 
 	default:
 		Print("%s(): type '%s' is not supported.", 
-					 __func__, ObjectTypeToString(mObjectMode).GetCString());
+					 __func__, ObjectTypeToString(mObjectMode).c_str());
 		return false;
 	}
 
@@ -2911,7 +2926,7 @@ void FreyjaControl::DeleteSelectedObject()
 
 	default:
 		Print("%s Object type '%s' is not supported.", 
-					 __func__, ObjectTypeToString(mObjectMode).GetCString());
+					 __func__, ObjectTypeToString(mObjectMode).c_str());
 	}
 
 	freyja_event_gl_refresh();
@@ -2994,8 +3009,51 @@ void FreyjaControl::InfoObject()
 		}
 		break;
 
+
+	case tMetadata:
+		{
+			Metadata* metadata = Metadata::GetObjectByUid( GetSelectedMetadata() );
+
+			if ( metadata )
+			{
+				const char* dialog = "MetadataPropertyDialog";
+				mgtk_set_query_dialog_string_default( dialog, "name", metadata->GetName() );
+				mgtk_set_query_dialog_string_default( dialog, "type", metadata->GetType() );
+				mgtk_set_query_dialog_string_default( dialog, "metadata", metadata->GetMetadata() );
+				mgtk_set_query_dialog_string_default( dialog, "model", metadata->GetModel() );
+				mgtk_set_query_dialog_string_default( dialog, "material", metadata->GetMaterial() );
+
+				int update = mgtk_execute_query_dialog( dialog );
+
+				if ( update )
+				{
+					const char* s = mgtk_get_query_dialog_string(dialog, "name");
+					if (s) metadata->SetName( s );
+
+					s = mgtk_get_query_dialog_string(dialog, "type");
+					if (s) metadata->SetType( s );
+
+					s = mgtk_get_query_dialog_string(dialog, "metadata");
+					if (s) metadata->SetMetadata( s );
+
+					s = mgtk_get_query_dialog_string(dialog, "model");
+					if (s) metadata->SetModel( s );
+
+					s = mgtk_get_query_dialog_string(dialog, "material");
+					if (s) metadata->SetMaterial( s );
+
+					FreyjaControl::GetInstance()->Dirty();
+				}
+
+				// model_filename
+				// material_filename
+			}
+		}
+		break;
+
+
 	default:
-		Print("%s Object type '%s' is not supported.", __func__, ObjectTypeToString(mObjectMode).GetCString());
+		Print("%s Object type '%s' is not supported.", __func__, ObjectTypeToString(mObjectMode).c_str());
 	}
 }
 
@@ -3040,7 +3098,7 @@ void FreyjaControl::CreateObject()
 				freyjaBoneRotateEuler3f(idx, 0.0f, 0.0f, 0.0f);
 				freyjaBoneFlags(idx, 0x0);
 				s.Set("bone_%i", idx);
-				freyjaBoneName(idx, s.GetCString());
+				freyjaBoneName(idx, s.c_str());
 				freyjaSkeletonAddBone(skel, idx);
 				freyjaSkeletonUpdateBones(skel);
 
@@ -3064,9 +3122,30 @@ void FreyjaControl::CreateObject()
 		RefreshContext();
 		break;
 
+	case tMetadata:
+		{
+			Metadata *m = new Metadata();
+
+			metadata_setup( m );
+
+			if ( !m->AddToPool() )
+			{
+				Print("Error creating new metadata!");
+			}
+			else
+			{
+				Print("New metadata object #%i created.", m->GetUid() );
+			}
+		}
+
+		ActionModelModified(NULL);
+		mCleared = false;
+		RefreshContext();
+		break;
+
 	default:
 		Print("%s Object type '%s' is not supported.", 
-			  __func__, ObjectTypeToString(mObjectMode).GetCString());
+			  __func__, ObjectTypeToString(mObjectMode).c_str());
 	}
 }
 
@@ -3101,7 +3180,7 @@ void FreyjaControl::SelectObjectByBox(hel::Vec3 min, hel::Vec3 max)
 	default:
 		{
 			String s = ObjectTypeToString(mObjectMode);
-			Print("%s() '%s' not supported.", __func__, s.GetCString());
+			Print("%s() '%s' not supported.", __func__, s.c_str());
 		}
 	}	
 }
@@ -3172,7 +3251,7 @@ void FreyjaControl::SelectAll(bool set)
 	default:
 		{
 			String s = ObjectTypeToString(mObjectMode);
-			Print("%s() '%s' not supported.", __func__, s.GetCString());
+			Print("%s() '%s' not supported.", __func__, s.c_str());
 		}
 	}	
 }
@@ -3327,6 +3406,37 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY, bool set)
 		}
 		break;
 
+	case tMetadata:
+		{
+			const vec_t radius = 0.5f;
+			hel::Ray& ray = FreyjaRender::mTestRay; //CastPickRay2(vx, vy);
+			vec_t closest = 9999.0f;
+		
+			for (uint32 i = 0, n = Metadata::GetObjectCount(); i < n; ++i)
+			{
+				Metadata* metadata = Metadata::GetObjectByUid( i );
+			
+				// This method will encounter any 'gaps' ( NULL pointers ) in the container.
+				if ( metadata )
+				{
+					vec_t t;
+
+					if ( ray.IntersectSphere((vec_t*)metadata->GetPos().mVec, radius, t) )
+					{
+						if ( t < closest )
+						{
+							closest = t;
+							SetSelectedMetadata( i );
+							mCursor.mPos = metadata->GetPos();
+						}
+					}
+				}
+			}
+
+			Print("Selected metadata object #%i.", GetSelectedMetadata() );
+		}
+		break;
+
 	case tSelectedVertices:
 	case tPoint:
 		{
@@ -3378,8 +3488,8 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY, bool set)
 		{
 			String s;
 			s = ObjectTypeToString(mObjectMode);
-			Print("SelectObject '%s' not supported.", s.GetCString());
-			MARK_MSGF("Case '%s' not supported", s.GetCString());
+			Print("SelectObject '%s' not supported.", s.c_str());
+			MARK_MSGF("Case '%s' not supported", s.c_str());
 		}
 	}
 }
@@ -3993,6 +4103,17 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 		}
 		break;
 
+	case tMetadata:
+		{
+			Metadata *metadata = Metadata::GetObjectByUid( mSelectedMetadata );
+
+			if ( metadata )
+			{
+				mCursor.mLastPos = metadata->GetPos();
+				metadata->SetPos( mCursor.mPos );
+			}
+		}
+		break;
 
 	case tModel: 
 		{
@@ -4425,6 +4546,21 @@ void FreyjaControl::RotateObject(int x, int y, freyja_plane_t plane)
 		}
 		break;
 
+	case tMetadata:
+		{
+			Metadata *metadata = Metadata::GetObjectByUid( mSelectedMetadata );
+
+			if ( metadata )
+			{
+				mCursor.mPos = metadata->GetPos(); // Move cursor
+				hel::Quat q;
+				q.SetByEulerAngles( helDegToRad( mCursor.mRotate.mX ),
+									helDegToRad( mCursor.mRotate.mY ),
+									helDegToRad( mCursor.mRotate.mZ ) );
+				metadata->SetRot( q );
+			}
+		}
+		break;
 
 	case tMesh:
 		{
@@ -5613,6 +5749,7 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eTransformVertex", &FreyjaControl::EvTransformVertex);
 	CreateListener("eTransformMeshes", &FreyjaControl::EvTransformMeshes);
 	CreateListener("eTransformMesh", &FreyjaControl::EvTransformMesh);
+	CreateListener("eTransformMetadata", &FreyjaControl::EvTransformMetadata);
 	CreateListener("eTransformFaces", &FreyjaControl::EvTransformFaces);
 	CreateListener("eTransformFace", &FreyjaControl::EvTransformFace);
 	CreateListener("eTransformModel", &FreyjaControl::EvTransformModel);
@@ -5632,6 +5769,7 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener1u("eRecentFiles", &FreyjaControl::EvRecentFiles);
 	CreateListener1u("eRecentMeshXML", &FreyjaControl::EvRecentMeshXML);
+	CreateListener1u("eRecentMetadataXML", &FreyjaControl::EvRecentMetadataXML);
 	CreateListener1u("eRecentSkeletonXML", &FreyjaControl::EvRecentSkeletonXML);
 	CreateListener1u("eRecentKeyframe", &FreyjaControl::EvRecentKeyframe);
 	CreateListener1u("eRecentLua", &FreyjaControl::EvRecentLua);
@@ -6066,9 +6204,49 @@ void FreyjaControl::EvMeshSelect()
 }
 
 
+void FreyjaControl::EvRecentMetadataXML(uint32 value) 
+{
+	Metadata *m = new Metadata();
+	m->AddToPool();
+	m->Unserialize( mRecentMetadata.GetFilename(value) ); 
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // Non-class methods, callbacks, and wrappers
 //////////////////////////////////////////////////////////////////////////
+
+void metadata_setup( Metadata *metadata )
+{
+	if ( !metadata )
+		return;
+
+#warning "FIXME metadata setup not complete"
+
+	freyja_print("FIXME %s:%i, this is optionally load from file or allow the user to fill in the values themselves here.", __FILE__, __LINE__);
+
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Metadata object...", 
+							  FreyjaControl::GetInstance()->GetRecentMetadata().GetPath(), 0,
+							  "Metadata Object (*.xml)", "*.xml");
+
+	// Canceled
+	if ( !filename )
+		return;
+
+	// If you got here push the filename into a recently used menu.
+	if ( metadata->Unserialize( filename ) )
+	{
+		FreyjaControl::GetInstance()->GetRecentMetadata().AddFilename( filename );
+	}
+	else
+	{
+		freyja_print("Error loading metadata xml.\n");
+	}
+
+	mgtk_filechooser_blocking_free( filename );
+}
+
 
 void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
 {

@@ -127,6 +127,36 @@ class Ray
 	 *
 	 ------------------------------------------------------*/
 
+	bool IntersectAABB_Old(vec3_t min, vec3_t max, vec_t &t);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool IntersectAABB_SAT(Vec3 min, Vec3 max, vec_t& t);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool IntersectOBB(vec3_t center, vec3_t u, vec3_t v, vec3_t w, vec_t &t);
+	/*------------------------------------------------------
+	 * Pre  : Given <min> and <max> of OBB. 
+	 *
+	 * Post : Returns <t> value along ray if AABB and ray intersect. 
+	 *        Returns true if OBB and ray intersect.
+	 *
+	 ------------------------------------------------------*/
+
+	//bool IntersectDOP(...);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	bool IntersectSphere(vec3_t center, vec_t radius, vec_t &t);
 	/*------------------------------------------------------
 	 * Pre  : Given generic sphere.
@@ -241,7 +271,14 @@ void Ray::SetOrigin(const vec_t x, const vec_t y, const vec_t z)
 inline
 bool Ray::IntersectBox(vec3_t min, vec3_t max, vec_t &t)
 {
-	return IntersectAABB(min, max, t);
+	return IntersectAABB_SAT(min, max, t);
+}
+
+
+inline
+bool Ray::IntersectAABB(vec3_t min, vec3_t max, vec_t &t)
+{
+	return IntersectAABB_SAT(min, max, t);
 }
 
 

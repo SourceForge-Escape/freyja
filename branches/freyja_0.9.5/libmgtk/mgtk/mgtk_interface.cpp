@@ -820,10 +820,7 @@ GtkWidget *mgtk_create_color_picker_dialog(const char *title, void *event_func)
 
 GtkWidget *mgtk_create_text_entry(GtkWidget *box)
 {
-	GtkWidget *entry;
-
-
-	entry = gtk_entry_new();
+	GtkWidget *entry = gtk_entry_new();
 	gtk_widget_ref(entry);
 	gtk_object_set_data_full(GTK_OBJECT(box), "entry", entry,
 									 (GtkDestroyNotify)gtk_widget_unref);
@@ -838,10 +835,7 @@ GtkWidget *mgtk_create_vbox(GtkWidget *box, char *name,
 							bool homogeneous, int spacing,
 							bool expand, bool fill, int pading)
 {
-	GtkWidget *vbox;
-
-	
-	vbox = gtk_vbox_new(homogeneous ? TRUE : FALSE, spacing);
+	GtkWidget *vbox = gtk_vbox_new(homogeneous ? TRUE : FALSE, spacing);
 	gtk_widget_ref(vbox);
 	gtk_object_set_data_full(GTK_OBJECT(box), name, vbox,
 									 (GtkDestroyNotify)gtk_widget_unref);

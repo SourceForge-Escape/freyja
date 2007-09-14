@@ -28,6 +28,7 @@ add_definitions(
 add_definitions( -DRELEASE -Wall -O2 -finline-functions -fomit-frame-pointer -funroll-loops )
 
 
+# NOTE: cmake 2.6 ( unreleased ) is required for cross compiling.
 if (WIN32)
 #	@-mkdir -p $(BUILD_WIN32_DIR)
 #	$(MAKE) w32targets BUILDDIR=$(BUILD_WIN32_DIR) \
@@ -51,21 +52,26 @@ if (WIN32)
 	#cmake_cxx_compiler("i586-mingw32msvc-g++ -mms-bitfields")
 	#add_definitions(-Wl,--export-all-symbols -Wl,--enable-auto-import)
 
-#elseif(OSX)
-#	@-mkdir -p $(BUILD_DEBUG_DIR)
-#	$(MAKE) osxtargets BUILDDIR=$(BUILD_DEBUG_DIR) \
-#	LD_FLAGS="$(LD_FLAGS) " \
-#	SHLIBLDFLAGS="$(LD_FLAGS) -dynamiclib -fPIC" \
-#	CFLAGS="$(DEBUG_CFLAGS)"
-
-#$(BUILDDIR)/$(NAME)$(API).dynlib : $(PROG_OBJS)
-#	$(CC) $(LD_FLAGS) -L/usr/local/lib -lhel0 \
-#	-L/usr/lib -lstdc++ -fPIC -dynamiclib \
-#	-o $(BUILDDIR)/$(MODULE).dynlib \
-#	$(PROG_OBJS)
 endif(WIN32)	
 
+
+#######################################################################
+# Dependencies
+#######################################################################
+
+# mstl
 include_directories( ../mstl . )
+
+# TinyXML 
+add_definitions( -DTINYXML_FOUND )
+include_directories( ../tinyxml )
+link_directories( ../tinyxml )
+link_libraries(	-ltinyxml )
+
+
+#######################################################################
+# Objects
+#######################################################################
 
 link_directories(../bin/libhel)
 
@@ -75,6 +81,7 @@ set(Objs
 	hel/CollisionObject 
 	hel/Mass 
 	hel/Mat44 
+	hel/Octree 
 	hel/Quat 
 	hel/Ray 
 	hel/Simulation 
@@ -108,7 +115,7 @@ INSTALL( TARGETS ${Name}-${Major}.${Minor}.${Micro} LIBRARY DESTINATION /usr/lib
 # Remember to run `export LD_LIBRARY_PATH=.` before running CTest!
 
 # Mat44
-add_executable( mat44 hel/unit/Mat44 )
+add_executable( mat44 hel/unit/mat44 )
 set_target_properties( mat44 PROPERTIES OUTPUT_NAME unit/mat44 )
 set_target_properties( mat44 PROPERTIES COMPILE_FLAGS 
 	"-DUNIT_TEST_MAT44" )
@@ -118,7 +125,7 @@ add_test( mat44 unit/mat44 unit/mat44-results.xml )
 
 
 # Ray
-add_executable( ray hel/unit/Ray )
+add_executable( ray hel/unit/ray )
 set_target_properties( ray PROPERTIES OUTPUT_NAME unit/ray )
 set_target_properties( ray PROPERTIES COMPILE_FLAGS 
 	"-DUNIT_TEST_RAY" )

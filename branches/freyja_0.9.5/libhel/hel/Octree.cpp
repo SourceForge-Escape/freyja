@@ -20,13 +20,15 @@
  ==========================================================================*/
 
 #include <mstl/list.h>
-#include <tinyxml/tinyxml.h>
+
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif
 
 #include "Octree.h"
 
+using namespace hel;
 
-// TODO: Use mstl::Thread to partition this 8-way.
-//       Use a struct to concat the 3 args into one for a Arg1 delegate.
 
 class XMLNode
 {
@@ -36,12 +38,12 @@ public:
 		mElement(NULL)
 	{}
 
-	XMLNode(Octree::Node* node, TiXmlElement* element) :
+	XMLNode(OctreeNode* node, TiXmlElement* element) :
 		mNode(node),
 		mElement(element)
 	{}
 
-	Octree::Node* mNode;
+	OctreeNode* mNode;
 	TiXmlElement* mElement;
 };
 
@@ -49,137 +51,38 @@ template<>
 XMLNode* mstl::list<XMLNode*>::mDefault = NULL; 
 
 
-void Octree::Node::SubdivChild(OctreeHelper &helper, hel::Vec3 &min, hel::Vec3 &max)
-{
-	// Test for geometry in the node region.
-	uint32 count = helper.GetFaceCountInBBox(min, max); 
-
-	if ( count )
-	{
-		Octree::Node *child = new Octree::Node(min, max);
-		mChildren.push_back( child );
-
-		if ( count > helper.GetMaxCount() )
-		{
-			child->Subdiv(helper);
-		}
-		else
-		{
-			// Only save face indices in leaves for now.
-			helper.GetFacesIndicesInBBox(min, max, child->mFaces);
-		}
-	}
-}
-
-
-void Octree::Node::Subdiv(OctreeHelper &helper)
-{
-	//helper.GetFacesIndicesInBBox(mMin, mMax, mFaces);
-
-	// Compute the axis aligned bounding box (AABB) centroid.
-	hel::Vec3 center = (mMin + mMax) * 0.5f;
-
-	// Use the centroid to compute 8 new AABBs for subdivision.
-
-	// TODO: Threading would be nice here.  This means you'd have to
-	// use internal data structure for CS access control.  freyja::Mesh is not
-	// thread safe for example.
-	//
-	// Using mstl thread delegate on the SubdivChild calls would be easy then.
-
-	// 'Bottom' AABBs
-	SubdivChild(helper, mMin, center);
-
-	{
-		hel::Vec3 min(mMin), max(center); 
-		min.mX = center.mX;
-		max.mX = mMax.mX;
-		SubdivChild(helper, min, max);
-	}
-
-	{
-		hel::Vec3 min(mMin), max(center); 
-		min.mZ = center.mZ;
-		max.mZ = mMax.mZ;
-		SubdivChild(helper, min, max);
-	}
-
-	{
-		hel::Vec3 min(center), max(mMax); 
-		min.mY = mMin.mY;
-		max.mY = center.mY;
-		SubdivChild(helper, min, max);
-	}
-
-	// 'Top' AABBs.
-	SubdivChild(helper, center, mMax);
-
-	{
-		hel::Vec3 min(center), max(mMax); 
-		min.mX = mMin.mX;
-		max.mX = center.mX;
-		SubdivChild(helper, min, max);
-	}
-
-	{
-		hel::Vec3 min(center), max(mMax); 
-		min.mZ = mMin.mZ;
-		max.mZ = center.mZ;
-		SubdivChild(helper, min, max);
-	}
-
-	{
-		hel::Vec3 min(mMin), max(center); 
-		min.mY = center.mY;
-		max.mY = mMax.mY;
-		SubdivChild(helper, min, max);
-	}
-}
-
-
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Octree::Octree() :
-	mMetadata(),
-	mVertices(),
-	mFaces(),
-	mRoot()
+#if TINYXML_FOUND
+
+bool Octree::Serialize(TiXmlElement* octree)
 {
-}
+	if ( !octree )
+		return false;
 
-
-Octree::~Octree()
-{
-}
-
-
-bool Octree::Serialize(const char *filename)
-{
-	TiXmlDocument doc;
-	TiXmlDeclaration *decl = new TiXmlDeclaration("1.0", "", "");
-	doc.LinkEndChild(decl);
-
-	TiXmlElement *container = new TiXmlElement("freyja");
-	doc.LinkEndChild(container);
-
-	TiXmlElement *root = new TiXmlElement("octree");
-	container->LinkEndChild( root );
-
-	// FIXME: Store metadata.
+	// Metadata
+	if ( mMetadata.c_str() )
+	{
+		TiXmlElement *metadata = new TiXmlElement("metadata");
+		TiXmlText *text = new TiXmlText( mMetadata.c_str() );
+		//text->SetCDATA(true);
+		metadata->LinkEndChild(text);
+		octree->LinkEndChild( metadata );
+	}
 
 	// Append nodes to octree
 	mstl::list<XMLNode *> queue;
 
-	queue.push_back( new XMLNode(&mRoot, root) );
+	queue.push_back( new XMLNode(&mRoot, octree) );
 
 	while ( queue.front() )
 	{
 		XMLNode* xmlnode = queue.front();
 		queue.pop_front();
 
-		Octree::Node *node = xmlnode->mNode;
+		OctreeNode *node = xmlnode->mNode;
 		TiXmlElement *parent = xmlnode->mElement;
 		delete xmlnode;
 
@@ -218,53 +121,16 @@ bool Octree::Serialize(const char *filename)
 		parent->LinkEndChild(child);
 	}
 
-	doc.SaveFile(filename);
-
-	return true;
+	return true;	
 }
 
 
-bool Octree::Unserialize(const char *filename)
+bool Octree::Unserialize(TiXmlElement* octree)
 {
-	TiXmlDocument doc(filename);
-
-	printf("@ Loading XML...\n");
-
-	/* File loading and error reporting/handling. */
-	{
-		bool fatal = false;
-
-		if ( !doc.LoadFile() )
-		{
-			fatal = true;
-		}
-
-		if ( doc.Error() )
-		{
-			printf("XML ERROR: %s, Line %i, Col %i\n", 
-				doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
-		}
-
-		//mDoc.Print();
-
-		if ( fatal )
-			return false;
-	}
-
-	printf("@ XML loading successful.\n");
-
-	TiXmlElement *root = doc.RootElement(); 
-
-	if (!root) 
-	{
-		printf("Couldn't find document root!\n");
+	if ( !octree )
 		return false;
-	}
 
-	// FIXME: Abstract octree and walkmesh to functions and test for tags.
-
-	// <octree>
-	TiXmlElement *octree = root->FirstChildElement();
+	Reset();
 
 	// Append nodes to octree
 	mstl::list<XMLNode *> stack;
@@ -275,7 +141,7 @@ bool Octree::Unserialize(const char *filename)
 	{
 		XMLNode* xmlnode = stack.front();
 		TiXmlElement* element = xmlnode->mElement;
-		Octree::Node* node = xmlnode->mNode;
+		OctreeNode* node = xmlnode->mNode;
 		stack.pop_front();
 
 		delete xmlnode;
@@ -301,7 +167,7 @@ bool Octree::Unserialize(const char *filename)
 			}
 			else if ( !strncmp("node", cur->Value(), 4) )
 			{
-				Octree::Node* child = new Octree::Node();
+				OctreeNode* child = new OctreeNode();
 				node->mChildren.push_back( child );
 				stack.push_front( new XMLNode(child, cur) );			
 			}
@@ -319,30 +185,10 @@ bool Octree::Unserialize(const char *filename)
 		}
 	}
 
-
-	// <walkmesh>
-	TiXmlElement *walkmesh = root->FirstChildElement();
-
-	TiXmlElement *cur = walkmesh->FirstChildElement();
-
-	for( ; cur; cur = cur->NextSiblingElement() )
-	{
-		if ( !strncmp("faces", cur->Value(), 5) )
-		{
-			// FIXME: scan uints from text, store in mFaces
-		}
-		else if ( !strncmp("vertices", cur->Value(), 8) )
-		{
-			// FIXME: scan floats from text, store in mVertices
-		}
-	}
-
 	return true;
 }
 
-
-
-
+#endif // TINYXML_FOUND
 
 
 ////////////////////////////////////////////////////////////

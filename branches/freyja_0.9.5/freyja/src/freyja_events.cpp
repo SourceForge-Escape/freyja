@@ -971,6 +971,7 @@ void eMeshTexcoordSpherical()
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 	if (m)
 	{
+		freyja_print("Spherical texcoord generation for selected faces...");
 		m->UVMapSelectedFaces_Spherical();
 		polymap_update_question();
 		FreyjaControl::GetInstance()->Dirty();
@@ -983,6 +984,7 @@ void eMeshTexcoordCylindrical()
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 	if (m)
 	{
+		freyja_print("Cylindrical texcoord generation for selected faces...");
 		m->UVMapSelectedFaces_Cylindrical();
 		polymap_update_question();
 		FreyjaControl::GetInstance()->Dirty();
@@ -995,6 +997,7 @@ void eMeshTexcoordPlaneProj()
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 	if (m)
 	{
+		freyja_print("Planar texcoord generation for selected faces...");
 		m->UVMapSelectedFaces_Plane();
 		polymap_update_question();
 		FreyjaControl::GetInstance()->Dirty();
@@ -1268,6 +1271,24 @@ void eBoneKeyFrameMetadata()
 }
 
 
+void eResetColorsToDefault()
+{
+	freyja_handle_color(eColorBackground, 0.5f, 0.5f, 0.5f, 1.0f);
+	freyja_handle_color(eColorGrid,	0.4f, 0.4f, 0.4f, 0.9f);
+	freyja_handle_color(eColorMesh,	0.0f, 0.0f, 0.0f, 1.0f);
+	freyja_handle_color(eColorMeshHighlight, 0.2f, 0.2f, 1.0f, 1.0f);
+	freyja_handle_color(eColorVertex, 0.2f, 1.0f, 1.0f, 1.0f);
+	freyja_handle_color(eColorVertexHighlight, 1.0f, 0.0f, 0.86f, 1.0f);
+	freyja_handle_color(eColorBone,	0.882352941f, 0.654901961f, 0.219607843f, 1.0f);
+	freyja_handle_color(eColorBoneHighlight, 0.956862745f, 0.415686275f, 0.2f, 1.0f);
+	freyja_handle_color(eColorJoint, 1.0f, 1.0f, 0.0f, 1.0f);
+	freyja_handle_color(eColorJointHighlight, 1.0f, 0.75f, 0.75f, 1.0f);
+	freyja_handle_color(eColorLightAmbient,	0.8f, 0.8f, 0.8f, 1.0f);
+	freyja_handle_color(eColorLightDiffuse, 0.8f, 0.8f, 0.8f, 1.0f);
+	freyja_handle_color(eColorLightSpecular, 0.8f, 0.8f, 0.8f, 1.0f);
+}
+
+
 void FreyjaMiscEventsAttach()
 {
 	// Empty menu events
@@ -1280,6 +1301,7 @@ void FreyjaMiscEventsAttach()
 	ResourceEventCallbackString::add("eTestTextViewText", &eTestTextViewText);
 
 	// Misc events
+	ResourceEventCallback::add("eResetColorsToDefault", &eResetColorsToDefault);
 	ResourceEventCallbackString::add("eBoneKeyFrameMetadataText", &eBoneKeyFrameMetadataText);
 	ResourceEventCallback::add("eBoneKeyFrameMetaData", &eBoneKeyFrameMetadata);
 	ResourceEventCallback::add("eBoneRefreshBindPose", &eBoneRefreshBindPose);
@@ -1454,7 +1476,7 @@ void freyja_handle_resource_init(Resource &r)
 
 	/* Load and init plugins */
 	String dir = freyja_rc_map_string("plugins");	
-	freyja_init_application_plugins(dir.GetCString());
+	freyja_init_application_plugins(dir.c_str());
 
 	/* Hook plugins to resource */
 	uint32 i, n = mgtk::ResourcePlugin::mPlugins.size();

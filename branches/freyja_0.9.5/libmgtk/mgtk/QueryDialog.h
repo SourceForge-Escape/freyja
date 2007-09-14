@@ -8,7 +8,7 @@
  * Object  : QueryDialog
  * License : No use w/o permission (C) 2007 Mongoose
  * Comments: Query Dialog class 
- *
+ * Todo    : Support XML structured dialogs.
  *
  *           This file was generated using Mongoose's C++ 
  *           template generator script.  <mongoose@icculus.org>
@@ -58,11 +58,18 @@ public:
 		return *this;
 	} 
 
+	mstl::String& GetSymbolString() { return mSymbol; }
+
 	const char *GetSymbol() { return mSymbol.c_str(); }
 
 	const char *GetQuestion() { return mQuestion.c_str(); }
 
 	T Get() { return mValue; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns by *value* the stored data.
+	 *
+	 ------------------------------------------------------*/
 
 	void Set(T v) { mValue = v; }
 
@@ -135,7 +142,9 @@ class QueryDialog
 		mAcceptIcon(d.mAcceptIcon),
 		mAcceptText(d.mAcceptText),
 		mFloats(d.mFloats),
-		mInts(d.mInts)
+		mInts(d.mInts),
+		mTextEntryStrings(d.mTextEntryStrings),
+		mTextAreaStrings(d.mTextAreaStrings)
 	{
 	}
 	/*------------------------------------------------------
@@ -155,6 +164,8 @@ class QueryDialog
 		mAcceptText = d.mAcceptText;
 		mFloats = d.mFloats;
 		mInts = d.mInts;
+		mTextEntryStrings = d.mTextEntryStrings;
+		mTextAreaStrings = d.mTextAreaStrings;
 
 		return *this;
 	}
@@ -203,10 +214,72 @@ class QueryDialog
 	 *
 	 ------------------------------------------------------*/
 
+	const char* GetString(const char* symbol);
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Returns value if <symbol> found or 0
+	 *
+	 ------------------------------------------------------*/
+
+	const char* GetTextEntryString(const char* symbol);
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Returns value if <symbol> found or 0
+	 *
+	 ------------------------------------------------------*/
+
+	const char* GetTextAreaString(const char* symbol);
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Returns value if <symbol> found or 0
+	 *
+	 ------------------------------------------------------*/
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	bool SetDefaultString(const char* symbol, const char* value);
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Returns value if <symbol> found and value set.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SetDefaultTextEntryString(const char* symbol, const char* value);
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Returns value if <symbol> found and value set.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SetDefaultTextAreaString(const char* symbol, const char* value);
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Returns value if <symbol> found and value set.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SetString(const char* symbol, const char* value);
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Returns value if <symbol> found and value set.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SetTextEntryString(const char* symbol, const char* value);
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Returns value if <symbol> found and value set.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SetTextAreaString(const char* symbol, const char* value);
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Returns value if <symbol> found and value set.
+	 *
+	 ------------------------------------------------------*/
 
 	mstl::String mName;
 
@@ -226,6 +299,8 @@ class QueryDialog
 	// Explict type support due to strict UI mapping
 	mstl::Vector<QueryDialogValue<float> > mFloats;
 	mstl::Vector<QueryDialogValue<int> > mInts;
+	mstl::Vector<QueryDialogValue<mstl::String> > mTextEntryStrings;
+	mstl::Vector<QueryDialogValue<mstl::String> > mTextAreaStrings;
 
  private:
 

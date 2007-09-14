@@ -263,7 +263,7 @@ public:
 			}
 		}
 
-		sz += 4 + mName.GetLength();
+		sz += 4 + mName.length();
 		sz += 4 + 4 + 4 + 1;
 
 		return sz;
@@ -288,8 +288,8 @@ public:
 		w.WriteLong(chunk.flags);
 		w.WriteLong(chunk.version);
 
-		w.WriteLong(mName.GetLength());
-		w.WriteString(mName.GetLength(), mName.c_str());
+		w.WriteLong(mName.length());
+		w.WriteString(mName.length(), mName.c_str());
 		w.WriteFloat32(mStart);
 		w.WriteFloat32(mRate);
 		w.WriteFloat32(mDuration);
