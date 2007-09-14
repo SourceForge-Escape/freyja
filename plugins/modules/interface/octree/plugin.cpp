@@ -68,6 +68,9 @@ void freyja_octree_clear()
 }
 
 
+template<>
+Octree::Node* mstl::list<Octree::Node*>::mDefault = NULL; 
+
 void freyja_octree_rebuild()
 {
 	index_t meshIndex = 0;
@@ -119,6 +122,36 @@ void freyja_octree_rebuild()
 		helper.SetMesh( mesh );
 		helper.SetMaxCount( count ); 
 		gOctree.Generate( helper );
+
+#if 1
+		// DEBUG: Show all marked faces...
+		mstl::list<Octree::Node*> queue;
+		queue.push_back( &gOctree.GetRoot() );
+
+		unsigned int count = 0;
+
+		while ( queue.front() )
+		{
+			Octree::Node* node = queue.front();
+			queue.pop_front();
+
+			for (uint32 i = 0, n = node->mChildren.size(); i < n; ++i)
+			{
+				if ( node->mChildren[i] )
+					queue.push_back( node->mChildren[i] );
+			}
+
+			for (uint32 i = 0, n = node->mFaces.size(); i < n; ++i)
+			{
+				mesh->SetFaceFlags( node->mFaces[i], freyja::Face::fSelected );
+			}
+
+			count += node->mFaces.size();
+		}
+
+		MGTK_ASSERTMSG(count == mesh->GetFaceCount(), "Some faces not mapped to octree!"); 
+
+#endif
 
 		gOctreeVisible = true;
 		mgtk_print("Octree generated.");

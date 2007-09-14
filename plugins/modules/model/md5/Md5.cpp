@@ -590,7 +590,7 @@ bool Md5Model::LoadQuakeWarsModel(mstl::SystemIO::TextFileReader &r)
 				r.ParseMatchingSymbol("{");
 
 				while ( !r.ParseMatchingSymbol("}") )
-					;
+					;  // FIXME: Store flags
 			}
 
 			if (!r.ParseMatchingSymbol("numverts"))

@@ -50,7 +50,8 @@
 
 #define helSquare(n) ((n) * (n))
 
-#define helEpsilon() (0.000001f)
+#define helEpsilon() (1.0e-7)
+// 0.000001f
 
 #define helCopyVec3(src, dest) memcpy(dest, src, sizeof(vec3_t))
 
@@ -77,6 +78,15 @@ typedef	union {
 		vec_t x, y, z;
 	};
 } uvec3_t;
+
+
+inline
+void helSwap2f(vec_t& a, vec_t& b) 
+{ 
+	vec_t c = b; 
+	b = a; 
+	a = c; 
+}
 
 
 const char *helVersionInfo();

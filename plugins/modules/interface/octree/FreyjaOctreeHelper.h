@@ -27,6 +27,7 @@
 #define GUARD__FREYJA_FREYJAOCTREEHELPER_H_
 
 #include <hel/math.h>
+#include <hel/moller-aabb-triangle.h>
 #include <hel/Vec3.h>
 #include <freyja/Mesh.h>
 #include <mstl/Vector.h>
@@ -111,13 +112,55 @@ uint32 FreyjaOctreeHelper::GetFaceCountInBBox(const hel::Vec3 &min, const hel::V
 {
 	if (mMesh)
 	{
-		mMesh->ClearFlagForSelectedFaces(Face::fSelected);
+		hel::Vec3 center = (min + max) * 0.5f;
+		hel::Vec3 halfsize = (max - min) * 0.5f;
+		unsigned int count = 0; 
 
-		hel::Vec3 a(min), b(max);
-		mMesh->SelectFacesByBox( a, b );
+		for ( unsigned int i = 0, n = mMesh->GetFaceCount(); i < n; ++i )
+		{
+			Face *face = mMesh->GetFace( i );
 
-		Vector<index_t> faces = mMesh->GetSelectedFaces();
-		return faces.size();
+			if ( face )
+			{
+				switch ( face->mIndices.size() )
+				{
+				case 3:
+					{
+						vec3_t a, b, c;
+						mMesh->GetVertexPos( face->mIndices[0], a );
+						mMesh->GetVertexPos( face->mIndices[1], b );
+						mMesh->GetVertexPos( face->mIndices[2], c );
+
+						if (helAABB_OverlapTriangle(center.mVec, halfsize.mVec, a, b, c)) 
+						{
+							++count;
+						}
+					}
+					break;
+
+				case 4:
+					{
+						vec3_t a, b, c, d;
+						mMesh->GetVertexPos( face->mIndices[0], a );
+						mMesh->GetVertexPos( face->mIndices[1], b );
+						mMesh->GetVertexPos( face->mIndices[2], c );
+						mMesh->GetVertexPos( face->mIndices[3], d );
+
+						if (helAABB_OverlapTriangle(center.mVec, halfsize.mVec, a, b, c) ||
+						    helAABB_OverlapTriangle(center.mVec, halfsize.mVec, a, d, c)) 
+						{
+							++count;
+						}
+					}
+					break;
+
+				default:
+					;  // Ignore unoptimized facets.
+				}
+			}
+		}
+
+		return count;
 	}
 
 	return 0;
@@ -130,12 +173,54 @@ void FreyjaOctreeHelper::GetFacesIndicesInBBox(const hel::Vec3 &min, const hel::
 {
 	if (mMesh)
 	{
-		mMesh->ClearFlagForSelectedFaces(Face::fSelected);
+		hel::Vec3 center = (min + max) * 0.5f;
+		hel::Vec3 halfsize = (max - min) * 0.5f;
+ 
+		for ( unsigned int i = 0, n = mMesh->GetFaceCount(); i < n; ++i )
+		{
+			Face *face = mMesh->GetFace( i );
 
-		hel::Vec3 a(min), b(max);
-		mMesh->SelectFacesByBox( a, b );
+			if ( face )
+			{
+				switch ( face->mIndices.size() )
+				{
+				case 3:
+					{
+						vec3_t a, b, c;
+						mMesh->GetVertexPos( face->mIndices[0], a );
+						mMesh->GetVertexPos( face->mIndices[1], b );
+						mMesh->GetVertexPos( face->mIndices[2], c );
 
-		indices = mMesh->GetSelectedFaces();
+						if (helAABB_OverlapTriangle(center.mVec, halfsize.mVec, a, b, c)) 
+						{
+							indices.push_back( i );
+						}
+					}
+					break;
+
+				case 4:
+					{
+						vec3_t a, b, c, d;
+						mMesh->GetVertexPos( face->mIndices[0], a );
+						mMesh->GetVertexPos( face->mIndices[1], b );
+						mMesh->GetVertexPos( face->mIndices[2], c );
+						mMesh->GetVertexPos( face->mIndices[3], d );
+
+						if (helAABB_OverlapTriangle(center.mVec, halfsize.mVec, a, b, c) ||
+						    helAABB_OverlapTriangle(center.mVec, halfsize.mVec, a, d, c)) 
+						{
+							indices.push_back( i );
+						}
+					}
+					break;
+
+				default:
+					;  // Ignore unoptimized facets.
+				}
+			}
+		}
+
+
 	}
 }
 

@@ -276,6 +276,9 @@
 			(menu_item	"Export Mesh..." eMeshToXML  "gtk-save-as")
 
 			(menu_seperator)
+			(submenu eRecentMetadataXML "Recent Meta_data...")
+
+			(menu_seperator)
 			(submenu eRecentSkeletonXML "Recent _Skeleton...")
 			(menu_item	"Import Skeleton..." eXMLToBones "gtk-open")
 			(menu_item	"Export Skeleton..." eBonesToXML "gtk-save-as")
@@ -503,6 +506,7 @@
 						(menu_item	"Vertices..."	eTransformVertices)
 						(menu_item	"Skeleton   "	eTransformSkeleton)
 						(menu_item	"Bone       "	eTransformBone)
+						(menu_item	"Metedata   "	eTransformMetadata)
 						(menu_item	"Light      "	eTransformLight)
 						(menu_item	"Camera     "	eTransformCamera)
 					) ; optionmenu
@@ -1163,7 +1167,19 @@
 	"gtk-cancel"	"_Cancel"	"gtk-quit"	"_Exit")
 
 
-;; Query Dialogs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Query Dialogs 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(query_dialog	"MetadataPropertyDialog"
+	"gtk-dialog-question"
+	"Metadata property editor."
+	"textentry"	"name"		"Name    "		"  "
+	"textentry"	"type"		"Type    "		"  "
+	"textarea"	"metadata"	"Metadata"	" "
+	"textentry"	"model"		"Model   "		"  "
+	"textentry"	"material"	"Material"	"  "
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Update")
 
 (query_dialog	"GenerateSheetDialog"
 	"gtk-dialog-question"
@@ -1359,6 +1375,9 @@
 		(hbox 1 0 0 1 2 
 			(label "Joint highlight " 0.0 0.5)
 			(colorbutton 1 eColorJointHighlight))
+
+		(hbox 1 0 0 1 2
+			(button "Reset to defaults" eNone eResetColorsToDefault))
 
 		) ; End (tab "Colors"
 		

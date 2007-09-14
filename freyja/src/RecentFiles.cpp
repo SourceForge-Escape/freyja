@@ -122,7 +122,7 @@ void RecentFiles::AddFilename(const char *filename)
 		{
 			swap = mRecentFiles[i];
 			
-			if (!swap.Empty())
+			if ( !swap.empty() )
 			{
 				w.Print("%s\n", swap.c_str() );
 			}

@@ -2020,7 +2020,7 @@ void Mesh::SelectVerticesByBox(hel::Vec3 &min, hel::Vec3 &max)
 	Vec3 mina(min), maxa(max);
 
 	// Reorder as needed, since we don't trust input
-	for (int32 i = 2; i >= 0; --i)
+	for (int32 i = 2; i > -1; --i)
 	{
 		if (min[i] > max[i])
 		{

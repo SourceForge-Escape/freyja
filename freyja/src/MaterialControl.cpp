@@ -421,20 +421,27 @@ bool MaterialControl::SaveMaterial(const char *filename)
 void MaterialControl::RefreshInterface()
 {
 	uint32 mIndex = freyjaGetCurrentMaterial();
-		
-	mgtk_textentry_value_set(EvSetNameId, freyjaGetMaterialName(mIndex));
-		
+
+	{
+		const char* s = freyjaGetMaterialName( mIndex );
+		mgtk_textentry_value_set( EvSetNameId, (s != NULL) ? s : " " );
+	}
+	
 	mgtk_spinbutton_value_set(EvSetShaderId, freyjaGetMaterialShader(mIndex));
 
-	mgtk_textentry_value_set(EvSetShaderFilenameId, 
-							 freyjaGetMaterialShaderName(mIndex));
-		
+	{
+		const char* s = freyjaGetMaterialShaderName(mIndex);
+		mgtk_textentry_value_set(EvSetShaderFilenameId, (s != NULL) ? s : " " );
+	}
+	
 	mgtk_spinbutton_value_set(EvSetTextureId,
 							  freyjaGetMaterialTexture(mIndex));
 
-	mgtk_textentry_value_set(EvSetTextureNameId,
-							 freyjaGetMaterialTextureName(mIndex));
-		
+	{
+		const char* s = freyjaGetMaterialTextureName(mIndex);
+		mgtk_textentry_value_set(EvSetTextureNameId, (s != NULL) ? s : " " );
+	}
+	
 	vec4_t ambient;
 	freyjaGetMaterialAmbient(mIndex, ambient);
 	freyja_event_set_color(eColorMaterialAmbient, 

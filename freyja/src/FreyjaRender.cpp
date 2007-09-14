@@ -44,6 +44,7 @@
 #include <freyja/Mesh.h>
 #include <freyja/MeshABI.h>
 #include <freyja/MaterialABI.h>
+#include <freyja/Metadata.h>
 
 #include "freyja_events.h"
 #include "FreyjaControl.h"
@@ -521,9 +522,42 @@ void FreyjaRender::DrawFreeWindow()
 
 void FreyjaRender::DrawIcons()
 {
-	glPushAttrib(GL_LIGHTING_BIT);
-	//glDisable(GL_TEXTURE_2D);
+	/* Metadata objects */
+	glPushAttrib(GL_LIGHTING_BIT);  
 	glDisable(GL_LIGHTING);
+
+	BindColorTexture();
+
+	glColor3fv(ORANGE);
+
+	// Will want to allow lighting when renderables are supported.
+	for (uint32 i = 0, n = Metadata::GetObjectCount(); i < n; ++i)
+	{
+		Metadata* metadata = Metadata::GetObjectByUid( i );
+
+		#warning "FIXME: Add support for metadata renderable."
+		
+		// This method will encounter any 'gaps' ( NULL pointers ) in the container.
+		if ( metadata )
+		{
+			glPushMatrix();
+
+			const Vec3 &pos = metadata->GetPos();
+			glTranslatef(pos.mX, pos.mY, pos.mZ);
+			mglDrawControlPoint();
+
+			glPopMatrix();
+		}
+	}
+
+	glPopAttrib();
+
+	/* End metadata objects */
+
+
+	glPushAttrib(GL_LIGHTING_BIT);
+	glDisable(GL_LIGHTING);
+	//glDisable(GL_TEXTURE_2D);
 	//glDisable(GL_BLEND);
 
 	BindColorTexture();

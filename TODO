@@ -11,7 +11,9 @@
 	- i386
 
  * New plugin subsystems.  ( Modular freyja )
-	- Octree plugin XML import/export.
+	- 'UI' plugins must self report to AID debugging via logs!
+	- Break up heightmap into it's own plugin ( from midgard ).
+	- Get octree plugin using the new libhel octree.
 	- OpenGL scripting from lua will allow plugins to generate their own widgets
 	- No 2d projections allowed.
 	- (de)coupling routines for ogl func pointers.
@@ -35,25 +37,52 @@
 		- Walkmesh can be subbed by IK over rendered mesh.
 
  * Metadata object eg for map objects ( currently bones w/ metadata are used )
-	- Control point based
-	- This will become a 'new' ui plugin.
-	- Prop: icon, name, type, metadata ( data )
+	- Snippet import / export.
+	- Group selection.
+	- Snippet group import / export.
+	- Freyja file format import / export.
+	- Parenting support to allow 'bundles' like the shinto shrine scene.
+	- Render toggle flag for metadata objects.
+	- Finish up Renderable support.
+	- Replace camera and light systems with metadata objects.
+	- Make edit window callable from generic eInfo event  ;)
+	- Might want to make an 'Edit prop' action button w/ new / delete for eInfo.
+	- Obsolete the 'control point' API and use new metadata type instead.
 	- Sprite and mesh instance 'icons'
-	- Alchemy (raw) test set.
+	- Paint tool support to add/remove a 'prefab' XML leaf node to metadata. 
+		- eg flags or some other user defined info
+
+ * Midgard
+	- Alchemy(raw), buildings, actor map placement test using metadata objects.
+	- Full animation support for MD5 v11.
+	- Merge with freyja's model plugin support.
 
  * Lua
-	- New OpenGL wrapper with lua draw() callback as separate library.
-	- New mgtk wrapper as separate library.
+	- Mlisp <-> XML <-> Lua UI script translator.
+	- New OpenGL wrapper with lua draw() callback as separate library?
+	- New mgtk wrapper as separate library?
 	- mgtk lua unit test using exe linking to mgtk
 	- Allow for calling lua functions instead of freyja events as well.
 		- Perhaps just hookup freyja events to lua functions?
 	- It's own thing or part of the Mlisp system?
 		- Let's give Lua it's own symbol table using a 'table'.
-	- Mlisp <-> XML <-> Lua UI script translator.
 	- Mlisp symbol table exposed in Lua for event system use.
 	- Expose things like control points via libfreyja backend.
  	- Widgets: lua mgtk wrapper to allow full interface plugins.
- 	- Binary file I/O wrapper.
+ 	- Binary file I/O wrapper with endian support.
+
+ * libfreyja
+	- Threaded import/export and new threaded ABI which isn't interdependent.
+
+ * libmgtk
+	- QueryDialog dynamic text entry + filedialog button 'string type'. 
+	- Merge sort / Binary search | TLB w/ hash QueryDialogs, mlisp symbols, etc. 
+	- gtk source view widget for optional editing of xml/lua from inside freyja.
+
+ * libhel
+	- Change hel/math to hel/hel or the like to avoid confusion for new comers.
+	- AABB, Sphere, etc get proper Class implementations.
+		- Rework bounding volume system around the new 'types'.
 
 
  Freyja 0.9.5.17	TBD
@@ -88,8 +117,6 @@
 	- Time for Catmull-Clark 'spheres'?
 
  * Edit modes setting visual mode for things like skeletal 'bone' animation
-
- * mgtk Query string support.
 
 
  Freyja 0.9.5.18	TBD
@@ -375,8 +402,7 @@
 
  * Log window for more complete error / warning reporting.
 
- * Query dialog with multitype support.
-		struct query { string msg, type defaultvalue, type eventId }
+ * Query dialog with multitype support via XML message passing.
 
  * Import/export plugin changes
 	- dropdown should change filename

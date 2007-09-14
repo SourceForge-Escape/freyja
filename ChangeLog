@@ -6,7 +6,14 @@
 
  Kagura prealpha, 0.9.5.16 () -- "On the roadmap again"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
+ - Stubs in place for MetadataRenderable. (1055)
+ - New 'Reset to defaults' color preferences button fixes 'black window bug'.
+ - New QueryDialog support for strings via entry and area widgets.
+ - New Metadata design with renderable icons.
+ - Fixes for octree mesh partitioning.
+ - mstl::String minor clean up and removal of legacy methods.
+ - Octree2 pushed into libhel.
+ - New libhel optional XML support via tinyxml ( first non-clib dep ).
  - QuakeWars model support checked in.
  - Various fixes in libhel thanks to new tests.  ^^
  - New cmake based unit tests for libhel.

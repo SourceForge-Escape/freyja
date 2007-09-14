@@ -46,6 +46,7 @@ class Md5Vertex
 	float uv[2];
 	int weight;
 	int numbones;
+	// int version11_unused[4];
 };
 
 
@@ -84,8 +85,9 @@ class Md5Mesh
 		if (weights) delete [] weights;
 	}
 
-	mstl::String name;
+	mstl::String name;   // Version 11, emulated in version 10
 	mstl::String shader;
+	// unsigned int flags; // Version 11
 	unsigned int numverts;
 	Md5Vertex *verts;
 	unsigned int numtriangles;
