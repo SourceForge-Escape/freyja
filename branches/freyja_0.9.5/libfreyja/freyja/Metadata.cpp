@@ -127,12 +127,63 @@ void Metadata::SetModel(const char* model)
 
 #if TINYXML_FOUND
 
-bool Metadata::Serialize(TiXmlElement* metadata)
+bool Metadata::Serialize(TiXmlElement* container)
 {
-	if ( !metadata )
+	if ( !container )
 		return false;
 
-	return false;
+	TiXmlElement *metadata = new TiXmlElement("freyja-metadata");
+	container->LinkEndChild( metadata );
+	metadata->SetAttribute("name", mName.c_str() );
+	metadata->SetAttribute("type", mType.c_str() );
+
+	TiXmlElement *pos = new TiXmlElement("pos");
+	metadata->LinkEndChild( pos );
+	pos->SetDoubleAttribute("x", mPos.mX);
+	pos->SetDoubleAttribute("y", mPos.mY);
+	pos->SetDoubleAttribute("z", mPos.mZ);	
+
+	TiXmlElement *rot = new TiXmlElement("rot");
+	metadata->LinkEndChild( rot );
+	rot->SetDoubleAttribute("x", mRot.mX);
+	rot->SetDoubleAttribute("y", mRot.mY);
+	rot->SetDoubleAttribute("z", mRot.mZ);	
+	rot->SetDoubleAttribute("w", mRot.mW);	
+
+	TiXmlElement *scale = new TiXmlElement("scale");
+	metadata->LinkEndChild( scale );
+	scale->SetDoubleAttribute("x", mScale.mX);
+	scale->SetDoubleAttribute("y", mScale.mY);
+	scale->SetDoubleAttribute("z", mScale.mZ);	
+
+	if ( mMetadata.c_str() )
+	{
+		TiXmlElement *data = new TiXmlElement("metadata");
+		TiXmlText *text = new TiXmlText( mMetadata.c_str() );
+		//text->SetCDATA(true);
+		data->LinkEndChild( text );
+		metadata->LinkEndChild( data );
+	}
+
+	if ( mMaterial.c_str() )
+	{
+		TiXmlElement *data = new TiXmlElement("material");
+		TiXmlText *text = new TiXmlText( mMaterial.c_str() );
+		//text->SetCDATA(true);
+		data->LinkEndChild( text );
+		metadata->LinkEndChild( data );
+	}
+
+	if ( GetModel() )
+	{
+		TiXmlElement *data = new TiXmlElement("model");
+		TiXmlText *text = new TiXmlText( GetModel() );
+		//text->SetCDATA(true);
+		data->LinkEndChild( text );
+		metadata->LinkEndChild( data );
+	}
+
+	return true;
 }
 
 

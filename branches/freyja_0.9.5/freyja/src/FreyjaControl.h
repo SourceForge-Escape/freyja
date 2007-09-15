@@ -607,6 +607,9 @@ class FreyjaControl : public Control
 	void EvSerializeMesh();
 	void EvUnserializeMesh();
 
+	void EvSerializeMetadata();
+	void EvUnserializeMetadata();
+
 	void EvSelectAll() { SelectAll(true); } 
 	void EvUnselectAll() { SelectAll(false); } 
 

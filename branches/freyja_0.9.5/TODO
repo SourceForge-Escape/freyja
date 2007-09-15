@@ -40,6 +40,7 @@
 	- Pos/Rot/Scale editing from prop dialog.
 	- Snippet import / export.
 	- Group selection.
+	- Metadata pick via scaled AABB of renderable. ( if renderable is set )
 	- Snippet group import / export.
 	- Freyja file format import / export / clear.
 	- Parenting support to allow 'bundles' like the shinto shrine scene.
@@ -81,11 +82,14 @@
 	- Threaded import/export and new threaded ABI which isn't interdependent.
 
  * libmgtk
+	- Replace Resource completely with MLisp or Lua.
 	- QueryDialog dynamic text entry + filedialog button 'string type'. 
 	- Merge sort / Binary search | TLB w/ hash QueryDialogs, mlisp symbols, etc. 
 	- gtk source view widget for optional editing of xml/lua from inside freyja.
 
  * libhel
+	- Use new OBB test for freyja 'box' selection on rotation axis rings.
+	- vec_t* based operations.
 	- Change hel/math to hel/hel or the like to avoid confusion for new comers.
 	- AABB, Sphere, etc get proper Class implementations.
 		- Rework bounding volume system around the new 'types'.

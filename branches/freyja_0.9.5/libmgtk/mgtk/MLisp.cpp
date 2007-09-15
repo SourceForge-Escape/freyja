@@ -2113,11 +2113,11 @@ MlispObject *menu(MlispObjectList *parms)
 	yPos = mlisp_obj_pop(&parms);
 	ret = NULL;
 	
-	if (objNumberP(xPos) && objNumberP(yPos))
+	if (mlisp_obj_numberp(xPos) && mlisp_obj_numberp(yPos))
 	{
 		/* Call event func here - simulated with printf for test */
 		printf("extern \"C\" { menu(%f, %f); }\n",
-			   getNumber(xPos), getNumber(yPos));
+			   mlisp_get_number(xPos), mlisp_get_number(yPos));
 
 		while ((obj = mlisp_obj_peek(parms)))
 		{
@@ -2150,7 +2150,7 @@ MlispObject *submenu(MlispObjectList *parms)
 	{
 		/* Call event func here - simulated with printf in tests */
 		printf("extern \"C\" { submenu(\"%s\"); }\n",
-				 getString(label));
+				 mlisp_get_string(label));
 
 		while ((obj = mlisp_obj_peek(parms)))
 		{
@@ -2160,7 +2160,7 @@ MlispObject *submenu(MlispObjectList *parms)
 			mlisp_obj_pop(&parms);
 		}
 
-		ret = mlisp_new_str_obj(getString(label));
+		ret = mlisp_new_str_obj(mlisp_get_string(label));
 	}
 	else
 	{
@@ -2185,9 +2185,9 @@ MlispObject *menu_item(MlispObjectList *parms)
 	{
 		/* Call event func here - simulated with printf in tests */
 		printf("extern \"C\" { menu_item(\"%s\", %i); }\n",
-				 getString(label), getInt(event));
+				 mlisp_get_string(label), mlisp_get_int(event));
 
-		ret = mlisp_new_str_obj(getString(label));
+		ret = mlisp_new_str_obj(mlisp_get_string(label));
 	}
 	else
 	{

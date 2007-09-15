@@ -200,7 +200,8 @@ bool Cursor::CheckForRayCollision(hel::Ray &r)
 					min = rot * min;
 					max = rot * max;
 
-					hit = r.IntersectBox(min.mVec, max.mVec, dist);
+#warning "FIXME: This needs to use another box pick method."
+					hit = r.IntersectAABB_Old(min.mVec, max.mVec, dist);
 						
 					if (hit && dist < best)
 					{
