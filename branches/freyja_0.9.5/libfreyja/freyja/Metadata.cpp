@@ -36,7 +36,6 @@
 using namespace freyja;
 using namespace mstl;
 
-Vector<MetadataRenderable*> gMetadataRenderableGobalPool;
 
 Vector<Metadata*> gMetadataGobalPool;
 
@@ -111,7 +110,18 @@ bool Metadata::RemoveFromPool()
 
 void Metadata::SetModel(const char* model)
 {
-	mRenderable = MetadataRenderable::ImportToCache( model );
+	if ( !model )
+		return;
+
+	// Do we already use the requested renderable instance?
+	if ( GetModel() && !strcmp( GetModel(), model ) )
+	{
+		// Do some 'check cache' call here later optionally.
+	}
+	else
+	{
+		mRenderable = MetadataRenderable::ImportToCache( model );
+	}
 }
 
 
@@ -178,6 +188,7 @@ bool Metadata::Unserialize(TiXmlElement* metadata)
 		}
 		else if (s == "model")
 		{
+			SetModel( child->GetText() );
 			// FIXME: Setup renderable!
 			//mModel = MetadataRenderable::GetInstance( child->GetText() );
 		}

@@ -351,6 +351,47 @@ void Mesh::GetSelectedVertices(Vector<index_t> &list)
 }
 
 
+bool Mesh::UnserializeXML(const char* filename)
+{
+#if TINYXML_FOUND
+	if (!filename)
+		return false;
+
+	TiXmlDocument doc(filename);
+
+	if ( !doc.LoadFile() )
+	{
+		freyjaPrintMessage("XML ERROR: %s, Line %i, Col %i\n", 
+		             doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
+		return false;
+	}
+
+	TiXmlElement *root = doc.RootElement(); 
+
+	if (!root) 
+	{
+		freyjaPrintMessage("XML ERROR: Couldn't find document root for '%s'!\n", filename );
+		return false;
+	}
+
+	TiXmlElement *child = root->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		String s = child->Value();
+
+		// Only handle the first one encountered given this is a class method.
+		if ( s == "mesh" )
+		{
+			return Unserialize( child );
+		}
+	}
+
+#endif // TINYXML_FOUND
+
+	return false;
+}
+
+
 bool Mesh::SerializePool(SystemIO::TextFileWriter &w, const char *name,
 						 Vector<vec_t> &array, mstl::stack<index_t> &stack)
 {
@@ -2105,6 +2146,108 @@ bool Mesh::IntersectClosestVertex(hel::Ray &r, int &vertex0, vec_t radius)
 ////////////////////////////////////////////////////////////
 // Public Mutators
 ////////////////////////////////////////////////////////////
+
+void Mesh::ApplyTrianglarTesselation()
+{
+	// This isn't needed to avoid the issues related to 'gaps' in mFaces[].
+	// However it ensures the mesh is 'squeaky clean', which should see
+	// the new faces appended to the end of the array at count offset.
+	//Repack();
+
+	for (uint32 i = 0, polygonCount = mFaces.size(); i < polygonCount; ++i)
+	{
+		Face* face = mFaces[i];
+
+		// This shouldn't happen with a repacked mesh in between valid faces.
+		// If this wasn't repacked a tesselated face would be skipped anyway.
+		if ( !face )
+			continue;
+
+		// For the sake of compatibility only support quads for now
+		switch ( face->mIndices.size() )
+		{
+		case 0: // Unallocated or empty
+		case 1: // Point?
+		case 2: // Edge?
+		case 3: // Already a triangle
+			break;
+
+		case 4: // Quad
+			{
+				Face* face2 = GetFace( CreateFace() );
+				FREYJA_ASSERTMSG( face2, "Face allocation failed!" );
+
+#warning "FIXME: Fix up vertex references and neighbours."
+
+				if ( face2 )
+				{
+					face2->mFlags = face->mFlags;                      
+					face2->mSmoothingGroup = face->mSmoothingGroup;
+					face2->mColor = face->mColor;                              
+					face2->mMaterial = face->mMaterial;                         
+					face2->mNormal = face->mNormal;
+				
+					// Split: abcd -> abc, cda ( keep winding )
+					{
+						index_t a = face->mIndices[0];
+						index_t b = face->mIndices[1];
+						index_t c = face->mIndices[2];
+						index_t d = face->mIndices[3];
+
+						face->mIndices.clear();
+						face->mIndices.push_back(a);
+						face->mIndices.push_back(b);
+						face->mIndices.push_back(c);
+
+						face2->mIndices.push_back(c);
+						face2->mIndices.push_back(d);
+						face2->mIndices.push_back(a);
+					}
+
+					if ( face->mTexCoordIndices.size() )
+					{
+						index_t a = face->mTexCoordIndices[0];
+						index_t b = face->mTexCoordIndices[1];
+						index_t c = face->mTexCoordIndices[2];
+						index_t d = face->mTexCoordIndices[3];
+
+						face->mTexCoordIndices.clear();
+						face->mTexCoordIndices.push_back(a);
+						face->mTexCoordIndices.push_back(b);
+						face->mTexCoordIndices.push_back(c);
+
+						face2->mTexCoordIndices.push_back(c);
+						face2->mTexCoordIndices.push_back(d);
+						face2->mTexCoordIndices.push_back(a);
+					}
+
+					if ( face->mNormalsIndices.size() )
+					{
+						index_t a = face->mNormalsIndices[0];
+						index_t b = face->mNormalsIndices[1];
+						index_t c = face->mNormalsIndices[2];
+						index_t d = face->mNormalsIndices[3];
+
+						face->mNormalsIndices.clear();
+						face->mNormalsIndices.push_back(a);
+						face->mNormalsIndices.push_back(b);
+						face->mNormalsIndices.push_back(c);
+
+						face2->mNormalsIndices.push_back(c);
+						face2->mNormalsIndices.push_back(d);
+						face2->mNormalsIndices.push_back(a);
+					}
+				}
+			}
+			break;
+
+		default:
+			;
+			#warning "FIXME: Didn't add a case for general polygons, which should tesselate on import anyway."
+		}
+	}
+}
+
 
 index_t Mesh::CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz)
 {

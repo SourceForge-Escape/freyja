@@ -89,6 +89,7 @@ set(Objs
 	freyja/Mesh
 	freyja/MeshABI
 	freyja/Metadata
+	freyja/MetadataRenderable
 	freyja/Model
 	freyja/ModelABI
 	freyja/PakABI

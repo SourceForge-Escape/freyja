@@ -136,6 +136,13 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	void SetScale(const hel::Vec3& scale);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sets object scale.
+	 *
+	 ------------------------------------------------------*/
+
 #if TINYXML_FOUND
 
 	bool Serialize(TiXmlElement* metadata);
@@ -165,6 +172,8 @@ public:
 
 	const char* GetMetadata() { return mMetadata.c_str(); }
 	void SetMetadata(const char* metadata) { mMetadata = metadata; }
+
+	MetadataRenderable* GetRenderable() { return mRenderable; }
 
 	const char* GetModel() { return mRenderable ? mRenderable->mModel.c_str() : NULL; }
 	void SetModel(const char* model);
@@ -301,6 +310,13 @@ inline
 void Metadata::SetPos(const hel::Vec3& pos)
 {
 	mPos = pos;
+}
+
+
+inline
+void Metadata::SetScale(const hel::Vec3& scale)
+{
+	mScale = scale;
 }
 
 

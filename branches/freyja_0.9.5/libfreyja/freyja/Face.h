@@ -48,104 +48,89 @@ public:
 	} Flags;
 
 
-	Face() :
-		mFlags(fNone),
-		mSmoothingGroup(0),
-		mColor(0),
-		//mVisible(0x0),
-		mMaterial(0), // Always have a valid material Id
-		mNormal(0.0f, 1.0f, 0.0f),
-		mIndices(),
-		mTexCoordIndices(),
-		mNormalsIndices(),
-		mNeighbours()
-	{
-	}
+	Face();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	~Face()
-	{
-	}
+	~Face();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
+	static const char *GetChunkType() 
+	{ return "Face"; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	static const char *GetChunkType() { return "Face"; }
+	static uint32 GetChunkVersion() 
+	{ return 9500; /* 0.9.5-00 */ }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	static uint32 GetChunkVersion() { return 9500; /* 0.9.5-00 */ }
+	void AppendNormal(index_t idx);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
+	void AppendTexCoord(index_t idx);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	void AppendNormal(index_t idx)
-	{
-		mFlags |= fPolyMappedNormals;
-		mNormalsIndices.pushBack(idx);
-	}
+	void AppendVertex(index_t idx);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
+	index_t FindCorrespondingTexCoord(index_t vertexIndex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	void AppendTexCoord(index_t idx)
-	{
-		mFlags |= fPolyMappedTexCoords;
-		mTexCoordIndices.pushBack(idx);
-	}
+	void WeldTexCoords(index_t replace, index_t texcoord);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
+	void WeldVertices(index_t replace, index_t vertex);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	void AppendVertex(index_t idx)
-	{
-		// FIXME: Now you should append this Face's id to the vertex's polyref
-		// FIXME: Might want to cache edge map too
-		mIndices.pushBack(idx);
-	}
-
-	index_t FindCorrespondingTexCoord(index_t vertexIndex)
-	{
-		for (uint32 i = 0, n = mIndices.size(); i < n; ++i)
-		{
-			if (mIndices[i] == vertexIndex)
-			{
-				return mTexCoordIndices[i];
-			}
-		}
-		
-		return INDEX_INVALID;
-	}
-
-
-	void WeldTexCoords(index_t replace, index_t texcoord)
-	{
-		for (uint32 i = 0, n = mTexCoordIndices.size(); i < n; ++i)
-		{
-			if (mTexCoordIndices[i] == replace)
-			{
-				mTexCoordIndices[i] = texcoord;
-				break;
-			}
-		}
-	}
-
-
-	void WeldVertices(index_t replace, index_t vertex)
-	{
-		for (uint32 i = 0, n = mIndices.size(); i < n; ++i)
-		{
-			if (mIndices[i] == replace)
-			{
-				mIndices[i] = vertex;
-				break;
-			}
-		}
-	}
-
-
-	void PurgePolyMappedTexCoords()
-	{
-		mFlags &= ~fPolyMappedTexCoords;
-		mTexCoordIndices.clear();
-	}
+	void PurgePolyMappedTexCoords();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Disables polymapped texCoords for this face 
 	 *
 	 ------------------------------------------------------*/
 
-	void ClearSmoothingGroup() { mSmoothingGroup = 0; }
-	void SetSmoothingGroup(uint32 g) { mSmoothingGroup = g; }
+	void ClearSmoothingGroup() 
+	{ mSmoothingGroup = 0; }
+	void SetSmoothingGroup(uint32 g) 
+	{ mSmoothingGroup = g; }
 	/*------------------------------------------------------
 	 * Pre  : -1 < <g> < 33 ( Relates to power of 2, bitmap ) 
 	 *        Groups:  1-24,    Normal smoothing groups
@@ -158,174 +143,52 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	size_t SerializedSize() { return 0; }
+	size_t SerializedSize() 
+	{ return 0; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	bool Serialize(SystemIO::FileWriter &w) { return false; }
+	bool Serialize(SystemIO::FileWriter &w) 
+	{ return false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	bool Serialize(SystemIO::TextFileWriter &w) 
-	{ 
-		w.Print("\t\tface %u %u %u %u\n", 
-				mFlags, mSmoothingGroup, mColor, mMaterial);
+	bool Serialize(SystemIO::TextFileWriter &w);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-		uint32 i;
-		w.Print("\t\t\tfv %u ", mIndices.size()); 
-		foreach(mIndices, i)
-		{
-			w.Print("%u ", mIndices[i]);
-		}
-		w.Print("\n");
-
-		w.Print("\t\t\tft %u ", mTexCoordIndices.size());
-		foreach(mTexCoordIndices, i)
-		{
-			w.Print("%u ", mTexCoordIndices[i]);
-		}
-		w.Print("\n");
-
-		w.Print("\t\t\tfn %u ", mNormalsIndices.size());
-		foreach(mNormalsIndices, i)
-		{
-			w.Print("%u ", mNormalsIndices[i]);
-		}
-		w.Print("\n");
-
-		return true;
-	}
-
-	bool Serialize(SystemIO::TextFileReader &r) 
-	{ 
-		const char *symbol = r.ParseSymbol();
-		if (strncmp(symbol, "face", 4))
-			return false;
-
-		mFlags = r.ParseInteger();
-		mSmoothingGroup = r.ParseInteger();
-		mColor = r.ParseInteger();
-		mMaterial = r.ParseInteger();
-
-		r.ParseSymbol(); // "fv"
-		for (uint32 i = 0, n = r.ParseInteger(); i < n; ++i)
-		{
-			mIndices.push_back(r.ParseInteger());
-		}
-
-		r.ParseSymbol(); // "ft"
-		for (uint32 i = 0, n = r.ParseInteger(); i < n; ++i)
-		{
-			mTexCoordIndices.push_back(r.ParseInteger());
-		}
-
-		r.ParseSymbol(); // "fn"
-		for (uint32 i = 0, n = r.ParseInteger(); i < n; ++i)
-		{
-			mNormalsIndices.push_back(r.ParseInteger());
-		}
-
-		return true;
-	}
-
+	bool Serialize(SystemIO::TextFileReader &r);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 #if TINYXML_FOUND
-	bool Serialize(TiXmlElement *container)
-	{	
-		if (!container)
-			return false;	
-		
-		TiXmlElement *face = new TiXmlElement("face");
 
-		face->SetAttribute("flags", mFlags);
-		face->SetAttribute("group", mSmoothingGroup);
-		face->SetAttribute("color", mColor);
-		face->SetAttribute("material", mMaterial);
+	bool Serialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-		uint32 i;
-		foreach (mIndices, i)
-		{
-			TiXmlElement *element = new TiXmlElement("vertex");
-			element->SetAttribute("id", i);
-			element->SetAttribute("index", mIndices[i]);
-			face->LinkEndChild(element);
-		}
+	bool Unserialize(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-		foreach (mTexCoordIndices, i)
-		{
-			TiXmlElement *element = new TiXmlElement("texcoord");
-			element->SetAttribute("id", i);
-			element->SetAttribute("index", mTexCoordIndices[i]);
-			face->LinkEndChild(element);
-		}
-
-		foreach (mNormalsIndices, i)
-		{
-			TiXmlElement *element = new TiXmlElement("normal");
-			element->SetAttribute("id", i);
-			element->SetAttribute("index", mNormalsIndices[i]);
-			face->LinkEndChild(element);
-		}
-
-		container->LinkEndChild(face);
-		return true;
-	}
-
-	bool Unserialize(TiXmlElement *container)
-	{
-		if (!container)
-			return false;
-
-		TiXmlElement *face = container;//->FirstChildElement("face");
-
-		if (!face)
-			return false;
-
-		int attr;
-		face->QueryIntAttribute("flags", &attr);
-		mFlags = attr < 0 ? INDEX_INVALID : attr;
-
-		face->QueryIntAttribute("group", &attr);
-		mSmoothingGroup = attr < 0 ? INDEX_INVALID : attr;
-
-		face->QueryIntAttribute("color", &attr);
-		mColor = attr < 0 ? INDEX_INVALID : attr;
-
-		face->QueryIntAttribute("material", &attr);
-		mMaterial = attr < 0 ? INDEX_INVALID : attr;
-
-		TiXmlElement *child = face->FirstChildElement();
-		for( ; child; child = child->NextSiblingElement() )
-		{
-			String s = child->Value();
-			attr = -1;
-
-			child->QueryIntAttribute("index", &attr);
-			unsigned int idx = attr < 0 ? INDEX_INVALID : attr;
-
-			// FIXME: should check id's in future, in case of hand edited files.
-			if (s == "vertex")
-			{
-				mIndices.push_back(idx);
-			}
-			else if (s == "texcoord")
-			{
-				mTexCoordIndices.push_back(idx);
-			}
-			else if (s == "normal")
-			{
-				mNormalsIndices.push_back(idx);
-			}
-		}
-
-		return true;
-	}
 #endif
 
 
@@ -351,7 +214,270 @@ public:
 };
 
 
-} // End namespace freyja
+////////////////////////////////////////////////////////////
+// Inline methods
+////////////////////////////////////////////////////////////
+
+inline
+Face::Face() :
+	mFlags(fNone),
+	mSmoothingGroup(0),
+	mColor(0),
+	//mVisible(0x0),
+	mMaterial(0), // Always have a valid material Id
+	mNormal(0.0f, 1.0f, 0.0f),
+	mIndices(),
+	mTexCoordIndices(),
+	mNormalsIndices(),
+	mNeighbours()
+{ }
+
+
+inline
+Face::~Face()
+{ }
+
+
+inline
+void Face::AppendNormal(index_t idx)
+{
+	mFlags |= fPolyMappedNormals;
+	mNormalsIndices.pushBack(idx);
+}
+
+
+inline
+void Face::AppendTexCoord(index_t idx)
+{
+	mFlags |= fPolyMappedTexCoords;
+	mTexCoordIndices.pushBack(idx);
+}
+
+
+inline
+void Face::AppendVertex(index_t idx)
+{
+	// FIXME: Now you should append this Face's id to the vertex's polyref
+	// FIXME: Might want to cache edge map too
+	mIndices.pushBack(idx);
+}
+
+
+inline
+index_t Face::FindCorrespondingTexCoord(index_t vertexIndex)
+{
+	for (uint32 i = 0, n = mIndices.size(); i < n; ++i)
+	{
+		if (mIndices[i] == vertexIndex)
+		{
+			return mTexCoordIndices[i];
+		}
+	}
+	
+	return INDEX_INVALID;
+}
+
+
+inline
+void Face::WeldTexCoords(index_t replace, index_t texcoord)
+{
+	for (uint32 i = 0, n = mTexCoordIndices.size(); i < n; ++i)
+	{
+		if (mTexCoordIndices[i] == replace)
+		{
+			mTexCoordIndices[i] = texcoord;
+			break;
+		}
+	}
+}
+
+
+inline
+void Face::WeldVertices(index_t replace, index_t vertex)
+{
+	for (uint32 i = 0, n = mIndices.size(); i < n; ++i)
+	{
+		if (mIndices[i] == replace)
+		{
+			mIndices[i] = vertex;
+			break;
+		}
+	}
+}
+
+
+inline
+void Face::PurgePolyMappedTexCoords()
+{
+	mFlags &= ~fPolyMappedTexCoords;
+	mTexCoordIndices.clear();
+}
+
+
+inline
+bool Face::Serialize(SystemIO::TextFileWriter &w) 
+{ 
+	w.Print("\t\tface %u %u %u %u\n", 
+			mFlags, mSmoothingGroup, mColor, mMaterial);
+
+	uint32 i;
+	w.Print("\t\t\tfv %u ", mIndices.size()); 
+	foreach(mIndices, i)
+	{
+		w.Print("%u ", mIndices[i]);
+	}
+	w.Print("\n");
+
+	w.Print("\t\t\tft %u ", mTexCoordIndices.size());
+	foreach(mTexCoordIndices, i)
+	{
+		w.Print("%u ", mTexCoordIndices[i]);
+	}
+	w.Print("\n");
+
+	w.Print("\t\t\tfn %u ", mNormalsIndices.size());
+	foreach(mNormalsIndices, i)
+	{
+		w.Print("%u ", mNormalsIndices[i]);
+	}
+	w.Print("\n");
+
+	return true;
+}
+
+
+inline
+bool Face::Serialize(SystemIO::TextFileReader &r) 
+{ 
+	const char *symbol = r.ParseSymbol();
+	if (strncmp(symbol, "face", 4))
+		return false;
+
+	mFlags = r.ParseInteger();
+	mSmoothingGroup = r.ParseInteger();
+	mColor = r.ParseInteger();
+	mMaterial = r.ParseInteger();
+
+	r.ParseSymbol(); // "fv"
+	for (uint32 i = 0, n = r.ParseInteger(); i < n; ++i)
+	{
+		mIndices.push_back(r.ParseInteger());
+	}
+
+	r.ParseSymbol(); // "ft"
+	for (uint32 i = 0, n = r.ParseInteger(); i < n; ++i)
+	{
+		mTexCoordIndices.push_back(r.ParseInteger());
+	}
+
+	r.ParseSymbol(); // "fn"
+	for (uint32 i = 0, n = r.ParseInteger(); i < n; ++i)
+	{
+		mNormalsIndices.push_back(r.ParseInteger());
+	}
+
+	return true;
+}
+
+
+#if TINYXML_FOUND
+
+inline
+bool Face::Serialize(TiXmlElement *container)
+{	
+	if (!container)
+		return false;	
+	
+	TiXmlElement *face = new TiXmlElement("face");
+
+	face->SetAttribute("flags", mFlags);
+	face->SetAttribute("group", mSmoothingGroup);
+	face->SetAttribute("color", mColor);
+	face->SetAttribute("material", mMaterial);
+
+	uint32 i;
+	foreach (mIndices, i)
+	{
+		TiXmlElement *element = new TiXmlElement("vertex");
+		element->SetAttribute("id", i);
+		element->SetAttribute("index", mIndices[i]);
+		face->LinkEndChild(element);
+	}
+
+	foreach (mTexCoordIndices, i)
+	{
+		TiXmlElement *element = new TiXmlElement("texcoord");
+		element->SetAttribute("id", i);
+		element->SetAttribute("index", mTexCoordIndices[i]);
+		face->LinkEndChild(element);
+	}
+
+	foreach (mNormalsIndices, i)
+	{
+		TiXmlElement *element = new TiXmlElement("normal");
+		element->SetAttribute("id", i);
+		element->SetAttribute("index", mNormalsIndices[i]);
+		face->LinkEndChild(element);
+	}
+
+	container->LinkEndChild(face);
+	return true;
+}
+
+inline
+bool Face::Unserialize(TiXmlElement *container)
+{
+	if (!container)
+		return false;
+
+	TiXmlElement *face = container;//->FirstChildElement("face");
+
+	if (!face)
+		return false;
+
+	int attr;
+	face->QueryIntAttribute("flags", &attr);
+	mFlags = attr < 0 ? INDEX_INVALID : attr;
+
+	face->QueryIntAttribute("group", &attr);
+	mSmoothingGroup = attr < 0 ? INDEX_INVALID : attr;
+
+	face->QueryIntAttribute("color", &attr);
+	mColor = attr < 0 ? INDEX_INVALID : attr;
+
+	face->QueryIntAttribute("material", &attr);
+	mMaterial = attr < 0 ? INDEX_INVALID : attr;
+
+	TiXmlElement *child = face->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
+	{
+		String s = child->Value();
+		attr = -1;
+
+		child->QueryIntAttribute("index", &attr);
+		unsigned int idx = attr < 0 ? INDEX_INVALID : attr;
+
+		// FIXME: should check id's in future, in case of hand edited files.
+		if (s == "vertex")
+		{
+			mIndices.push_back(idx);
+		}
+		else if (s == "texcoord")
+		{
+			mTexCoordIndices.push_back(idx);
+		}
+		else if (s == "normal")
+		{
+			mNormalsIndices.push_back(idx);
+		}
+	}
+
+	return true;
+}
+
+#endif // TINYXML_FOUND
+
+} // namespace freyja
 
 
 #endif // GUARD__FREYJA_FACE_H_
