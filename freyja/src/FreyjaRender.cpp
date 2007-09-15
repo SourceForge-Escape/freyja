@@ -527,15 +527,11 @@ void FreyjaRender::DrawIcons()
 	glDisable(GL_LIGHTING);
 
 	BindColorTexture();
-
 	glColor3fv(ORANGE);
 
-	// Will want to allow lighting when renderables are supported.
 	for (uint32 i = 0, n = Metadata::GetObjectCount(); i < n; ++i)
 	{
 		Metadata* metadata = Metadata::GetObjectByUid( i );
-
-		#warning "FIXME: Add support for metadata renderable."
 		
 		// This method will encounter any 'gaps' ( NULL pointers ) in the container.
 		if ( metadata )
@@ -551,6 +547,86 @@ void FreyjaRender::DrawIcons()
 	}
 
 	glPopAttrib();
+
+
+
+	glPushAttrib(GL_LIGHTING_BIT);  
+	glDisable(GL_LIGHTING);
+
+	glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);//GL_CLIENT_VERTEX_ARRAY_BIT);
+	glEnableClientState(GL_NORMAL_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	for (uint32 i = 0, n = Metadata::GetObjectCount(); i < n; ++i)
+	{
+		Metadata* metadata = Metadata::GetObjectByUid( i );
+		
+		// This method will encounter any 'gaps' ( NULL pointers ) in the container.
+		if ( metadata )
+		{
+			MetadataRenderable* renderable = metadata->GetRenderable(); 
+
+			if ( renderable )
+			{
+				BindColorTexture();
+
+				glPushMatrix();
+				const Vec3 &pos = metadata->GetPos();
+				glTranslatef(pos.mX, pos.mY, pos.mZ);
+
+				glPushMatrix();
+				const Vec3& scale = metadata->GetScale();
+				glScalef(scale.mX, scale.mY, scale.mZ);
+
+				#warning "FIXME: Add support for renderable rotation and material."
+#if 1
+		glPushAttrib(GL_POLYGON_BIT);
+		glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glPolygonMode(GL_BACK, GL_LINE);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+
+		glDisable(GL_DEPTH_TEST);
+
+		glLineWidth(3.0f);
+
+		glColor3fv(BLACK);
+#endif
+
+				glVertexPointer(3, GL_FLOAT, 0, renderable->mVertices);
+				glNormalPointer(GL_FLOAT, 0, renderable->mNormals);
+				glTexCoordPointer(3, GL_FLOAT, 0, renderable->mTexcoords);
+				glDrawElements(GL_TRIANGLES, renderable->mFaceCount*3,
+				               GL_UNSIGNED_SHORT, renderable->mIndices);
+
+#if 1
+		glPopAttrib(); // GL_LINE_BIT | GL_DEPTH_BUFFER_BIT
+
+		glPolygonMode(GL_FRONT, GL_FILL);
+		glCullFace(GL_BACK);
+
+		glPopAttrib(); // GL_POLYGON_BIT
+
+				glColor3fv(WHITE);
+
+				glVertexPointer(3, GL_FLOAT, 0, renderable->mVertices);
+				glNormalPointer(GL_FLOAT, 0, renderable->mNormals);
+				glTexCoordPointer(3, GL_FLOAT, 0, renderable->mTexcoords);
+				glDrawElements(GL_TRIANGLES, 
+				               (renderable->mFaceCount<<1)+renderable->mFaceCount,
+				               GL_UNSIGNED_SHORT, renderable->mIndices);
+#endif
+
+				glPopMatrix();
+				glPopMatrix();
+			}
+		}
+	}
+
+	glPopAttrib();
+
+	glPopClientAttrib();
 
 	/* End metadata objects */
 

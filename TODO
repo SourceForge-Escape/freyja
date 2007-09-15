@@ -5,7 +5,7 @@
  Freyja 0.9.5.16	TBD
  -----------------------------------------------------------------------------
 
- * Ubuntu packages for release.
+ * Ubuntu packages for release on all supported arch.
 	- PPC
 	- AMD64
 	- i386
@@ -37,10 +37,11 @@
 		- Walkmesh can be subbed by IK over rendered mesh.
 
  * Metadata object eg for map objects ( currently bones w/ metadata are used )
+	- Pos/Rot/Scale editing from prop dialog.
 	- Snippet import / export.
 	- Group selection.
 	- Snippet group import / export.
-	- Freyja file format import / export.
+	- Freyja file format import / export / clear.
 	- Parenting support to allow 'bundles' like the shinto shrine scene.
 	- Render toggle flag for metadata objects.
 	- Finish up Renderable support.
@@ -71,7 +72,12 @@
  	- Widgets: lua mgtk wrapper to allow full interface plugins.
  	- Binary file I/O wrapper with endian support.
 
+ * mstl
+	- LRU / MRU generics would make a lot of sense.
+
  * libfreyja
+	- Abstract Mesh's Vec3 pools.
+	- Go back to default UVs ( 2fv ) and allow optional ( 3fv ).
 	- Threaded import/export and new threaded ABI which isn't interdependent.
 
  * libmgtk
@@ -87,12 +93,6 @@
 
  Freyja 0.9.5.17	TBD
  -----------------------------------------------------------------------------
-
- * Port cross compile build system to Cmake.
-	- Depends on the release of Cmake 2.6.0. ( Current release is 2.4. )
-	- Depends on proper Cmake support of cross compiler(s).
-	- Possibly support generic strip and package rules too.
-	- http://www.cmake.org/Wiki/CMake_Cross_Compiling
 
  * Edge editing.
 	- Select and transform edges in UI.
@@ -135,6 +135,12 @@
 
  Freyja, Development branch 0.9.5 ( Current )
  -----------------------------------------------------------------------------
+
+ * Port cross compile build system to Cmake.
+	- Depends on the release of Cmake 2.6.0. ( Current release is 2.4. )
+	- Depends on proper Cmake support of cross compiler(s).
+	- Possibly support generic strip and package rules too.
+	- http://www.cmake.org/Wiki/CMake_Cross_Compiling
 
  * Swap file for crash recovery and very, very large undo.
 

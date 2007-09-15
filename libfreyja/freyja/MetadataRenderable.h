@@ -55,6 +55,18 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+
+	////////////////////////////////////////////////////////////
+	// Cache API methods.
+	////////////////////////////////////////////////////////////
+
+	static MetadataRenderable* FindInCache(const char* key);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns pointer to cached instance or NULL if DNE.
+	 *
+	 ------------------------------------------------------*/
+
 	static MetadataRenderable* ImportToCache(const char* filename);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -62,6 +74,20 @@ public:
 	 *        and returns pointer to cache instance.
 	 *
 	 ------------------------------------------------------*/
+
+	uint32 mRefCount;
+
+	mstl::String mModel;            /* Model filename / renderable instance key. */
+
+	vec_t* mVertices;  /* Geometry buffers for rendering the icon. */
+	vec_t* mTexcoords;
+	vec_t* mNormals;
+
+	uint16* mIndices;  /* Triangle indices for rendering. */
+	uint16 mFaceCount;
+
+
+protected:
 
 	bool LoadModel(const char* filename);
 	/*------------------------------------------------------
@@ -74,17 +100,9 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 mRefCount;
+	static MetadataRenderable* mMRU;
 
-	mstl::String mModel;            /* Model filename / renderable instance key. */
-
-	mstl::Vector<vec_t> mVertices;  /* Geometry buffers for rendering the icon. */
-
-	mstl::Vector<vec_t> mTexcoords;
-
-	mstl::Vector<vec_t> mNormals;
-
-	mstl::Vector<uint16> mIndices;  /* Triangle indices for rendering. */
+	static mstl::Vector<MetadataRenderable*> mGobalPool;
 };
 
 
@@ -96,24 +114,25 @@ inline
 MetadataRenderable::MetadataRenderable()  :
 		mRefCount(0),
 		mModel(),
-		mVertices(),
-		mNormals(),
-		mIndices()
+		mVertices(NULL),
+		mTexcoords(NULL),
+		mNormals(NULL),
+		mIndices(NULL),
+		mFaceCount(0)
 { }
 
 
 inline
 MetadataRenderable::~MetadataRenderable()
-{ }
-
-
-inline
-MetadataRenderable* MetadataRenderable::ImportToCache(const char* filename)
 {
-#warning "FIXME: Implement this function for metadata renderables."
-	return NULL;
+	if (mVertices) delete [] mVertices;
+	if (mTexcoords) delete [] mTexcoords;
+	if (mNormals) delete [] mNormals;
+	if (mIndices) delete [] mIndices; 
 }
+
 
 } // freyja
 
 #endif // GUARD__LIBFREYJA_METADATARENDERABLE_H_
+

@@ -477,46 +477,14 @@ public:
 	 *        Always sets fRayHit flag on face0, clears old results. 
 	 ------------------------------------------------------*/
 
+	bool UnserializeXML(const char* filename);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : XML file serialization.  1:1, File:Mesh
+	 *
+	 ------------------------------------------------------*/
+
 #if TINYXML_FOUND
-
-	bool SerializeFaces(TiXmlElement *container);
-	bool SerializeWeights(TiXmlElement *container);
-	bool SerializeVertices(TiXmlElement *container);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serializes object list in the mesh to XML.
-	 *
-	 ------------------------------------------------------*/
-
-	bool UnserializeFaces(TiXmlElement *container);
-	bool UnserializeWeights(TiXmlElement *container);
-	bool UnserializeVertices(TiXmlElement *container);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Unserialize object list.
-	 *
-	 ------------------------------------------------------*/
-
-	bool SerializeBufferGaps(TiXmlElement *container, 
-							 const char *name, mstl::stack<index_t> &s);
-	bool UnserializeBufferGaps(TiXmlElement *container, 
-							   const char *name, mstl::stack<index_t> &s);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : XML serialization for array gaps.
-	 *
-	 ------------------------------------------------------*/
-
-	bool SerializeBuffer(TiXmlElement *container, 
-						 const char *name, Vector<vec_t> &array);
-	bool UnserializeBuffer(TiXmlElement *container, 
-						   const char *name, Vector<vec_t> &array);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : XML serialization for arrays.
-	 *
-	 ------------------------------------------------------*/
-
 	bool Serialize(TiXmlElement *container);
 	bool Unserialize(TiXmlElement *container);
 	/*------------------------------------------------------
@@ -546,6 +514,14 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
+
+	void ApplyTrianglarTesselation();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Make all facets triangles.  
+	 *        This calls Repack() before tesselation.
+	 *
+	 ------------------------------------------------------*/
 
 	bool Repack();
 	/*------------------------------------------------------
@@ -1384,6 +1360,47 @@ protected:
 	 * Pre  : 
 	 * Post : Serializes the given pool to diskfile as a chunk
 	 ------------------------------------------------------*/
+
+#if TINYXML_FOUND
+
+	bool SerializeFaces(TiXmlElement *container);
+	bool SerializeWeights(TiXmlElement *container);
+	bool SerializeVertices(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Serializes object list in the mesh to XML.
+	 *
+	 ------------------------------------------------------*/
+
+	bool UnserializeFaces(TiXmlElement *container);
+	bool UnserializeWeights(TiXmlElement *container);
+	bool UnserializeVertices(TiXmlElement *container);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Unserialize object list.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SerializeBufferGaps(TiXmlElement *container, 
+							 const char *name, mstl::stack<index_t> &s);
+	bool UnserializeBufferGaps(TiXmlElement *container, 
+							   const char *name, mstl::stack<index_t> &s);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : XML serialization for array gaps.
+	 *
+	 ------------------------------------------------------*/
+
+	bool SerializeBuffer(TiXmlElement *container, 
+						 const char *name, Vector<vec_t> &array);
+	bool UnserializeBuffer(TiXmlElement *container, 
+						   const char *name, Vector<vec_t> &array);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : XML serialization for arrays.
+	 *
+	 ------------------------------------------------------*/
+#endif
 
 	void ClampVecValues(Vector<vec_t> &v, vec_t min, vec_t max);
 	/*------------------------------------------------------

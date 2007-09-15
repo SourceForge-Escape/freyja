@@ -35,36 +35,34 @@
 #include "QueryDialog.h"
 
 mstl::Vector<QueryDialog> gQueryDialogs;
+QueryDialog* gLastQueryDialog = NULL;
 
 namespace mgtk {
 
-bool ExecuteQueryDialog(const char *name)
-{
-	unsigned int i;
-	foreach (gQueryDialogs, i)
-	{
-		if ( gQueryDialogs[i].mName == name )
-		{
-			return gQueryDialogs[i].Execute();
-		}
-	}
-
-	return false;
-}
-
-
 QueryDialog* FindQueryDialog(const char* name)
 {
+	if ( gLastQueryDialog && gLastQueryDialog->mName == name )
+		return gLastQueryDialog;
+
 	unsigned int i;
 	foreach (gQueryDialogs, i)
 	{
 		if ( gQueryDialogs[i].mName == name )
 		{
+			// Cache last hit to speed up most common pattern.
+			gLastQueryDialog = &(gQueryDialogs[i]);
 			return &(gQueryDialogs[i]);
 		}
 	}
 
 	return NULL;
+}
+
+
+bool ExecuteQueryDialog(const char *name)
+{
+	QueryDialog* query = mgtk::FindQueryDialog( name );
+	return query ? query->Execute() : false;
 }
 
 } // namespace mgtk

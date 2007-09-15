@@ -4730,6 +4730,22 @@ void FreyjaControl::ScaleObject(int x, int y, freyja_plane_t plane)
 		}
 		break;
 
+	case tMetadata:
+		{
+			Metadata *metadata = Metadata::GetObjectByUid( mSelectedMetadata );
+
+			if ( metadata )
+			{
+				hel::Vec3 scale = metadata->GetScale();
+				scale *= mCursor.mScale.mX;
+				scale *= mCursor.mScale.mY;
+				scale *= mCursor.mScale.mZ;
+				metadata->SetScale( scale );
+				mCursor.mScale = Vec3(1.0f, 1.0f, 1.0f);
+			}
+		}
+		break;
+
 	default:
 		;
 	}
@@ -6245,6 +6261,8 @@ void metadata_setup( Metadata *metadata )
 	}
 
 	mgtk_filechooser_blocking_free( filename );
+
+	FreyjaControl::GetInstance()->Dirty();
 }
 
 
