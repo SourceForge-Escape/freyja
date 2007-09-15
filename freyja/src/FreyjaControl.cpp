@@ -82,7 +82,6 @@ void ePluginImport(ResourceEvent *e);
 void ePluginExport(ResourceEvent *e);
 mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, 
 										 mgtk_tree_t *tree);
-void metadata_setup( Metadata *metadata );
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
 uint32 FreyjaControl::mSelectedControlPoint = 0;
@@ -3126,8 +3125,6 @@ void FreyjaControl::CreateObject()
 		{
 			Metadata *m = new Metadata();
 
-			metadata_setup( m );
-
 			if ( !m->AddToPool() )
 			{
 				Print("Error creating new metadata!");
@@ -4460,6 +4457,7 @@ void FreyjaControl::RotateObject(int x, int y, freyja_plane_t plane)
 
 	switch (mObjectMode)
 	{
+	case tMetadata:
 	case tBone:
 		{
 			// Reduce rotation for bones to be 1/2 normal rate
@@ -4548,16 +4546,18 @@ void FreyjaControl::RotateObject(int x, int y, freyja_plane_t plane)
 
 	case tMetadata:
 		{
+			//mCursor.SetMode(freyja3d::Cursor::Rotation);
 			Metadata *metadata = Metadata::GetObjectByUid( mSelectedMetadata );
 
 			if ( metadata )
 			{
 				mCursor.mPos = metadata->GetPos(); // Move cursor
-				hel::Quat q;
+				hel::Quat q = metadata->GetRot();
 				q.SetByEulerAngles( helDegToRad( mCursor.mRotate.mX ),
 									helDegToRad( mCursor.mRotate.mY ),
 									helDegToRad( mCursor.mRotate.mZ ) );
 				metadata->SetRot( q );
+				//Print("%f %f %f %f", q.mX, q.mY, q.mZ, q.mW);
 			}
 		}
 		break;
@@ -5775,6 +5775,9 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener("eTransformCamera", &FreyjaControl::EvTransformCamera);
 
 
+	CreateListener("eMetaToXML", &FreyjaControl::EvSerializeMetadata);
+	CreateListener("eXMLToMeta", &FreyjaControl::EvUnserializeMetadata);
+
 	CreateListener("eMeshToXML", &FreyjaControl::EvSerializeMesh);
 	CreateListener("eXMLToMesh", &FreyjaControl::EvUnserializeMesh);
 
@@ -5992,6 +5995,89 @@ void FreyjaControl::EvUnserializeMesh()
 	}
 
 	mgtk_filechooser_blocking_free(filename);
+#endif
+}
+
+
+void FreyjaControl::EvSerializeMetadata()
+{
+#if TINYXML_FOUND
+	Metadata* metadata = Metadata::GetObjectByUid( GetSelectedMetadata() );
+
+	if (!metadata)
+		return;
+
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Save Selected Metadata...", 
+							  mRecentMetadata.GetPath(), 1,
+							  "Metadata Object (*.xml)", "*.xml");
+
+	if (!filename)
+		return;
+
+	TiXmlDocument doc;
+	TiXmlDeclaration *decl = new TiXmlDeclaration("1.0", "", "");
+	doc.LinkEndChild(decl);
+
+	TiXmlElement *container = new TiXmlElement("freyja");
+	container->SetAttribute("version", VERSION);
+	container->SetAttribute("build-date", __DATE__);
+	container->SetAttribute("file-version", 1);
+	doc.LinkEndChild(container);
+
+	if (filename &&  metadata->Serialize(container) && doc.SaveFile(filename) )
+	{
+		mRecentMetadata.AddFilename(filename);
+		Print("Saved metadata '%s'.", filename);
+	}
+	else if (filename)
+	{
+		Print("Failed to save metadata '%s'.", filename);
+	}
+
+	mgtk_filechooser_blocking_free(filename);
+#endif
+}
+
+
+void FreyjaControl::EvUnserializeMetadata()
+{
+#if TINYXML_FOUND
+
+	Metadata *metadata = new Metadata();
+
+	if ( !metadata->AddToPool() )
+	{
+		delete metadata;
+		Print("Error creating new metadata!");
+	}
+	else
+	{
+		Print("New metadata object #%i created.", metadata->GetUid() );
+	}
+
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Metadata object...", 
+							  FreyjaControl::GetInstance()->GetRecentMetadata().GetPath(), 0,
+							  "Metadata Object (*.xml)", "*.xml");
+
+	// Canceled
+	if ( !filename )
+		return;
+
+	// If you got here push the filename into a recently used menu.
+	if ( metadata->Unserialize( filename ) )
+	{
+		FreyjaControl::GetInstance()->GetRecentMetadata().AddFilename( filename );
+	}
+	else
+	{
+		freyja_print("Error loading metadata xml.\n");
+	}
+
+	mgtk_filechooser_blocking_free( filename );
+
+	FreyjaControl::GetInstance()->Dirty();
 #endif
 }
 
@@ -6231,40 +6317,6 @@ void FreyjaControl::EvRecentMetadataXML(uint32 value)
 //////////////////////////////////////////////////////////////////////////
 // Non-class methods, callbacks, and wrappers
 //////////////////////////////////////////////////////////////////////////
-
-void metadata_setup( Metadata *metadata )
-{
-	if ( !metadata )
-		return;
-
-#warning "FIXME metadata setup not complete"
-
-	freyja_print("FIXME %s:%i, this is optionally load from file or allow the user to fill in the values themselves here.", __FILE__, __LINE__);
-
-	char *filename =
-	mgtk_filechooser_blocking("freyja - Open Metadata object...", 
-							  FreyjaControl::GetInstance()->GetRecentMetadata().GetPath(), 0,
-							  "Metadata Object (*.xml)", "*.xml");
-
-	// Canceled
-	if ( !filename )
-		return;
-
-	// If you got here push the filename into a recently used menu.
-	if ( metadata->Unserialize( filename ) )
-	{
-		FreyjaControl::GetInstance()->GetRecentMetadata().AddFilename( filename );
-	}
-	else
-	{
-		freyja_print("Error loading metadata xml.\n");
-	}
-
-	mgtk_filechooser_blocking_free( filename );
-
-	FreyjaControl::GetInstance()->Dirty();
-}
-
 
 void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
 {

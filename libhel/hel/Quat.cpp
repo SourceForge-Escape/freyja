@@ -29,7 +29,7 @@ using namespace hel;
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-void Quat::GetAxisAngles(vec4_t axyz)
+void Quat::GetAxisAngles(vec4_t axyz) const
 {
 	const vec_t theta = acosf(mW) * 2.0;
 	const vec_t invScale = 1.0f / sinf(theta / 2.0f);
@@ -40,13 +40,13 @@ void Quat::GetAxisAngles(vec4_t axyz)
 }
 
 
-void Quat::GetEulerAngles(vec3_t xyz)
+void Quat::GetEulerAngles(vec3_t xyz) const
 {
 	GetEulerAngles(xyz[0], xyz[1], xyz[2]);
 }
 
 
-void Quat::GetEulerAngles(vec_t &alpha, vec_t &beta, vec_t &gamma)
+void Quat::GetEulerAngles(vec_t &alpha, vec_t &beta, vec_t &gamma) const
 {
 	const vec_t sqx = mX * mX;
 	const vec_t sqy = mY * mY;

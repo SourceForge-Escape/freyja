@@ -81,15 +81,15 @@ class Quat
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	void GetAxisAngles(vec4_t axyz);
+	void GetAxisAngles(vec4_t axyz) const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Axis angles are returned in *radians*.
 	 *
 	 ------------------------------------------------------*/
 
-	void GetEulerAngles(vec3_t abg);
-	void GetEulerAngles(vec_t &alpha, vec_t &beta, vec_t &gamma);
+	void GetEulerAngles(vec3_t abg) const;
+	void GetEulerAngles(vec_t &alpha, vec_t &beta, vec_t &gamma) const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Euler angles are returned in *radians*.

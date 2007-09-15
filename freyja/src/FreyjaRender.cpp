@@ -570,15 +570,28 @@ void FreyjaRender::DrawIcons()
 			{
 				BindColorTexture();
 
-				glPushMatrix();
-				const Vec3 &pos = metadata->GetPos();
-				glTranslatef(pos.mX, pos.mY, pos.mZ);
+				{
+					glPushMatrix();
+					const Vec3 &pos = metadata->GetPos();
+					glTranslatef(pos.mX, pos.mY, pos.mZ);
 
-				glPushMatrix();
-				const Vec3& scale = metadata->GetScale();
-				glScalef(scale.mX, scale.mY, scale.mZ);
+					Vec3 rot;
+					metadata->GetRot().GetEulerAngles(rot.mVec);
+					rot *= HEL_180_OVER_PI;
+					glRotatef(rot.mX, 1,0,0);
+					glRotatef(rot.mY, 0,1,0);
+					glRotatef(rot.mZ, 0,0,1);
 
-				#warning "FIXME: Add support for renderable rotation and material."
+					//vec4_t rot;
+					//metadata->GetRot().GetAxisAngles(rot);
+					//glRotatef(rot[0], rot[1], rot[2], rot[3]);
+
+					glPushMatrix();
+					const Vec3& scale = metadata->GetScale();
+					glScalef(scale.mX, scale.mY, scale.mZ);
+				}
+
+				#warning "FIXME: Add support for metadata:renderable material."
 #if 1
 		glPushAttrib(GL_POLYGON_BIT);
 		glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);

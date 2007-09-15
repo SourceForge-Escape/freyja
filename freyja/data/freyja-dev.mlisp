@@ -277,6 +277,8 @@
 
 			(menu_seperator)
 			(submenu eRecentMetadataXML "Recent Meta_data...")
+			(menu_item	"Import Metadata..." eXMLToMeta "gtk-open")
+			(menu_item	"Export Metadata..." eMetaToXML  "gtk-save-as")
 
 			(menu_seperator)
 			(submenu eRecentSkeletonXML "Recent _Skeleton...")
@@ -506,7 +508,7 @@
 						(menu_item	"Vertices..."	eTransformVertices)
 						(menu_item	"Skeleton   "	eTransformSkeleton)
 						(menu_item	"Bone       "	eTransformBone)
-						(menu_item	"Metedata   "	eTransformMetadata)
+						(menu_item	"Metadata   "	eTransformMetadata)
 						(menu_item	"Light      "	eTransformLight)
 						(menu_item	"Camera     "	eTransformCamera)
 					) ; optionmenu
