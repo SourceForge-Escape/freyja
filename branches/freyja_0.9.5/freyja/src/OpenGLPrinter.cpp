@@ -109,7 +109,7 @@ bool OpenGLPrinter::GenerateFont(Font &font,
 		float v = invWidth * (float)glyphs[i].y;
 		float u2 = invWidth * (float)(glyphs[i].x + glyphs[i].w);
 		float v2 = invWidth * (float)(glyphs[i].y + glyphs[i].h);
-		const int h = 0;
+		const int h = glyphs[i].yOffset;
 
 		/* Make a list for this TTF glyph, one nonuniform Quad per glyph */
 		glNewList(font.mListBase + i, GL_COMPILE);
@@ -226,10 +226,13 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 			glyphs[i].y = pen_y - slot->bitmap_top;
 			glyphs[i].w = slot->bitmap.width;
 			glyphs[i].h = slot->bitmap.rows;
+			glyphs[i].yOffset = ( slot->metrics.height - slot->metrics.horiBearingY ) >> 6;
 
-#if 0
-			printf("%i, %c -> %i - %i, %i\n", pt, text[i], pen_y, slot->bitmap_top, slot->metrics.vertBearingY);
-#endif
+			if ( glyphs[i].yOffset )
+			{
+				//printf("\t %ix%i, %i\n", glyphs[i].w, glyphs[i].h, glyphs[i].yOffset);				
+				glyphs[i].yOffset = -glyphs[i].yOffset;
+			}
 		}
 
 		pen_x += slot->bitmap.width + x_padding;

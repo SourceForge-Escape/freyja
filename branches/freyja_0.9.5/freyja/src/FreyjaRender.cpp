@@ -1066,7 +1066,7 @@ void FreyjaRender::Display()
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glColor3fv(GREEN);
-	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, "FREYJA  0.9.6 PREALPHA.");
+	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, "Freyja 0.9.6 prealpha.");
 	glPopAttrib();
 
 	//CHECK_OPENGL_ERROR( glFlush() );
