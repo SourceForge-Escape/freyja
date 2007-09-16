@@ -2,13 +2,50 @@
  TODO
  =============================================================================
 
- Freyja 0.9.5.16	TBD
+ Freyja 0.9.5.17	TBD
  -----------------------------------------------------------------------------
 
- * Ubuntu packages for release on all supported arch.
-	- PPC
-	- AMD64
-	- i386
+ * Edge editing.
+	- Select and transform edges in UI.
+	- Replace wireframe renderer with edge renderer?
+	- Mesh::RebuildPlanes()
+	- RELATED Cache s-edge results until light / mesh moves.
+
+ * New XML based freyja file format.
+	- Repacking required.
+	- Save IDs with objects if needed.
+	- Native format should be very stable.
+	- Make external plugins for older text based freyja/ja formats.
+
+ * Improve Camera.
+	- Add more options such as perspective settings.
+	- Editor mode support for camera view.
+ 	- Camera animation editor.
+
+ * Mesh replace stack use with list (as [ordered] queue/stack).
+
+ * Remove LegacyABI use in MeshABI mesh generators.
+	- Time for Catmull-Clark 'spheres'?
+
+ * Edit modes setting visual mode for things like skeletal 'bone' animation
+
+
+ Freyja 0.9.5.18	TBD
+ -----------------------------------------------------------------------------
+
+ * Finish up new keyframing + bones ( UI + renderer ).
+	- Slerp for QuatKeyframe
+	- Animation Track / Keyframe snippets in UI once NEW keyframing is done.	
+	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
+ 	- Keyframes using list + vector ( TLB index:iterators for random access )
+		- No more NULL 'gaps' and only store 'true count'.
+		- Allows *Next() [list] and *ElementAt() [vector] ABI access.
+	- Bone undo support ( maybe store state from edit mode chord )
+ 	- (Un)Parenting for bones with dashed line UI.
+
+
+ Freyja, Development branch 0.9.5 ( Current )
+ -----------------------------------------------------------------------------
 
  * New plugin subsystems.  ( Modular freyja )
 	- 'UI' plugins must self report to AID debugging via logs!
@@ -55,7 +92,6 @@
 		- eg flags or some other user defined info
 
  * Midgard
-	- Alchemy(raw), buildings, actor map placement test using metadata objects.
 	- Full animation support for MD5 v11.
 	- Merge with freyja's model plugin support.
 
@@ -74,6 +110,7 @@
  	- Binary file I/O wrapper with endian support.
 
  * mstl
+	- Generic sort / search algorithms.
 	- LRU / MRU generics would make a lot of sense.
 
  * libfreyja
@@ -93,52 +130,6 @@
 	- Change hel/math to hel/hel or the like to avoid confusion for new comers.
 	- AABB, Sphere, etc get proper Class implementations.
 		- Rework bounding volume system around the new 'types'.
-
-
- Freyja 0.9.5.17	TBD
- -----------------------------------------------------------------------------
-
- * Edge editing.
-	- Select and transform edges in UI.
-	- Replace wireframe renderer with edge renderer?
-	- Mesh::RebuildPlanes()
-	- RELATED Cache s-edge results until light / mesh moves.
-
- * New XML based freyja file format.
-	- Repacking required.
-	- Save IDs with objects if needed.
-	- Native format should be very stable.
-	- Make external plugins for older text based freyja/ja formats.
-
- * Improve Camera.
-	- Add more options such as perspective settings.
-	- Editor mode support for camera view.
- 	- Camera animation editor.
-
- * Mesh replace stack use with list (as [ordered] queue/stack).
-
- * Remove LegacyABI use in MeshABI mesh generators.
-	- Time for Catmull-Clark 'spheres'?
-
- * Edit modes setting visual mode for things like skeletal 'bone' animation
-
-
- Freyja 0.9.5.18	TBD
- -----------------------------------------------------------------------------
-
- * Finish up new keyframing + bones ( UI + renderer ).
-	- Slerp for QuatKeyframe
-	- Animation Track / Keyframe snippets in UI once NEW keyframing is done.	
-	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
- 	- Keyframes using list + vector ( TLB index:iterators for random access )
-		- No more NULL 'gaps' and only store 'true count'.
-		- Allows *Next() [list] and *ElementAt() [vector] ABI access.
-	- Bone undo support ( maybe store state from edit mode chord )
- 	- (Un)Parenting for bones with dashed line UI.
-
-
- Freyja, Development branch 0.9.5 ( Current )
- -----------------------------------------------------------------------------
 
  * Port cross compile build system to Cmake.
 	- Depends on the release of Cmake 2.6.0. ( Current release is 2.4. )
