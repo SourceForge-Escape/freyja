@@ -194,13 +194,15 @@ debian:
 
 
 deb:
+	@-cd tinyxml; fakeroot dpkg-buildpackage 
+	@-cd ..
+	@-cd lua; fakeroot dpkg-buildpackage 
+	@-cd ..
 	@-cd libhel; fakeroot dpkg-buildpackage 
 	@-cd ..
 	@-cd libmgtk; fakeroot dpkg-buildpackage 
 	@-cd ..
 	@-cd libfreyja; fakeroot dpkg-buildpackage 
-	@-cd ..
-	@-cd tinyxml; fakeroot dpkg-buildpackage 
 	@-cd ..
 	@-cd plugins; fakeroot dpkg-buildpackage 
 	@-cd ..

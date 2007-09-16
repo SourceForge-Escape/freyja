@@ -28,6 +28,8 @@ using namespace hel;
 Vector<Mesh *> Mesh::mGobalPool;
 //index_t Mesh::mNextUID = 0;
 
+#define GROUP_FACE_WITHOUT_BITMAPS 0
+
 
 ////////////////////////////////////////////////////////////
 // Constructors
@@ -2872,9 +2874,13 @@ void Mesh::ClearGroupsFaceSelected(uint32 groups)
 		Face *face = GetFace(f);
 
 		// We only consider facets in given group
-		if (face && groups & (1<<face->mSmoothingGroup))
+		if (face && 
+#if GROUP_FACE_WITHOUT_BITMAPS
 			// No longer use bitflaged groups
-			//groups & face->mSmoothingGroup)
+			groups & (1<<face->mSmoothingGroup))
+#else
+			groups & face->mSmoothingGroup)
+#endif
 		{
 			face->mFlags &= ~Face::fSelected;
 		}
@@ -2889,9 +2895,13 @@ void Mesh::SetGroupsFaceSelected(uint32 groups)
 		Face *face = GetFace(f);
 
 		// We only consider facets in given group(s)...
-		if (face && groups & (1<<face->mSmoothingGroup))
+		if (face &&
+#if GROUP_FACE_WITHOUT_BITMAPS
 			// No longer use bitflaged groups
-			//groups & face->mSmoothingGroup)
+			groups & (1<<face->mSmoothingGroup))
+#else
+			groups & face->mSmoothingGroup)
+#endif
 		{
 			face->mFlags |= Face::fSelected;
 		}

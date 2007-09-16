@@ -28,7 +28,6 @@
 
 #include <string.h>
 
-//#include <freyja/LegacyABI.h>  // FIXME: Still using legacy polymesh generator
 #include <freyja/MeshABI.h>
 #include <freyja/TextureABI.h>
 #include <freyja/PluginABI.h>
@@ -546,8 +545,8 @@ void eSmooth(unsigned int group, unsigned int value)
 
 	if (m)
 	{
-		freyja_print("Faces in group (%i) %s.", 
-					 group, value ? "selected" : "unselected");
+		freyja_print("Faces in group %i %s.", 
+					 group+1, value ? "selected" : "unselected");
 
 		if (value)
 		{

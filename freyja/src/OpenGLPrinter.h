@@ -38,7 +38,7 @@ namespace freyja3d {
 
 typedef struct {
 	unsigned int x, y, w, h;
-
+	unsigned int yOffset;
 } glyph_t;
 
 

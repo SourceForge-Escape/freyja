@@ -4,8 +4,16 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
- Kagura prealpha, 0.9.5.16 () -- "On the roadmap again"
+ Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - 
+ - FIX UV selection not broken -- depends on material:mesh Id.
+ - FIX Face group assign set/clear now uses 2^n (bitmap) selector again.
+ - FIX for typesetting in OpenGLPrinter by offsetting drawlist.
+
+
+ Kagura prealpha, 0.9.5.16 (1060) -- "On the roadmap again"
+ 20070916 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - Fix for rotation axis selection.
  - New full snippets menu for Metdata with serializer.
  - MetadataRenderables working w/o shading or materials. (1059)

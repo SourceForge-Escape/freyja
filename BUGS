@@ -13,15 +13,6 @@
  Fix queue.
  ----------------------------
  
- * FIX Face group assign set/clear has mapping bug. n vs 2^n
-	- Only sets 2^n values now.
-
- * Fix UV generation causes crash with some OBJ imported meshes.
-
- * FIX UV selection.
-	- Seems to only work from clean 'reset' state of the modeler now.
-	- Likely to be caused by edit mode state -- needs debugging.
-
  * FIX mstl::list - push_back, etc have bugs ( need unit tests )
 
  * FIX Save As.. dialog triggers twice with text entry event.
@@ -29,16 +20,15 @@
 	- Related fix the material Save As... also
 		. Also add recent files for material for the hell of it.
 
- * FIX TTF renderer.
- 	- Add back typesetting for GLPrinter.
-	- This should be fixed using the drawlist, and not altering the texture.
-
  * FIX Lineage II import directly from pak vfs.
 
 
  
  A - Serious bugs
  ----------------------------
+
+ * Fix UV generation causes crash with some OBJ imported meshes.
+	- Needs more information.
 
  * [UNCONFIRMED] Repacking might break aging Undo system for some operations.
 	- This is bug is only a theory based on how undo works for objects.
@@ -96,6 +86,9 @@
 
 Regression notes
 ---------------------------------------------------
+
+* I can't select UVs in UV editor!
+	- Depends on material:mesh Id if UVs are selectable.
 
 * The OpenGL window is pitch black!
 	- This is caused by corrupted user preferences mlisp. ( rare )
