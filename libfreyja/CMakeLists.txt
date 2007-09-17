@@ -89,7 +89,6 @@ set(Objs
 	freyja/Mesh
 	freyja/MeshABI
 	freyja/Metadata
-	freyja/MetadataRenderable
 	freyja/Model
 	freyja/ModelABI
 	freyja/PakABI
@@ -99,8 +98,9 @@ set(Objs
 	freyja/Printer
 	freyja/PythonABI
 	freyja/LuaABI
-	freyja/QueryABI
+	freyja/Renderable
 	freyja/RigidBody
+	freyja/QueryABI
 	freyja/Skeleton
 	freyja/Track
 	freyja/Vertex

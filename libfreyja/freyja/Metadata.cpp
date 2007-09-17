@@ -120,7 +120,7 @@ void Metadata::SetModel(const char* model)
 	}
 	else
 	{
-		mRenderable = MetadataRenderable::ImportToCache( model );
+		mRenderable = Renderable::ImportToCache( model );
 	}
 }
 

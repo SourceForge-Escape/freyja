@@ -217,6 +217,8 @@ void FreyjaControl::Init()
 	LoadResource();
 
 	/* Load up recent files list into file menu */
+	mMaterial.InitRecentFilesMenu();
+
 	Print("Loading %s...", mRecentModel.GetResourceFilename());
 	if ( !mRecentModel.LoadResource() )
 	{
@@ -1213,21 +1215,7 @@ void FreyjaControl::SaveFile()
 		break;
 
 	case eScheme_Material:
-		{
-			mstl::String path = freyja_rc_map_string("/");
-			char *filename =
-			mgtk_filechooser_blocking("freyja - Save Materal...", 
-									  path.c_str(), 1,
-									  "Freyja Material (*.mat)", "*.mat");
-
-			if (filename)
-			{
-				mMaterial.EvSaveMaterial(filename);
-				//Print("Materal '%s' Saved", filename);
-			}
-			
-			mgtk_filechooser_blocking_free(filename);	
-		}
+		mMaterial.EvSaveMaterial(  );	
 		break;
 		
 		
@@ -4842,19 +4830,6 @@ void FreyjaControl::LoadResource()
 											"GLSL Fragment (*.frag)", "*.frag");
 	mgtk_event_fileselection_append_pattern(eOpenShaderId, 
 											"ARB Fragment (*.frag)", "*.frag");
-
-	/* Material file dialog patterns */
-	{
-		int loadEventId = GetEventIdByName("eOpenMaterial");
-		int saveEventId = GetEventIdByName("eSaveMaterial");
-
-		
-		mgtk_event_fileselection_append_pattern(loadEventId, 
-												"Freyja Material (*.mat)", "*.mat");
-
-		mgtk_event_fileselection_append_pattern(saveEventId, 
-												"Freyja Material (*.mat)", "*.mat");
-	}
 
 
 	/* Model file dialog patterns */

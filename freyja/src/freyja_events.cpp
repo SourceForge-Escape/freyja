@@ -217,22 +217,22 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 	{
 	case eColorMaterialAmbient: 
 		freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
-		MaterialControl::mHack->RefreshInterface();
+		MaterialControl::GetInstance()->RefreshInterface();
 		break;
 
 	case eColorMaterialDiffuse:
 		freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
-		MaterialControl::mHack->RefreshInterface();
+		MaterialControl::GetInstance()->RefreshInterface();
 		break;
 
 	case eColorMaterialSpecular:
 		freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
-		MaterialControl::mHack->RefreshInterface();
+		MaterialControl::GetInstance()->RefreshInterface();
 		break;
 
 	case eColorMaterialEmissive:
 		freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
-		MaterialControl::mHack->RefreshInterface();
+		MaterialControl::GetInstance()->RefreshInterface();
 		break;
 
 	case eColorLightAmbient: 
@@ -1523,7 +1523,7 @@ void freyja_handle_resource_start()
 	}
 
 	/* Setup material interface */
-	MaterialControl::mHack->RefreshInterface();
+	MaterialControl::GetInstance()->RefreshInterface();
 
 	/* Setup editor modes and drop-down menus */
 	mgtk_option_menu_value_set(eViewportModeMenu, 0);

@@ -25,6 +25,7 @@
 #include <mstl/stack.h>
 
 #include "Control.h"
+#include "RecentFiles.h"
 
 
 namespace freyja3d {
@@ -42,14 +43,16 @@ class MaterialControl : public Control
 
 	} options_t;
 
+
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	MaterialControl();
+	static MaterialControl* GetInstance() 
+	{ return mInstance ? mInstance : ( mInstance = new MaterialControl() ); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructor for MaterialControl.
+	 * Post : "Singleton" Constructor for MaterialControl.
 	 *
 	 ------------------------------------------------------*/
 
@@ -141,6 +144,13 @@ class MaterialControl : public Control
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Hooks up MethodDelegates to the event system.
+	 ------------------------------------------------------*/
+
+	bool InitRecentFilesMenu();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Generates recent files menu data model.
+	 *
 	 ------------------------------------------------------*/
 
 	bool LoadTexture(const char *filename);
@@ -295,17 +305,19 @@ class MaterialControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	void EvOpenMaterial(char *filename);
+	void EvOpenMaterial();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for unserialize material.
+	 *        Opens file dialog for user input.
 	 *
 	 ------------------------------------------------------*/
 
-	void EvSaveMaterial(char *filename);
+	void EvSaveMaterial();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Handle event for serialize material.
+	 *        Opens file dialog for user input.
 	 *
 	 ------------------------------------------------------*/
 
@@ -384,6 +396,14 @@ class MaterialControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
+	void EvRecentFile(uint32 value) 
+	{ LoadMaterial( mRecent.GetFilename(value) ); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Load a file from the recently used menu.
+	 *
+	 ------------------------------------------------------*/
+
 	uint32 EvGLSLFragmentModeId;
 	void EvGLSLFragmentMode(uint32 value);
 	/*------------------------------------------------------
@@ -407,7 +427,15 @@ class MaterialControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	static MaterialControl *mHack;  // FIXME: Stopgap until refactor is done 
+
+ //protected:  // This isn't going to be a 'real' Singleton yet.
+
+	MaterialControl();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructor for MaterialControl.
+	 *
+	 ------------------------------------------------------*/
 
 
  private:
@@ -429,7 +457,7 @@ class MaterialControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 CreateListener(const char *name, MethodPtr1f ptr);
+	uint32 CreateListener1f(const char *name, MethodPtr1f ptr);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Bind a MethodDelegate to an external event.
@@ -437,7 +465,7 @@ class MaterialControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 CreateListener(const char *name, MethodPtr1s ptr);
+	uint32 CreateListener1s(const char *name, MethodPtr1s ptr);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Bind a MethodDelegate to an external event.
@@ -445,7 +473,7 @@ class MaterialControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 CreateListener(const char *name, MethodPtr1u ptr);
+	uint32 CreateListener1u(const char *name, MethodPtr1u ptr);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Bind a MethodDelegate to an external event.
@@ -458,25 +486,55 @@ class MaterialControl : public Control
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	void SetFlag(options_t flag, bool b)
-	{
-		if (b) {
-			mFlags |= flag;
-		}
-		else {
-			mFlags &= ~flag;
-		}
-	}
+	void SetFlag(options_t flag, bool b);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Pretty interface for setting bitflags.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 mFlags;           /* Options for this class */
+	static MaterialControl *mInstance;  /* "Singleton" instance. */
 
-	int32 mTextureId;        /* Currently active texture slot. */
+	uint32 mFlags;                      /* Options for this class */
+
+	int32 mTextureId;                   /* Currently active texture slot. */
+
+	RecentFiles mRecent;                /* Recent material files lists. */
 };
+
+
+////////////////////////////////////////////////////////////
+// Inline Private Mutators
+////////////////////////////////////////////////////////////
+
+inline
+void MaterialControl::SetFlag(options_t flag, bool b)
+{
+	if (b) 
+	{
+		mFlags |= flag;
+	}
+	else 
+	{
+		mFlags &= ~flag;
+	}
+}
+
+
+inline
+bool MaterialControl::InitRecentFilesMenu()
+{
+	Print("Loading %s...", mRecent.GetResourceFilename());
+	if ( !mRecent.LoadResource() )
+	{
+		Print("Failed to load '%s'.", mRecent.GetResourceFilename() );
+		return false;
+	}
+
+	return true;
+}
+
+
 
 } // namespace freyja3d 
 

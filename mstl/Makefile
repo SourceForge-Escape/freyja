@@ -60,6 +60,11 @@ Vector.test:
 		-o $(BUILD_TEST_DIR)/Vector.test $(SRC_DIR)/test_vector.cpp
 	$(BUILD_TEST_DIR)/Vector.test
 
+list.test:
+	mkdir -p $(BUILD_TEST_DIR)
+	$(CC) $(CFLAGS) $(LDFLAGS) \
+		-o $(BUILD_TEST_DIR)/list.test $(SRC_DIR)/list.cpp
+	$(BUILD_TEST_DIR)/list.test
 
 ########################################################
 

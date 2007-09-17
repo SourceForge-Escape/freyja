@@ -30,7 +30,7 @@
 using namespace freyja3d;
 	
 
-MaterialControl *MaterialControl::mHack = NULL;
+MaterialControl *MaterialControl::mInstance = NULL;
 
 
 ////////////////////////////////////////////////////////////
@@ -39,7 +39,8 @@ MaterialControl *MaterialControl::mHack = NULL;
 
 MaterialControl::MaterialControl() : 
 	EvSelectId(0), EvShineId(0), EvSetNameId(0), 
-	EvSetTextureNameId(0), mFlags(fNone)
+	EvSetTextureNameId(0), mFlags(fNone),
+	mRecent("freyja-dev-recent-material", "eRecentMaterial")
 {
 	// We move to class based index_t later instead integer ids
 	for (uint32 i = 0; i < 4; ++i)
@@ -47,7 +48,7 @@ MaterialControl::MaterialControl() :
 		EvAmbientId[i] = EvDiffuseId[i] = EvEmissiveId[i] = EvSpecularId[i] = 0;
 	}
 
-	mHack = this;
+	mInstance = this;
 }
 
 
@@ -319,6 +320,8 @@ bool MaterialControl::LoadMaterial(const char *filename)
 
 	RefreshInterface();
 
+	mRecent.AddFilename( filename );
+
 	return true;
 }
 
@@ -512,63 +515,65 @@ void MaterialControl::AttachMethodListeners()
 {
 	CreateListener("eSetMaterialShaderFilename", &MaterialControl::EvNop);
 
-	EvSelectId = CreateListener("eSetMaterial", &MaterialControl::EvSelect);
-	EvAmbientId[0] = CreateListener("eMaterialAmbient0", &MaterialControl::EvAmbient0);
-	EvAmbientId[1] = CreateListener("eMaterialAmbient1", &MaterialControl::EvAmbient1);
-	EvAmbientId[2] = CreateListener("eMaterialAmbient2", &MaterialControl::EvAmbient2);
-	EvAmbientId[3] = CreateListener("eMaterialAmbient3", &MaterialControl::EvAmbient3);
-	EvDiffuseId[0] = CreateListener("eMaterialDiffuse0", &MaterialControl::EvDiffuse0);
-	EvDiffuseId[1] = CreateListener("eMaterialDiffuse1", &MaterialControl::EvDiffuse1);
-	EvDiffuseId[2] = CreateListener("eMaterialDiffuse2", &MaterialControl::EvDiffuse2);
-	EvDiffuseId[3] = CreateListener("eMaterialDiffuse3", &MaterialControl::EvDiffuse3);
-	EvSpecularId[0] = CreateListener("eMaterialSpecular0", &MaterialControl::EvSpecular0);
-	EvSpecularId[1] = CreateListener("eMaterialSpecular1", &MaterialControl::EvSpecular1);
-	EvSpecularId[2] = CreateListener("eMaterialSpecular2", &MaterialControl::EvSpecular2);
-	EvSpecularId[3] = CreateListener("eMaterialSpecular3", &MaterialControl::EvSpecular3);
-	EvEmissiveId[0] = CreateListener("eMaterialEmissive0", &MaterialControl::EvEmissive0);
-	EvEmissiveId[1] = CreateListener("eMaterialEmissive1", &MaterialControl::EvEmissive1);
-	EvEmissiveId[2] = CreateListener("eMaterialEmissive2", &MaterialControl::EvEmissive2);
-	EvEmissiveId[3] = CreateListener("eMaterialEmissive3", &MaterialControl::EvEmissive3);
-	EvShineId = CreateListener("eMaterialShine", &MaterialControl::EvShine);
-	EvSetNameId = CreateListener("eSetMaterialName", &MaterialControl::EvSetName);
-	EvSetShaderId =CreateListener("eSetMaterialShader", &MaterialControl::EvSetShader);
+	CreateListener1u("eRecentMaterial", &MaterialControl::EvRecentFile);
+
+	EvSelectId = CreateListener1u("eSetMaterial", &MaterialControl::EvSelect);
+	EvAmbientId[0] = CreateListener1f("eMaterialAmbient0", &MaterialControl::EvAmbient0);
+	EvAmbientId[1] = CreateListener1f("eMaterialAmbient1", &MaterialControl::EvAmbient1);
+	EvAmbientId[2] = CreateListener1f("eMaterialAmbient2", &MaterialControl::EvAmbient2);
+	EvAmbientId[3] = CreateListener1f("eMaterialAmbient3", &MaterialControl::EvAmbient3);
+	EvDiffuseId[0] = CreateListener1f("eMaterialDiffuse0", &MaterialControl::EvDiffuse0);
+	EvDiffuseId[1] = CreateListener1f("eMaterialDiffuse1", &MaterialControl::EvDiffuse1);
+	EvDiffuseId[2] = CreateListener1f("eMaterialDiffuse2", &MaterialControl::EvDiffuse2);
+	EvDiffuseId[3] = CreateListener1f("eMaterialDiffuse3", &MaterialControl::EvDiffuse3);
+	EvSpecularId[0] = CreateListener1f("eMaterialSpecular0", &MaterialControl::EvSpecular0);
+	EvSpecularId[1] = CreateListener1f("eMaterialSpecular1", &MaterialControl::EvSpecular1);
+	EvSpecularId[2] = CreateListener1f("eMaterialSpecular2", &MaterialControl::EvSpecular2);
+	EvSpecularId[3] = CreateListener1f("eMaterialSpecular3", &MaterialControl::EvSpecular3);
+	EvEmissiveId[0] = CreateListener1f("eMaterialEmissive0", &MaterialControl::EvEmissive0);
+	EvEmissiveId[1] = CreateListener1f("eMaterialEmissive1", &MaterialControl::EvEmissive1);
+	EvEmissiveId[2] = CreateListener1f("eMaterialEmissive2", &MaterialControl::EvEmissive2);
+	EvEmissiveId[3] = CreateListener1f("eMaterialEmissive3", &MaterialControl::EvEmissive3);
+	EvShineId = CreateListener1f("eMaterialShine", &MaterialControl::EvShine);
+	EvSetNameId = CreateListener1s("eSetMaterialName", &MaterialControl::EvSetName);
+	EvSetShaderId =CreateListener1u("eSetMaterialShader", &MaterialControl::EvSetShader);
 
 	EvSetTextureId = 
-	CreateListener("eSetMaterialTexture", &MaterialControl::EvSetTexture);
+	CreateListener1u("eSetMaterialTexture", &MaterialControl::EvSetTexture);
 
 	EvSetTextureNameId = 
-	CreateListener("eSetTextureNameA", &MaterialControl::EvSetTextureName);
+	CreateListener1s("eSetTextureNameA", &MaterialControl::EvSetTextureName);
 
 	CreateListener("eNewMaterial", &MaterialControl::EvNewMaterial);
 	CreateListener("eOpenMaterial", &MaterialControl::EvOpenMaterial);
 	CreateListener("eSaveMaterial", &MaterialControl::EvSaveMaterial);
 
 	EvEnableBlendingId = 
-	CreateListener("eEnableMaterialBlending", &MaterialControl::EvEnableBlending);
+	CreateListener1u("eEnableMaterialBlending", &MaterialControl::EvEnableBlending);
 
 	EvEnableTextureId = 
-	CreateListener("eEnableMaterialTexture", &MaterialControl::EvEnableTexture);
+	CreateListener1u("eEnableMaterialTexture", &MaterialControl::EvEnableTexture);
 
-	CreateListener("eEnableDetailTexture", &MaterialControl::EvEnableDetailTexture);
+	CreateListener1u("eEnableDetailTexture", &MaterialControl::EvEnableDetailTexture);
 
-	CreateListener("eTextureSlotLoad", &MaterialControl::EvTextureSlotLoad);
-	CreateListener("eMaterialSlotLoad", &MaterialControl::EvMaterialSlotLoad);
+	CreateListener1u("eTextureSlotLoad", &MaterialControl::EvTextureSlotLoad);
+	CreateListener1u("eMaterialSlotLoad", &MaterialControl::EvMaterialSlotLoad);
 
-	CreateListener("eEnableNormalize", &MaterialControl::EvEnableNormalize);
+	CreateListener1u("eEnableNormalize", &MaterialControl::EvEnableNormalize);
 
 	EvGLSLFragmentModeId =
-	CreateListener("eGLSLFragmentMode", &MaterialControl::EvGLSLFragmentMode);
+	CreateListener1u("eGLSLFragmentMode", &MaterialControl::EvGLSLFragmentMode);
 
 	EvARBFragmentModeId = 
-	CreateListener("eARBFragmentMode", &MaterialControl::EvARBFragmentMode);
+	CreateListener1u("eARBFragmentMode", &MaterialControl::EvARBFragmentMode);
 
-	CreateListener("eOpenShader", &MaterialControl::EvOpenShader);
-	CreateListener("eOpenTexture", &MaterialControl::EvOpenTexture);
+	CreateListener1s("eOpenShader", &MaterialControl::EvOpenShader);
+	CreateListener1s("eOpenTexture", &MaterialControl::EvOpenTexture);
 
-	CreateListener("eBlendSrc", &MaterialControl::EvBlendSrc);
-	CreateListener("eBlendDest", &MaterialControl::EvBlendDest);
+	CreateListener1u("eBlendSrc", &MaterialControl::EvBlendSrc);
+	CreateListener1u("eBlendDest", &MaterialControl::EvBlendDest);
 
-	CreateListener("eTextureUpload", &MaterialControl::EvTextureUpload);
+	CreateListener1u("eTextureUpload", &MaterialControl::EvTextureUpload);
 
 	//CreateListener("", &MaterialControl::);
 }
@@ -1024,18 +1029,40 @@ void MaterialControl::EvNewMaterial()
 }
 
 
-void MaterialControl::EvOpenMaterial(char *filename)
+void MaterialControl::EvOpenMaterial()
 {
-	if (LoadMaterial(filename))
+	mstl::String path = freyja_rc_map_string("/");
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Materal...", 
+							  path.c_str(), 0,
+							  "Freyja Material (*.mat)", "*.mat");
+
+	if ( filename )
 	{
-		RefreshInterface();
+		if ( LoadMaterial(filename) )
+		{
+			RefreshInterface();
+		}
 	}
+			
+	mgtk_filechooser_blocking_free( filename );	
 }
 
 
-void MaterialControl::EvSaveMaterial(char *filename)
+void MaterialControl::EvSaveMaterial()
 {
-	SaveMaterial(filename);
+	mstl::String path = freyja_rc_map_string("/");
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Save Materal...", 
+							  path.c_str(), 1,
+							  "Freyja Material (*.mat)", "*.mat");
+
+	if ( filename )
+	{
+		SaveMaterial( filename );
+	}
+			
+	mgtk_filechooser_blocking_free( filename );	
 }
 
 
@@ -1238,7 +1265,7 @@ uint32 MaterialControl::CreateListener(const char *name, MethodPtr ptr)
 }
 
 
-uint32 MaterialControl::CreateListener(const char *name, MethodPtr1f ptr)
+uint32 MaterialControl::CreateListener1f(const char *name, MethodPtr1f ptr)
 {
 	MethodDelegate *d = 
 	new MethodDelegateArg1<MaterialControl, vec_t>(this, ptr);
@@ -1247,7 +1274,7 @@ uint32 MaterialControl::CreateListener(const char *name, MethodPtr1f ptr)
 }
 
 
-uint32 MaterialControl::CreateListener(const char *name, MethodPtr1s ptr)
+uint32 MaterialControl::CreateListener1s(const char *name, MethodPtr1s ptr)
 {
 	MethodDelegate *d = 
 	new MethodDelegateArg1<MaterialControl, char *>(this, ptr);
@@ -1256,7 +1283,7 @@ uint32 MaterialControl::CreateListener(const char *name, MethodPtr1s ptr)
 }
 
 
-uint32 MaterialControl::CreateListener(const char *name, MethodPtr1u ptr)
+uint32 MaterialControl::CreateListener1u(const char *name, MethodPtr1u ptr)
 {
 	MethodDelegate *d = 
 	new MethodDelegateArg1<MaterialControl, uint32>(this, ptr);

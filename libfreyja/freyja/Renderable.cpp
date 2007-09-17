@@ -21,18 +21,18 @@
 
 #include "Mesh.h"
 
-#include "MetadataRenderable.h"
+#include "Renderable.h"
 
 using namespace freyja;
 
-mstl::Vector<MetadataRenderable*> MetadataRenderable::mGobalPool;
+mstl::Vector<Renderable*> Renderable::mGobalPool;
 
-MetadataRenderable* MetadataRenderable::mMRU = NULL;
+Renderable* Renderable::mMRU = NULL;
 
 
-MetadataRenderable* metadatarenderable_convert_mesh_to_renderable(Mesh* mesh)
+Renderable* renderable_convert_mesh_to_renderable(Mesh* mesh)
 {
-	MetadataRenderable* renderable = NULL;
+	Renderable* renderable = NULL;
 
 	if ( mesh )
 	{
@@ -42,7 +42,7 @@ MetadataRenderable* metadatarenderable_convert_mesh_to_renderable(Mesh* mesh)
 }
 
 
-MetadataRenderable* MetadataRenderable::FindInCache(const char* key)
+Renderable* Renderable::FindInCache(const char* key)
 {
 	if ( mMRU && mMRU->mModel == key )
 		return mMRU;
@@ -62,9 +62,9 @@ MetadataRenderable* MetadataRenderable::FindInCache(const char* key)
 }
 
 
-MetadataRenderable* MetadataRenderable::ImportToCache(const char* filename)
+Renderable* Renderable::ImportToCache(const char* filename)
 {
-	MetadataRenderable* renderable = FindInCache( filename );
+	Renderable* renderable = FindInCache( filename );
 
 	if ( renderable == NULL )
 	{
@@ -74,7 +74,7 @@ MetadataRenderable* MetadataRenderable::ImportToCache(const char* filename)
 		{
 			mesh->ApplyTrianglarTesselation();
 
-			renderable = new MetadataRenderable();
+			renderable = new Renderable();
 			renderable->mModel = filename;			
 
 			renderable->mFaceCount = mesh->GetFaceCount();
