@@ -1273,6 +1273,22 @@ void FreyjaControl::OpenFile()
 	}
 }
 
+
+void FreyjaControl::SaveAsFileModel()
+{
+	mstl::String s = freyja_rc_map_string("/");
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Save Model As...", s.c_str(), 1,
+							  "Freyja Modeler (*.freyja)", "*.freyja");
+	
+	if ( filename && SaveModel( filename ) )
+	{
+		Print("Wrote '%s' to disk.", filename);
+	}
+	
+	mgtk_filechooser_blocking_free(filename);
+}
+
 	
 void FreyjaControl::SaveFileModel()
 {
@@ -1282,20 +1298,7 @@ void FreyjaControl::SaveFileModel()
 	}
 	else if (mCurrentlyOpenFilename.empty())
 	{
-		mstl::String s = freyja_rc_map_string("/");
-		char *filename =
-		mgtk_filechooser_blocking("freyja - Open Pak...", s.c_str(), 1,
-								  "Freyja Modeler (*.freyja)", "*.freyja");
-		
-		if (filename)
-		{
-			if (SaveModel(filename))
-			{
-				
-			}
-		}
-
-		mgtk_filechooser_blocking_free(filename);
+		SaveAsFileModel();
 	}
 	else
 	{
@@ -1322,13 +1325,7 @@ void FreyjaControl::OpenFileModel()
 			Clear();
 			Print("Closing Model...");
 			freyja_set_main_window_title(BUILD_NAME);
-				
-			//freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 		}
-	}
-	else
-	{
-		//freyja_event_file_dialog(FREYJA_MODE_LOAD_MODEL, "Open model...");
 	}
 }
 	
@@ -5677,7 +5674,8 @@ void FreyjaControl::AttachMethodListeners()
 	CreateListener1s("eOpenModel", &FreyjaControl::EvOpenModel);
 
 	// Misc
-	CreateListener2s("eSaveModel", &FreyjaControl::EvSaveModel);
+	//CreateListener2s("eSaveModel", &FreyjaControl::EvSaveModel);
+	CreateListener("eSaveModel", &FreyjaControl::SaveAsFileModel);
 
 	CreateListener("ePolygonSplit", &FreyjaControl::EvPolygonSplit);
 	CreateListener("eSetMeshTexture", &FreyjaControl::EvSetMeshTexture);

@@ -42,10 +42,16 @@
 	- Editor mode support for camera view.
  	- Camera animation editor.
 
- * Mesh replace stack use with list (as [ordered] queue/stack).
+ * Pick more modules to break up from the FreyjaControl monolith.
 
- * Remove LegacyABI use in MeshABI mesh generators.
-	- Time for Catmull-Clark 'spheres'?
+ * Enforce file extensions with mgtk file dialog use.
+
+ * libfreyja
+	- Mesh: Abstract Mesh's Vec3 pools.
+	- Mesh: Go back to default UVs ( 2fv ) and allow optional ( 3fv ).
+	- Mesh: replace stack use with list (as [sorted] queue/stack).
+	- MeshABI: Remove LegacyABI use in geo primative generators.
+	- MeshABI: Catmull-Clark 'spheres' from subdiv cube.
 
  * Edit modes setting visual mode for things like skeletal 'bone' animation
 
@@ -112,13 +118,14 @@
  	- Binary file I/O wrapper with endian support.
 
  * mstl
+	- Unit tests and optimization.
 	- Generic sort / search algorithms.
 	- LRU / MRU generics would make a lot of sense.
 
  * libfreyja
-	- Abstract Mesh's Vec3 pools.
-	- Go back to default UVs ( 2fv ) and allow optional ( 3fv ).
-	- Threaded import/export and new threaded ABI which isn't interdependent.
+	- New threaded ABI which isn't interdepent on gobal states.
+		- aka 'Model based' backend where data models are self contained.
+	- Threaded plugin import/export.
 
  * libmgtk
 	- Replace Resource completely with MLisp or Lua.

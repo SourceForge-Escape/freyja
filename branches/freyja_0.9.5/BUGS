@@ -13,9 +13,6 @@
  Fix queue.
  ----------------------------
  
- * FIX Save As.. dialog triggers twice with text entry event.
-	- Make this *.freyja only and using the one-off choosers to fix.
-
  * FIX Lineage II import directly from pak vfs.
 
 

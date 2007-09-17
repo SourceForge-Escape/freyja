@@ -840,13 +840,14 @@ class FreyjaControl : public Control
 	void CloseFile();
 	void SaveFile();
 	void OpenFile();
+	void SaveAsFileModel();
 	void SaveFileModel();
 	void OpenFileModel();
 	void RevertFile();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Event callbacks for hooking to widget system 
-	 *        ( Break up into separate classes later. )
+	 *        ( Break up into separate class later. )
 	 *
 	 ------------------------------------------------------*/
 
