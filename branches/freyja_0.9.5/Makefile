@@ -194,19 +194,19 @@ debian:
 
 
 deb:
-	@-cd tinyxml; fakeroot dpkg-buildpackage 
+	@-cd tinyxml; cmake .; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd lua; fakeroot dpkg-buildpackage 
+	@-cd lua; cmake .; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd libhel; fakeroot dpkg-buildpackage 
+	@-cd libhel; cmake .; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd libmgtk; fakeroot dpkg-buildpackage 
+	@-cd libmgtk; cmake .; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd libfreyja; fakeroot dpkg-buildpackage 
+	@-cd libfreyja; cmake .; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd plugins; fakeroot dpkg-buildpackage 
+	@-cd plugins; cmake .; fakeroot dpkg-buildpackage 
 	@-cd ..
-	@-cd freyja; fakeroot dpkg-buildpackage 
+	@-cd freyja; cmake .; fakeroot dpkg-buildpackage 
 	@-cd ..
 
 apt:

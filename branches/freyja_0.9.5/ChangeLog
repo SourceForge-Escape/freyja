@@ -7,6 +7,7 @@
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - 
+ - Fix for toplevel make deb not calling cmake.
 
 
  Kagura prealpha, 0.9.5.16 (1065) -- "On the roadmap again"
