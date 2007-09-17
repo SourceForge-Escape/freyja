@@ -62,9 +62,8 @@
 
 			(menu_item "_Save Model"	eSaveFileModel	"C-s"	"gtk-save")
 		
-			(filechoosermenu_item "Save Model _As..."       "Save Model..." "S-C-s" eSaveModel      "mode=save"     "gtk-save-as") ;confirm-overwrite=true,
-	
-			;(menu_item "Save Model _As..."	eSaveModel	"S-C-s"	"gtk-save-as")
+			;(filechoosermenu_item "Save Model _As..."       "Save Model..." "S-C-s" eSaveModel      "mode=save"     "gtk-save-as") ;confirm-overwrite=true,
+			(menu_item "Save Model _As..."	eSaveModel	"S-C-s"	"gtk-save-as")
 			(menu_item "_Revert Model"		eRevertFile	"gtk-revert-to-saved")
 			(menu_seperator)
 
@@ -327,10 +326,12 @@
 					(toolbar_button  "gtk-save" "Save Model" 
 						"Save Model"	eEvent eSaveFileModel)
 
-					(filechoosertoolbar_button 
-						"gtk-save-as" "Save as..." 
-						"Save Model As..."	"Save Model As..."
-						eSaveModel "mode=save")
+					;(filechoosertoolbar_button 
+					;	"gtk-save-as" "Save as..." 
+					;	"Save Model As..."	"Save Model As..."
+					;	eSaveModel "mode=save")
+					(toolbar_button  "gtk-save-as" "Save Model As..." 
+						"Save Model As..."	eEvent eSaveModel)
 
 					(toolbar_separator)
 
