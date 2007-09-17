@@ -4,6 +4,8 @@
 
  Freyja 0.9.5.17	TBD
  -----------------------------------------------------------------------------
+ 
+ * Check TODO for cleared tasks.
 
  * Metadata object eg for map objects ( currently bones w/ metadata are used )
 	- Pos/Rot/Scale editing from prop dialog?
@@ -31,6 +33,7 @@
 	- RELATED Cache s-edge results until light / mesh moves.
 
  * New XML based freyja file format.
+	- Zip support.
 	- Repacking required.
 	- Save IDs with objects if needed.
 	- Native format should be very stable.
@@ -46,8 +49,12 @@
 
  * Enforce file extensions with mgtk file dialog use.
 
+ * Low-poly 'draw' face creation to fill in gaps in models by vertices.
+
  * libfreyja
-	- Mesh: Abstract Mesh's Vec3 pools.
+	- Mesh: Face combine, eg 2 adj quads = 1 quad
+	- Mesh: Triangle tess for all polygons.
+	- Mesh: Abstract Mesh's vec_t pools.
 	- Mesh: Go back to default UVs ( 2fv ) and allow optional ( 3fv ).
 	- Mesh: replace stack use with list (as [sorted] queue/stack).
 	- MeshABI: Remove LegacyABI use in geo primative generators.
@@ -411,8 +418,6 @@
  * PluginManager ( enable / disable plugins, descriptions, etc )
 
  * Log window for more complete error / warning reporting.
-
- * Query dialog with multitype support via XML message passing.
 
  * Import/export plugin changes
 	- dropdown should change filename
