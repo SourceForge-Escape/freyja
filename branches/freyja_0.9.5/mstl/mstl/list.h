@@ -96,62 +96,6 @@ namespace mstl
 
 
 	template <typename T> 
-	class listnode_bookend
-	{
-	public:
-		listnode_bookend() 
-			: mNext(NULL), mPrev(NULL)
-		{}
-		/*--------------------------------------------------------
-		 * Pre  : 
-		 * Post : 
-		 *
-		 --------------------------------------------------------*/
-		
-		listnode<T> *GetNext() 
-		{ return mNext; }
-		/*--------------------------------------------------------
-		 * Pre  : 
-		 * Post : 
-		 *
-		 --------------------------------------------------------*/
-
-		void SetNext(listnode<T> *node)  
-		{ mNext = node; } 
-		/*--------------------------------------------------------
-		 * Pre  : 
-		 * Post : 
-		 *
-		 --------------------------------------------------------*/
-
-		listnode<T> *GetPrev() 
-		{ return mPrev; }
-		/*--------------------------------------------------------
-		 * Pre  : 
-		 * Post : 
-		 *
-		 --------------------------------------------------------*/
-
-		void SetPrev(listnode<T> *node)  
-		{ mPrev = node; } 
-		/*--------------------------------------------------------
-		 * Pre  : 
-		 * Post : 
-		 *
-		 --------------------------------------------------------*/
-
-	protected:
-		listnode_bookend<T>(const listnode_bookend<T> &node);
-
-		listnode_bookend<T> &operator =(const listnode_bookend<T> &node);
-
-		listnode<T> *mNext;
-		
-		listnode<T> *mPrev;
-	};
-
-
-	template <typename T> 
 	class list 
 	{ 
 	public: 
@@ -204,7 +148,7 @@ namespace mstl
 			 *
 			 --------------------------------------------------------*/
 			
-			iterator &operator++()
+			iterator& operator++()
 			{ 
 				cur = cur ? cur->GetNext() : NULL; 
 				return *this; 
@@ -214,6 +158,7 @@ namespace mstl
 			 * Post : Prefix next
 			 *
 			 --------------------------------------------------------*/
+
 
 		protected:
 			listnode<T> *cur;
@@ -369,7 +314,7 @@ namespace mstl
 	const T& list<T>::back() const
 	{
 		return mTail ? mTail->GetData() : mDefault;  
-	}	
+	}
 
 
 	template <typename T> 
@@ -504,15 +449,16 @@ namespace mstl
 	template <typename T> 
 	void list<T>::push_back(const T& data)
 	{
-		listnode<T> *node = new listnode<T>(data);
+		listnode<T>* node = new listnode<T>(data);
 
-		if (!mTail)
+		if ( !mTail )
 		{
 			mHead = mTail = node;
 		}    
 		else
 		{
-			mTail->SetNext(node);
+			mTail->SetNext( node );
+			node->SetPrev( mTail );
 			mTail = node;
 		}
 	}
@@ -521,15 +467,16 @@ namespace mstl
 	template <typename T> 
 	void list<T>::push_front(const T& data)
 	{
-		listnode<T> *node = new listnode<T>(data);
+		listnode<T>* node = new listnode<T>(data);
 
-		if (!mHead)
+		if ( !mHead )
 		{
 			mHead = mTail = node;
 		}    
 		else
 		{
-			node->SetNext(mHead);
+			mHead->SetPrev( node );
+			node->SetNext( mHead );
 			mHead = node;
 		}
 	}

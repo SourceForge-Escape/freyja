@@ -19,8 +19,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#ifndef GUARD__LIBFREYJA_METADATARENDERABLE_H_
-#define GUARD__LIBFREYJA_METADATARENDERABLE_H_
+#ifndef GUARD__LIBFREYJA_RENDERABLE_H_
+#define GUARD__LIBFREYJA_RENDERABLE_H_
 
 #include <hel/math.h>
 #include <hel/Vec3.h>
@@ -34,21 +34,21 @@
 
 namespace freyja {
 
-class MetadataRenderable
+class Renderable
 {
 public:
 	////////////////////////////////////////////////////////////
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	MetadataRenderable();
+	Renderable();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of MetadataRenderable
 	 *
 	 ------------------------------------------------------*/
 
-	~MetadataRenderable();
+	~Renderable();
 	/*------------------------------------------------------
 	 * Pre  : MetadataRenderable object is allocated
 	 * Post : Deconstructs an object of MetadataRenderable
@@ -60,14 +60,14 @@ public:
 	// Cache API methods.
 	////////////////////////////////////////////////////////////
 
-	static MetadataRenderable* FindInCache(const char* key);
+	static Renderable* FindInCache(const char* key);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns pointer to cached instance or NULL if DNE.
 	 *
 	 ------------------------------------------------------*/
 
-	static MetadataRenderable* ImportToCache(const char* filename);
+	static Renderable* ImportToCache(const char* filename);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Caches renderable ( if not already cached ),
@@ -100,9 +100,9 @@ protected:
 	 *
 	 ------------------------------------------------------*/
 
-	static MetadataRenderable* mMRU;
+	static Renderable* mMRU;
 
-	static mstl::Vector<MetadataRenderable*> mGobalPool;
+	static mstl::Vector<Renderable*> mGobalPool;
 };
 
 
@@ -111,7 +111,7 @@ protected:
 ////////////////////////////////////////////////////////////
 
 inline
-MetadataRenderable::MetadataRenderable()  :
+Renderable::Renderable()  :
 		mRefCount(0),
 		mModel(),
 		mVertices(NULL),
@@ -123,7 +123,7 @@ MetadataRenderable::MetadataRenderable()  :
 
 
 inline
-MetadataRenderable::~MetadataRenderable()
+Renderable::~Renderable()
 {
 	if (mVertices) delete [] mVertices;
 	if (mTexcoords) delete [] mTexcoords;
@@ -134,5 +134,5 @@ MetadataRenderable::~MetadataRenderable()
 
 } // freyja
 
-#endif // GUARD__LIBFREYJA_METADATARENDERABLE_H_
+#endif // GUARD__LIBFREYJA_RENDERABLE_H_
 

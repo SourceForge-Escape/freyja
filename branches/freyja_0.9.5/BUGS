@@ -13,12 +13,8 @@
  Fix queue.
  ----------------------------
  
- * FIX mstl::list - push_back, etc have bugs ( need unit tests )
-
  * FIX Save As.. dialog triggers twice with text entry event.
 	- Make this *.freyja only and using the one-off choosers to fix.
-	- Related fix the material Save As... also
-		. Also add recent files for material for the hell of it.
 
  * FIX Lineage II import directly from pak vfs.
 
@@ -26,6 +22,10 @@
  
  A - Serious bugs
  ----------------------------
+
+ * Crash caused by loading a non-power of two texture via plugin system.
+	- A flat file material import can generate an invalid texture 
+	  using the perlin noise flat file extension.
 
  * Fix UV generation causes crash with some OBJ imported meshes.
 	- Needs more information.
@@ -43,7 +43,7 @@
 	- Explicit *.freyja filter won't save for example, since it's not a module.
 
  * Import model dialog bug.
-	- Canceling attempts to open "Open..." dialog's selected extension.
+	- Canceling attempts to open dialog's selected extension.
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor.
 	- Clicking in the viewport must reset edit mode for this to work.
@@ -55,8 +55,9 @@
 
  * Extruding faces can cause invalid mesh pieces for open mesh topologies.
 
- * Model transforms with cursor have 'jump' - temp workaround is to 'tap' cursor
-	after a 'jump'
+ * Model mode transforms with cursor have 'jump'.
+	- A workaround is to 'tap' cursor after a 'jump'.
+	- Depends on Model based backend as opposed to Mesh/Skeleton.
 
  * Cursor reset on undo 
 	- Use a separate undo state system for cursor, or store extra state.
@@ -71,7 +72,7 @@
  * Mesh rotator for box and cursor are unmatched!
 
  * Plugins
-	- Some plugins don't support 64bit/big endian still.
+	- Some plugins don't support 64bit/big endian properly still.
 	- Halflife
 		. Freyja 0.9.5 takes unweighted mesh, so unweight the mesh. 
 	- PSK
@@ -79,23 +80,25 @@
 	- GRN 
 		. Skeleton incorrect.
 
- * ReverseEngineer plugin's spinbuttons don't always update value.
-	- Tabbing always updates.
-	- Sometimes typing space and enter updates.. weird Gtk+ events.
 
 
-Regression notes
----------------------------------------------------
+ NOTES
+ ---------------------------------------------------
 
-* I can't select UVs in UV editor!
+ * I can't select UVs in UV editor!
 	- Depends on material:mesh Id if UVs are selectable.
+	- This is by design and not a bug.  ( Request design change )
 
-* The OpenGL window is pitch black!
+ * The OpenGL window is pitch black!
+	- This can be caused by an unstable filesystem. ( rare )
 	- This is caused by corrupted user preferences mlisp. ( rare )
 
-* When modal dialogs fail to cancel.
-	- This is caused by build optimizations with Gtk+ wrapper.
+ * Modal dialogs fail to cancel.
+	- This is caused by build optimizations with Gtk+ wrapper callback.
 
-
+ * Spinbuttons don't always update value for embedded plugins.
+	- Tabbing always updates.
+	- Sometimes typing space and enter triggers an update.
+	- This is a Gtk+ bug that shouldn't be encountered anymore.
 
 

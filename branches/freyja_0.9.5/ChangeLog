@@ -7,14 +7,20 @@
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - 
- - FIX UV selection not broken -- depends on material:mesh Id.
+
+
+ Kagura prealpha, 0.9.5.16 () -- "On the roadmap again"
+ 20070916 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - 
+ - Various minor clean up for MaterialControl.
+ - New material recently used files menu button with support.
+ - FIX for material 'double save' caused by obsolete filedialog use.
+ - FIX for mstl list.
+ - MetadataRenderable renamed to Renderable to reflect there is no dependency.
+ - FIX UV selection not broken -- depends on material:mesh Id. (1062)
  - FIX Face group assign set/clear now uses 2^n (bitmap) selector again.
  - FIX for typesetting in OpenGLPrinter by offsetting drawlist.
-
-
- Kagura prealpha, 0.9.5.16 (1060) -- "On the roadmap again"
- 20070916 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - Fix for rotation axis selection.
+ - Fix for rotation axis selection. (1060)
  - New full snippets menu for Metdata with serializer.
  - MetadataRenderables working w/o shading or materials. (1059)
  - Minor clean up in libfreyja.

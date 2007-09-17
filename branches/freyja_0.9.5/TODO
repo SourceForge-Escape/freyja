@@ -5,6 +5,25 @@
  Freyja 0.9.5.17	TBD
  -----------------------------------------------------------------------------
 
+ * Metadata object eg for map objects ( currently bones w/ metadata are used )
+	- Pos/Rot/Scale editing from prop dialog?
+	- Group selection support using option flags.
+	- Delete instance support in UI.
+	- Support for swapping out renderable at runtime.
+	- Metadata pick via scaled AABB of renderable. ( if renderable is set )
+	- Snippet group import / export.
+	- Freyja file format import / export / clear.
+	- Parenting support to allow 'bundles' like the shinto shrine scene.
+	- Render toggle flag for metadata objects.
+	- Finish up Renderable support.
+	- Replace camera and light systems with metadata objects.
+	- Make edit window callable from generic eInfo event  ;)
+	- Might want to make an 'Edit prop' action button w/ new / delete for eInfo.
+	- Obsolete the 'control point' API and use new metadata type instead.
+	- Sprite and mesh instance 'icons'
+	- Paint tool support to add/remove a 'prefab' XML leaf node to metadata. 
+		- eg flags or some other user defined info
+
  * Edge editing.
 	- Select and transform edges in UI.
 	- Replace wireframe renderer with edge renderer?
@@ -18,6 +37,7 @@
 	- Make external plugins for older text based freyja/ja formats.
 
  * Improve Camera.
+	- Tie into new metadata implementation.
 	- Add more options such as perspective settings.
 	- Editor mode support for camera view.
  	- Camera animation editor.
@@ -48,7 +68,7 @@
  -----------------------------------------------------------------------------
 
  * New plugin subsystems.  ( Modular freyja )
-	- 'UI' plugins must self report to AID debugging via logs!
+	- 'UI' plugins must self report to logging system.
 	- Break up heightmap into it's own plugin ( from midgard ).
 	- Get octree plugin using the new libhel octree.
 	- OpenGL scripting from lua will allow plugins to generate their own widgets
@@ -72,24 +92,6 @@
 		- Boxes for collision w/ centered control point.
 		- Walkmesh generation can be done in octree cooker?
 		- Walkmesh can be subbed by IK over rendered mesh.
-
- * Metadata object eg for map objects ( currently bones w/ metadata are used )
-	- Pos/Rot/Scale editing from prop dialog.
-	- Snippet import / export.
-	- Group selection.
-	- Metadata pick via scaled AABB of renderable. ( if renderable is set )
-	- Snippet group import / export.
-	- Freyja file format import / export / clear.
-	- Parenting support to allow 'bundles' like the shinto shrine scene.
-	- Render toggle flag for metadata objects.
-	- Finish up Renderable support.
-	- Replace camera and light systems with metadata objects.
-	- Make edit window callable from generic eInfo event  ;)
-	- Might want to make an 'Edit prop' action button w/ new / delete for eInfo.
-	- Obsolete the 'control point' API and use new metadata type instead.
-	- Sprite and mesh instance 'icons'
-	- Paint tool support to add/remove a 'prefab' XML leaf node to metadata. 
-		- eg flags or some other user defined info
 
  * Midgard
 	- Full animation support for MD5 v11.

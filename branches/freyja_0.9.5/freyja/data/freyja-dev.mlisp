@@ -255,6 +255,7 @@
 		(submenu ePluginMenu "_Plugins..."
 				(submenu eRecentLua "_Lua" "recent_lua_bind" )
 				(submenu eRecentPython "_Python" "recent_python_bind" )
+				(submenu eRecentMaterial "Material" "recent_material_bind")
 				(submenu "_Test"
 					(menu_item "_Assert MsgBox"		eTestAssertMsgBox)
 					(menu_item "_Textview"			eTestTextView)))
@@ -844,16 +845,28 @@
 					(toolbar_button "gtk-new" "New"
 						"New material"	eEvent	eNewMaterial)
 
-					(filechoosertoolbar_button	"gtk-open" "Open"
-						"Loads material from disk" 
-						"Open Material..." eOpenMaterial "mode=open")
+					;(filechoosertoolbar_button	"gtk-open" "Open"
+					;	"Loads material from disk" 
+					;	"Open Material..." eOpenMaterial "mode=open")
 
+					;(toolbar_button "gtk-open" "Open"
+					;	"Open Material..."	eEvent	eOpenMaterial)
+
+					(toolbar_menu_button "gtk-open" "Material"
+						"Open Material..." eEvent eOpenMaterial
+						"recent_material_bind")
+					
 					(toolbar_togglebutton false "gtk-apply" "Lock"
 						"Overwrite material on load" eEvent eMaterialSlotLoad)
 
-					(filechoosertoolbar_button	"gtk-save-as" "Save as..." 
-						"Saves material to disk" 
-						"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,")
+					;(filechoosertoolbar_button	"gtk-save-as" "Save as..." 
+					;	"Saves material to disk" 
+					;	"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,")
+					(toolbar_button "gtk-save-as" "Save as..." 
+						"Save Material..." eEvent eSaveMaterial)
+					
+
+
 				)) ; End toobar / hbox
 
 				;; Material selector / name editor

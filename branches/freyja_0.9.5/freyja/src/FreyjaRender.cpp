@@ -520,7 +520,7 @@ void FreyjaRender::DrawFreeWindow()
 }
 
 
-void FreyjaRender::DrawIcons()
+void FreyjaRender::DrawMetadataRenderables()
 {
 	/* Metadata objects */
 	glPushAttrib(GL_LIGHTING_BIT);  
@@ -564,7 +564,7 @@ void FreyjaRender::DrawIcons()
 		// This method will encounter any 'gaps' ( NULL pointers ) in the container.
 		if ( metadata )
 		{
-			MetadataRenderable* renderable = metadata->GetRenderable(); 
+			Renderable* renderable = metadata->GetRenderable(); 
 
 			if ( renderable )
 			{
@@ -581,10 +581,6 @@ void FreyjaRender::DrawIcons()
 					glRotatef(rot.mX, 1,0,0);
 					glRotatef(rot.mY, 0,1,0);
 					glRotatef(rot.mZ, 0,0,1);
-
-					//vec4_t rot;
-					//metadata->GetRot().GetAxisAngles(rot);
-					//glRotatef(rot[0], rot[1], rot[2], rot[3]);
 
 					glPushMatrix();
 					const Vec3& scale = metadata->GetScale();
@@ -642,7 +638,12 @@ void FreyjaRender::DrawIcons()
 	glPopClientAttrib();
 
 	/* End metadata objects */
+}
 
+
+void FreyjaRender::DrawIcons()
+{
+	DrawMetadataRenderables();
 
 	glPushAttrib(GL_LIGHTING_BIT);
 	glDisable(GL_LIGHTING);

@@ -38,7 +38,7 @@
 #   include <tinyxml/tinyxml.h>
 #endif
 
-#include "MetadataRenderable.h"
+#include "Renderable.h"
 #include "freyja.h"
 
 
@@ -86,7 +86,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	const MetadataRenderable* GetRenderable() const;
+	const Renderable* GetRenderable() const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns object's geometric representation.
@@ -173,7 +173,7 @@ public:
 	const char* GetMetadata() { return mMetadata.c_str(); }
 	void SetMetadata(const char* metadata) { mMetadata = metadata; }
 
-	MetadataRenderable* GetRenderable() { return mRenderable; }
+	Renderable* GetRenderable() { return mRenderable; }
 
 	const char* GetModel() { return mRenderable ? mRenderable->mModel.c_str() : NULL; }
 	void SetModel(const char* model);
@@ -231,7 +231,7 @@ public:
 
 	mstl::String mMetadata;        /* User given XML metadata. */
 
-	MetadataRenderable* mRenderable;  /* Used as a geometric symbol. */
+	Renderable* mRenderable;       /* Used as a geometric symbol. */
 
 	mstl::String mMaterial;        /* Optional material for Renderable. */
 
@@ -279,7 +279,7 @@ const hel::Vec3& Metadata::GetPos() const
 
 
 inline
-const MetadataRenderable* Metadata::GetRenderable() const
+const Renderable* Metadata::GetRenderable() const
 {
 	return mRenderable;
 }
