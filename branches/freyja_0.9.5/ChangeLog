@@ -9,10 +9,10 @@
  - 
 
 
- Kagura prealpha, 0.9.5.16 () -- "On the roadmap again"
+ Kagura prealpha, 0.9.5.16 (1065) -- "On the roadmap again"
  20070916 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
- - New design change for top level Save As... doesn't report plugins anymore.
+ - New roadmap released.
+ - New design change for top level Save As... (1064)
    You must now use Export menu/dialog to save to a plugin based format.
  - FIX for Save As.. dialog triggers twice with text entry event.
  - Various minor clean up for MaterialControl. (1063)

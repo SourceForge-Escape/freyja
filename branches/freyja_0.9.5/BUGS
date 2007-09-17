@@ -15,7 +15,6 @@
  
  * FIX Lineage II import directly from pak vfs.
 
-
  
  A - Serious bugs
  ----------------------------
@@ -66,17 +65,15 @@
  * Models loading w/o complete materials often are alpha masked.
 	- This is a plugin bug caused by plugins not requesting enough material ids.
 
- * Mesh rotator for box and cursor are unmatched!
+ * Mesh rotation for box and cursor are unmatched.
 
- * Plugins
-	- Some plugins don't support 64bit/big endian properly still.
-	- Halflife
-		. Freyja 0.9.5 takes unweighted mesh, so unweight the mesh. 
-	- PSK
-		. Skeleton incorrect.
-	- GRN 
-		. Skeleton incorrect.
+ * Some plugins don't support 64bit/big endian properly still.
+	
+ * Halflife plugin needs to unweight the mesh for 0.9.5 ABI. 
 
+ * PSK plugin's skeleton import is now incorrect for 0.9.5.
+
+ * GRN plugin's skeleton import is now incorrect for 0.9.5.
 
 
  NOTES
