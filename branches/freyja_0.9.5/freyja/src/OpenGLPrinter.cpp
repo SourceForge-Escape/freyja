@@ -463,8 +463,11 @@ void OpenGLPrinter::AddGlyphToTexture32(unsigned char *image,
 										unsigned int img_width,
 										unsigned char *pixmap,
 										unsigned int width, unsigned int height,
-										unsigned int pen_x, unsigned int pen_y)
+										unsigned int pen_x, int pen_y)
 {
+	if ( pen_y < 0 )
+		pen_y = 0;
+
 	for (unsigned int i = 0; i < width; ++i)
 	{
 		for (unsigned int j = 0; j < height; ++j)

@@ -37,7 +37,8 @@ BUILD_ROOT_DIR=../bin/freyja
 # Common precompiler defines
 ################################################################
 
-COMMON_INCLUDES=-Isrc -I../libmgtk/ -I../libfreyja/ -I../libhel/ -I../mstl/
+COMMON_INCLUDES=-Isrc -I../libmgtk/ -I../libfreyja/ -I../libhel/ -I../mstl/ \
+	-I../lua/
 COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
 		-DBUILD_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
@@ -47,11 +48,13 @@ COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGL -DHAVE_HEL \
 		-DPLANE_NOTIFY_WITH_AXIS -DUSING_OPENGL_EXT \
-		-DHAVE_FREETYPE2 $(shell freetype-config --cflags)
+		-DHAVE_FREETYPE2 $(shell freetype-config --cflags) \
+		-DLUAWRAPPER_FOUND -DLUA_FOUND
 
 COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES)
 
 COMMON_LD_FLAGS=-lhel-0.0.2 -lfreyja-0.9.5 -lmgtk-0.2.10 \
+		-lluawrapper -llua51 -ltinyxml \
 		-lGL -lGLU \
 		$(shell freetype-config --libs)
 

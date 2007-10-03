@@ -3836,7 +3836,8 @@ void FreyjaControl::Transform(object_type_t obj,
 				return;
 			}
 			
-			Vector<index_t> faces = m->GetSelectedFaces();
+			Vector<index_t> faces;
+			m->GetSelectedFaces( faces );
 			m->TransformFacesInList(faces, mat);
 			Action *a = new ActionFacesTransform(GetSelectedMesh(), faces, mat);
 			ActionModelModified(a);
@@ -4147,9 +4148,9 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 								found = true;
 							}
 
-							list.pushBack(i);
+							list.push_back(i);
 							// should be i?
-							list2.pushBack(m->GetVertexPosition(v->mVertexIndex));
+							list2.push_back(m->GetVertexPosition(v->mVertexIndex));
 						}
 					}
 
@@ -4293,9 +4294,9 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 								found = true;
 							}
 
-							list.pushBack(idx);
+							list.push_back(idx);
 							// should be idx?
-							list2.pushBack(m->GetVertexPosition(v->mVertexIndex));
+							list2.push_back(m->GetVertexPosition(v->mVertexIndex));
 						}
 					}
 
@@ -4682,9 +4683,9 @@ void FreyjaControl::ScaleObject(int x, int y, freyja_plane_t plane)
 								found = true;
 							}
 
-							list.pushBack(i);
+							list.push_back(i);
 							// should be i?
-							list2.pushBack(m->GetVertexPosition(v->mVertexIndex));
+							list2.push_back(m->GetVertexPosition(v->mVertexIndex));
 						}
 					}
 
@@ -5787,6 +5788,8 @@ void FreyjaControl::AttachMethodListeners()
 
 	CreateListener("eSelectAll", &FreyjaControl::EvSelectAll);
 	CreateListener("eUnSelectAll", &FreyjaControl::EvUnselectAll);
+
+	CreateListener("eMeshKeyframeCopy", &FreyjaControl::EvMeshFromKeyframe);
 }
 
 
@@ -5873,6 +5876,21 @@ void FreyjaControl::EvLoadPythonScript()
 }
 
 
+void FreyjaControl::EvMeshFromKeyframe()
+{
+	Mesh* src = Mesh::GetMesh( GetSelectedMesh() );
+	
+	if ( src )
+	{
+		Mesh* dest = src->CopyWithBlendedVertices();
+
+		if ( dest )
+		{
+			dest->AddToPool();  // Just add to pool for now.
+		}
+	}
+}
+
 
 void FreyjaControl::EvSerializeMesh()
 {
@@ -5928,7 +5946,7 @@ void FreyjaControl::EvSerializeMesh()
 void FreyjaControl::EvMeshSubDiv()
 {
 	Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
-	if (m) m->SubDivLoop();
+	if (m) m->ApplyLoopSubDiv();
 
 	Print("Non-smoothed loop subdiv requested.");
 }
