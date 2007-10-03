@@ -225,7 +225,7 @@ class OpenGLPrinter
 	void AddGlyphToTexture32(unsigned char *image, unsigned int img_width,
 							 unsigned char *pixmap,
 							 unsigned int width, unsigned int height,
-							 unsigned int pen_x, unsigned int pen_y);
+							 unsigned int pen_x, int pen_y);
 	/*------------------------------------------------------
 	 * Pre  : My... what a large stack you have.
 	 *        <image> is allocated and w = h = <img_width> @ 32bpp ARGB 

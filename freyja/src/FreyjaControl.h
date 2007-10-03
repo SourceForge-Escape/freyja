@@ -624,6 +624,8 @@ class FreyjaControl : public Control
 	void EvLoadLuaScript();
 	void EvLoadPythonScript();
 
+	void EvMeshFromKeyframe();
+
 	void EvLaunchFourms()
 	{ mstl::SystemIO::OpenURLInWebBrowser(FREYJA_FORUMS_URL); }
 

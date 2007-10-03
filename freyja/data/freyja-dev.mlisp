@@ -231,6 +231,7 @@
 				(menu_item "Snap-_Weld vertices"	eSnapWeldVerts)
 				(menu_item "Cleanup vertices" eCleanupVertices)
 				(menu_item "Repack" eMeshRepack)
+				(menu_item "Keyframe to mesh" eMeshKeyframeCopy)
 
 			) ; submenu _Mesh
 

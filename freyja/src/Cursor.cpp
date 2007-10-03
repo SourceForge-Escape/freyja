@@ -466,8 +466,8 @@ void Cursor::Draw3dCursorRotHitBoxes()
 		x *= radius;
 		z *= radius;
 
-		xs.pushBack(x);
-		zs.pushBack(z);
+		xs.push_back(x);
+		zs.push_back(z);
 	}
 
 	// Pick the closest 'hit' from each 'axis' ring
