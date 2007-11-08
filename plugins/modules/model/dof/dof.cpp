@@ -54,7 +54,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginName1s("dof");
-	freyjaPluginDescription1s("dof model (*.dof)");
+	freyjaPluginDescription1s("DOF model (*.dof)");
 	freyjaPluginAddExtention1s("*.dof");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
 	freyjaPluginExport1i(FREYJA_PLUGIN_NONE);
