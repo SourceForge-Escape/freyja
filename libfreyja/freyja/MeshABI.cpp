@@ -123,7 +123,7 @@ int32 freyjaMeshLoadChunkJA(SystemIO::FileReader &r, freyja_file_chunk_t &chunk)
 
 		freyjaMeshVertexTexCoord3fv(mesh, idx, xyz);
 
-		verticesMap.pushBack(idx);
+		verticesMap.push_back(idx);
 	}
 
 	//freyjaEnd(); // FREYJA_VERTEX_GROUP
@@ -156,7 +156,7 @@ int32 freyjaMeshLoadChunkJA(SystemIO::FileReader &r, freyja_file_chunk_t &chunk)
 			uv[j] = r.ReadFloat32();
 
 		idx = freyjaMeshTexCoordCreate2fv(mesh, uv);
-		texcoordsMap.pushBack(idx);
+		texcoordsMap.push_back(idx);
 	}
 
 	/* Polygons */
@@ -448,7 +448,7 @@ void freyjaMeshPolygonAddTexCoord1i(index_t mesh, index_t polygon,
 		if (f)
 		{
 			f->mFlags |= Face::fPolyMappedTexCoords;
-			f->mTexCoordIndices.pushBack(texcoord);
+			f->mTexCoordIndices.push_back(texcoord);
 		}
 	}
 }
@@ -479,7 +479,7 @@ void freyjaMeshPolygonAddVertex1i(index_t mesh, index_t polygon, index_t vertex)
 				}
 			}
 
-			face->mIndices.pushBack(vertex);
+			face->mIndices.push_back(vertex);
 		}
 	}
 }
@@ -1321,7 +1321,7 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 
 		if (!face)
 		{
-			faceNormals.pushBack(normal);  // For alignment purposes
+			faceNormals.push_back(normal);  // For alignment purposes
 			continue;
 		}
 
@@ -1330,7 +1330,7 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 			Vertex *vertex = mesh->GetVertex(face->mIndices[v]);
 			
 			if (vertex)
-				vertex->GetTmpRefs().pushBack(f);
+				vertex->GetTmpRefs().push_back(f);
 		}
 
 		mesh->GetVertexPos(face->mIndices[0], a.mVec);
@@ -1340,7 +1340,7 @@ void freyjaMeshGenerateVertexNormals(index_t meshIndex)
 		/* Compute normal for the face, and store it */
 		normal = Vec3::Cross(a - b, c - b);
 		normal.Norm();
-		faceNormals.pushBack(normal);
+		faceNormals.push_back(normal);
 		//DEBUG_MSGF("face %i. %f %f %f\n", f, normal.mVec[0], normal.mVec[1], normal.mVec[2]);
 	}
 
@@ -1900,7 +1900,7 @@ void freyjaMeshSubDivQuadMesh(index_t mesh)
 	if (!m)
 		return;
 
-	m->SubDivLoop();
+	m->ApplyLoopSubDiv();
 }
 
 
@@ -2389,10 +2389,10 @@ index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius,
 				float v = 0.5 * ((float)i/(float)rings) + 0.5;
 
 				index_t idx = vertices[j];
-				//segVert.pushBack(index);
+				//segVert.push_back(index);
 
 				idx = freyjaMeshTexCoordCreate2f(mesh, u, v);
-				//segTex.pushBack(index);
+				//segTex.push_back(index);
 			}
 
 			continue;
@@ -2407,10 +2407,10 @@ index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius,
 				v = 0.5 * ((float)i/(float)segments) + 0.5;
 
 				index = vertices2[j];
-				segVert.pushBack(index);
+				segVert.push_back(index);
 
 				index = freyjaTexCoordCreate2f(u, v);
-				segTex.pushBack(index);
+				segTex.push_back(index);
 			}
 
 			continue;
@@ -2433,10 +2433,10 @@ index_t freyjaMeshCreateTube(vec3_t origin, vec_t height, vec_t radius,
 			t = o + p;
 			index_t vidx = freyjaMeshVertexCreate3fv(mesh, t.mVec);
 			freyjaMeshVertexNormal3fv(mesh, vidx, n.mVec);
-			//segVert.pushBack(index);
+			//segVert.push_back(index);
 
 			vidx = freyjaTexCoordCreate2f(u, v);
-			//segTex.pushBack(index);
+			//segTex.push_back(index);
 		}
 	}
 

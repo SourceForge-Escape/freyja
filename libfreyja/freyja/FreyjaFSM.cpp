@@ -431,7 +431,7 @@ void FreyjaFSM::freyjaPolygonAddVertex1i(index_t vertexIndex)
 {
 	if (mStack.peek() == FREYJA_POLYGON)
 	{
-		mVertexList.pushBack(vertexIndex);
+		mVertexList.push_back(vertexIndex);
 	}
 	else
 	{
@@ -461,7 +461,7 @@ void FreyjaFSM::freyjaPolygonAddTexCoord1i(index_t texcoordIndex)
 {
 	if (mStack.peek() == FREYJA_POLYGON)
 	{
-		mTexCoordList.pushBack(texcoordIndex);
+		mTexCoordList.push_back(texcoordIndex);
 	}
 	else
 	{

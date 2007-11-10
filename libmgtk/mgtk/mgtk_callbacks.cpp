@@ -123,7 +123,7 @@ void mgtk_event_subscribe_gtk_widget(int index, GtkWidget *widget)
 		gWidgetMap.Add(index, widgets);
 	}
 
-	widgets->pushBack(widget);
+	widgets->push_back(widget);
 
 	mgtk_print("(mgtk_event_subscribe_gtk_widget %d %p)", 
 				//gObserverGtkWigets.NumItems(), index, widget, widgets->size()

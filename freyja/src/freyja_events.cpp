@@ -30,8 +30,6 @@
 
 #include <freyja/MeshABI.h>
 #include <freyja/TextureABI.h>
-#include <freyja/PluginABI.h>
-#include <freyja/Plugin.h>
 #include <freyja/LightABI.h>
 #include <freyja/MaterialABI.h>
 #include <freyja/SkeletonABI.h>
@@ -52,145 +50,24 @@
 #include <freyja/LuaABI.h>
 #include <mgtk/MGtkLua.h>
 
+#include "Plugins.h"
 #include "freyja_events.h"
 
-arg_list_t *freyja_rc_color(arg_list_t *args);
 
-long PLUGIN_EVENT_COUNTER = ePluginEventBase;
+arg_list_t *freyja_rc_color(arg_list_t *args);
 
 using namespace freyja3d;
 
 
-long freyja_get_new_plugin_eventid()
+void freyja3d_update_scenegraph()
 {
-	return PLUGIN_EVENT_COUNTER++;
+	FreyjaControl::GetInstance()->UpdateSkeletalUI();
 }
 
 
-// Get the basename of the full path name and strip ext '.so', '.dll', etc
-void freyja_init_get_basename(const char *filename, char *basename, uint32 size)
+void freyja3d_record_saved_model(const char* filename)
 {
-	uint32 i, j, l = strlen(filename);
-	char c;
-
-
-	for (i = 0, j = 0; i < l; ++i)
-	{
-		c = filename[i];
-
-		switch (c)
-		{
-		case '\\':
-		case '/':
-			j = 0;
-			basename[0] = 0;
-			break;
-		
-		default:
-			if (j < size-1)
-			{
-				basename[j++] = c;
-				basename[j] = 0;
-			}
-		}
-	}
-
-	for (; i > 0; --i)
-	{
-		c = basename[i];
-
-		if (c == '.')
-			break;
-	}
-
-	if (i > 0)
-		basename[i] = 0;
-
-	//freyjaPrintMessage("! %s", basename);
-}
-
-
-void freyja_plugin_generic(const char *symbol, void *something)
-{
-#if 0
-	// NOTICE I don't actually let plugins query the Resource for safety ;)
-
-	// 1. look for symbol in the 'hack bind list'
-	// 2. return what you found via the void pointer
-
-	if (strncmp(symbol, "freyja_load_texture_buffer", 25) == 0)
-	{
-		something = (void *)freyja_load_texture_buffer;
-	}
-#endif
-	something = 0x0; // Stop the madness
-}
-
-
-void freyja_init_application_plugins(const char *dir)
-{
-#if FREYJA_APP_PLUGINS
-	SystemIO::FileReader reader;
-	char module_name[128];
-	char module_symbol[128];
-	void (*init)(void (*func)(const char*, void*));
-	bool done = false;
-	const char *module_filename;
-	void *handle;
-
-
-	freyja_print("![Freyja application plugin system invoked]");
-
-	if (!reader.OpenDir(dir))
-	{
-		freyja_print("!Couldn't access application plugin directory.");
-		return;
-	}
-
-	while (!done && (module_filename = reader.GetNextDirectoryListing()))
-	{
-		if (reader.IsDirectory(module_filename))
-			continue;
-
-		if (!SystemIO::CheckModuleExt(module_filename))
-			continue;
-
-		if (!(handle = freyjaModuleLoad(module_filename)))
-		{
-			continue; /* Try the next plugin, even after a bad module load */
-		}
-		else
-		{
-			freyja_init_get_basename(module_filename, module_name, 128);
-			snprintf(module_symbol, 128, "freyja_%s_init", module_name);
-
-			freyja_print("!Module '%s' opened.", module_filename);
-
-			init = (void (*)(void (*)(const char*, void*)))freyjaModuleImportFunction(handle, module_symbol);
-
-			if (init == NULL)  
-			{
-				freyjaModuleUnload(handle);
-				continue;
-			}
-
-			/* Call plugin's init function */
-	      	(*init)(freyja_plugin_generic);
-
-			freyja_print("!Module '%s' linked.", module_filename);
-
-			// Keep these plugins in memory...
-			//freyjaModuleUnload(handle);
-		}
-	}
-
-	reader.CloseDir();
-
-	freyja_print("![Freyja application plugin loader sleeps now]\n");
-
-#else
-	freyja_print("FreyjaAppPlugin: This build was compiled w/o plugin support");
-#endif
+	FreyjaControl::GetInstance()->RecordSavedModel(filename);
 }
 
 
@@ -1405,11 +1282,14 @@ void freyja_handle_resource_init(Resource &r)
 	ResourceEventCallback2::add("eBoneUnLinkChild", &eNoImplementation);
 	ResourceEventCallback2::add("eAppendFile", &eNoImplementation);
 	ResourceEventCallback2::add("eBoneDelete", &eNoImplementation);
+
 	ResourceEventCallback2::add("eVertexNew", &eNoImplementation);
 	ResourceEventCallback2::add("eVertexDelete", &eNoImplementation);
+
 	ResourceEventCallback2::add("ePolygonNew", &eNoImplementation);
 	ResourceEventCallback2::add("ePolygonDelete", &eNoImplementation);
 	ResourceEventCallback2::add("ePolygonSelect", &eNoImplementation);
+
 	ResourceEventCallback2::add("eRenderShadow", &eNoImplementation);
 	ResourceEventCallback2::add("ePolyMapTexturePolygon", &eNoImplementation);
 	ResourceEventCallback2::add("eUVMapCreate", &eNoImplementation);
@@ -1475,18 +1355,7 @@ void freyja_handle_resource_init(Resource &r)
 
 	/* Load and init plugins */
 	String dir = freyja_rc_map_string("plugins");	
-	freyja_init_application_plugins(dir.c_str());
-
-	/* Hook plugins to resource */
-	uint32 i, n = mgtk::ResourcePlugin::mPlugins.size();
-
-	for (i = 0; i < n; ++i)
-	{
-		if (mgtk::ResourcePlugin::mPlugins[i] != 0x0)
-		{
-			mgtk::ResourcePlugin::mPlugins[i]->mEventsAttach();
-		}
-	}
+	freyja3d_plugin_application_init( dir.c_str() );
 }
 
 
@@ -1508,19 +1377,9 @@ void freyja_handle_resource_start()
 	if (!freyja_is_user_installed())
 		freyja_install_user();
 
-	/* Build the user interface from lisp, and load user preferences */
+	/* Build the user interface from scripts and load user preferences. */
 	FreyjaControl::GetInstance()->Init();
-
-	/* FreyjaAppPlugin prototype testing... */
-	uint32 i, n = mgtk::ResourcePlugin::mPlugins.size();
-
-	for (i = 0; i < n; ++i)
-	{
-		if (mgtk::ResourcePlugin::mPlugins[i] != 0x0)
-		{
-			mgtk::ResourcePlugin::mPlugins[i]->mGUIAttach();
-		}
-	}
+	freyja3d_plugin_application_widget_init();
 
 	/* Setup material interface */
 	MaterialControl::GetInstance()->RefreshInterface();
@@ -1542,19 +1401,6 @@ void freyja_handle_resource_start()
 
 	/* Mongoose 2002.02.23, Hook for exit() calls */
 	atexit(freyja_event_shutdown);
-}
-
-
-void freyja_plugins_draw()
-{
-	/* FreyjaAppPlugin prototype testing... */
-	for (uint32 i = 0, n = mgtk::ResourcePlugin::mPlugins.size(); i < n; ++i)
-	{
-		if (mgtk::ResourcePlugin::mPlugins[i] != 0x0)
-		{
-			mgtk::ResourcePlugin::mPlugins[i]->Draw();
-		}
-	}
 }
 
 

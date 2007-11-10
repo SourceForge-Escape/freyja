@@ -218,12 +218,28 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	void SplitFace(index_t faceIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 ------------------------------------------------------*/
+
+	void GetSelectedFaces(Vector<index_t>& faces);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get a list of unique faces marked selected
+	 *
+	 ------------------------------------------------------*/
+
+	void GetUniqueVerticesInFaces(const Vector<index_t>& faces,
+								  Vector<index_t>& vertices);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get a list of unique vertices in faces list
+	 *
 	 ------------------------------------------------------*/
 
 	void SelectVerticesOfSelectedFaces();
@@ -271,6 +287,13 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	Face *GetFace(index_t idx);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	uint32 GetFaceCount() { return mFaces.size(); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -290,7 +313,7 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void GetSelectedVertices(Vector<index_t> &list);
+	void GetSelectedVertices(Vector<index_t>& vertices);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Return a list of vertices flagged fSelected 
@@ -515,6 +538,14 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+	void ApplyLoopSubDiv();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Loop subdivision is performed on the mesh.
+	 *        This calls UpdateEdgeGraph() before subdiv.
+	 *
+	 ------------------------------------------------------*/
+
 	void ApplyTrianglarTesselation();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -631,6 +662,26 @@ public:
 	 * Post : Clears option flag for <vertex>
 	 ------------------------------------------------------*/
 
+	Mesh* CopyWithBlendedVertices();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Copies this mesh, except the blend vertices
+	 *        replace the unweighted vertices.
+	 *
+	 *        Returns mesh outside of pool control. 
+	 *
+	 ------------------------------------------------------*/
+
+	index_t CreateVertexKeyframeFromBlended(index_t track, vec_t time);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : The blend vertices are converted to a 
+	 *        vertex morph keyframe.
+	 *
+	 *        Returns valid index on success. 
+	 *
+	 ------------------------------------------------------*/	
+
 	void SetVertexFlags(index_t vertex, uint32 flags);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -691,17 +742,8 @@ public:
 	 *
 	 *        Returns C's index
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2004.04.08:
-	 * Mongoose - Created with new generic API based on mtk
 	 ------------------------------------------------------*/
 	
-
-	////////////////////////////////////////////////////////////
-	// Public Mutators
-	////////////////////////////////////////////////////////////
-
 	void AppendVertexToFace(index_t face, index_t vertex);
 	/*------------------------------------------------------
 	 * Pre  :  
@@ -843,7 +885,6 @@ public:
 	 *        
 	 ------------------------------------------------------*/
 
-
 	void MarkVerticesOfFacesWithFlag(Face::Flags flag, 
 									 Vertex::Flags mark, bool clear);
 	/*------------------------------------------------------
@@ -855,19 +896,9 @@ public:
 	 *        have flag <mark> cleared.
 	 ------------------------------------------------------*/
 
-
-	void SubDivLoop();
-
 	void ConvertAllFacesToTexCoordPloymapping();
 
 	void ConvertFaceToTexCoordPloymapping(index_t face);
-
-	Face *GetFace(index_t idx);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
 
 	void VertexCleanup();
 	/*------------------------------------------------------
@@ -902,7 +933,7 @@ public:
 	void DeleteFace(index_t face);
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : All face is removed from mesh.
+	 * Post : face is removed from mesh.
 	 *
 	 ------------------------------------------------------*/
 
@@ -996,19 +1027,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	Vector<index_t> GetSelectedFaces();
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get a list of unique faces marked selected
-	 *
-	 ------------------------------------------------------*/
 
-	Vector<index_t> GetUniqueVerticesInFaces(Vector<index_t> &faces);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get a list of unique vertices in faces list
-	 *
-	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
@@ -1024,21 +1043,21 @@ public:
 	 ------------------------------------------------------*/
 
 	vec_t *GetVertexArray()
-	{ return mVertexPool.getVectorArray(); }
+	{ return mVertexPool.get_array(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns vertex array ( great for rendering )
 	 ------------------------------------------------------*/
 
 	vec_t *GetNormalArray()
-	{ return mNormalPool.getVectorArray(); }
+	{ return mNormalPool.get_array(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns normal array ( great for rendering )
 	 ------------------------------------------------------*/
 
 	vec_t *GetTexCoordArray()
-	{ return mTexCoordPool.getVectorArray(); }
+	{ return mTexCoordPool.get_array(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns texcoord array ( great for rendering )
@@ -1540,6 +1559,22 @@ protected:
 ////////////////////////////////////////////////////////////
 
 inline
+void Mesh::GetSelectedFaces(Vector<index_t>& faces)
+{
+	uint32 i;
+	foreach (mFaces, i)
+	{
+		Face *f = mFaces[i];
+		
+		if (f && f->mFlags & Face::fSelected)
+		{
+			faces.push_back(i);
+		}
+	}
+}
+
+
+inline
 void Mesh::RemoveWeightSelectedVertices(index_t bone)
 {
 	for (int32 i = mVertices.size()-1; i > -1; --i)
@@ -1583,7 +1618,7 @@ void Mesh::SetWeight(index_t vertex, index_t bone, vec_t weight)
 		}
 	}
 
-	mWeights.pushBack(new Weight(vertex, bone, weight));
+	mWeights.push_back(new Weight(vertex, bone, weight));
 }
 
 
@@ -1631,7 +1666,7 @@ void Mesh::AddWeight(index_t vertexIndex, vec_t weight, index_t bone)
 inline
 Face *Mesh::GetFace(index_t idx)
 {
-	Face **array = mFaces.getVectorArray();
+	Face **array = mFaces.get_array();
 		
 	if ( idx < mFaces.size() )
 	{
@@ -1645,7 +1680,7 @@ Face *Mesh::GetFace(index_t idx)
 inline
 index_t Mesh::CreateFace()
 {
-	Face **array = mFaces.getVectorArray();
+	Face **array = mFaces.get_array();
 	Face *face = new Face();
 
 	for ( uint32 i = 0, count = mFaces.size(); i < count; ++i )
@@ -1690,7 +1725,7 @@ index_t Mesh::AddToPool()
 
 		if (!found)
 		{
-			mGobalPool.pushBack(this);
+			mGobalPool.push_back(this);
 		}
 	}
 
@@ -1713,7 +1748,7 @@ void Mesh::RemoveFromPool()
 inline
 void Mesh::ClampVecValues(Vector<vec_t> &v, vec_t min, vec_t max)
 {
-	vec_t *array = v.getVectorArray();
+	vec_t *array = v.get_array();
 	vec_t r;
 
 	for ( uint32 i = 0, n = v.size(); i < n; ++i )
@@ -1749,7 +1784,7 @@ index_t Mesh::AppendVec(Vector<vec_t> &v, uint32 n, vec_t *u)
 {
 	for ( uint32 i = 0; i < n; ++i)
 	{
-		v.pushBack(u[i]);
+		v.push_back(u[i]);
 	}
 
 	return (( v.end() / n ) - 1);
@@ -1764,7 +1799,7 @@ void Mesh::GetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u)
 	if (tIndex > v.end())
 		return;
 
-	vec_t *array = v.getVectorArray();
+	vec_t *array = v.get_array();
 
 	for ( uint32 i = 0; i < n; ++i)
 	{
@@ -1781,7 +1816,7 @@ void SetVec(Vector<vec_t> &v, uint32 n, index_t tIndex, vec_t *u)
 	if (tIndex > v.end())
 		return;
 
-	vec_t *array = v.getVectorArray();
+	vec_t *array = v.get_array();
 
 	for ( uint32 i = 0; i < n; ++i)
 	{
@@ -1821,7 +1856,7 @@ inline
 void Mesh::TripleVec_Addition(Vector<vec_t> &v, const vec3_t xyz)
 {
 	uint32 i, size = v.size();
-	vec_t *array = v.getVectorArray();
+	vec_t *array = v.get_array();
 
 	for ( i = 0; i < size; i += 3 )
 	{
@@ -1836,7 +1871,7 @@ inline
 void Mesh::TripleVec_Transform(Vector<vec_t> &v, hel::Mat44 &mat)
 {
 	uint32 i, size = v.size();
-	vec_t *array = v.getVectorArray();
+	vec_t *array = v.get_array();
 
 	for ( i = 0; i < size; i += 3 )
 	{
@@ -1853,7 +1888,7 @@ void Mesh::GetTripleVec(Vector<vec_t> &v, index_t tIndex, vec3_t xyz)
 	if (tIndex > v.end())
 		return;
 
-	vec_t *array = v.getVectorArray();
+	vec_t *array = v.get_array();
 
 	xyz[0] = array[tIndex    ];
 	xyz[1] = array[tIndex + 1];
@@ -1869,7 +1904,7 @@ void Mesh::SetTripleVec(Vector<vec_t> &v, index_t tIndex, const vec3_t xyz)
 	if (tIndex > v.end())
 		return;
 
-	vec_t *array = v.getVectorArray();
+	vec_t *array = v.get_array();
 
 	array[tIndex    ] = xyz[0];
 	array[tIndex + 1] = xyz[1];

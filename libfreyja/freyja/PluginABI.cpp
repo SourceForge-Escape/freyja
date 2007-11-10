@@ -27,9 +27,11 @@
 #include <math.h>
 #include <mstl/Vector.h>
 #include <mstl/SystemIO.h>
+#include <zlib.h>
 #include "MaterialABI.h"
 #include "ModelABI.h"
 #include "MeshABI.h"
+#include "Metadata.h"
 #include "BoneABI.h"
 #include "SkeletonABI.h"
 #include "PluginABI.h"
@@ -133,7 +135,7 @@ void freyjaPluginAddDirectory(const char *dir)
 			return;
 	}
 
-	gPluginDirectories.pushBack(dir);
+	gPluginDirectories.push_back(dir);
 }
 
 
@@ -144,21 +146,6 @@ void freyjaPluginFilename1s(const char *filename)
 
 	if (plugin)
 		plugin->SetFilename(filename);
-}
-
-
-int qSort_FreyjaPluginDesc(const void *a, const void *b)
-{
-	if (a == NULL)
-		return 1;
-
-	if (b == NULL)
-		return -1;
-
-	freyja::PluginDesc &objA = *( (freyja::PluginDesc *)a );
-	freyja::PluginDesc &objB = *( (freyja::PluginDesc *)b );
-
-	return objA.mDescription.Strcmp(objB.mDescription.c_str());
 }
 
 
@@ -259,19 +246,6 @@ void freyjaPluginsInit()
 
 		reader.Close();
 	}
-
-#   if 0   // useless really  =)
-	/* Sort the plugins for interface usage */
-	gFreyjaPlugins.qSort(qSort_FreyjaPluginDesc);
-
-	foreach (gFreyjaPlugins, i)
-	{
-		DEBUG_MSG("\t+ '%s', '%s'\n", 
-				  gFreyjaPlugins[i]->mDescription.c_str(),
-				  gFreyjaPlugins[i]->mExtention.c_str());
-	}
-
-#   endif
 
 	gCurrentFreyjaPlugin = -1;
 #endif
@@ -461,6 +435,221 @@ int32 freyjaImportModel(const char *filename)
 }
 
 
+int gzwrite_buffer(const char* filename, const char* buffer, const unsigned int size)
+{
+#if 0
+	const unsigned int chunk = 16384;
+	byte out[chunk];
+
+    /* Allocate deflate state */
+    z_stream strm;
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+
+	/* Use deflateInit2 / inflateInit2 functions for Gzip format. */
+    int ret = deflateInit2(&strm, level);
+
+    if (ret != Z_OK)
+        return ret;
+
+    /* Compress xml string. */
+    do {
+        strm.avail_in = fread(in, 1, CHUNK, source);
+        if (ferror(source)) {
+            (void)deflateEnd(&strm);
+            return Z_ERRNO;
+        }
+        flush = feof(source) ? Z_FINISH : Z_NO_FLUSH;
+        strm.next_in = in;
+
+        /* run deflate() on input until output buffer not full, finish
+           compression if all of source has been read in */
+        do {
+            strm.avail_out = CHUNK;
+            strm.next_out = out;
+            ret = deflate(&strm, flush);    /* no bad return value */
+            assert(ret != Z_STREAM_ERROR);  /* state not clobbered */
+            have = CHUNK - strm.avail_out;
+            if (fwrite(out, 1, have, dest) != have || ferror(dest)) {
+                (void)deflateEnd(&strm);
+                return Z_ERRNO;
+            }
+        } while (strm.avail_out == 0);
+        assert(strm.avail_in == 0);     /* all input will be used */
+
+        /* done when last data in file processed */
+    } while (flush != Z_FINISH);	
+
+    /* Clean up. */
+    (void)deflateEnd(&strm);
+
+	return ( ret != Z_STREAM_END ) ? -1 : 0;
+#else
+	 gzFile f = gzopen(filename, "wb");
+
+	 if ( f )
+	 {
+		 if ( gzwrite(f, buffer, size) < (int)size )
+		 {
+			 freyjaPrintError("gzwrite('%s') failed.", filename);
+		 }
+			 
+		gzclose(f);
+		return 0;
+	 }
+
+	 return -1;
+#endif
+}
+
+
+int gzread_buffer(const char* filename, char*& buffer, const unsigned int& size)
+{
+	 gzFile f = gzopen(filename, "rb");
+
+	 if ( f )
+	 {
+		 if ( gzread(f, buffer, size) < (int)size )
+		 {
+			 freyjaPrintError("gzread('%s') failed.", filename);
+		 }
+
+		 gzclose(f);
+		 return 0;
+	 }
+
+	 return -1;
+}
+
+
+int freyjaExportScene(const char* filename)
+{
+#if TINYXML_FOUND
+
+	if ( !filename || !filename[0] )
+		return -1;
+
+	TiXmlDocument doc;
+	TiXmlDeclaration* decl = new TiXmlDeclaration("1.0", "", "");
+	doc.LinkEndChild( decl );
+
+	TiXmlElement* root = new TiXmlElement("freyja");
+	root->SetAttribute("version", VERSION);
+	root->SetAttribute("build-date", __DATE__);
+	root->SetAttribute("file-version", 1);
+	doc.LinkEndChild( root );
+
+	// Materials
+	TiXmlElement* materials = new TiXmlElement("materials");
+	root->LinkEndChild( materials );
+	for (uint32 i = 0, n = freyjaGetMaterialCount(); i < n; ++i)
+	{
+		Material *mat = freyjaGetMaterialClass( i );
+
+		if (mat)
+		{
+			mat->Serialize( materials );
+		}
+	}
+
+	// Scene
+	TiXmlElement* scene = new TiXmlElement("scene");
+	root->LinkEndChild( scene );
+
+	//    Metadata
+	for (uint32 i = 0, n = Metadata::GetObjectCount(); i < n; ++i)
+	{
+		Metadata* metadata = Metadata::GetObjectByUid( i );
+
+		if (metadata)
+		{
+			metadata->Serialize( materials );
+		}
+	}
+	
+
+
+	//       Skeletons
+	//          Bones
+	//
+
+	//    Models
+	TiXmlElement* models = new TiXmlElement("models");
+	scene->LinkEndChild( models );
+
+
+	// foreach()
+	TiXmlElement* model = new TiXmlElement("model");
+	models->LinkEndChild( model );
+
+	//       SkeletonInstance
+
+	//       Meshes
+	for (uint32 i = 0, n = Mesh::GetCount(); i < n; ++i)
+	{
+		Mesh* mesh = Mesh::GetMesh( i );
+
+		if (mesh)
+		{
+			mesh->Serialize( model );
+		}
+	}
+
+
+	TiXmlPrinter printer;
+	printer.SetIndent( "\t" );
+	doc.Accept( &printer );
+	const char* xml = printer.CStr();
+
+	if ( xml )
+	{
+		gzwrite_buffer( filename, xml, strlen(xml) );
+	}
+
+	//doc.SaveFile( filename );
+
+	return 0;
+
+#else
+
+	return -1;
+
+#endif // TINYXML_FOUND
+}
+
+
+int freyjaImportScene(const char* filename)
+{
+#if TINYXML_FOUND
+
+	if ( !filename || !filename[0] )
+		return -1;
+
+	TiXmlDocument doc;
+	char* xml;
+	unsigned int size;
+
+	gzread_buffer( filename, xml, size );
+	doc.Parse( xml );
+
+	delete xml; // this smart?
+                        
+	if ( doc.Error() )
+	{
+		return -2;
+	}
+
+	return 0;
+
+#else
+
+	return -1;
+
+#endif // TINYXML_FOUND
+}
+
+
 int32 freyjaExportModel(const char *filename, const char *type)
 {
 	if (!type || !filename)
@@ -469,6 +658,11 @@ int32 freyjaExportModel(const char *filename, const char *type)
 	/* Check for native format. */
 	if (strcmp(type, "freyja") == 0)
 	{
+		if ( !freyjaExportScene( filename ) )
+		{
+			return 0;
+		}
+
 		SystemIO::TextFileWriter tw; 
 
 		if (tw.Open(filename))
@@ -760,6 +954,29 @@ void freyjaPluginShutdown()
 }
 
 
+const char* freyjaPluginFindByDescription(const char* desc)
+{
+	freyja::PluginDesc *module = NULL;
+
+	for (uint32 i = 0, count = freyjaGetPluginCount(); i < count; ++i)
+	{
+		freyja::PluginDesc* plugin = freyjaGetPluginClassByIndex( i );
+			
+		if ( plugin == NULL )
+			continue;
+
+		if ( plugin->mDescription == desc )
+		{
+			module = plugin;
+			break;
+		}
+	}
+
+	return (module) ? module->mFilename.c_str() : NULL;
+}
+
+
+
 ///////////////////////////////////////////////////////////////////////
 //  Plugin import/export iteraction
 ///////////////////////////////////////////////////////////////////////
@@ -768,7 +985,7 @@ void freyjaPluginBegin()
 {
 	freyja::PluginDesc *plugin = new freyja::PluginDesc();
 	plugin->SetId(gFreyjaPlugins.size());
-	gFreyjaPlugins.pushBack(plugin);
+	gFreyjaPlugins.push_back(plugin);
 	
 	gCurrentFreyjaPlugin = plugin->GetId();
 }

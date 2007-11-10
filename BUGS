@@ -15,7 +15,6 @@
  
  * FIX Lineage II import directly from pak vfs.
 
- * Debian tarballs have svn metadata in them.
 
  
  A - Serious bugs
@@ -76,6 +75,8 @@
  * PSK plugin's skeleton import is now incorrect for 0.9.5.
 
  * GRN plugin's skeleton import is now incorrect for 0.9.5.
+
+ * Debian tarballs have svn metadata in them.
 
 
  NOTES

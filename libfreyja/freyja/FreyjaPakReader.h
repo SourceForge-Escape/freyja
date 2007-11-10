@@ -218,12 +218,12 @@ class FreyjaPakDirectory
 
 	void addDir(FreyjaPakDirectory *dir)
 	{
-		mPakDirs.pushBack(dir);
+		mPakDirs.push_back(dir);
 	}
 
 	index_t addFile(FreyjaPakFile *file)
 	{
-		mPakFiles.pushBack(file);
+		mPakFiles.push_back(file);
 		return (mPakFiles.size() - 1);
 	}
 

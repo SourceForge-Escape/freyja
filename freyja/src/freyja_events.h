@@ -340,10 +340,32 @@ void freyja_swap_buffers();
  *
  ------------------------------------------------------*/
 
-void freyja_plugins_draw();
+void freyja3d_update_scenegraph();
 /*------------------------------------------------------
  * Pre  : 
- * Post : Allows plugins to hook into scene rendering.
+ * Post : Update the scenegraph widgets.
+ *
+ ------------------------------------------------------*/
+
+void freyja3d_record_saved_model(const char* filename);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Update client title, recent list, etc for a
+ *        newly saved model.
+ *
+ ------------------------------------------------------*/
+
+int freyja3d_load_texture(const char* filename);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Texture callback load function.
+ *
+ ------------------------------------------------------*/
+
+int freyja3d_load_shader(const char* filename);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Shader callback load function.
  *
  ------------------------------------------------------*/
 

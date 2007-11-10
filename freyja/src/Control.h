@@ -40,7 +40,7 @@ public:
 
 	~Control() {}
 
-	int GetEventIdByName(const char *symbol)
+	static int GetEventIdByName(const char *symbol)
 	{ return GetResource().GetEventIdByName(symbol); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -48,7 +48,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	Resource &GetResource() { return mResource; } 
+	static Resource &GetResource() { return mResource; } 
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -71,7 +71,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	int LookupEventSymbol(const char *symbol) 
+	static int LookupEventSymbol(const char *symbol) 
 	{ int event; mResource.Lookup(symbol, &event); return event; }
 	/*------------------------------------------------------
 	 * Pre  : 

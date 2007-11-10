@@ -88,7 +88,7 @@ ResourceEvent::ResourceEvent(const char *name)
 
 	if (!found)
 	{
-		mEvents.pushBack(this);
+		mEvents.push_back(this);
 		printf("+ %u : '%s'\n", mUID, mName);
 	}
 

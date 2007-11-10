@@ -2,22 +2,93 @@
  TODO
  =============================================================================
 
- Freyja 0.9.5.17	TBD
+ Freyja 0.9.5.17	( Halloween Special )
  -----------------------------------------------------------------------------
  
  * Check TODO for cleared tasks.
 
- * Metadata object eg for map objects ( currently bones w/ metadata are used )
+ * New freyja compressed XML file format must be finished.
+	- Plugin for importing the old freyja format.
+	- Remove old text / binary format support.
+
+ * Edit modes setting visual mode for things like skeletal 'bone' animation
+	- Allow for some dialog to allow 'debugging' toggles.
+
+ * Want to be able to shuffle around SceneGraphs for threaded loading, etc.
+
+ * SceneGraph[]
+	- Metadata[]
+		- MaterialRef[]
+		- ModelRef
+	- Skeleton[]
+		- Bone[]
+	- Model[]
+		- MaterialRef
+		- SkeletonRef
+		- Mesh[]
+	- Material[]
+
+ * Pick more modules to break up from the FreyjaControl monolith.
+
+ * Mlisp / XML / Lua UI script translator.
+
+ * Improve and refine skeletal -> mesh animation.
+
+ * Work up list of supported formats and their support levels / bugs.
+
+ * Material tab with material names.
+
+ * Timer based refresh for animation playback.
+
+ * Vertex / Knife based face splitting.
+
+ * Vertex delete broken!!!
+
+ * Low-poly 'draw' face creation to fill in gaps in models by vertices.
+ 	- Select 3 vertices = action for making triangle.
+	- Select 4 vertices = action for making quad.
+
+ * Just make skeletal animation -> vertex animation a mesh copy operation for now.
+	- Export mesh keyframe.
+	- Ability to copy / paste keyframe from one mesh to another.
+	- Ability to toggle mesh / skeletal mode.
+	- Ability to generate mesh keyframe from skeletal keyframe in the same mesh.
+
+ * Single joint animation shishi odoshi tutorial demo.
+
+ * New XML based freyja file format.
+	- Zip support.
+	- Repacking required.
+	- Only store used materials. ( fix up on load too. )
+		- Instance support for materials.
+	- Save IDs with objects if needed.
+	- Native format should be very stable.
+	- Make external plugins for older text based freyja/ja formats.
+
+ * libfreyja
+	- List like access for meshes eg Mesh::GetNext(i)
+	- Mesh: Face combine, eg 2 adj quads = 1 quad
+	- Mesh: Triangle tess for all polygons.
+	- Mesh: Abstract Mesh's vec_t array pools.
+	- Mesh: Abstract gobal mesh object pool.
+	- Mesh: Go back to default UVs ( 2fv ) and allow optional ( 3fv ).
+	- Mesh: replace stack use with list (as [sorted] queue/stack).
+	- MeshABI: Remove LegacyABI use in geo primative generators.
+	- MeshABI: Catmull-Clark 'spheres' from subdiv cube.
+
+
+ * Metadata 
+	- Grouping	
+		- Group selection support using option flags.
+		- Snippet group import / export.
+		- Parenting support to allow 'bundles' like the shinto shrine scene.
 	- Pos/Rot/Scale editing from prop dialog?
-	- Group selection support using option flags.
 	- Delete instance support in UI.
 	- Support for swapping out renderable at runtime.
 	- Metadata pick via scaled AABB of renderable. ( if renderable is set )
-	- Snippet group import / export.
 	- Freyja file format import / export / clear.
-	- Parenting support to allow 'bundles' like the shinto shrine scene.
 	- Render toggle flag for metadata objects.
-	- Finish up Renderable support.
+	- Renderable material support.
 	- Replace camera and light systems with metadata objects.
 	- Make edit window callable from generic eInfo event  ;)
 	- Might want to make an 'Edit prop' action button w/ new / delete for eInfo.
@@ -32,39 +103,18 @@
 	- Mesh::RebuildPlanes()
 	- RELATED Cache s-edge results until light / mesh moves.
 
- * New XML based freyja file format.
-	- Zip support.
-	- Repacking required.
-	- Save IDs with objects if needed.
-	- Native format should be very stable.
-	- Make external plugins for older text based freyja/ja formats.
-
  * Improve Camera.
-	- Tie into new metadata implementation.
 	- Add more options such as perspective settings.
 	- Editor mode support for camera view.
  	- Camera animation editor.
 
- * Pick more modules to break up from the FreyjaControl monolith.
-
- * Enforce file extensions with mgtk file dialog use.
-
- * Low-poly 'draw' face creation to fill in gaps in models by vertices.
-
- * libfreyja
-	- Mesh: Face combine, eg 2 adj quads = 1 quad
-	- Mesh: Triangle tess for all polygons.
-	- Mesh: Abstract Mesh's vec_t pools.
-	- Mesh: Go back to default UVs ( 2fv ) and allow optional ( 3fv ).
-	- Mesh: replace stack use with list (as [sorted] queue/stack).
-	- MeshABI: Remove LegacyABI use in geo primative generators.
-	- MeshABI: Catmull-Clark 'spheres' from subdiv cube.
-
- * Edit modes setting visual mode for things like skeletal 'bone' animation
+ * Enforce file extensions with mgtk file dialog use?
 
 
  Freyja 0.9.5.18	TBD
  -----------------------------------------------------------------------------
+
+ * Second Life plugin
 
  * Finish up new keyframing + bones ( UI + renderer ).
 	- Slerp for QuatKeyframe
@@ -111,7 +161,6 @@
 	- Merge with freyja's model plugin support.
 
  * Lua
-	- Mlisp <-> XML <-> Lua UI script translator.
 	- New OpenGL wrapper with lua draw() callback as separate library?
 	- New mgtk wrapper as separate library?
 	- mgtk lua unit test using exe linking to mgtk
@@ -175,12 +224,10 @@
 	- Fitting functionality
 	- Overlap 'fixup'
 
- * gconf support as dl linked module or DBUS for checking keys.
+ * gconf support as dlopen linked module or DBUS for checking keys.
 	- http://developer.gnome.org/doc/API/gconf
 	- Use for getting prefered browser, etc
 	- /desktop/gnome/applications/browser/exec  "epiphany"
-
- * Single joint animation shishi odoshi tutorial demo.
 
  * Subdiv knife.
 
@@ -243,8 +290,6 @@
 	- Ref weights from vertex to fix blending issues
 
  * Automatic online updates from the modeler itself.
-
- * ZIP file based pak format for freyja format models w/ textures, etc?
 	
  * Mesh parenting and grouping.
 
@@ -287,7 +332,7 @@
 
  * sphere brush for paint tool
 
- * XML link support eg <link name="miko-weight.xml" type="weight" />
+ * XML link support eg <link-ref filename="miko-weight.xml" type="weight" />
 	- This XML file depends upon another one to be loaded as well.
 
  * Texture buffer expansion:
@@ -311,7 +356,7 @@
 	- Moving out of 'this is for developers' to 'this is for users'.
 		. Time to start hiding debugging toggles instead of on front shelf.
 
-	- Two window view mode
+	- Two window view mode support.
 
 	- 'Size' cursor 'recenters' -- floor on Y value to avoid confusing people?
 
@@ -672,7 +717,7 @@
 
  * Use comment blocks for method description.  No per method histories!
 
- * Place inline methods over 1 line outside class at the bottom of the header.
+ * Place inline methods over 1 line go outside class defn at the bottom of the header.
 
 
 

@@ -25,6 +25,15 @@
 
 #include "freyja.h"
 
+/* Flags used with C ABI. */
+#define fBone_XRot    2
+#define fBone_YRot    4
+#define fBone_ZRot    8
+#define fBone_XPos   16
+#define fBone_YPos   32
+#define fBone_ZPos   64
+
+
 extern "C" {
 
 

@@ -38,7 +38,7 @@ BUILD_ROOT_DIR=../bin/libfreyja
 ################################################################
 
 COMMON_INCLUDES=-I. -I../libfreyja/ -I../libhel/ -I../mstl/ -I../tinyxml/ \
-	-I../lua/lua
+	-I../lua/
 COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
 		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
@@ -46,7 +46,7 @@ COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DMODEL_PLUGINS -DFREYJAIMAGE_PLUGINS -DFREYJA_PLUGINS
 
-COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES) -DTINYXML_FOUND -DLUA_FOUND
+COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES) -DTINYXML_FOUND -DLUAWRAPPER_FOUND -DLUA_FOUND
 
 COMMON_LD_FLAGS=-lhel-0.0.2 -ltinyxml2
 
@@ -73,6 +73,7 @@ OBJS = \
 	$(BUILDDIR)/MaterialABI.o \
 	$(BUILDDIR)/Mesh.o \
 	$(BUILDDIR)/MeshABI.o \
+	$(BUILDDIR)/Metadata.o \
 	$(BUILDDIR)/Model.o \
 	$(BUILDDIR)/ModelABI.o \
 	$(BUILDDIR)/PakABI.o \
@@ -81,6 +82,7 @@ OBJS = \
 	$(BUILDDIR)/Plugin.o \
 	$(BUILDDIR)/Printer.o \
 	$(BUILDDIR)/PythonABI.o \
+	$(BUILDDIR)/Renderable.o \
 	$(BUILDDIR)/QueryABI.o \
 	$(BUILDDIR)/RigidBody.o \
 	$(BUILDDIR)/Skeleton.o \

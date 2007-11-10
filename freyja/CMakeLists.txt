@@ -82,6 +82,7 @@ set(Objs
 	src/FreyjaOpenGL
 	src/MaterialControl
 	src/OpenGLPrinter
+	src/Plugins
 	src/RecentFiles
 	src/Texture
 )

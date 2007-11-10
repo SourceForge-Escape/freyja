@@ -242,7 +242,7 @@ inline
 void Face::AppendNormal(index_t idx)
 {
 	mFlags |= fPolyMappedNormals;
-	mNormalsIndices.pushBack(idx);
+	mNormalsIndices.push_back(idx);
 }
 
 
@@ -250,7 +250,7 @@ inline
 void Face::AppendTexCoord(index_t idx)
 {
 	mFlags |= fPolyMappedTexCoords;
-	mTexCoordIndices.pushBack(idx);
+	mTexCoordIndices.push_back(idx);
 }
 
 
@@ -259,7 +259,7 @@ void Face::AppendVertex(index_t idx)
 {
 	// FIXME: Now you should append this Face's id to the vertex's polyref
 	// FIXME: Might want to cache edge map too
-	mIndices.pushBack(idx);
+	mIndices.push_back(idx);
 }
 
 

@@ -46,7 +46,6 @@
 #include <hel/Ray.h>
 #include <hel/Quat.h>
 
-#include <freyja/Plugin.h>
 #include <freyja/Bone.h>
 #include <freyja/Mesh.h>
 #include <freyja/FreyjaImage.h>
@@ -64,6 +63,7 @@
 #include <freyja/TextureABI.h>
 
 #include "FreyjaOpenGL.h" // for load_shader
+#include "Plugins.h"
 #include "freyja_events.h"
 
 #include "FreyjaControl.h"
@@ -74,12 +74,7 @@ using namespace freyja3d;
 
 using hel::Vec3;
 
-
-int load_texture(const char *filename);
-int load_shader(const char *filename);
 void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array);
-void ePluginImport(ResourceEvent *e);
-void ePluginExport(ResourceEvent *e);
 mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, 
 										 mgtk_tree_t *tree);
 
@@ -162,10 +157,6 @@ FreyjaControl::FreyjaControl() :
 	mFullScreen(false),
 	mToken(false)
 {
-	/* Add extra paths for freyja plugins. */
-	String sPluginDir = freyja_rc_map_string("plugins/");
-	freyjaPluginAddDirectory(sPluginDir.c_str());
-
 	/* Start up libfreyja backend, and redirect its print/logging. */
 	freyjaSpawn();
 	extern void freyja__setPrinter(Printer *printer, bool freyjaManaged);
@@ -177,8 +168,8 @@ FreyjaControl::FreyjaControl() :
 	freyjaLightPosition4v(freyjaGetCurrentLight(), lightPos);
 
 	/* Spawn 0th material, set the iterator, and make a default material */
-	Material::mLoadTextureFunc = load_texture;
-	Material::mLoadShaderFunc = load_shader;
+	Material::mLoadTextureFunc = freyja3d_load_texture;
+	Material::mLoadShaderFunc = freyja3d_load_shader;
 	int32 mIndex = freyjaMaterialCreate();
 	vec4_t rgba = {0,0,0,1};
 	freyjaCurrentMaterial(mIndex);
@@ -928,33 +919,17 @@ bool FreyjaControl::UnserializeBones(const char *filename)
 
 bool FreyjaControl::SaveModel(const char *filename, const char *plugin_desc)
 {
+	// FIXME: This should be mostly pushed back to libfreyja.
 	if (!filename || !filename[0])
 		return false;
 
-	mstl::String desc = plugin_desc;
-	mstl::String select = filename;
-	freyja::PluginDesc *module = NULL;
-
-	for (uint32 i = 0, count = freyjaGetPluginCount(); i < count; ++i)
-	{
-		freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(i);
-			
-		if (plugin == NULL)
-			continue;
-
-		if (plugin->mExportFlags && desc == plugin->mDescription)
-		{
-			module = plugin;
-			break;
-		}
-	}
-
+	const char* module = freyjaPluginFindByDescription( plugin_desc );
 	bool ret = false;
 
-	if (module)
+	if ( module )
 	{
 		/* Overwrite test, No longer altering filename from here on... */
-		if ( SystemIO::File::DoesFileExist( select.c_str() ) )
+		if ( SystemIO::File::DoesFileExist( filename ) )
 		{
 			if ( !mgtk::ExecuteConfirmationDialog("OverwriteFileDialog") )
 			{
@@ -962,45 +937,18 @@ bool FreyjaControl::SaveModel(const char *filename, const char *plugin_desc)
 			}
 		}
 
-		/* Magically generate dialogs for import/export settings per module */
-
-		//module->mDescription.c_str();
-		//module->mExtention.c_str();
-		//module->mName.c_str();
-		//module->mFilename.c_str();
-		
-		uint32 i;
-		foreach (module->mArgs, i)
-		{
-			// FIXME: Convert this crap to a generated QueryDialog
-			if (module->mArgs[i].GetStringType() == "float")
-			{
-				float r = module->GetFloatArg(module->mArgs[i].GetName());
-				r = mgtk_create_query_dialog_float("gtk-dialog-question",
-												   (char*)module->mArgs[i].GetName(),
-												   r, -9999, 9999, 
-												   1, 4);
-				//module->SetFloatArg(module->mArgs[i].GetName(), r)
-			}
-		}
-
 		/* Export the model */
-		ret = !(freyjaExportModelByModule(select.c_str(), 
-										  module->mFilename.c_str()));
+		freyja3d_plugin_generate_dialog( module );
+		ret = !freyjaExportModelByModule( filename, module );
 	}
 	else
 	{
-		ret = SaveModel(filename);
+		ret = SaveModel( filename );
 	}
 
-	if (ret)
+	if ( ret )
 	{
-		mstl::String title;
-		title.Set("%s - Freyja", select.c_str());
-		freyja_set_main_window_title(title.c_str());
-		mCurrentlyOpenFilename = select;
-		mCleared = true;
-		mRecentModel.AddFilename(filename);
+		freyja3d_record_saved_model( filename );
 	}
 
 	return ret;
@@ -4800,123 +4748,7 @@ void FreyjaControl::LoadResource()
 		mResource.Flush();
 	}
 
-	// FIXME: Rework image plugins with flags like model plugins
-	/* Image file dialog patterns - texture */
-	uint32 eOpenTextureId = GetEventIdByName("eOpenTexture");
-	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
-											"All Files (*.*)", "*.*");
-	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
-											"BMP Image (*.bmp)", "*.bmp");
-	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
-											"DDS Image (*.dds)", "*.dds");
-	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
-											"JPEG Image (*.jpg)", "*.jpg");
-	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
-											"PCX Image (*.pcx)", "*.pcx");
-	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
-											"PNG Image (*.png)", "*.png");
-	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
-											"PPM Image (*.ppm)", "*.ppm");
-	mgtk_event_fileselection_append_pattern(eOpenTextureId, 
-											"TARGA Image (*.tga)", "*.tga");
-
-	/* Shader file dialog patterns */
-	uint32 eOpenShaderId = GetEventIdByName("eOpenShader");
-	mgtk_event_fileselection_append_pattern(eOpenShaderId, 
-											"All Files (*.*)", "*.*");
-	mgtk_event_fileselection_append_pattern(eOpenShaderId, 
-											"GLSL Fragment (*.frag)", "*.frag");
-	mgtk_event_fileselection_append_pattern(eOpenShaderId, 
-											"ARB Fragment (*.frag)", "*.frag");
-
-
-	/* Model file dialog patterns */
-	freyjaPluginsInit();
-
-	{
-		// yes, you can even query eventIds for even func binds
-		int loadEventId = GetEventIdByName("eOpenModel");
-		int saveEventId = GetEventIdByName("eSaveModel");
-		int exportEventId = GetEventIdByName("eExportFile");
-		int importEventId = GetEventIdByName("eImportFile");
-		long i, count = freyjaGetPluginCount();
-
-		mgtk_event_fileselection_append_pattern(loadEventId, 
-												"All Files (*.*)", "*.*");
-
-		mgtk_event_fileselection_append_pattern(saveEventId, 
-												"All Files (*.*)", "*.*");
-
-		for (i = 0; i < count; ++i)
-		{
-			freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(i);
-			
-			if (plugin == NULL)
-				continue;
-
-			Print("! %i/%i %i. [%s] %s, %s%s\n", i, count, 
-				  plugin->GetId(),
-				  plugin->mName.c_str(),
-				  plugin->mFilename.c_str(),
-				  plugin->mImportFlags ? "Import " : "",
-				  plugin->mExportFlags ? "Export " : "");
-
-			// Only append plugins that are external modules with import flags.
-			if (plugin->mFilename.c_str() &&
-				plugin->mName.c_str() && plugin->mImportFlags)
-			{
-				char *desc = (char*)plugin->mDescription.c_str();
-				char *ext = (char*)plugin->mExtention.c_str();
-
-				// Append filter to generic filedialog.
-				mgtk_event_fileselection_append_pattern(loadEventId, desc, ext);
-
-				// Generate menu item.
-				mstl::String s;
-				s.Set("%i|%s-ePluginImport", 
-					  plugin->GetId(), plugin->mName.c_str());
-				ResourceEventCallback2::add(s.c_str(), &ePluginImport);
-				int EvImportModelId = LookupEventSymbol(s.c_str());
-				mgtk_append_item_to_menu(importEventId, desc, EvImportModelId);
-			}
-			else if (plugin->mImportFlags)
-			{
-				char *desc = (char*)plugin->mDescription.c_str();
-				char *ext = (char*)plugin->mExtention.c_str();
-
-				// Append filter to generic filedialog.
-				mgtk_event_fileselection_append_pattern(loadEventId, desc, ext);
-			}
-
-
-			// Only append plugins that are external modules with export flags.
-			if (plugin->mFilename.c_str() &&
-				plugin->mName.c_str() && plugin->mExportFlags)
-			{
-				char *desc = (char*)plugin->mDescription.c_str();
-				char *ext = (char*)plugin->mExtention.c_str();
-
-				// Append filter to generic filedialog.
-				mgtk_event_fileselection_append_pattern(saveEventId, desc, ext);
-
-				// Generate menu item.
-				mstl::String s;
-				s.Set("%i|%s-ePluginExport", 
-					  plugin->GetId(), plugin->mName.c_str());
-				ResourceEventCallback2::add(s.c_str(), &ePluginExport);
-				int EvExportModelId = LookupEventSymbol(s.c_str());
-				mgtk_append_item_to_menu(exportEventId, desc, EvExportModelId);
-			}
-			else if (plugin->mExportFlags)
-			{
-				char *desc = (char*)plugin->mDescription.c_str();
-				char *ext = (char*)plugin->mExtention.c_str();
-
-				// Append filter to generic filedialog.
-				mgtk_event_fileselection_append_pattern(saveEventId, desc, ext);
-			}
-		}
-	}
+	freyja3d_plugin_init();
 }
 
 
@@ -6305,6 +6137,24 @@ void FreyjaControl::EvRecentMetadataXML(uint32 value)
 }
 
 
+#if 0
+void FreyjaControl::EvFreePolygonCreate()
+{
+	index_t freyjaMeshPolygonCreate(index_t mesh);
+
+
+	void freyjaMeshPolygonAddVertex1i(index_t mesh, index_t polygon, 
+									  index_t vertex);
+}
+
+
+void FreyjaControl::EvFreeVertexCreate()
+{
+	index_t freyjaMeshVertexCreate3fv(index_t mesh, vec3_t xyz);
+}
+#endif
+
+
 //////////////////////////////////////////////////////////////////////////
 // Non-class methods, callbacks, and wrappers
 //////////////////////////////////////////////////////////////////////////
@@ -6374,265 +6224,6 @@ void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
 				// Not handled
 			}
 		}	
-	}
-}
-
-
-int load_texture(const char *filename)
-{
-	int id = 0;
-	FreyjaControl::GetInstance()->LoadTexture(filename, id);
-	freyja_print("! Texture callback %i : '%s'...", id, filename);
-	return id;
-}
-
-
-int load_shader(const char *filename)
-{
-	uint32 id = 0;
-
-	freyja_print("! Shader callback %i : '%s'...", id, filename);
-
-	if (!freyja3d::OpenGL::LoadFragmentGLSL(filename, id))
-		return 0;
-
-	return id;
-}
-
-
-void ePluginImport(ResourceEvent *e)
-{
-	if (!e || !e->getName())
-		return;
-
-	mstl::String s = e->getName();
-
-	s.Replace('|', 0);
-
-	int idx = atoi(s.c_str());
-
-	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(idx);
-			
-	if (plugin)
-	{
-		QueryDialog d;
-		d.mName = e->getName(); 
-		d.mDialogIcon = "gtk-question"; 
-		d.mInformationMessage.Set("Plugin Import: %s", 
-								  plugin->mName.c_str()); 
-		d.mCancelIcon = "gtk-cancel"; 
-		d.mCancelText = "Cancel"; 
-		d.mAcceptIcon = "gtk-ok";
-		d.mAcceptText = "Import"; 
-
-		uint32 i;
-		foreach (plugin->mArgs, i)
-		{
-			if (plugin->mArgs[i].GetStringType() == "float")
-			{
-				mstl::String symbol = plugin->mArgs[i].GetName();
-				mstl::String question = plugin->mArgs[i].GetName();
-				float value = 0.0f;
-				value = plugin->GetFloatArg(plugin->mArgs[i].GetName());
-
-				QueryDialogValue<float> v(symbol.c_str(), question.c_str(), value);
-				d.mFloats.push_back(v);	
-			}
-			else if (plugin->mArgs[i].GetStringType() == "int")
-			{
-				mstl::String symbol = plugin->mArgs[i].GetName();
-				mstl::String question = plugin->mArgs[i].GetName();
-				int value = 0;
-				value = plugin->GetIntArg(plugin->mArgs[i].GetName());
-
-				QueryDialogValue<int> v(symbol.c_str(), question.c_str(), value);
-				d.mInts.push_back(v);	
-			}
-		}
-
-		if (!plugin->mArgs.size() || d.Execute())
-		{
-			// Update plugin settings from dialog input.
-			foreach (plugin->mArgs, i)
-			{
-				if (plugin->mArgs[i].GetStringType() == "float")
-				{
-					float value = 
-					d.GetFloat(plugin->mArgs[i].GetName());
-					mstl::String s;
-					s.Set("%f", value);
-					plugin->mArgs[i].SetValue(s.c_str());
-				}
-				else if (plugin->mArgs[i].GetStringType() == "int")
-				{
-					int value = 
-					d.GetInt(plugin->mArgs[i].GetName());
-					mstl::String s;
-					s.Set("%i", value);
-					plugin->mArgs[i].SetValue(s.c_str());
-				}
-			}
-				
-			// File dialog here with preset for export type.
-			mstl::String title;
-			title.Set("Importing %s - Freyja", plugin->mName.c_str());
-			char *filename =
-			mgtk_filechooser_blocking(title.c_str(),  
-									  freyja_rc_map_string("/").c_str(), 
-									  0,
-									  plugin->mDescription.c_str(),
-									  plugin->mExtention.c_str());
-
-			freyja_print("! Importing: '%s'\n", filename);
-
-			if (!freyjaImportModelByModule(filename, 
-										   plugin->mFilename.c_str()))
-			{				   
-				if (plugin->mImportFlags & FREYJA_PLUGIN_PAK_VFS)
-				{
-					// FIXME: Old school plugin callback
-					uint32 id = ResourceEvent::GetResourceIdBySymbol("eDialogPakReader");
-					ResourceEvent::listen(id);
-					id = ResourceEvent::GetResourceIdBySymbol("ePakReaderMenuUpdate");
-					ResourceEvent::listen(id);
-
-					FREYJA_INFOMSG(0, "Click on the Plugins Tab and expand PakBrowser to browse the pak file.\nClick the Reset VFS button if the vfs doesn't automaticaly load for you.\nIf the file doesn't open automatically from the pak\nit will likely still be written to /tmp/utpak \nor ./utpak to load from another plugin.");
-				}
-				else
-				{
-					FreyjaControl::GetInstance()->RecordSavedModel(filename);
-					freyja_print("! Imported: '%s'\n", filename);
-
-					// Update skeletal UI
-					if (freyjaGetCurrentSkeleton() == INDEX_INVALID &&
-						freyjaGetSkeletonCount() > 0)
-					{
-						freyjaCurrentSkeleton(0);
-					}
-
-					FreyjaControl::GetInstance()->UpdateSkeletalUI();
-				}
-			}
-			else
-			{
-				freyja_print("! Failed to import: '%s'\n", filename);
-			}
-
-			mgtk_filechooser_blocking_free(filename);
-		}
-	}
-}
-
-
-void ePluginExport(ResourceEvent *e)
-{
-	if (!e || !e->getName())
-		return;
-
-	mstl::String s = e->getName();
-
-	s.Replace('|', 0);
-
-	int idx = atoi(s.c_str());
-
-	freyja::PluginDesc *plugin = freyjaGetPluginClassByIndex(idx);
-			
-	if (plugin)
-	{
-		QueryDialog d;
-		d.mName = e->getName(); 
-		d.mDialogIcon = "gtk-question"; 
-		d.mInformationMessage.Set("Plugin Export: %s", 
-								  plugin->mName.c_str()); 
-		d.mCancelIcon = "gtk-cancel"; 
-		d.mCancelText = "Cancel"; 
-		d.mAcceptIcon = "gtk-ok"; 
-		d.mAcceptText = "Export"; 
-
-		uint32 i;
-		foreach (plugin->mArgs, i)
-		{
-			if (plugin->mArgs[i].GetStringType() == "float")
-			{
-				mstl::String symbol = plugin->mArgs[i].GetName();
-				mstl::String question = plugin->mArgs[i].GetName();
-				float value = 0.0f;
-				value = plugin->GetFloatArg(plugin->mArgs[i].GetName());
-
-				QueryDialogValue<float> v(symbol.c_str(), question.c_str(), value);
-				d.mFloats.push_back(v);	
-			}
-			else if (plugin->mArgs[i].GetStringType() == "int")
-			{
-				mstl::String symbol = plugin->mArgs[i].GetName();
-				mstl::String question = plugin->mArgs[i].GetName();
-				int value = 0;
-				value = plugin->GetIntArg(plugin->mArgs[i].GetName());
-
-				QueryDialogValue<int> v(symbol.c_str(), question.c_str(), value);
-				d.mInts.push_back(v);	
-			}
-		}
-
-		if (!plugin->mArgs.size() || d.Execute())
-		{
-			// Update plugin settings from dialog input.
-			foreach (plugin->mArgs, i)
-			{
-				if (plugin->mArgs[i].GetStringType() == "float")
-				{
-					float value = 
-					d.GetFloat(plugin->mArgs[i].GetName());
-					mstl::String s;
-					s.Set("%f", value);
-					plugin->mArgs[i].SetValue(s.c_str());
-				}
-				else if (plugin->mArgs[i].GetStringType() == "int")
-				{
-					int value = 
-					d.GetInt(plugin->mArgs[i].GetName());
-					mstl::String s;
-					s.Set("%i", value);
-					plugin->mArgs[i].SetValue(s.c_str());
-				}
-			}
-				
-			// File dialog here with preset for export type.
-			mstl::String title;
-			title.Set("Exporting %s - Freyja", plugin->mName.c_str());
-			char *filename =
-			mgtk_filechooser_blocking(title.c_str(),  
-									  freyja_rc_map_string("/").c_str(), 
-									  1,
-									  plugin->mDescription.c_str(),
-									  plugin->mExtention.c_str());
-
-			{
-				String ext = filename;
-
-				int pos = ext.find_last_of('.');
-
-				if (pos == String::npos)
-				{
-					
-				}
-			}
-
-			freyja_print("! Exporting: '%s'\n", filename);
-				
-			if (!freyjaExportModelByModule(filename, 
-										   plugin->mFilename.c_str()))
-			{				   
-				FreyjaControl::GetInstance()->RecordSavedModel(filename);
-				freyja_print("! Exported: '%s'\n", filename);
-			}
-			else
-			{
-				freyja_print("! Failed to export: '%s'\n", filename);
-			}
-
-			mgtk_filechooser_blocking_free(filename);
-		}
 	}
 }
 

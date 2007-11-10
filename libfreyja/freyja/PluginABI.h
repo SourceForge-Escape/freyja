@@ -169,6 +169,14 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	const char* freyjaPluginFindByDescription(const char* desc);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns filename of plugin with description or
+	 *        NULL if not found.
+	 *
+	 ------------------------------------------------------*/
+
 
 	///////////////////////////////////////////////////////////////////////
 	//  Plugin import/export iteraction
