@@ -74,6 +74,7 @@ link_libraries(	-lfreyja-0.9.5 -lhel-0.2.2 -lmgtk-0.1.1 -ltinyxml )
 
 set(Objs
 	src/freyja_events
+	src/misc
 	src/Control
 	src/ControlPrinter
 	src/Cursor
