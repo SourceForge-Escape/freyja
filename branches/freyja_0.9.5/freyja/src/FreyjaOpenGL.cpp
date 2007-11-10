@@ -1800,3 +1800,17 @@ void mglExitMode2d()
 
 	glMatrixMode(GL_MODELVIEW);
 }
+
+
+int freyja3d_load_shader(const char *filename)
+{
+	uint32 id = 0;
+
+	freyja_print("! Shader callback %i : '%s'...", id, filename);
+
+	if (!freyja3d::OpenGL::LoadFragmentGLSL(filename, id))
+		return 0;
+
+	return id;
+}
+

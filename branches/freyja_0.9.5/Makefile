@@ -101,11 +101,14 @@ osx:
 .PHONY : win32
 
 win32:
-	@-printf "Building libhel\n" 
-	cd libhel && rm -f depend.win32 && make -f Makefile.Win32
-
 	@-printf "Building libtinyxml\n" 
 	cd tinyxml && rm -f depend.win32 && make -f Makefile.Win32 
+
+	@-printf "Building libluawrapper\n" 
+	cd lua && rm -f depend.win32 && make -f Makefile.Win32 
+
+	@-printf "Building libhel\n" 
+	cd libhel && rm -f depend.win32 && make -f Makefile.Win32
 
 	@-printf "Building libfreyja\n" 
 	cd libfreyja && rm -f depend.win32 && make -f Makefile.Win32 

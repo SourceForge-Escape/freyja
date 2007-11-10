@@ -47,6 +47,7 @@
 #include <freyja/Metadata.h>
 
 #include "freyja_events.h"
+#include "Plugins.h"
 #include "FreyjaControl.h"
 
 #include "FreyjaRender.h"
@@ -706,7 +707,7 @@ void FreyjaRender::DrawIcons()
 
 	// Draw currently enabled plugin 'icons'.
 	// PluginManager.Draw();
-	freyja_plugins_draw();
+	freyja3d_plugin_draw_loop();
 
 	glPopAttrib();
 }

@@ -246,7 +246,7 @@ index_t freyjaTextureCreateBuffer(byte *image, uint32 byteDepth,
 
 	if (!found)
 	{
-		gFreyjaTextures.pushBack(texture);
+		gFreyjaTextures.push_back(texture);
 	}
 
 	++gFreyjaTextureCount;

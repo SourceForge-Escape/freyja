@@ -219,6 +219,18 @@ src/OpenGLPrinter.s:
 	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/OpenGLPrinter.s
 
 # target to build an object file
+src/Plugins.o:
+	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Plugins.o
+
+# target to preprocess a source file
+src/Plugins.i:
+	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Plugins.i
+
+# target to generate assembly for a file
+src/Plugins.s:
+	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Plugins.s
+
+# target to build an object file
 src/RecentFiles.o:
 	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/RecentFiles.o
 
@@ -290,6 +302,9 @@ help::
 	@echo "... src/OpenGLPrinter.o"
 	@echo "... src/OpenGLPrinter.i"
 	@echo "... src/OpenGLPrinter.s"
+	@echo "... src/Plugins.o"
+	@echo "... src/Plugins.i"
+	@echo "... src/Plugins.s"
 	@echo "... src/RecentFiles.o"
 	@echo "... src/RecentFiles.i"
 	@echo "... src/RecentFiles.s"

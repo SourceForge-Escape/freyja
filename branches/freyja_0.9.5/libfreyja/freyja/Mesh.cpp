@@ -117,11 +117,11 @@ Mesh::Mesh(const Mesh &mesh) :
 	{
 		if (((Mesh&)mesh).mVertices[i])
 		{
-			mVertices.pushBack(new Vertex(*(((Mesh&)mesh).mVertices[i])));
+			mVertices.push_back(new Vertex(*(((Mesh&)mesh).mVertices[i])));
 		}
 		else  // Need to NULL pad to exact match if needed
 		{
-			mVertices.pushBack(NULL);
+			mVertices.push_back(NULL);
 		}
 
 		DEBUG_MSG("\t%i - vertices copied\n", i);
@@ -132,11 +132,11 @@ Mesh::Mesh(const Mesh &mesh) :
 	{
 		if (((Mesh&)mesh).mFaces[i])
 		{
-			mFaces.pushBack(new Face(*(((Mesh&)mesh).mFaces[i])));
+			mFaces.push_back(new Face(*(((Mesh&)mesh).mFaces[i])));
 		}
 		else  // Need to NULL pad to exact match if needed
 		{
-			mFaces.pushBack(NULL);
+			mFaces.push_back(NULL);
 		}
 
 		DEBUG_MSG("\t%i - Facees copied\n", i);
@@ -147,11 +147,11 @@ Mesh::Mesh(const Mesh &mesh) :
 	{
 		if (((Mesh&)mesh).mWeights[i])
 		{
-			mWeights.pushBack(new Weight(*(((Mesh&)mesh).mWeights[i])));
+			mWeights.push_back(new Weight(*(((Mesh&)mesh).mWeights[i])));
 		}
 		else  // Need to NULL pad to exact match if needed
 		{
-			mWeights.pushBack(NULL);
+			mWeights.push_back(NULL);
 		}
 
 		DEBUG_MSG("\t%i - weights copied\n", i);
@@ -2149,6 +2149,196 @@ bool Mesh::IntersectClosestVertex(hel::Ray &r, int &vertex0, vec_t radius)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+void Mesh::ApplyLoopSubDiv()
+{
+	// FIXME: Clean Up And Optimize!
+	// Use the vertices' tempRefs to store shared edges in UpdateEdgeGraph();
+	// for much more speed by avoiding search loops.
+
+
+	// Forced in 0.9.5, since it didn't start with edge support ( not ensured )
+	UpdateEdgeGraph();
+
+	Vector<index_t> vertices; // 'edge' vertices
+	Vector<index_t> centroids; // 'face' vertices
+	Vector<index_t> purge;
+
+	uint32 i;
+
+	// 1. Compute centroid for each face. ( vertex in the 'middle' of the facet )
+	centroids.reserve( mFaces.size() );
+	purge.reserve(mFaces.size()+1);
+	foreach (mFaces, i)
+	{
+		Face *f = mFaces[i];
+		
+		if (f)
+		{
+			purge.push_back(i);
+
+			Vec3 centroid, uv;
+
+			uint32 j;
+			foreach (f->mIndices, j)
+			{
+				uv += GetVertexTexCoord(f->mIndices[j]);
+				centroid += GetVertexPosition(f->mIndices[j]);
+			}
+
+			// Set it's 'pretty' vertex ( normals, uvs, etc are 'correct' )
+			uv /= f->mIndices.size();
+			centroid /= f->mIndices.size();
+			index_t vertex = CreateVertex(centroid);
+			SetVertexNormal(vertex, f->mNormal);
+			SetVertexTexCoord(vertex, uv);
+
+			centroids.push_back(vertex);
+		}		
+	}
+
+	// 2. Compute midpoint vertices for each edge.
+	vertices.reserve( mVertices.size() / 2 );
+	foreach (mEdges, i)
+	{
+		Edge *e = mEdges[i];
+
+		if (!e)
+			continue;
+
+		// Take a lot of midpoints to generate pretty vertices.
+		Vec3 a = GetVertexPosition(e->mA);
+		Vec3 b = GetVertexPosition(e->mB);
+		index_t vertex = CreateVertex( ( a + b ) * 0.5f );
+
+		{
+			Vec3 n0 = GetVertexNormal(e->mA);
+			Vec3 n1 = GetVertexNormal(e->mB);
+			SetVertexNormal(vertex, (n0 + n1) * 0.5f);
+		}
+
+		{
+			Vec3 uv0 = GetVertexTexCoord(e->mA);
+			Vec3 uv1 = GetVertexTexCoord(e->mB);
+			SetVertexTexCoord(vertex, (uv0 + uv1) * 0.5f);
+		}
+
+		vertices.push_back( vertex );
+	}
+
+	// 3. Make new facets with these vertices on a per face pass.
+	foreach (mEdges, i)
+	{
+		Edge *e = mEdges[i];
+
+		if (!e)
+			continue;
+
+		// 1. Get our shared midpoint for this edge. 
+		index_t mid = vertices[i];
+
+		// 2. Generate new facets for each facet using this edge.
+		uint32 j;
+		foreach (e->mFaceRefs, j)
+		{
+			Face *f = mFaces[ e->mFaceRefs[j] ];
+			if (!f) continue;
+
+			index_t centroid = centroids[ e->mFaceRefs[j] ];
+			
+			// 3. We need to *search for the neighbouring edges given no 
+			//    connected graph in this API version.  =(
+
+			uint32 k, count = 0;
+			foreach (mEdges, k)
+			{
+				Edge *e2 = mEdges[k];
+				if (!e2 || e == e2) continue;
+		
+				bool found = false;
+				uint32 l;
+				foreach (e2->mFaceRefs, l)
+				{
+					if (e2->mFaceRefs[l] == e->mFaceRefs[j])
+					{
+						found = true;
+						break;
+					}
+				}
+
+				if (!found)
+					continue;
+				
+				if (e->mA == e2->mA || e->mA == e2->mB)
+				{
+					// centroid, mid, e->mA, e2's mid
+					index_t face = CreateFace();
+					Face *f2 = GetFace(face);
+
+					if (f2)
+					{
+						// FIXME: Handle material, etc
+						f2->mMaterial = f->mMaterial;
+						f2->mNormal = f->mNormal;
+#if 0
+						f2->AppendVertex(centroid);
+						f2->AppendVertex(mid);
+						f2->AppendVertex(e->mA);
+						f2->AppendVertex( vertices[k] );
+#else
+						AppendVertexToFace(face, centroid);
+						AppendVertexToFace(face, mid);
+						AppendVertexToFace(face, e->mA);
+						AppendVertexToFace(face, vertices[k]);
+#endif
+					}
+
+					++count;
+				}
+				else if (e->mB == e2->mA || e->mB == e2->mB)
+				{
+					// centroid, mid, e->mB, e2's mid
+					index_t face = CreateFace();
+					Face *f2 = GetFace(face);
+
+					if (f2)
+					{
+						// FIXME: Handle material, etc
+#if 0
+						f2->AppendVertex(centroid);
+						f2->AppendVertex(mid);
+						f2->AppendVertex(e->mB);
+						f2->AppendVertex( vertices[k] );
+#else
+						AppendVertexToFace(face, centroid);
+						AppendVertexToFace(face, mid);
+						AppendVertexToFace(face, e->mB);
+						AppendVertexToFace(face, vertices[k]);
+#endif
+					}
+
+					++count;
+				}
+
+				// Up to 2 correct faces can be generated per pass per
+				// edge this way... aka the hard way.
+
+				//if (count == 2)
+				//	break;
+			}
+		}
+	}
+
+	// 4. Purge old faces.
+	foreach(purge, i)
+	{
+		DeleteFace( purge[i] );
+	}
+
+	// 5. This is needed for alignment if called again.
+	//Repack();
+}
+
+
 void Mesh::ApplyTrianglarTesselation()
 {
 	// This isn't needed to avoid the issues related to 'gaps' in mFaces[].
@@ -2245,15 +2435,50 @@ void Mesh::ApplyTrianglarTesselation()
 
 		default:
 			;
-			#warning "FIXME: Didn't add a case for general polygons, which should tesselate on import anyway."
+#warning "FIXME: Didn't add a case for general polygons, which should tesselate on import anyway."
 		}
 	}
 }
 
 
+Mesh* Mesh::CopyWithBlendedVertices()
+{
+	if ( mBlendVertices.size() )
+	{
+		Mesh* mesh = new Mesh(*this);
+		mesh->mVertexPool = mBlendVertices;
+		return mesh;
+	}
+
+	return NULL;
+}
+
+
+index_t Mesh::CreateVertexKeyframeFromBlended(index_t track, vec_t time)
+{
+	if ( mBlendVertices.size() )
+	{
+		VertexAnimTrack& t = GetVertexAnimTrack(track);
+		index_t key = t.NewKeyframe(time);
+		VertexAnimKeyFrame* k = t.GetKeyframe(key);
+
+		if (k)
+		{
+			k->ArrayResize( mBlendVertices.size() );
+			vec_t* array = k->GetVertexArray();
+			memcpy( array, mBlendVertices.get_array(), mBlendVertices.size()*4 );
+
+			return key;
+		}
+	}
+
+	return INDEX_INVALID;
+}
+
+
 index_t Mesh::CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz)
 {
-	Vertex **array = mVertices.getVectorArray();
+	Vertex **array = mVertices.get_array();
 	index_t vertex = AddTripleVec(mVertexPool, mFreedVertices, (vec_t*)xyz);
 	index_t texcoord = AddTripleVec(mTexCoordPool, mFreedTexCoords, (vec_t*)uvw);
 	index_t normal = AddTripleVec(mNormalPool, mFreedNormals, (vec_t*)nxyz);
@@ -2302,7 +2527,7 @@ index_t Mesh::CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz
 		}
 	}
 
-	mVertices.pushBack(vert);
+	mVertices.push_back(vert);
 	return mVertices.size() - 1;
 }
 
@@ -2661,7 +2886,7 @@ void Mesh::DeleteFace(index_t face)
 
 void Mesh::DeleteSelectedFaces()
 {
-	Face **array = mFaces.getVectorArray();
+	Face **array = mFaces.get_array();
 
 	for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
 	{
@@ -2682,7 +2907,7 @@ void Mesh::DeleteSelectedFaces()
 
 void Mesh::DeleteUnSelectedFaces()
 {
-	Face **array = mFaces.getVectorArray();
+	Face **array = mFaces.get_array();
 
 	for (uint32 i = 0, n = mFaces.size(); i < n; ++i)
 	{
@@ -3096,7 +3321,7 @@ void Mesh::UpdateVertexReferenceWithSelectedBias()
 			
 			if (vertex)
 			{
-				vertex->GetTmpRefs().pushBack(f);
+				vertex->GetTmpRefs().push_back(f);
 			}
 		}
 	}	
@@ -3138,7 +3363,7 @@ void Mesh::UpdateVertexReferenceWithColorBias(uint32 color)
 			
 			if (vertex)
 			{
-				vertex->GetTmpRefs().pushBack(f);
+				vertex->GetTmpRefs().push_back(f);
 			}
 		}
 	}
@@ -3180,7 +3405,7 @@ void Mesh::UpdateVertexReferenceWithSmoothingGroupBias(uint32 groupFilter)
 			
 			if (vertex)
 			{
-				vertex->GetTmpRefs().pushBack(f);
+				vertex->GetTmpRefs().push_back(f);
 			}
 		}
 	}
@@ -3375,7 +3600,7 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 		// We only consider selected facets here... you filter updates here
 		if (!face || !(group & (1<<face->mSmoothingGroup)))
 		{
-			faceNormals.pushBack(normal);  // For alignment purposes push a 'V0'
+			faceNormals.push_back(normal);  // For alignment purposes push a 'V0'
 			continue;
 		}
 
@@ -3384,7 +3609,7 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 			Vertex *vertex = GetVertex(face->mIndices[v]);
 			
 			if (vertex)
-				vertex->GetTmpRefs().pushBack(f);
+				vertex->GetTmpRefs().push_back(f);
 		}
 
 		GetVertexPos(face->mIndices[0], a.mVec);
@@ -3394,7 +3619,7 @@ void Mesh::GroupedFacesGenerateVertexNormals(uint32 group)
 		/* Compute normal for the face, and store it */
 		normal = Vec3::Cross(a - b, c - b);
 		normal.Norm();
-		faceNormals.pushBack(normal);
+		faceNormals.push_back(normal);
 	}
 
 
@@ -3479,7 +3704,7 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 		// We only consider selected facets here... you filter updates here
 		if (!face || !(face->mFlags & Face::fSelected))
 		{
-			faceNormals.pushBack(normal);  // For alignment purposes push a 'V0'
+			faceNormals.push_back(normal);  // For alignment purposes push a 'V0'
 			continue;
 		}
 
@@ -3488,7 +3713,7 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 			Vertex *vertex = GetVertex(face->mIndices[v]);
 			
 			if (vertex)
-				vertex->GetTmpRefs().pushBack(f);
+				vertex->GetTmpRefs().push_back(f);
 		}
 
 		GetVertexPos(face->mIndices[0], a.mVec);
@@ -3498,7 +3723,7 @@ void Mesh::SelectedFacesGenerateVertexNormals()
 		/* Compute normal for the face, and store it */
 		normal = Vec3::Cross(a - b, c - b);
 		normal.Norm();
-		faceNormals.pushBack(normal);
+		faceNormals.push_back(normal);
 	}
 
 
@@ -3608,19 +3833,19 @@ void Mesh::SplitFace(index_t faceIndex)
 		// 2. Generate a new quad face, and reuse the old one with new vertices
 		genFace = GetFace(CreateFace());
 		genFace->mMaterial = face->mMaterial;
-		genFace->mIndices.pushBack(A);
-		genFace->mIndices.pushBack(M1);
-		genFace->mIndices.pushBack(M2);
-		genFace->mIndices.pushBack(D);
+		genFace->mIndices.push_back(A);
+		genFace->mIndices.push_back(M1);
+		genFace->mIndices.push_back(M2);
+		genFace->mIndices.push_back(D);
 		
 		// This won't be correct
 		if (face->mFlags & Face::fPolyMappedTexCoords)
 		{
 			// This will have to change when polymapping changes
-			genFace->mTexCoordIndices.pushBack(A);
-			genFace->mTexCoordIndices.pushBack(M1);
-			genFace->mTexCoordIndices.pushBack(M2);
-			genFace->mTexCoordIndices.pushBack(D);
+			genFace->mTexCoordIndices.push_back(A);
+			genFace->mTexCoordIndices.push_back(M1);
+			genFace->mTexCoordIndices.push_back(M2);
+			genFace->mTexCoordIndices.push_back(D);
 		}
 
 		// Reuse old face here
@@ -3633,10 +3858,10 @@ void Mesh::SplitFace(index_t faceIndex)
 		if (face->mFlags & Face::fPolyMappedTexCoords)
 		{
 			// This will have to change when polymapping changes
-			genFace->mTexCoordIndices.pushBack(B);
-			genFace->mTexCoordIndices.pushBack(M1);
-			genFace->mTexCoordIndices.pushBack(M2);
-			genFace->mTexCoordIndices.pushBack(C);
+			genFace->mTexCoordIndices.push_back(B);
+			genFace->mTexCoordIndices.push_back(M1);
+			genFace->mTexCoordIndices.push_back(M2);
+			genFace->mTexCoordIndices.push_back(C);
 		}
 
 		// 3. Use vertex references to check for gaps
@@ -3648,18 +3873,18 @@ void Mesh::SplitFace(index_t faceIndex)
 		{
 			genFace = GetFace(CreateFace());
 			genFace->mMaterial = face->mMaterial;
-			genFace->mIndices.pushBack(A);
-			genFace->mIndices.pushBack(M1);
-			genFace->mIndices.pushBack(B);
+			genFace->mIndices.push_back(A);
+			genFace->mIndices.push_back(M1);
+			genFace->mIndices.push_back(B);
 		}
 
 		if (gap2)
 		{
 			genFace = GetFace(CreateFace());
 			genFace->mMaterial = face->mMaterial;
-			genFace->mIndices.pushBack(D);
-			genFace->mIndices.pushBack(M2);
-			genFace->mIndices.pushBack(C);
+			genFace->mIndices.push_back(D);
+			genFace->mIndices.push_back(M2);
+			genFace->mIndices.push_back(C);
 		}
 		break;
 
@@ -3819,195 +4044,6 @@ void Mesh::AppendVertexToFace(index_t face, index_t vertex)
 	}
 }
 
-
-void Mesh::SubDivLoop()
-{
-	// FIXME: Clean Up And Optimize!
-	// Use the vertices' tempRefs to store shared edges in UpdateEdgeGraph();
-	// for much more speed by avoiding search loops.
-
-
-	// Forced in 0.9.5, since it didn't start with edge support ( not ensured )
-	UpdateEdgeGraph();
-
-	Vector<index_t> vertices; // 'edge' vertices
-	Vector<index_t> centroids; // 'face' vertices
-	Vector<index_t> purge;
-
-	uint32 i;
-
-	// 1. Compute centroid for each face. ( vertex in the 'middle' of the facet )
-	centroids.reserve( mFaces.size() );
-	purge.reserve(mFaces.size()+1);
-	foreach (mFaces, i)
-	{
-		Face *f = mFaces[i];
-		
-		if (f)
-		{
-			purge.push_back(i);
-
-			Vec3 centroid, uv;
-
-			uint32 j;
-			foreach (f->mIndices, j)
-			{
-				uv += GetVertexTexCoord(f->mIndices[j]);
-				centroid += GetVertexPosition(f->mIndices[j]);
-			}
-
-			// Set it's 'pretty' vertex ( normals, uvs, etc are 'correct' )
-			uv /= f->mIndices.size();
-			centroid /= f->mIndices.size();
-			index_t vertex = CreateVertex(centroid);
-			SetVertexNormal(vertex, f->mNormal);
-			SetVertexTexCoord(vertex, uv);
-
-			centroids.push_back(vertex);
-		}		
-	}
-
-	// 2. Compute midpoint vertices for each edge.
-	vertices.reserve( mVertices.size() / 2 );
-	foreach (mEdges, i)
-	{
-		Edge *e = mEdges[i];
-
-		if (!e)
-			continue;
-
-		// Take a lot of midpoints to generate pretty vertices.
-		Vec3 a = GetVertexPosition(e->mA);
-		Vec3 b = GetVertexPosition(e->mB);
-		index_t vertex = CreateVertex( ( a + b ) * 0.5f );
-
-		{
-			Vec3 n0 = GetVertexNormal(e->mA);
-			Vec3 n1 = GetVertexNormal(e->mB);
-			SetVertexNormal(vertex, (n0 + n1) * 0.5f);
-		}
-
-		{
-			Vec3 uv0 = GetVertexTexCoord(e->mA);
-			Vec3 uv1 = GetVertexTexCoord(e->mB);
-			SetVertexTexCoord(vertex, (uv0 + uv1) * 0.5f);
-		}
-
-		vertices.push_back( vertex );
-	}
-
-	// 3. Make new facets with these vertices on a per face pass.
-	foreach (mEdges, i)
-	{
-		Edge *e = mEdges[i];
-
-		if (!e)
-			continue;
-
-		// 1. Get our shared midpoint for this edge. 
-		index_t mid = vertices[i];
-
-		// 2. Generate new facets for each facet using this edge.
-		uint32 j;
-		foreach (e->mFaceRefs, j)
-		{
-			Face *f = mFaces[ e->mFaceRefs[j] ];
-			if (!f) continue;
-
-			index_t centroid = centroids[ e->mFaceRefs[j] ];
-			
-			// 3. We need to *search for the neighbouring edges given no 
-			//    connected graph in this API version.  =(
-
-			uint32 k, count = 0;
-			foreach (mEdges, k)
-			{
-				Edge *e2 = mEdges[k];
-				if (!e2 || e == e2) continue;
-		
-				bool found = false;
-				uint32 l;
-				foreach (e2->mFaceRefs, l)
-				{
-					if (e2->mFaceRefs[l] == e->mFaceRefs[j])
-					{
-						found = true;
-						break;
-					}
-				}
-
-				if (!found)
-					continue;
-				
-				if (e->mA == e2->mA || e->mA == e2->mB)
-				{
-					// centroid, mid, e->mA, e2's mid
-					index_t face = CreateFace();
-					Face *f2 = GetFace(face);
-
-					if (f2)
-					{
-						// FIXME: Handle material, etc
-						f2->mMaterial = f->mMaterial;
-						f2->mNormal = f->mNormal;
-#if 0
-						f2->AppendVertex(centroid);
-						f2->AppendVertex(mid);
-						f2->AppendVertex(e->mA);
-						f2->AppendVertex( vertices[k] );
-#else
-						AppendVertexToFace(face, centroid);
-						AppendVertexToFace(face, mid);
-						AppendVertexToFace(face, e->mA);
-						AppendVertexToFace(face, vertices[k]);
-#endif
-					}
-
-					++count;
-				}
-				else if (e->mB == e2->mA || e->mB == e2->mB)
-				{
-					// centroid, mid, e->mB, e2's mid
-					index_t face = CreateFace();
-					Face *f2 = GetFace(face);
-
-					if (f2)
-					{
-						// FIXME: Handle material, etc
-#if 0
-						f2->AppendVertex(centroid);
-						f2->AppendVertex(mid);
-						f2->AppendVertex(e->mB);
-						f2->AppendVertex( vertices[k] );
-#else
-						AppendVertexToFace(face, centroid);
-						AppendVertexToFace(face, mid);
-						AppendVertexToFace(face, e->mB);
-						AppendVertexToFace(face, vertices[k]);
-#endif
-					}
-
-					++count;
-				}
-
-				// Up to 2 correct faces can be generated per pass per
-				// edge this way... aka the hard way.
-
-				//if (count == 2)
-				//	break;
-			}
-		}
-	}
-
-	// 4. Purge old faces.
-	foreach(purge, i)
-	{
-		DeleteFace( purge[i] );
-	}
-
-	// 5. This is needed for alignment if called again.
-	//Repack();
-}
 
 
 void Mesh::UpdateEdgeGraph()
@@ -4186,21 +4222,21 @@ void Mesh::TransformFacesWithFlag(Face::Flags flag, hel::Mat44 &mat)
 }
 
 
-Vector<index_t> Mesh::GetUniqueVerticesInFaces(Vector<index_t> &faces)
+void Mesh::GetUniqueVerticesInFaces(const Vector<index_t> &faces, 
+									Vector<index_t>& vertices)
 {
-	Vector<index_t> vertices;
-
 	for (uint32 i = 0, n = faces.size(); i < n; ++i)
 	{
 		Face *f = GetFace(faces[i]);
 		
 		if (f)
 		{
+			// These lists must retain order, so please don't sort.
 			uint32 j;
 			foreach (f->mIndices, j)
 			{
 				bool found = false;
-				uint32 vertex = f->mIndices[j];
+				uint32 vertex = f->mIndices[j]; 
 
 				uint32 k;
 				foreach (vertices, k)
@@ -4219,33 +4255,13 @@ Vector<index_t> Mesh::GetUniqueVerticesInFaces(Vector<index_t> &faces)
 			}
 		}
 	}
-
-	return vertices;
-}
-
-
-Vector<index_t> Mesh::GetSelectedFaces()
-{
-	Vector<index_t> faces;
-
-	uint32 i;
-	foreach (mFaces, i)
-	{
-		Face *f = mFaces[i];
-		
-		if (f && f->mFlags & Face::fSelected)
-		{
-			faces.push_back(i);
-		}
-	}
-
-	return faces;
 }
 
 
 void Mesh::TransformFacesInList(Vector<index_t> &faces, hel::Mat44 &mat)
 {
-	Vector<index_t> vertices = GetUniqueVerticesInFaces(faces);
+	Vector<index_t> vertices; 
+	GetUniqueVerticesInFaces(faces, vertices);
 	TransformVerticesInList(vertices, mat);
 }
 

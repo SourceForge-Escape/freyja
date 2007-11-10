@@ -83,7 +83,7 @@ index_t freyjaPakBegin(const char *filename)
 
 	if (!found)
 	{
-		gFreyjaPaks.pushBack(pak);
+		gFreyjaPaks.push_back(pak);
 	}
 
 	++gFreyjaPakCount;

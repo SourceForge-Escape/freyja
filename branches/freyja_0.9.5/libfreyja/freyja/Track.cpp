@@ -79,7 +79,7 @@ void TransformTrack::GetTransform(vec_t time,
 		scale = Vec3(1,1,1);
 		
 		// Find last keyframe ( not last played, that's for a game engine )
-		KeyFrame **array = mKeyFrames.getVectorArray();
+		KeyFrame **array = mKeyFrames.get_array();
 		int32 last;
 		vec_t start = 0.0f;
 		

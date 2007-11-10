@@ -1298,4 +1298,21 @@ uint32 MaterialControl::CreateListener1u(const char *name, MethodPtr1u ptr)
 
 
 
+////////////////////////////////////////////////////////////
+// API Functions
+////////////////////////////////////////////////////////////
+
+int freyja3d_load_texture(const char* filename)
+{
+	int id = -1;
+
+	if ( MaterialControl::GetInstance()->LoadTexture(filename) )
+	{
+		id = MaterialControl::GetInstance()->GetTextureId()-1;
+	}
+
+	freyja_print("! Texture callback %i : '%s'...", id, filename);
+}
+	
+
 

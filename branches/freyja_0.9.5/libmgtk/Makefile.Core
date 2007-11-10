@@ -37,7 +37,7 @@ BUILD_ROOT_DIR=../bin/libmgtk
 # Common precompiler defines
 ################################################################
 
-COMMON_INCLUDES=-I. -I../libmgtk/ -I../libhel/ -I../mstl/
+COMMON_INCLUDES=-I. -I../libmgtk/ -I../libhel/ -I../mstl/ -I../lua/
 COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
 		-DBUILD_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
@@ -45,11 +45,12 @@ COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
 		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
 		-DUSING_GTK_2_0 -DHAVE_FREYJA_IMAGE -DHAVE_OPENGL \
-		-DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR -DMGTKEXPORTSCLASS
+		-DHAVE_GTKGLEXT -DFORCE_ICON_TOOLBAR -DMGTKEXPORTSCLASS \
+		-DLUAWRAPPER_FOUND -DLUA_FOUND
 
 COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES)
 
-COMMON_LD_FLAGS=
+COMMON_LD_FLAGS=-lluawrapper
 
 ################################################################
 # Object targets
@@ -58,6 +59,7 @@ COMMON_LD_FLAGS=
 OBJS = \
 	$(BUILDDIR)/ConfirmationDialog.o \
 	$(BUILDDIR)/MLisp.o \
+	$(BUILDDIR)/MGtkLua.o \
 	$(BUILDDIR)/QueryDialog.o \
 	$(BUILDDIR)/Resource.o \
 	$(BUILDDIR)/ResourceEvent.o \

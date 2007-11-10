@@ -225,7 +225,7 @@ bool VertexAnimKeyFrame::Unserialize(SystemIO::FileReader &r)
 
 	for (uint32 i = 0; i < sz; ++i)
 	{
-		mVertices.pushBack(r.ReadFloat32());
+		mVertices.push_back(r.ReadFloat32());
 	}
 
 	return true; 

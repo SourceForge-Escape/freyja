@@ -40,90 +40,121 @@ public:
 
 	typedef enum {
 
-		fNonClass = 1   // Mainly to avoid class data member operator = bugs
+		fNonClass = 1,   // Set this to used optimize non-class arrays.
+		fSorted   = 2
 
 	} OptionFlags_t;
 
 
-	Vector() :
-		mData(0x0),
-		mFlags(0),
-		mReserve(0),
-		mStart(0),
-		mEnd(0),
-		mExpand(VECTOR_BASE_EXPAND)
-	{
-	}
+	////////////////////////////////////////////////////////////
+	// Constructors
+	////////////////////////////////////////////////////////////
+
+	Vector();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Contstructor.
+	 *
+	 ------------------------------------------------------*/
+
+	Vector(const Vector& v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Copy contstructor.
+	 *
+	 ------------------------------------------------------*/
+
+	Vector(const unsigned int size);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Contstructor with initial array size.
+	 *
+	 ------------------------------------------------------*/
+
+	~Vector();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Deconstructor.
+	 *
+	 ------------------------------------------------------*/
 
 
-	Vector(const Vector &v) :
-		mData(0x0),
-		mFlags(0),
-		mReserve(0),
-		mStart(0),
-		mEnd(0),
-		mExpand(VECTOR_BASE_EXPAND)
-	{
-		copy(v);
-	}
+	////////////////////////////////////////////////////////////
+	// Operators
+	////////////////////////////////////////////////////////////
+
+	Vector &operator=(const Vector<Object>& v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Assignment operator.
+	 *
+	 ------------------------------------------------------*/
+
+	Object& operator [] (const unsigned int idx) const;
+	/*------------------------------------------------------
+	 * Pre  : Caller does any required bounds checking.
+	 * Post : Returns a reference to <idx>th array element. 
+	 *
+	 ------------------------------------------------------*/
 
 
-	Vector(unsigned int size) :
-		mData(0x0),
-		mFlags(0),
-		mReserve(0),
-		mStart(0),
-		mEnd(0),
-		mExpand(VECTOR_BASE_EXPAND)
-	{
-		resize(size);
-	}
+	////////////////////////////////////////////////////////////
+	// Public Acessors
+	////////////////////////////////////////////////////////////
+
+	unsigned int begin() const
+	{ return mStart; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	unsigned int capacity() const
+	{ return mReserve; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool empty() const
+	{ return (begin() == end()); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void for_each(void (*func)(Object)) const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : func is called with each element as a parameter. 
+	 *
+	 ------------------------------------------------------*/
+
+	unsigned int end() const
+	{ return mEnd; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	unsigned int size() const
+	{ return mEnd;	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	static const int npos = -1;
 
 
-	Vector &operator=(const Vector<Object> &v)
-	{
-		// Mongoose, 20070426 - Don't trust Vector user to free data!
-		if (mData) delete [] mData;
-
-		mData = NULL;
-		mFlags = v.mFlags;
-		mReserve = v.mReserve;
-		mStart = v.mStart;
-		mEnd = v.mEnd;
-
-		if ( v.mData != NULL && mReserve )
-		{
-			mData = new Object[mReserve];
-
-			if (mFlags & fNonClass)
-			{
-				memcpy(mData, v.mData, sizeof(Object) * mReserve);
-			}
-			else // FIX for special class operator = usage ( default )
-			{
-				for (unsigned int i = 0; i < mReserve; ++i)
-				{
-					mData[i] = v.mData[i];
-				}
-			}
-		}
-
-		return *this;
-	}
-
-
-	~Vector()
-	{
-		clear();
-		mReserve = 0;
-
-		if (mData)
-		{
-			delete [] mData;
-		}
-	}
-
-	////////////////////////////////////////////
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
 
 	void ClearFlag(OptionFlags_t f) { mFlags &= ~f;	}
 	/*------------------------------------------------------
@@ -139,304 +170,90 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void Replace(Object oldObj, Object newObj)
-	{
-		unsigned int i;
+	void clear();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-		for (i = begin(); i< end(); ++i)
-		{
-			if (mData[i] == oldObj)
-			{
-				assign(i, newObj);
-			}
-		}
-	}
+	void copy(const Vector<Object>& v);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Make this Vector a copy of v.
+	 *
+	 ------------------------------------------------------*/
 
-	unsigned int SearchIndex(Object obj)
-	{
-		unsigned int i;
+	void erase();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-		for (i = begin(); i < end(); ++i)
-		{
-			if (mData[i] == obj)
-			{
-				return i;
-			}
-		}
-
-		return UINT_MAX;
-	}
-
-
-	unsigned int GetErrorIndex() { return UINT_MAX; }
-
-
-	long findFirstMatch(Object obj)
-	{
-		unsigned int i;
-
-		for (i = begin(); i < end(); ++i)
-		{
-			if (mData[i] == obj)
-			{
-				return i;
-			}
-		}
-
-		return -1;
-	}
-
-	////////////////////////////////////////////
-
-
-	void clear()
-	{
-		mStart = 0;
-		mEnd = 0;
-	}
-
-	void erase()
-	{
-		unsigned int i;
-
-
-		for (i = begin(); i < end(); ++i)
-		{
-			if (mData[i])
-			{
-				delete mData[i];
-			}
-		}
-		
-		clear();
-	}
-
-	/* Returns false if reserve changes */
-	bool reserve(unsigned int count)
-	{
-		Object *swap = 0x0;
-		unsigned int i;
-
-		if (count > mReserve)
-		{
-			// Yeah it's stupid, but I don't trust pure scaling
-			if (count + mReserve > 100)
-				mExpand += 10;
-			
-			if (count + mReserve > 500)
-				mExpand += 100;
-			
-			if (count + mReserve > 7000)
-				mExpand += 1000;
-
-			swap = mData;
-			mReserve = count + mExpand;
-			mData = new Object[count + mExpand];
-		}
-
-		if (swap)
-		{
-			for (i = begin(); i < end(); ++i)
-			{
-				mData[i] = swap[i];
-			}
-			
-			delete [] swap;
-		}
-
-		return (swap == 0x0);
-	}
-
-
-	void resize(unsigned int count)
-	{
-		if (!count)
-		{
-			/* I don't do deallocation here, call erase */
-			mStart = 0;
-			mEnd = 0;
-			return;
-		}
-
-#if OLD_VECTOR_PTR_HELPER
-		resize(count, 0x0);
-#else
-		unsigned int i;
-
-		if (!reserve(count))
-		{
-			for (i = 0; i < count; ++i)
-			{
-				if (i < begin() || i >= end())
-				{
-					mData[i] = Object();
-				}
-			}
-		}
-
-		mEnd = count;
-#endif
-	}
-
-
-	void resize(unsigned int count, Object obj)//Object &obj = Object())
-	{
-		if (!reserve(count))
-		{
-			for (unsigned int i = 0; i < count; ++i)
-			{
-				if (i < begin() || i >= end())
-				{
-					mData[i] = obj;
-				}
-			}
-		}
-
-		mEnd = count;
-	}
-
-
-	void push_back() { push_back(0x0); }
+	void push_back() 
+	{ push_back(0x0); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 	
-	void push_back(Object object)
-	{
-		resize(size() + 1);
-		mData[size()-1] = object;
-	}
+	void push_back(Object object);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
+	bool reserve(const unsigned int count);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns false if array changes.
+	 *
+	 ------------------------------------------------------*/
 
-	bool empty()
-	{
-		return (begin() == end());
-	}
+	void resize(unsigned int count);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
+	void resize(unsigned int count, Object obj);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	unsigned int capacity()
-	{
-		return mReserve;
-	}
+	void qSort(int (*compare_func)(const void*, const void*));
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/	
+
+	void swap(unsigned int a, unsigned int b);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 	
+	void assign(unsigned int index, Object object);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	unsigned int begin()
-	{
-		return mStart;
-	}
-	
-
-	unsigned int end()
-	{
-		return mEnd;
-	}
-
-
-	unsigned int size()
-	{
-		return mEnd;
-	}
-	
-
-	void copy(const Vector<Object> &v)
-	{
-#if 1 // Do full copies now...
-		*this = v;
-#else
-		unsigned int i, count;
-
-		if (v.mReserve > capacity())
-		{
-			resize(v.mReserve);
-		}
-
-		mFlags = v.mFlags;
-		mStart = v.mStart;
-		mEnd = v.mEnd;
-
-		for (i = mStart, count = mEnd; i < count; ++i)
-		{
-			mData[i] = v.mData[i];
-		}
-#endif
-	}
-
-
-	void qSort(int (*compare_func)(const void *, const void *))
-	{
-		qsort(mData, end(), sizeof(Object), compare_func);
-	}
-	
-
-	void swap(unsigned int a, unsigned int b)
-	{
-		if (a < begin() || a > end())
-			return;
-		
-		if (b < begin() || b > end())
-			return;
-
-		Object swap = mData[a];
-		mData[a] = mData[b];
-		mData[b] = swap;
-	}
-
-	
-	void assign(unsigned int index, Object object)
-	{
-		mData[index] = object;
-	}
-
-
-	void assign_all(Object object)
-	{
-		for (unsigned int i = mStart, count = mEnd; i < count; ++i)
-		{
-			mData[i] = object;
-		}
-	}
-
-
-
-	/* Mongoose 2002.08.31, The burden of bounds checking is on you
-	 *   this way you can handle your own problems w/o exceptions */
-	Object &operator [] (unsigned int index)
-	{
-		return mData[index];
-	}
-
-
-	void print(void (*print_func)(Object))
-	{
-		unsigned int i;
-
-
-		for (i = begin(); i < end(); ++i)
-		{
-			if (print_func)
-			{
-				(*print_func)(mData[i]);
-			}
-
-			fflush(stdout);
-		}
-		
-		printf("\n");    
-	}
-
-
-	// Instead of appending objects this apptempts replacing 'removed' objects
-	unsigned int add(Object object)
-	{
-		if (begin() > 0)
-		{
-			mData[begin() - 1] = object;
-			--mStart;
-
-			return begin();
-		}
-
-		push_back(object);
-		return size();
-	}
-
+	void assign_all(Object object);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	void remove(unsigned int idx) { if (idx < end()) mData[idx] = 0x0; }
 	/*------------------------------------------------------
@@ -474,26 +291,446 @@ public:
 	 ------------------------------------------------------*/
 
 
-	// Deprecated API wrappers...
-	void pushBack() { push_back(); }
-	
-	void pushBack(Object object) { push_back(object); }
 
-	Object *getVectorArray() { return get_array(); }
+	////////////////////////////////////////////////////////////
+	// Deprecated API
+	////////////////////////////////////////////////////////////
 
+	long findFirstMatch(Object obj) const;
+	/*------------------------------------------------------
+	 * Pre  : DEPRECATED API
+	 * Post : Returns index to first obj or -1 on error.
+	 *
+	 ------------------------------------------------------*/
+
+	unsigned int GetErrorIndex() const;
+	/*------------------------------------------------------
+	 * Pre  : DEPRECATED API
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	unsigned int SearchIndex(Object obj) const;
+	/*------------------------------------------------------
+	 * Pre  : DEPRECATED API
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void Replace(Object oldObj, Object newObj);
+	/*------------------------------------------------------
+	 * Pre  : DEPRECATED API
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void print(void (*print_func)(Object));
+	/*------------------------------------------------------
+	 * Pre  : DEPRECATED API
+	 * Post : Uses passed print function on each element. 
+	 *
+	 ------------------------------------------------------*/
+
+	unsigned int add(Object object);
+	/*------------------------------------------------------
+	 * Pre  : DEPRECATED API
+	 * Post : This replaces 'removed' objects with new object.
+	 *
+	 ------------------------------------------------------*/
 
 private:
 
+	////////////////////////////////////////////////////////////
+	// Private Mutators
+	////////////////////////////////////////////////////////////
+
 	Object *mData;
 
-	unsigned int mFlags;
+	unsigned char mFlags;
 	unsigned int mReserve;
 	unsigned int mStart;
 	unsigned int mEnd;
 	unsigned int mExpand;
 };
 
-// Thanks to Rajiv Bhagwat for foreach macro idea, didn't want to use internal iterators however
+
+
+////////////////////////////////////////////////////////////
+// Constructors
+////////////////////////////////////////////////////////////
+
+
+template <typename T>
+Vector<T>::Vector() :
+	mData(0x0),
+	mFlags(0),
+	mReserve(0),
+	mStart(0),
+	mEnd(0),
+	mExpand(VECTOR_BASE_EXPAND)
+{ }
+
+
+template <typename T>
+Vector<T>::Vector(const Vector<T>& v) :
+	mData(0x0),
+	mFlags(0),
+	mReserve(0),
+	mStart(0),
+	mEnd(0),
+	mExpand(VECTOR_BASE_EXPAND)
+{
+	copy(v);
+}
+
+
+template <typename T>
+Vector<T>::Vector(const unsigned int size) :
+	mData(0x0),
+	mFlags(0),
+	mReserve(0),
+	mStart(0),
+	mEnd(0),
+	mExpand(VECTOR_BASE_EXPAND)
+{
+	resize(size);
+}
+
+
+template <typename T>
+Vector<T>::~Vector()
+{
+	clear();
+	mReserve = 0;
+	
+	if (mData)
+	{
+		delete [] mData;
+	}
+}
+
+
+////////////////////////////////////////////////////////////
+// Operators
+////////////////////////////////////////////////////////////
+
+template <typename T>
+Vector<T>& Vector<T>::operator=(const Vector<T> &v)
+{
+	// Mongoose, 20070426 - Don't trust Vector user to free data!
+	if (mData) 
+		delete [] mData;
+
+	mData = NULL;
+	mFlags = v.mFlags;
+	mReserve = v.mReserve;
+	mStart = v.mStart;
+	mEnd = v.mEnd;
+
+	if ( v.mData != NULL && mReserve )
+	{
+		mData = new T[mReserve];
+		
+		if ( mFlags & fNonClass )
+		{
+			memcpy(mData, v.mData, sizeof(T) * mReserve);
+		}
+		else // FIX for special class operator = usage ( default )
+		{
+			for (unsigned int i = 0; i < mReserve; ++i)
+			{
+				mData[i] = v.mData[i];
+			}
+		}
+	}
+	
+	return *this;
+}
+
+
+template <typename T>
+T& Vector<T>::operator [] (const unsigned int idx) const
+{
+	return mData[idx];
+}
+
+
+////////////////////////////////////////////////////////////
+// Public Acessors
+////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////
+// Public Mutators
+////////////////////////////////////////////////////////////
+
+template <typename T>
+void Vector<T>::Replace(T oldObj, T newObj)
+{
+	for (unsigned int i = begin(); i < end(); ++i)
+	{
+		if (mData[i] == oldObj)
+		{
+			assign(i, newObj);
+		}
+	}
+}
+
+
+template <typename T>
+unsigned int Vector<T>::SearchIndex(T obj) const
+{
+	for (unsigned int i = begin(); i < end(); ++i)
+	{
+		if (mData[i] == obj)
+		{
+			return i;
+		}
+	}
+
+	return UINT_MAX;
+}
+
+
+template <typename T>
+unsigned int Vector<T>::GetErrorIndex() const
+{ 
+	return UINT_MAX; 
+}
+
+
+template <typename T>
+long Vector<T>::findFirstMatch(T obj) const
+{
+	for (unsigned int i = begin(); i < end(); ++i)
+	{
+		if (mData[i] == obj)
+		{
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+
+template <typename T>
+void Vector<T>::clear()
+{
+	mStart = 0;
+	mEnd = 0;
+}
+
+
+template <typename T>
+void Vector<T>::erase()
+{
+	for (unsigned int i = begin(); i < end(); ++i)
+	{
+		if (mData[i])
+		{
+			delete mData[i];
+		}
+	}
+		
+	clear();
+}
+
+
+template <typename T>
+bool Vector<T>::reserve(const unsigned int count)
+{
+	T* swap = 0x0;
+	
+	if (count > mReserve)
+	{
+		// Yeah it's stupid, but I don't trust pure scaling
+		if (count + mReserve > 100)
+			mExpand += 10;
+		
+		if (count + mReserve > 500)
+			mExpand += 100;
+		
+		if (count + mReserve > 7000)
+			mExpand += 1000;
+		
+		swap = mData;
+		mReserve = count + mExpand;
+		mData = new T[count + mExpand];
+	}
+	
+	if (swap)
+	{
+		for (unsigned int i = begin(); i < end(); ++i)
+		{
+			mData[i] = swap[i];
+		}
+		
+		delete [] swap;
+	}
+	
+	return (swap == 0x0);
+}
+
+
+template <typename T>
+void Vector<T>::resize(unsigned int count)
+{
+	if (!count)
+	{
+		/* I don't do deallocation here, call erase */
+		mStart = 0;
+		mEnd = 0;
+		return;
+	}
+
+#if OLD_VECTOR_PTR_HELPER
+	resize(count, 0x0);
+#else
+
+	if (!reserve(count))
+	{
+		for (unsigned int i = 0; i < count; ++i)
+		{
+			if (i < begin() || i >= end())
+			{
+				mData[i] = T();
+			}
+		}
+	}
+
+	mEnd = count;
+#endif
+}
+
+
+template <typename T>
+void Vector<T>::resize(unsigned int count, T obj)
+{
+	if (!reserve(count))
+	{
+		for (unsigned int i = 0; i < count; ++i)
+		{
+			if (i < begin() || i >= end())
+			{
+				mData[i] = obj;
+			}
+		}
+	}
+
+	mEnd = count;
+}
+
+
+template <typename T>
+void Vector<T>::push_back(T object)
+{
+	resize(size() + 1);
+	mData[size()-1] = object;
+}
+
+
+template <typename T>
+void Vector<T>::copy(const Vector<T>& v)
+{
+	*this = v;
+}
+
+
+template <typename T>
+void Vector<T>::qSort(int (*compare_func)(const void*, const void*))
+{
+	qsort(mData, end(), sizeof(T), compare_func);
+}
+	
+
+template <typename T>
+void Vector<T>::swap(unsigned int a, unsigned int b)
+{
+#if 0
+	// Bounds checking.
+	if ( a < begin() || a > end() )
+		return;
+	
+	if ( b < begin() || b > end() )
+		return;
+#endif
+
+	T swap = mData[a];
+	mData[a] = mData[b];
+	mData[b] = swap;
+}
+
+	
+template <typename T>
+void Vector<T>::assign(unsigned int idx, T object)
+{
+	mData[idx] = object;
+}
+
+
+template <typename T>
+void Vector<T>::assign_all(T object)
+{
+	for (unsigned int i = begin(); i < mEnd; ++i)
+	{
+		mData[i] = object;
+	}
+}
+
+
+template <typename T>
+void Vector<T>::print(void (*print_func)(T))
+{
+	if ( print_func )
+	{
+		for (unsigned int i = begin(); i < end(); ++i)
+		{
+			(*print_func)(mData[i]);
+			fflush(stdout);
+		}
+	
+		printf("\n");    
+	}
+}
+
+
+template <typename T>
+void Vector<T>::for_each(void (*func)(T)) const
+{
+	if ( func )
+	{
+		for (unsigned int i = begin(); i < end(); ++i)
+		{
+			(*func)(mData[i]);
+		}
+	}
+}
+
+
+template <typename T>
+unsigned int Vector<T>::add(T object)
+{
+	if (begin() > 0)
+	{
+		mData[begin() - 1] = object;
+		--mStart;
+
+		return begin();
+	}
+
+	push_back(object);
+	return size();
+}
+
+
+////////////////////////////////////////////////////////////
+// foreach macro
+//
+// Thanks to Rajiv Bhagwat for foreach macro idea, but 
+// I use a different implementation for my needs.
+////////////////////////////////////////////////////////////
+
 #define F_E_JOIN2(a,b) a##b
 #define F_E_JOIN(a,b) F_E_JOIN2(a,b)
 #define foreach(v, idx) for(bool F_E_JOIN(flag,__LINE__)=v.start(idx); F_E_JOIN(flag,__LINE__);F_E_JOIN(flag,__LINE__)=v.next(idx)) 
@@ -501,4 +738,4 @@ private:
 
 } // namespace mstl
 
-#endif
+#endif // GUARD__MSTL_VECTOR_H_

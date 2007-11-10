@@ -6,8 +6,20 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
- - Fix for toplevel make deb not calling cmake.
+ - Import/export plugin refactoring in client.
+ - Changed the order of the filedialog / plugin option dialog for import/export.
+ - Sorted import / export filters and menus.
+ - LLM basic import plugin.
+ - BVH basic import plugin.  
+ - Crash fix for certain TTFs used for texture generation.
+ - FIX Obsolete mstl use was removed.
+ - Copy mesh using blended vertices support and UI.
+ - Copy skeletal mesh keyframe to vertex morph keyframe support.
+ - Compressed file format test with gzip compression.
+ - Clean up in Mesh and Vector.
+ - FIX for Win32 lua GUI scripting support build issues.
+ - Win32 cross compile build system support for libluawrapper.
+ - FIX for toplevel make deb not calling cmake.
 
 
  Kagura prealpha, 0.9.5.16 (1065) -- "On the roadmap again"

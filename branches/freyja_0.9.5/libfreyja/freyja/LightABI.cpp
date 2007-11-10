@@ -38,7 +38,7 @@ index_t freyjaLightCreate()
 {
 	index_t lightIndex = gFreyjaLights.size();
 
-	gFreyjaLights.pushBack(new Light());
+	gFreyjaLights.push_back(new Light());
 
 	return lightIndex;	
 }

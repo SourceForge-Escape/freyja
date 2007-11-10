@@ -170,7 +170,7 @@ index_t Skeleton::AddToPool()
 
 		if (!found)
 		{
-			mGobalPool.pushBack(this);
+			mGobalPool.push_back(this);
 		}
 	}
 
@@ -189,7 +189,7 @@ void Skeleton::RemoveBone(index_t bone)
 	{
 		if (mBones[i] != bone)
 		{
-			bones.pushBack(mBones[i]);
+			bones.push_back(mBones[i]);
 		}
 	}
 
@@ -197,7 +197,7 @@ void Skeleton::RemoveBone(index_t bone)
 
 	for (i = 0, n = bones.size(); i < n; ++i)
 	{
-		mBones.pushBack(bones[i]);
+		mBones.push_back(bones[i]);
 	}
 }
 

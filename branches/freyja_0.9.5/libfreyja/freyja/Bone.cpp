@@ -355,7 +355,7 @@ bool Bone::UnserializePool(TiXmlElement *container)
 
 void Bone::AddChild(index_t child)
 {
-	mChildren.pushBack(child);
+	mChildren.push_back(child);
 }
 
 
@@ -401,7 +401,7 @@ void Bone::RemoveChild(index_t child)
 	{
 		if (mChildren[i] != child)
 		{
-			children.pushBack(mChildren[i]);
+			children.push_back(mChildren[i]);
 		}
 	}
 
@@ -409,7 +409,7 @@ void Bone::RemoveChild(index_t child)
 
 	for (i = 0, n = children.size(); i < n; ++i)
 	{
-		mChildren.pushBack(children[i]);
+		mChildren.push_back(children[i]);
 	}
 }
 

@@ -47,7 +47,7 @@ index_t freyjaMaterialCreate()
 {
 	index_t materialIndex = gFreyjaMaterials.size();
 
-	gFreyjaMaterials.pushBack(new Material());
+	gFreyjaMaterials.push_back(new Material());
 	gFreyjaMaterials[materialIndex]->mId = materialIndex;
 
 	return materialIndex;

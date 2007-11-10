@@ -299,6 +299,7 @@ void mglGetOpenGLProjectionMatrix16fv(matrix_t projection);
 void mglApplyMaterial(uint32 materialIndex);
 
 
+
 namespace freyja3d {
 
 
