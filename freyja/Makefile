@@ -266,6 +266,18 @@ src/freyja_events.i:
 src/freyja_events.s:
 	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja_events.s
 
+# target to build an object file
+src/misc.o:
+	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/misc.o
+
+# target to preprocess a source file
+src/misc.i:
+	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/misc.i
+
+# target to generate assembly for a file
+src/misc.s:
+	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/misc.s
+
 # Help Target
 help::
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -314,6 +326,9 @@ help::
 	@echo "... src/freyja_events.o"
 	@echo "... src/freyja_events.i"
 	@echo "... src/freyja_events.s"
+	@echo "... src/misc.o"
+	@echo "... src/misc.i"
+	@echo "... src/misc.s"
 
 
 

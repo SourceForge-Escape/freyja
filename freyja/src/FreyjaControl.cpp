@@ -59,7 +59,6 @@
 #include <freyja/PythonABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/PluginABI.h>
-#include <freyja/QueryABI.h>
 #include <freyja/TextureABI.h>
 
 #include "FreyjaOpenGL.h" // for load_shader
@@ -73,10 +72,6 @@ using namespace freyja;
 using namespace freyja3d;
 
 using hel::Vec3;
-
-void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array);
-mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, 
-										 mgtk_tree_t *tree);
 
 FreyjaControl *FreyjaControl::mInstance = NULL;
 uint32 FreyjaControl::mSelectedControlPoint = 0;
@@ -6158,148 +6153,6 @@ void FreyjaControl::EvFreeVertexCreate()
 //////////////////////////////////////////////////////////////////////////
 // Non-class methods, callbacks, and wrappers
 //////////////////////////////////////////////////////////////////////////
-
-void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
-{
-	QueryDialog d;
-	d.mName = "freyjaQueryCallbackHandler"; 
-	d.mDialogIcon = "gtk-question"; 
-	d.mInformationMessage = "Query Dialog"; 
-	d.mCancelIcon = "gtk-cancel"; 
-	d.mCancelText = "Cancel"; 
-	d.mAcceptIcon = "gtk-ok";
-	d.mAcceptText = "Answer"; 
-
-	bool any = false;
-
-	for (uint32 i = 0; i < size; ++i)
-	{
-		const char *type = array[i].type;
-		const char *symbol = array[i].symbol;
-		void *data = array[i].ptr;
-
-		String s = type;
-
-		if (s == "int")
-		{
-			s += " ";
-			s += symbol;
-			QueryDialogValue<int> v(symbol, s.c_str(), *(int *)data);
-			d.mInts.push_back(v);
-			any = true;
-		}
-		else if (s == "float")
-		{
-			s += " ";
-			s += symbol;
-			QueryDialogValue<float> v(symbol, s.c_str(), *(float *)data);
-			d.mFloats.push_back(v);
-			any = true;
-		}
-		else
-		{
-			FREYJA_INFOMSG(false, "FIXME: Unhandled query '%s' '%s' %p\n", 
-						   type, symbol, data);
-		}
-	}
-
-
-	// If the user chooses to set values, set them.
-	if ( any && d.Execute() )
-	{
-		for (uint32 i = 0; i < size; ++i)
-		{
-			String s = array[i].type;
-
-			if (s == "int")
-			{
-				(*(int *)array[i].ptr) = d.GetInt( array[i].symbol );
-			}
-			else if (s == "float")
-			{
-				(*(float *)array[i].ptr) = d.GetFloat( array[i].symbol );
-			}
-			else
-			{
-				// Not handled
-			}
-		}	
-	}
-}
-
-
-// FIXME: Rewrite this to be Skeleton based!!  Allow for bones outside of root
-//        and include Skeleton in tree
-//
-//        Also have tree root be skeleton name, so you can do multiple skeletons
-//        in the widget if needed later ala scene graphs
-mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, 
-										 mgtk_tree_t *tree)
-{
-	if (!freyjaIsBoneAllocated(rootIndex))
-	{
-		freyja_print("!generateSkeletalUI(): No Skeleton root given.\n");
-		return 0x0;
-	}
-
-	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
-	const char *rootName = freyjaGetBoneNameString(rootIndex);
-	uint32 rootSkelBID = rootIndex;//freyjaGetBoneSkeletalBoneIndex(rootIndex);
-
-	if (rootChildCount > freyjaGetBoneCount())
-	{
-		FREYJA_ASSERTMSG(0, "root %i '%s'\nchildren %i > %i\nInvalid bone indices predicted.  Child count exceeds maximum bone count.",
-						 rootIndex, rootName,
-						 rootChildCount, freyjaGetBoneCount());
-		return 0x0;
-	}
-
-	if (tree == 0x0)
-	{
-		tree = new mgtk_tree_t;
-		snprintf(tree->label, 63, "root");	
-		tree->label[63] = '\0';
-		tree->parent = 0x0;
-	}
-	else
-	{
-		snprintf(tree->label, 63, "bone%03i", rootSkelBID);
-		tree->label[63] = '\0';
-	}
-
-	if (rootName[0])
-	{
-		snprintf(tree->label, 63, "%s", rootName);
-		tree->label[63] = '\0';
-	}
-
-	tree->id = rootIndex;
-	tree->numChildren = rootChildCount;
-	tree->children = 0x0;
-
-#if DEBUG_BONE_LOAD
-	printf("-- %s : %i/%i children\n",  
-		   tree->label, tree->numChildren, rootChildCount);
-#endif
-
-	if (tree->numChildren == 0)
-		return tree->parent;
-
-	tree->children = new mgtk_tree_t[tree->numChildren+1];
-
-	for (uint32 count = 0, i = 0; i < rootChildCount; ++i)
-	{
-		uint32 boneChild = freyjaGetBoneChild(rootIndex, i);
-
-		if (freyjaIsBoneAllocated(boneChild))
-		{
-			tree->children[count].parent = tree;
-			freyja_generate_skeletal_ui(skelIndex, boneChild, &tree->children[count++]);
-		}
-	}
-
-	return (tree->parent) ? tree->parent : tree;
-}
 
 
 

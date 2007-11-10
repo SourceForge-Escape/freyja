@@ -24,10 +24,14 @@
 #define GUARD__FREYJA3D_FREYJA_EVENT_H
 
 #include <stdarg.h>
+
+#include <mstl/String.h>
+
 #include <mgtk/mgtk_keys.h>
 #include <mgtk/mgtk_events.h>
-#include <mstl/String.h>
+
 #include <freyja/freyja.h>
+#include <freyja/QueryABI.h>
 
 typedef enum {
 
@@ -340,6 +344,8 @@ void freyja_swap_buffers();
  *
  ------------------------------------------------------*/
 
+
+
 void freyja3d_update_scenegraph();
 /*------------------------------------------------------
  * Pre  : 
@@ -366,6 +372,20 @@ int freyja3d_load_shader(const char* filename);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Shader callback load function.
+ *
+ ------------------------------------------------------*/
+
+mgtk_tree_t* freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, mgtk_tree_t *tree);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Legacy function that generates model for the tree widget.
+ *
+ ------------------------------------------------------*/
+
+void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Legacy function that handles generated queries.
  *
  ------------------------------------------------------*/
 

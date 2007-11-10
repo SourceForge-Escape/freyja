@@ -6,6 +6,7 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Misc events moved out to its own file to start refactoring.
  - Import/export plugin refactoring in client.
  - Changed the order of the filedialog / plugin option dialog for import/export.
  - Sorted import / export filters and menus.
