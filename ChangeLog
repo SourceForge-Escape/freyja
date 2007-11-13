@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Skeleton tree widget is now a scenegraph control.
+ - mgtk_tree refactored to be more flexible and clean.
  - Misc events moved out to its own file to start refactoring.
  - Import/export plugin refactoring in client.
  - Changed the order of the filedialog / plugin option dialog for import/export.
