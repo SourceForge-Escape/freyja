@@ -2,33 +2,29 @@
  TODO
  =============================================================================
 
- Freyja 0.9.5.17	( Halloween Special )
+ Freyja 0.9.5.17	( TBD )
  -----------------------------------------------------------------------------
  
  * Check TODO for cleared tasks.
 
- * New freyja compressed XML file format must be finished.
+ * New XML based freyja file format.
 	- Plugin for importing the old freyja format.
 	- Remove old text / binary format support.
+	- Zip support? ( gzip only right now )
+	- Repacking required.
+	- Only store used materials. ( fix up on load too. )
+		- Instance support for materials.
+	- Save IDs with objects if needed.
+	- Native format should be very stable.
+	- Make external plugins for older text based freyja/ja formats.
 
  * Edit modes setting visual mode for things like skeletal 'bone' animation
 	- Allow for some dialog to allow 'debugging' toggles.
 
- * Want to be able to shuffle around SceneGraphs for threaded loading, etc.
-
- * SceneGraph[]
-	- Metadata[]
-		- MaterialRef[]
-		- ModelRef
-	- Skeleton[]
-		- Bone[]
-	- Model[]
-		- MaterialRef
-		- SkeletonRef
-		- Mesh[]
-	- Material[]
-
  * Scenegraph 
+	- Perhaps add a new column to mgtk_tree for string for type / metadata.
+		- Or just replace numeric column with string.
+	- Work out new graph layout.
 	- Widget needs to be able to select / edit name correctly per 'type'.
 	- Needs to update on every object 'type' creation / name change / removal.
 	- Maybe use backend libfreyja signals?
@@ -38,21 +34,18 @@
 
  * Pick more modules to break up from the FreyjaControl monolith.
 
- * Mlisp / XML / Lua UI script translator.
-
  * Improve and refine skeletal -> mesh animation.
 
  * Work up list of supported formats and their support levels / bugs.
 
  * Timer based refresh for animation playback.
 
- * Vertex / Knife based face splitting.
-
- * Vertex delete broken!!!
-
- * Low-poly 'draw' face creation to fill in gaps in models by vertices.
- 	- Select 3 vertices = action for making triangle.
-	- Select 4 vertices = action for making quad.
+ * Low-poly model creation by vertices features.
+	- Fix vertex deletion.
+	- Vertex / Knife based face splitting (edge midpoint/sliding edge points).
+	- Low-poly 'draw' face creation to fill in gaps in models by vertices.
+	 	- Select 3 vertices = action for making triangle.
+		- Select 4 vertices = action for making quad.
 
  * Just make skeletal animation -> vertex animation a mesh copy operation for now.
 	- Export mesh keyframe.
@@ -60,18 +53,15 @@
 	- Ability to toggle mesh / skeletal mode.
 	- Ability to generate mesh keyframe from skeletal keyframe in the same mesh.
 
+
+ Freyja 0.9.5.18	TBD
+ -----------------------------------------------------------------------------
+
  * Single joint animation shishi odoshi tutorial demo.
 
- * New XML based freyja file format.
-	- Zip support.
-	- Repacking required.
-	- Only store used materials. ( fix up on load too. )
-		- Instance support for materials.
-	- Save IDs with objects if needed.
-	- Native format should be very stable.
-	- Make external plugins for older text based freyja/ja formats.
-
  * libfreyja
+	- True scenegraphs in backend.
+	- Want to be able to shuffle around SceneGraphs for threaded loading, etc.
 	- List like access for meshes eg Mesh::GetNext(i)
 	- Mesh: Face combine, eg 2 adj quads = 1 quad
 	- Mesh: Triangle tess for all polygons.
@@ -112,14 +102,8 @@
 	- Add more options such as perspective settings.
 	- Editor mode support for camera view.
  	- Camera animation editor.
-
- * Enforce file extensions (via filters) with mgtk file dialog?
-
-
- Freyja 0.9.5.18	TBD
- -----------------------------------------------------------------------------
-
- * Second Life plugin
+ 
+ * Mlisp / XML / Lua UI script translator.
 
  * Finish up new keyframing + bones ( UI + renderer ).
 	- Slerp for QuatKeyframe
@@ -130,6 +114,8 @@
 		- Allows *Next() [list] and *ElementAt() [vector] ABI access.
 	- Bone undo support ( maybe store state from edit mode chord )
  	- (Un)Parenting for bones with dashed line UI.
+
+ * Enforce file extensions (via filters) with mgtk file dialog.
 
 
  Freyja, Development branch 0.9.5 ( Current )

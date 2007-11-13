@@ -723,6 +723,7 @@ bool Md5Model::LoadQuakeWarsModel(mstl::SystemIO::TextFileReader &r)
 #include <freyja/freyja.h>
 #include <freyja/BoneABI.h>
 #include <freyja/MeshABI.h>
+#include <freyja/MaterialABI.h>
 #include <freyja/ModelABI.h>
 #include <freyja/PluginABI.h>
 #include <freyja/SkeletonABI.h>
@@ -815,6 +816,20 @@ int freyja_model__md5_import(char *filename)
 		freyjaModelAddMesh(modelIdx, meshIdx);
 		freyjaMeshName1s( meshIdx, mesh.name.c_str() );
 		
+		index_t materialIndex = freyjaMaterialCreate();
+		freyjaMaterialName(materialIndex, mesh.shader.c_str());
+		freyjaMaterialTexture(materialIndex, 0);
+		freyjaMaterialTextureName(materialIndex, mesh.shader.c_str());
+
+#if 0		
+		freyjaMaterialAmbient(materialIndex, ambient);
+		freyjaMaterialDiffuse(materialIndex, diffuse);
+		freyjaMaterialSpecular(materialIndex, specular);
+		freyjaMaterialEmissive(materialIndex, emissive);
+		freyjaMaterialShininess(materialIndex, shininess);
+		freyjaMaterialTransparency(materialIndex, transparency);
+#endif
+
 		// Freyja 0.9.5 wants a non-deformed mesh as input, since
 		// it will later deform the mesh as needed depending on mode.
 		for (unsigned int j = 0; j < mesh.numverts; ++j)
