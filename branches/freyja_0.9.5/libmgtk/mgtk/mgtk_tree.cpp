@@ -28,14 +28,12 @@
 #include "mgtk_callbacks.h"
 #include "mgtk_resource.h"
 #include "mgtk_events.h"
+#include "mgtk_tree.h"
 
 using namespace mstl;
 
 
-// Multiple trees widgets possibly sharing the same event id
-//Map<int, Vector<GtkTreeView *> *> gTreeWidgetMap;
-
-// Multiple tree widgets with unique event ids 
+/* Multiple tree widgets with unique event ids per widget. */
 Map<int, GtkTreeView *> gTreeWidgetMap;
 
 
@@ -78,7 +76,7 @@ void mgtk_resource_rebuild_treeview(int event, GtkTreeModel *model)
 {
 	GtkTreeView *view = mgtk_tree_get_treeview(event);
 
-	if (view && model)
+	if ( view && model )
 	{
 		gtk_tree_view_set_model(view, model);
 	}
@@ -237,143 +235,149 @@ arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *container)
 // mgtk event - tree model builder helper
 //////////////////////////////////////////////////////////////////////
 
-mgtk_tree_t *mgtk_event_tree_new(int id, const char *label)
+mgtk_tree_t* mgtk_tree_new(const char* label, int id)
 {
 	mgtk_tree_t *tree = new mgtk_tree_t;
-	tree->parent = NULL;
+
 	snprintf(tree->label, mgtk_tree_label_size, label);
-	tree->label[mgtk_tree_label_size-1] = 0;
+	tree->label[mgtk_tree_label_size-1] = '\0';
 	tree->id = id;
-	tree->numChildren = 0;
-	tree->children = NULL;
+
+	tree->parent = NULL;
+	tree->child = NULL;
+	tree->sibling = NULL;
 
 	return tree;
 }
 
 
-void mgtk_event_tree_copy(mgtk_tree_t *src, mgtk_tree_t *dest)
+void mgtk_tree_shallow_copy(mgtk_tree_t* src, mgtk_tree_t* dest)
 {
-	if (src && dest)
+	if ( src && dest )
 	{
-		snprintf(dest->label, mgtk_tree_label_size, src->label);
-		dest->label[mgtk_tree_label_size-1] = 0;
 		dest->id = src->id;
+		snprintf(dest->label, mgtk_tree_label_size, src->label);
+		dest->label[ mgtk_tree_label_size - 1 ] = '\0';
+
 		dest->parent = src->parent;
-
-		// NOTE: Shallow copy
-		dest->numChildren = src->numChildren;
-		dest->children = src->children;
-		//MSTL_MSG("*** '%s' %i", dest->label, dest->id);
+		dest->child = src->child;
+		dest->sibling = src->sibling;
 	}
 }
 
 
-void mgtk_event_tree_add_child(mgtk_tree_t *parent, mgtk_tree_t *child)
+void mgtk_tree_add_child(mgtk_tree_t* parent, mgtk_tree_t* child)
 {
-	if (parent && child)
-	{
-		if (child->parent)
-		{
-			// Might want to do something here later
-		}
+	/* Throw a warning dialog for debugging on invalid precondition. */
+	//MGTK_ASSERTMSG( (parent && child), "Assertion failure.");
 
-		MGTK_ASSERTMSG(child->parent == NULL, "Overwriting tree->parent");
+	if ( parent && child )
+	{
+		/* Throw a warning dialog for debugging on overwrite. */
+		MGTK_ASSERTMSG(child->parent == NULL, "Overwriting tree->parent.");
+
+		/* Set child record. */
 		child->parent = parent;
+		child->sibling = NULL;
 
-		// NOTE: Until the new mgtk_tree struct is introduced this will 
-		//       be a horrible 'dumb vector' merry-go-round insertion
-		mgtk_tree_t *array = parent->children;
-		parent->children = new mgtk_tree_t[parent->numChildren+1];
-
-		for (int i = 0, n = parent->numChildren; i < n; ++i)
+		/* Append to parent's child list. */
+		if ( !parent->child )
 		{
-			//MSTL_MSG("*** '%s' %i", array[i].label, array[i].id);
-			mgtk_event_tree_copy(array+i, parent->children+i);
+			parent->child = child;
 		}
-		
-		if (array)
-			delete [] array;
-
-		mgtk_event_tree_copy(child, parent->children+parent->numChildren);
-		parent->numChildren++;
-		delete child;
-	}
-}
-
-
-void mgtk_event_tree_add_new_child(mgtk_tree_t *parent, int id, const char *label)
-{
-	mgtk_event_tree_add_child(parent, mgtk_event_tree_new(id, label));
-}
-
-
-void mgtk_event_tree_children_delete(mgtk_tree_t *tree)
-{
-	if (tree)
-	{
-		if (tree->children)
+		else
 		{
-			for (unsigned int i = 0; i < tree->numChildren; ++i)
+			mgtk_tree_t* node = parent->child;
+
+			if ( node )
 			{
-				mgtk_event_tree_children_delete( tree->children + i );
-			}
+				while ( node->sibling )
+				{
+					node = node->sibling;
+				}
 
-			delete [] tree->children;
+				node->sibling = child;
+			}
 		}
 	}
 }
 
 
-void mgtk_event_tree_delete(mgtk_tree_t *tree)
+mgtk_tree_t* mgtk_tree_add_new_child(mgtk_tree_t* parent, const char* label, int id)
+{
+	mgtk_tree_t* child = mgtk_tree_new(label, id);
+	mgtk_tree_add_child( parent, child );
+	return child;
+}
+
+
+void mgtk_tree_delete_children(mgtk_tree_t* tree)
 {
 	if (tree)
 	{
-		mgtk_event_tree_children_delete(tree);
+		tree->child = NULL;
+		mgtk_tree_delete( tree->child );
+	}
+}
+
+
+void mgtk_tree_delete(mgtk_tree_t* tree)
+{
+	if ( tree )
+	{
+		mgtk_tree_delete( tree->sibling );
+		mgtk_tree_delete( tree->child );
 		delete tree;
 	}
 }
 
 
-void mgtk_event_update_gtk_tree(int event, mgtk_tree_t *tree,
-								GtkTreeStore *store, GtkTreeIter root)
+void mgtk_tree_update_widget_helper(const char* name, int event, mgtk_tree_t* tree, 
+									GtkTreeStore* store, GtkTreeIter root)
 {
 	if (!tree)
 	{	
 		GtkTreeIter root;
 		GtkTreeStore *store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
-								   G_TYPE_STRING,   /* Bone Name */
-    	                           G_TYPE_INT);     /* Bone Id */
+												 G_TYPE_STRING,   /* Node name */
+												 G_TYPE_INT);     /* Node id */
 
 		gtk_tree_store_append(store, &root, NULL);
 		gtk_tree_store_set(store, &root,
-						   NAME_COLUMN, "Skeleton",
+						   NAME_COLUMN, name,
 						   ID_COLUMN, -1,
 						   -1);
 		mgtk_resource_rebuild_treeview(event, GTK_TREE_MODEL(store));
 		return;
-	}
-
-	GtkTreeIter child;
-	unsigned int i;
+	}	
 
 #ifdef DEBUG_UPDATE_GTK_TREE
 	mgtk_print("mgtk_event_update_gtk_tree %d::\n", tree->id);
 #endif
 
-	if (tree->id == -1 && tree->children) // 'Hidden root' to make a 'flat' list
+	/* 'Hidden root' to make a 'flat' list view. */
+	if ( tree->id == -2 && tree->child )
 	{
-		for (i = 1; i < tree->numChildren; ++i)
+		GtkTreeIter child;
+		mgtk_tree_t* node = tree->child;
+
+		if ( node )
 		{
-			mgtk_event_update_gtk_tree(event, &tree->children[i], store, child);
+			/* List view skips first child node. */
+			while ( node->sibling )
+			{
+				mgtk_tree_update_widget_helper(name, event, node->sibling, store, child);
+				node = node->sibling;
+			}
 		}
 
-		mgtk_resource_rebuild_treeview(event, GTK_TREE_MODEL(store));
+		mgtk_resource_rebuild_treeview( event, GTK_TREE_MODEL(store) );
 	}
-	else if (tree->id == 0) // Root bone
+	else if ( tree->id == -1 ) // 'Root'
 	{
 		store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
-								   G_TYPE_STRING,   /* Bone Name */
-    	                           G_TYPE_INT);     /* Bone Id */
+								   G_TYPE_STRING,   /* Tree name */
+    	                           G_TYPE_INT);     /* Tree node (root) id */
 
 		gtk_tree_store_append(store, &root, NULL);
 		gtk_tree_store_set(store, &root,
@@ -381,12 +385,20 @@ void mgtk_event_update_gtk_tree(int event, mgtk_tree_t *tree,
 						   ID_COLUMN, tree->id,
 						   -1);
 
-		for (i = 0; i < tree->numChildren; ++i)
+		mgtk_tree_t* node = tree->child;
+
+		if ( node )
 		{
-			mgtk_event_update_gtk_tree(event, &tree->children[i], store, root);
+			mgtk_tree_update_widget_helper(name, event, node, store, root);	
+
+			while ( node->sibling )
+			{
+				mgtk_tree_update_widget_helper(name, event, node->sibling, store, root);
+				node = node->sibling;
+			}
 		}
 
-		mgtk_resource_rebuild_treeview(event, GTK_TREE_MODEL(store));
+		mgtk_resource_rebuild_treeview( event, GTK_TREE_MODEL(store) );
 	}
 	else if (!store)
 	{
@@ -394,41 +406,42 @@ void mgtk_event_update_gtk_tree(int event, mgtk_tree_t *tree,
 	}
 	else
 	{
+		GtkTreeIter child;
 		gtk_tree_store_append(store, &child, &root);
 		gtk_tree_store_set(store, &child,
 						   NAME_COLUMN, tree->label,
 						   ID_COLUMN, tree->id,
 						   -1);
 
-		for (i = 0; i < tree->numChildren; ++i)
+		mgtk_tree_t* node = tree->child;
+
+		if ( node )
 		{
-			mgtk_event_update_gtk_tree(event, &tree->children[i], store, child);
+			mgtk_tree_update_widget_helper(name, event, node, store, child);	
+
+			while ( node->sibling )
+			{
+				mgtk_tree_update_widget_helper(name, event, node->sibling, store, child);
+				node = node->sibling;
+			}
 		}
 	}
 }
 
 
-void mgtk_event_update_tree(unsigned int id, mgtk_tree_t *tree)
+void mgtk_tree_update_widget(const char* name, unsigned int id, mgtk_tree_t* tree)
 {
 	GtkTreeIter root;
-
-	mgtk_event_update_gtk_tree(id, tree, NULL, root);
+	mgtk_tree_update_widget_helper(name, id, tree, NULL, root);
 }
 
 
 
-//////////////////////////////////////////////////////////////////////////
-// new tree
-//////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+// mgtk_tree_path
+/////////////////////////////////////////////////////////////////////
 
-Map<int, GtkTreeIter *> gTreeIterMap;
-
-// GtkTreeView *treeview = mgtk_tree_get_treeview(event);
-// GtkTreeModel *model = gtk_tree_view_get_model(treeview);
-//void                gtk_tree_iter_free                  (GtkTreeIter *iter);
-//gchar*              gtk_tree_model_get_string_from_iter (GtkTreeModel *tree_model,
-//                                                         GtkTreeIter *iter);
-
+//Map<int, GtkTreeIter *> gTreeIterMap;
 
 GtkTreeStore *mgtk_tree_store_new(const char *types)
 {
@@ -463,7 +476,7 @@ GtkTreeStore *mgtk_tree_store_new(const char *types)
 }
 
 
-char *mgtk_tree_new(int widget_id, const char *types, ...)
+char *mgtk_tree_path_new(int widget_id, const char *types, ...)
 {
 	GtkTreeStore *store = mgtk_tree_store_new(types);
 	GtkTreeIter root;
@@ -481,13 +494,13 @@ char *mgtk_tree_new(int widget_id, const char *types, ...)
 }
 
 
-void mgtk_tree_free_path(char *path)
+void mgtk_tree_path_free(char *path)
 {
 	if (path) g_free(path);
 }
 
 
-char *mgtk_tree_append(int widget_id, const char *path, const char *types, ...)
+char *mgtk_tree_path_append(int widget_id, const char *path, const char *types, ...)
 {
 	GtkTreeView *tree_view = mgtk_tree_get_treeview(widget_id);
 	GtkTreeModel *tree_model = gtk_tree_view_get_model(tree_view);
@@ -512,12 +525,3 @@ char *mgtk_tree_append(int widget_id, const char *path, const char *types, ...)
 	return NULL;
 }
 
-
-
-
-// EXP: This is a test to see if you can run the other func via CLI-like
-//      interface to avoid passing C-structs
-void mgtk_event_tree_builder(mgtk_tree_t *&tree, const char *format, ...)
-{
-	// Removed
-}

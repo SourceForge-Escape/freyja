@@ -344,7 +344,22 @@ void freyja_swap_buffers();
  *
  ------------------------------------------------------*/
 
+void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Legacy function that handles generated queries.
+ *
+ ------------------------------------------------------*/
 
+
+// 'freyja3d' 
+
+void freyja3d_scenegraph_init();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Initialize the scenegraph widget(s).
+ *
+ ------------------------------------------------------*/
 
 void freyja3d_update_scenegraph();
 /*------------------------------------------------------
@@ -372,20 +387,6 @@ int freyja3d_load_shader(const char* filename);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Shader callback load function.
- *
- ------------------------------------------------------*/
-
-mgtk_tree_t* freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, mgtk_tree_t *tree);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Legacy function that generates model for the tree widget.
- *
- ------------------------------------------------------*/
-
-void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Legacy function that handles generated queries.
  *
  ------------------------------------------------------*/
 

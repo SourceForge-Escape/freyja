@@ -33,11 +33,13 @@
 #include <freyja/MaterialABI.h>
 #include <freyja/LuaABI.h>
 #include <freyja/FreyjaImage.h>
+#include <freyja/Metadata.h>
 
 #include <mstl/SystemIO.h>
 
 #include <mgtk/mgtk_events.h>
 #include <mgtk/mgtk_linker.h>
+#include <mgtk/mgtk_tree.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/ConfirmationDialog.h>
 #include <mgtk/QueryDialog.h>
@@ -55,10 +57,91 @@ arg_list_t *freyja_rc_color(arg_list_t *args);
 
 using namespace freyja3d;
 
+void freyja3d_update_scenegraph_skeleton_helper(mgtk_tree_t* subroot, index_t id)
+{
+	if (!subroot)
+		return;
+
+	for (uint32 i = 0, n = freyjaGetBoneChildCount(id); i < n; ++i)
+	{
+		index_t cid = freyjaGetBoneChild(id, i);
+		mgtk_tree_t* child = mgtk_tree_add_new_child( subroot, freyjaGetBoneNameString(cid), cid );
+		freyja3d_update_scenegraph_skeleton_helper(child, cid);
+	}	
+}
+
 
 void freyja3d_update_scenegraph()
 {
-	FreyjaControl::GetInstance()->UpdateSkeletalUI();
+	/* Generate treeview model. */
+	mgtk_tree_t* scene = mgtk_tree_new("Scene", -1); // -1 is treemodel root.
+
+	/* Metadata */
+	{
+		mgtk_tree_t* subroot = mgtk_tree_add_new_child( scene, "Metadata", 0 );
+
+		for (uint32 i = 0, n = Metadata::GetObjectCount(); i < n; ++i)
+		{
+			Metadata* metadata = Metadata::GetObjectByUid( i );
+			
+			// This method will encounter any 'gaps' ( NULL pointers ) in the container.
+			if ( metadata )
+			{
+				mgtk_tree_t* node = mgtk_tree_add_new_child( subroot, metadata->GetName(), i );
+				mgtk_tree_add_new_child( node, metadata->GetType(), 0 );
+				mgtk_tree_add_new_child( node, metadata->GetModel(), 0 );
+				mgtk_tree_add_new_child( node, metadata->GetMaterial(), 0 );
+			}
+		}
+	}
+
+	/* Materials. */
+	{
+		mgtk_tree_t* material = mgtk_tree_add_new_child( scene, "Material", 0 );
+
+		for (uint32 i = 0, n = freyjaGetMaterialCount(); i < n; ++i)
+		{
+			mgtk_tree_add_new_child( material, freyjaGetMaterialName(i), i );
+		}
+	}
+
+	/* Model / Meshes */
+	{
+		mgtk_tree_t* model = mgtk_tree_add_new_child( scene, "Model", 0 );
+		mgtk_tree_t* meshes = mgtk_tree_add_new_child( model, "Meshes", 0 );
+
+		for (uint32 i = 0, n = freyjaGetMeshCount(); i < n; ++i)
+		{
+			if ( freyjaIsMeshAllocated(i) )
+			{
+				mgtk_tree_add_new_child( meshes, freyjaGetMeshNameString(i), i );
+			}
+		}
+	}
+
+	/* Skeleton / Bones */
+	{
+		mgtk_tree_t* skeleton = mgtk_tree_add_new_child( scene, "Skeleton", 0 );
+		
+		for (uint32 i = 0, n = freyjaGetBoneCount(); i < n; ++i)
+		{
+			if ( freyjaIsBoneAllocated(i) )
+			{
+				if ( freyjaGetBoneParent(i) == INDEX_INVALID )
+				{
+					// This is either a root or subroot at the top level.
+					mgtk_tree_t* root = mgtk_tree_add_new_child( skeleton, freyjaGetBoneNameString(i), i );
+					freyja3d_update_scenegraph_skeleton_helper(root, i);
+				}
+			}
+		}
+	}
+
+	/* Update treeview widget(s). */
+	mgtk_tree_update_widget( "Scene", FreyjaControl::EvBoneIteratorId, scene ); // FIXME: EvSceneGraphId
+
+	/* Free tree model. */
+	mgtk_tree_delete( scene );
 }
 
 
@@ -68,79 +151,10 @@ void freyja3d_record_saved_model(const char* filename)
 }
 
 
-// FIXME: Rewrite this to be Skeleton based!!  Allow for bones outside of root
-//        and include Skeleton in tree
-//
-//        Also have tree root be skeleton name, so you can do multiple skeletons
-//        in the widget if needed later ala scene graphs
-mgtk_tree_t *freyja_generate_skeletal_ui(uint32 skelIndex, uint32 rootIndex, 
-										 mgtk_tree_t *tree)
+void freyja3d_scenegraph_init()
 {
-	if (!freyjaIsBoneAllocated(rootIndex))
-	{
-		freyja_print("!generateSkeletalUI(): No Skeleton root given.\n");
-		return 0x0;
-	}
-
-	uint32 rootChildCount = freyjaGetBoneChildCount(rootIndex);
-	const char *rootName = freyjaGetBoneNameString(rootIndex);
-	uint32 rootSkelBID = rootIndex;//freyjaGetBoneSkeletalBoneIndex(rootIndex);
-
-	if (rootChildCount > freyjaGetBoneCount())
-	{
-		FREYJA_ASSERTMSG(0, "root %i '%s'\nchildren %i > %i\nInvalid bone indices predicted.  Child count exceeds maximum bone count.",
-						 rootIndex, rootName,
-						 rootChildCount, freyjaGetBoneCount());
-		return 0x0;
-	}
-
-	if (tree == 0x0)
-	{
-		tree = new mgtk_tree_t;
-		snprintf(tree->label, 63, "root");	
-		tree->label[63] = '\0';
-		tree->parent = 0x0;
-	}
-	else
-	{
-		snprintf(tree->label, 63, "bone%03i", rootSkelBID);
-		tree->label[63] = '\0';
-	}
-
-	if (rootName[0])
-	{
-		snprintf(tree->label, 63, "%s", rootName);
-		tree->label[63] = '\0';
-	}
-
-	tree->id = rootIndex;
-	tree->numChildren = rootChildCount;
-	tree->children = 0x0;
-
-#if DEBUG_BONE_LOAD
-	printf("-- %s : %i/%i children\n",  
-		   tree->label, tree->numChildren, rootChildCount);
-#endif
-
-	if (tree->numChildren == 0)
-		return tree->parent;
-
-	tree->children = new mgtk_tree_t[tree->numChildren+1];
-
-	for (uint32 count = 0, i = 0; i < rootChildCount; ++i)
-	{
-		uint32 boneChild = freyjaGetBoneChild(rootIndex, i);
-
-		if (freyjaIsBoneAllocated(boneChild))
-		{
-			tree->children[count].parent = tree;
-			freyja_generate_skeletal_ui(skelIndex, boneChild, &tree->children[count++]);
-		}
-	}
-
-	return (tree->parent) ? tree->parent : tree;
+	freyja3d_update_scenegraph();
 }
-
 
 
 void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
@@ -539,12 +553,15 @@ void freyja_handle_resource_start()
 	freyja_handle_resource_init(FreyjaControl::GetInstance()->GetResource());
 
 	/* User install of icons, samples, configs, etc */
-	if (!freyja_is_user_installed())
+	if ( !freyja_is_user_installed() )
 		freyja_install_user();
 
 	/* Build the user interface from scripts and load user preferences. */
 	FreyjaControl::GetInstance()->Init();
 	freyja3d_plugin_application_widget_init();
+
+	/* Setup scenegraph widget(s). */
+	freyja3d_scenegraph_init();
 
 	/* Setup material interface */
 	MaterialControl::GetInstance()->RefreshInterface();

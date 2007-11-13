@@ -37,7 +37,6 @@
 
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
-#include <mgtk/QueryDialog.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/ResourceEventDelegate.h>
 #include <mgtk/ConfirmationDialog.h>
@@ -61,10 +60,8 @@
 #include <freyja/PluginABI.h>
 #include <freyja/TextureABI.h>
 
-#include "FreyjaOpenGL.h" // for load_shader
 #include "Plugins.h"
 #include "freyja_events.h"
-
 #include "FreyjaControl.h"
 
 using namespace mstl;
@@ -1722,6 +1719,9 @@ void FreyjaControl::PrintInfo()
 
 void FreyjaControl::UpdateSkeletalUI()
 {
+	freyja3d_scenegraph_init();
+
+#if 0 // 0
 	uint32 skeleton = GetSelectedSkeleton();
 	index_t root = freyjaGetSkeletonRootIndex(skeleton);
 
@@ -1746,6 +1746,7 @@ void FreyjaControl::UpdateSkeletalUI()
 		mgtk_event_update_tree(FreyjaControl::EvBoneIteratorId, NULL);
 #endif
 	}
+#endif // 0
 }
 
 

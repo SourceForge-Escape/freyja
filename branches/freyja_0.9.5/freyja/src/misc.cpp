@@ -492,6 +492,8 @@ void eGenerateCube()
 		index_t mesh = freyjaMeshCreateCube(v.mVec, size);
 		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
 		FreyjaControl::GetInstance()->Dirty();
+
+		freyja3d_update_scenegraph();
 	}
 }
 

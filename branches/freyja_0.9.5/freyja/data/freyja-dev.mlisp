@@ -784,8 +784,8 @@
 
 				(handlebox 1
 				(vbox 1 1 0 1 1
-					(expander "Skeleton" 1
-						(textbox eSkeletonName)
+					(expander "Scenegraph" 1
+						;(textbox eSkeletonName)
 						(tree eBoneIterator eSetBoneName)
 					
 					) ; expander
