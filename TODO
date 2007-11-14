@@ -2,7 +2,7 @@
  TODO
  =============================================================================
 
- Freyja 0.9.5.17	( TBD )
+ Freyja 0.9.5.17	TBD
  -----------------------------------------------------------------------------
  
  * Check TODO for cleared tasks.
@@ -10,8 +10,7 @@
  * New XML based freyja file format.
 	- Plugin for importing the old freyja format.
 	- Remove old text / binary format support.
-	- Zip support? ( gzip only right now )
-	- Repacking required.
+	- Add Zip support. ( gzip only right now )
 	- Only store used materials. ( fix up on load too. )
 		- Instance support for materials.
 	- Save IDs with objects if needed.
@@ -20,6 +19,7 @@
 
  * Edit modes setting visual mode for things like skeletal 'bone' animation
 	- Allow for some dialog to allow 'debugging' toggles.
+	- Just have a toggle for 'bones' which will enable either the ref or pose.
 
  * Scenegraph 
 	- Perhaps add a new column to mgtk_tree for string for type / metadata.
@@ -32,13 +32,8 @@
  * Material import should create materials where needed for every model plugin.
  	- Material tab with material names or just use new scenegraph?
 
- * Pick more modules to break up from the FreyjaControl monolith.
-
  * Improve and refine skeletal -> mesh animation.
-
- * Work up list of supported formats and their support levels / bugs.
-
- * Timer based refresh for animation playback.
+	- Make the GUI easier to use for conversion.
 
  * Low-poly model creation by vertices features.
 	- Fix vertex deletion.
@@ -58,6 +53,12 @@
  -----------------------------------------------------------------------------
 
  * Single joint animation shishi odoshi tutorial demo.
+
+ * Break up remaining monolithic source files into modules. (cont)
+ 
+ * Work up list of supported formats and their support levels / bugs. (cont)
+
+ * Timer based refresh for animation playback widget a la blender.
 
  * libfreyja
 	- True scenegraphs in backend.

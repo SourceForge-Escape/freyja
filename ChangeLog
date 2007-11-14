@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - *_rc_color mlisp implementation pushed down into libmgtk.
+ - Enforing GTK_IS_ENTRY again for mgtk_textentry_value_set().
  - Skeleton tree widget is now a scenegraph control. (1071)
  - mgtk_tree refactored to be more flexible and clean.
  - Misc events moved out to its own file to start refactoring.

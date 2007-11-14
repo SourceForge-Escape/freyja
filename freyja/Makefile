@@ -255,6 +255,18 @@ src/Texture.s:
 	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Texture.s
 
 # target to build an object file
+src/freyja3d_scenegraph.o:
+	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja3d_scenegraph.o
+
+# target to preprocess a source file
+src/freyja3d_scenegraph.i:
+	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja3d_scenegraph.i
+
+# target to generate assembly for a file
+src/freyja3d_scenegraph.s:
+	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja3d_scenegraph.s
+
+# target to build an object file
 src/freyja_events.o:
 	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja_events.o
 
@@ -323,6 +335,9 @@ help::
 	@echo "... src/Texture.o"
 	@echo "... src/Texture.i"
 	@echo "... src/Texture.s"
+	@echo "... src/freyja3d_scenegraph.o"
+	@echo "... src/freyja3d_scenegraph.i"
+	@echo "... src/freyja3d_scenegraph.s"
 	@echo "... src/freyja_events.o"
 	@echo "... src/freyja_events.i"
 	@echo "... src/freyja_events.s"

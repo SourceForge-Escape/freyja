@@ -2,11 +2,11 @@
 /*===========================================================================
  * 
  * Project : Freyja
- * Author  : Mongoose
- * Website : http://icculus.org/mongoose/
+ * Author  : Terry 'Mongoose' Hendrix II
+ * Website : http://icculus.org/freyja/
  * Email   : mongooseichiban@gmail.com
  * Object  : 
- * License : (C) 2001-2007 Mongoose
+ * License : (C) 2001-2007 Terry 'Mongoose' Hendrix II
  * Comments: This is the event system facade for mgtk for freyja.
  *
  *           It's independent of the widget set, etc

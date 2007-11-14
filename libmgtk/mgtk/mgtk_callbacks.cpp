@@ -257,7 +257,7 @@ void mgtk_textentry_value_set(int event, const char *s)
 	{
 		test = (*widgets)[i];
 
-		if (test)// && GTK_IS_ENTRY(test))
+		if ( test && GTK_IS_ENTRY(test) )
 		{
 			gtk_entry_set_text(GTK_ENTRY(test), s);
 		}

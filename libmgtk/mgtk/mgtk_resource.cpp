@@ -2363,3 +2363,40 @@ arg_list_t *mgtk_rc_menubar(arg_list_t *arg)
 	return ret;
 }
 
+
+arg_list_t *mgtk_rc_color(arg_list_t *args)
+{
+	arg_list_t *sym, *r, *g, *b, *a;
+
+	symbol_enforce_type(&sym, INT);
+	symbol_enforce_type(&r, FLOAT);
+	symbol_enforce_type(&g, FLOAT);
+	symbol_enforce_type(&b, FLOAT);
+	symbol_enforce_type(&a, FLOAT);
+
+	// Call event func here - simulated with printf in tests
+	if (sym && r && g && b && a)
+	{
+#if DEBUG_RESOURCE_COLOR
+		mgtk_print("extern \"C\" { color(%s, %f, %f, %f); }\n",
+				   get_int(sym),//get_string(sym),
+				   get_float(r), get_float(g), get_float(b));
+#endif
+
+		mgtk_handle_color(get_int(sym),
+						  get_float(r), get_float(g), get_float(b),
+						  get_float(a));
+	}
+	else
+	{
+		mgtk_print("mgtk_rc_color> Failed to extract strict typed data from script\n");
+	}
+
+	delete_arg(&sym);
+	delete_arg(&r);
+	delete_arg(&g);
+	delete_arg(&b);
+	delete_arg(&a);
+
+	return NULL;
+}
