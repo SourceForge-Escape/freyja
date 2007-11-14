@@ -566,6 +566,7 @@ Resource::Resource() :
 	RegisterFunction("label", mgtk_rc_label);
 	RegisterFunction("label2", mgtk_rc_label2);
 	RegisterFunction("colorbutton", mgtk_rc_colorbutton);
+	RegisterFunction("color", mgtk_rc_color);
 	RegisterFunction("button", mgtk_rc_button);
 	RegisterFunction("togglebutton", mgtk_rc_togglebutton);
 	RegisterFunction("spinbutton", mgtk_rc_spinbutton);

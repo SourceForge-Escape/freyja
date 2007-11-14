@@ -2,11 +2,11 @@
 /*===========================================================================
  * 
  * Project : Freyja
- * Author  : Mongoose
- * Website : http://icculus.org/mongoose/
+ * Author  : Terry 'Mongoose' Hendrix II
+ * Website : http://icculus.org/freyja/
  * Email   : mongooseichiban@gmail.com
  * Object  : 
- * License : No use w/o permission (C) 2001 Mongoose
+ * License : No use w/o permission (C) 2001 Terry 'Mongoose' Hendrix II
  * Comments: This is the common event system interface
  *           for freyja
  *
@@ -48,112 +48,18 @@
 #include "FreyjaRender.h"
 #include "FreyjaControl.h"
 #include "Plugins.h"
+#include "freyja3d_scenegraph.h"
 #include "freyja_events.h"
 
 void freyja3d_misc_events_attach();
 
-arg_list_t *freyja_rc_color(arg_list_t *args);
-
 
 using namespace freyja3d;
-
-void freyja3d_update_scenegraph_skeleton_helper(mgtk_tree_t* subroot, index_t id)
-{
-	if (!subroot)
-		return;
-
-	for (uint32 i = 0, n = freyjaGetBoneChildCount(id); i < n; ++i)
-	{
-		index_t cid = freyjaGetBoneChild(id, i);
-		mgtk_tree_t* child = mgtk_tree_add_new_child( subroot, freyjaGetBoneNameString(cid), cid );
-		freyja3d_update_scenegraph_skeleton_helper(child, cid);
-	}	
-}
-
-
-void freyja3d_update_scenegraph()
-{
-	/* Generate treeview model. */
-	mgtk_tree_t* scene = mgtk_tree_new("Scene", -1); // -1 is treemodel root.
-
-	/* Metadata */
-	{
-		mgtk_tree_t* subroot = mgtk_tree_add_new_child( scene, "Metadata", 0 );
-
-		for (uint32 i = 0, n = Metadata::GetObjectCount(); i < n; ++i)
-		{
-			Metadata* metadata = Metadata::GetObjectByUid( i );
-			
-			// This method will encounter any 'gaps' ( NULL pointers ) in the container.
-			if ( metadata )
-			{
-				mgtk_tree_t* node = mgtk_tree_add_new_child( subroot, metadata->GetName(), i );
-				mgtk_tree_add_new_child( node, metadata->GetType(), 0 );
-				mgtk_tree_add_new_child( node, metadata->GetModel(), 0 );
-				mgtk_tree_add_new_child( node, metadata->GetMaterial(), 0 );
-			}
-		}
-	}
-
-	/* Materials. */
-	{
-		mgtk_tree_t* material = mgtk_tree_add_new_child( scene, "Material", 0 );
-
-		for (uint32 i = 0, n = freyjaGetMaterialCount(); i < n; ++i)
-		{
-			mgtk_tree_add_new_child( material, freyjaGetMaterialName(i), i );
-		}
-	}
-
-	/* Model / Meshes */
-	{
-		mgtk_tree_t* model = mgtk_tree_add_new_child( scene, "Model", 0 );
-		mgtk_tree_t* meshes = mgtk_tree_add_new_child( model, "Meshes", 0 );
-
-		for (uint32 i = 0, n = freyjaGetMeshCount(); i < n; ++i)
-		{
-			if ( freyjaIsMeshAllocated(i) )
-			{
-				mgtk_tree_add_new_child( meshes, freyjaGetMeshNameString(i), i );
-			}
-		}
-	}
-
-	/* Skeleton / Bones */
-	{
-		mgtk_tree_t* skeleton = mgtk_tree_add_new_child( scene, "Skeleton", 0 );
-		
-		for (uint32 i = 0, n = freyjaGetBoneCount(); i < n; ++i)
-		{
-			if ( freyjaIsBoneAllocated(i) )
-			{
-				if ( freyjaGetBoneParent(i) == INDEX_INVALID )
-				{
-					// This is either a root or subroot at the top level.
-					mgtk_tree_t* root = mgtk_tree_add_new_child( skeleton, freyjaGetBoneNameString(i), i );
-					freyja3d_update_scenegraph_skeleton_helper(root, i);
-				}
-			}
-		}
-	}
-
-	/* Update treeview widget(s). */
-	mgtk_tree_update_widget( "Scene", FreyjaControl::EvBoneIteratorId, scene ); // FIXME: EvSceneGraphId
-
-	/* Free tree model. */
-	mgtk_tree_delete( scene );
-}
 
 
 void freyja3d_record_saved_model(const char* filename)
 {
 	FreyjaControl::GetInstance()->RecordSavedModel(filename);
-}
-
-
-void freyja3d_scenegraph_init()
-{
-	freyja3d_update_scenegraph();
 }
 
 
@@ -348,7 +254,7 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 const char *freyja_get_resource_path_callback()
 {
 	static String s;
-	s = freyja_get_resource_path(); // in case it's changed somehow
+	s = freyja_get_resource_path(); // In case it's changed refresh here.
 	return s.c_str();
 }
 
@@ -487,9 +393,8 @@ void freyja_handle_resource_init(Resource &r)
 	// Non-class listeners
 	freyja3d_misc_events_attach();
 
-	/* Mongoose 2002.01.12, 
-	 * Bind script functions to C/C++ functions */
-	r.RegisterFunction("color", freyja_rc_color);
+	// Bind mlisp script functions to C/C++ functions.
+	//r.RegisterFunction("funcname", freyja_rc_funcname);
 
 
 	////////////////////////////////////////////////////////////////////
@@ -497,7 +402,7 @@ void freyja_handle_resource_init(Resource &r)
 	////////////////////////////////////////////////////////////////////
 
 	/* Mongoose 2002.01.21, 
-	 * Bind some script vars to matching name in C/C++ */
+	 * Bind some script vars to matching symbol in C/C++ */
 
 	// Event types used for flow control of event ids
 	r.RegisterInt("eMode", eMode);
@@ -933,45 +838,6 @@ char *freyja_rc_map(char *basename)
 	String s = freyja_get_resource_path();
 	s += basename;
 	return mstl::String::Strdup(s.c_str());;
-}
-
-
-arg_list_t *freyja_rc_color(arg_list_t *args)
-{
-	arg_list_t *sym, *r, *g, *b, *a;
-
-
-	symbol_enforce_type(&sym, INT);
-	symbol_enforce_type(&r, FLOAT);
-	symbol_enforce_type(&g, FLOAT);
-	symbol_enforce_type(&b, FLOAT);
-	symbol_enforce_type(&a, FLOAT);
-
-	// Call event func here - simulated with printf in tests
-	if (sym && r && g && b && a)
-	{
-#if DEBUG_RESOURCE_COLOR
-		freyja_print("extern \"C\" { color(%s, %f, %f, %f); }\n",
-					 get_int(sym),//get_string(sym),
-					 get_float(r), get_float(g), get_float(b));
-#endif
-
-		mgtk_handle_color(get_int(sym),
-						  get_float(r), get_float(g), get_float(b),
-						  get_float(a));
-	}
-	else
-	{
-		printf("color> Failed to extract strict typed data from script\n");
-	}
-
-	delete_arg(&sym);
-	delete_arg(&r);
-	delete_arg(&g);
-	delete_arg(&b);
-	delete_arg(&a);
-
-	return NULL;
 }
 
 

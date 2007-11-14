@@ -33,6 +33,7 @@
 #include <mgtk/ResourceEventDelegate.h>
 #include <mgtk/ConfirmationDialog.h>
 
+#include "freyja3d_scenegraph.h"
 #include "Control.h"
 #include "Plugins.h"
 
@@ -568,7 +569,7 @@ void ePluginImport(ResourceEvent *e)
 						freyjaCurrentSkeleton(0);
 					}
 
-					freyja3d_update_scenegraph();
+					freyja3d_scenegraph_update();
 				}
 			}
 			else

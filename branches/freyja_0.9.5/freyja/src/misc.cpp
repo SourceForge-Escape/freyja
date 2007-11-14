@@ -31,8 +31,9 @@
 #include <mgtk/ConfirmationDialog.h>
 #include <mgtk/MGtkLua.h>
 
-#include "FreyjaControl.h"
 #include "freyja_events.h"
+#include "freyja3d_scenegraph.h"
+#include "FreyjaControl.h"
 
 using namespace freyja3d;
 
@@ -493,7 +494,7 @@ void eGenerateCube()
 		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
 		FreyjaControl::GetInstance()->Dirty();
 
-		freyja3d_update_scenegraph();
+		freyja3d_scenegraph_update();
 	}
 }
 
