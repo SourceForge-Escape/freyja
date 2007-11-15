@@ -1999,117 +1999,6 @@ arg_list_t *mgtk_rc_check_menu_item(arg_list_t *menu)
 }
 
 
-void mgtk_accel_support(GtkWidget *item, arg_list_t *accel)
-{
-#ifdef ACCEL_SUPPORT_ON
-
-	if (accel != 0 && accel->data != 0 && ((char *)accel->data)[0] != 0)
-	{  
-		GtkAccelGroup *accel_group;
-		unsigned int i, len, key = 0, mod;
-		char *s = (char *)(accel->data);
-		
-		mgtk_print("Key accel %s", (char *)(accel->data));
-		
-		len = strlen(s);
-
-		for (mod = 0, i = 0; i < len; ++i)
-		{
-			switch (s[i])
-			{
-			case 'C':
-				mod |= GDK_CONTROL_MASK;
-				break;
-			case 'S':
-				mod |= GDK_SHIFT_MASK;
-				break;
-			case 'M':
-				mod |= GDK_MOD1_MASK;
-				break;
-			case 'E': // Enter
-				key = GDK_Return;
-						
-				i = len + 8;
-				break;
-			case 'D': // Delete
-				key = GDK_Delete;
-						
-				i = len + 8;
-				break;
-			case 'F':
-				switch (s[i+1])
-				{
-				case '1':
-					switch (s[i+2])
-					{
-					case '0':
-						key = GDK_F10;
-						break;
-					case '1':
-						key = GDK_F11;
-						break;
-					case '2':
-						key = GDK_F12;
-						break;
-					default:
-						key = GDK_F1;
-						break;
-					}
-					break;
-				case '2':
-					key = GDK_F2;
-					break;
-				case '3':
-					key = GDK_F3;
-					break;
-				case '4':
-					key = GDK_F4;
-					break;
-				case '5':
-					key = GDK_F5;
-					break;
-				case '6':
-					key = GDK_F6;
-					break;
-				case '7':
-					key = GDK_F7;
-					break;
-				case '8':
-					key = GDK_F8;
-					break;
-				case '9':
-					key = GDK_F9;
-					break;
-				}
-
-				i = len + 8;
-				break;
-			case '-':
-				break;
-			default:
-				key = gdk_unicode_to_keyval(s[i]);
-				break;
-			}
-		}
-				
-		/* Add code here to translate accel string to GDK key / mods */
-
-		accel_group = gtk_accel_group_new();
-  
-		// GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK
-
-		gtk_widget_add_accelerator(item, "activate", 
-								   accel_group,
-								   key, (GdkModifierType)mod,
-								   GTK_ACCEL_VISIBLE);
-
-		gtk_window_add_accel_group(GTK_WINDOW(mgtk_get_application_window()),
-								   accel_group);
-	}
-#endif
-}
-
-
 // Four cases
 //  (menu_item "Label"		  eEvent)
 //  (menu_item "Label"		  eEvent       number-or-subevent)
@@ -2187,7 +2076,7 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 
 		if (accel)
 		{
-			mgtk_accel_support(item, accel);
+			mgtk_accel_support(item, mlisp_get_string(accel) );
 		}
 
 		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item);		

@@ -45,9 +45,11 @@ void mgtk_lua_register_functions(const Lua &lua)
 	lua.RegisterFunction("mgtk_summonbox", mgtk_lua_rc_summonbox);
 	lua.RegisterFunction("mgtk_expander", mgtk_lua_rc_expander);
 
+	lua.RegisterFunction("mgtk_menu_item", mgtk_lua_rc_menu_item);
 	lua.RegisterFunction("mgtk_append_menu", mgtk_lua_rc_append_menu);
 	lua.RegisterFunction("mgtk_menubar", mgtk_lua_rc_menubar);
 	lua.RegisterFunction("mgtk_submenu", mgtk_lua_rc_submenu);
+	lua.RegisterFunction("mgtk_menu_sep", mgtk_lua_rc_menu_seperator);
 
 	lua.RegisterFunction("mgtk_button", mgtk_lua_rc_button);
 	lua.RegisterFunction("mgtk_colorbutton", mgtk_lua_rc_colorbutton);
@@ -294,6 +296,15 @@ int mgtk_lua_rc_summonbox(lua_State *s)
 // Event widgets
 ////////////////////////////////////////////////////////////////////////////// 
 
+int mgtk_lua_rc_menu_seperator(lua_State *s)
+{
+	GtkWidget* sep = gtk_menu_item_new();
+	gtk_widget_show(sep);
+	lua_pushlightuserdata(s, sep);
+	return 1;
+}
+
+
 int mgtk_lua_rc_append_menu(lua_State *s)
 {
 	if ( lua_gettop(s) >= 2 &&
@@ -302,7 +313,12 @@ int mgtk_lua_rc_append_menu(lua_State *s)
 		GtkWidget *menu = (GtkWidget *)lua_touserdata(s, 1);
 		GtkWidget *item = (GtkWidget *)lua_touserdata(s, 2);
 
-		if ( GTK_IS_MENU_BAR(menu) )
+		/* menu_items must be use their submenu member directly. */
+		if ( GTK_IS_MENU_ITEM(menu) )
+		{
+			gtk_menu_append(GTK_MENU( gtk_menu_item_get_submenu( GTK_MENU_ITEM(menu) ) ), item);
+		}
+		else if ( GTK_IS_MENU_BAR(menu) )
 		{
 			gtk_menu_append(GTK_MENU_BAR(menu), item);
 		}
@@ -318,7 +334,8 @@ int mgtk_lua_rc_append_menu(lua_State *s)
 
 int mgtk_lua_rc_menubar(lua_State *s)
 {
-	GtkWidget *menubar = gtk_menu_bar_new();
+	GtkWidget* menubar = gtk_menu_bar_new();
+	gtk_widget_show(menubar);
 
 	// Push widget pointer unto the lua stack.
 	lua_pushlightuserdata(s, menubar);
@@ -345,6 +362,8 @@ int mgtk_lua_rc_submenu(lua_State *s)
 	GtkWidget *item = gtk_image_menu_item_new_with_mnemonic(label);
 	GtkWidget *submenu = gtk_menu_new();
 	gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), submenu);
+	gtk_widget_show(item);
+	gtk_widget_show(submenu);
 
 	if (id != -1)
 	{
@@ -367,7 +386,83 @@ int mgtk_lua_rc_submenu(lua_State *s)
 	}
 
 	// Push widget pointer unto the lua stack.
-	lua_pushlightuserdata(s, (void *)submenu);
+	lua_pushlightuserdata(s, (void *)item);
+
+	return 1;
+}
+
+
+int mgtk_lua_rc_menu_item(lua_State *s)
+{
+	const char* label = NULL;
+	const char* icon = NULL;
+	const char* accel = NULL;
+	int id = -1;
+
+
+	if ( lua_isstring(s, 1) && lua_isnumber(s, 2) )
+	{
+		label = lua_tostring(s, 1);
+		id = (int)lua_tonumber(s, 2);
+	}
+
+	if ( lua_gettop(s) > 3 && lua_isstring(s, 3) && lua_isstring(s, 4) )
+	{
+		accel = lua_tostring(s, 3);
+		icon = lua_tostring(s, 4);
+	}
+	else if ( lua_gettop(s) > 2 && lua_isstring(s, 3) )
+	{
+		icon = lua_tostring(s, 3);
+	}
+
+
+	GtkWidget *item = gtk_image_menu_item_new_with_mnemonic( label );
+
+	if ( icon )
+	{
+		gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(item),
+									  mgtk_create_icon(icon, GTK_ICON_SIZE_MENU) );
+	}
+
+	if ( accel )
+	{
+		mgtk_accel_support(item, accel);
+	}
+
+	gtk_widget_show(item);
+
+	if (id != -1)
+	{
+		// Mongoose 2002.02.14, Add this widget to a special 
+		//   lookup table by it's event id
+		mgtk_event_subscribe_gtk_widget(id, item);
+	}
+
+#if 0
+
+		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item);		
+		gtk_menu_append(GTK_MENU(menu->data), item);
+		gtk_widget_show(item);
+
+		if (subevent)
+		{
+			gtk_object_set_data(GTK_OBJECT(item), "mlisp_event", 
+								GINT_TO_POINTER(get_int(subevent)));
+			gtk_signal_connect(GTK_OBJECT(item), "activate",
+							   GTK_SIGNAL_FUNC(mgtk_event_dual_command), 
+							   GINT_TO_POINTER(get_int(event)));
+		}
+		else
+		{
+			gtk_signal_connect(GTK_OBJECT(item), "activate",
+							   GTK_SIGNAL_FUNC(mgtk_event_command), 
+							   GINT_TO_POINTER(get_int(event)));
+		}
+#endif
+
+	// Push widget pointer unto the lua stack.
+	lua_pushlightuserdata(s, (void *)item);
 
 	return 1;
 }

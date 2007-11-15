@@ -97,5 +97,6 @@ void mgtk_destroy_window(GtkWidget *widget);
 
 void mgtk_refresh_glarea(GtkWidget *glarea);
 
+void mgtk_accel_support(GtkWidget *item, const char* accel);
 
 #endif
