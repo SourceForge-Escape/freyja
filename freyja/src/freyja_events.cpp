@@ -463,6 +463,7 @@ void freyja_handle_resource_start()
 
 	/* Build the user interface from scripts and load user preferences. */
 	FreyjaControl::GetInstance()->Init();
+	freyja3d_plugin_init();
 	freyja3d_plugin_application_widget_init();
 
 	/* Setup scenegraph widget(s). */

@@ -4743,8 +4743,6 @@ void FreyjaControl::LoadResource()
 	{
 		mResource.Flush();
 	}
-
-	freyja3d_plugin_init();
 }
 
 
