@@ -101,7 +101,6 @@ include_directories( ../mstl .  )
 
 set(Objs
 	mgtk/ConfirmationDialog
-	mgtk/MGtkLua
 	mgtk/MLisp
 	mgtk/QueryDialog
 	mgtk/Resource
@@ -109,6 +108,7 @@ set(Objs
 	mgtk/mgtk_callbacks
 	mgtk/mgtk_interface
 	mgtk/mgtk_linker
+	mgtk/mgtk_lua
 	mgtk/mgtk_resource
 	mgtk/mgtk_filedialog
 	mgtk/mgtk_tree

@@ -135,18 +135,6 @@ mgtk/ConfirmationDialog.s:
 	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.s
 
 # target to build an object file
-mgtk/MGtkLua.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MGtkLua.o
-
-# target to preprocess a source file
-mgtk/MGtkLua.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MGtkLua.i
-
-# target to generate assembly for a file
-mgtk/MGtkLua.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MGtkLua.s
-
-# target to build an object file
 mgtk/MLisp.o:
 	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.o
 
@@ -243,6 +231,18 @@ mgtk/mgtk_linker.s:
 	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.s
 
 # target to build an object file
+mgtk/mgtk_lua.o:
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_lua.o
+
+# target to preprocess a source file
+mgtk/mgtk_lua.i:
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_lua.i
+
+# target to generate assembly for a file
+mgtk/mgtk_lua.s:
+	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_lua.s
+
+# target to build an object file
 mgtk/mgtk_resource.o:
 	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.o
 
@@ -281,9 +281,6 @@ help::
 	@echo "... mgtk/ConfirmationDialog.o"
 	@echo "... mgtk/ConfirmationDialog.i"
 	@echo "... mgtk/ConfirmationDialog.s"
-	@echo "... mgtk/MGtkLua.o"
-	@echo "... mgtk/MGtkLua.i"
-	@echo "... mgtk/MGtkLua.s"
 	@echo "... mgtk/MLisp.o"
 	@echo "... mgtk/MLisp.i"
 	@echo "... mgtk/MLisp.s"
@@ -308,6 +305,9 @@ help::
 	@echo "... mgtk/mgtk_linker.o"
 	@echo "... mgtk/mgtk_linker.i"
 	@echo "... mgtk/mgtk_linker.s"
+	@echo "... mgtk/mgtk_lua.o"
+	@echo "... mgtk/mgtk_lua.i"
+	@echo "... mgtk/mgtk_lua.s"
 	@echo "... mgtk/mgtk_resource.o"
 	@echo "... mgtk/mgtk_resource.i"
 	@echo "... mgtk/mgtk_resource.s"

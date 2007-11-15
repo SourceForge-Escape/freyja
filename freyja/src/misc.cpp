@@ -29,7 +29,7 @@
 #include <mgtk/mgtk_events.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/ConfirmationDialog.h>
-#include <mgtk/MGtkLua.h>
+#include <mgtk/mgtk_lua.h>
 
 #include "freyja_events.h"
 #include "freyja3d_scenegraph.h"

@@ -496,7 +496,7 @@ arg_list_t *mgtk_rc_check_menu_item(arg_list_t *args);
 arg_list_t *mgtk_rc_optionmenu(arg_list_t *args);
 arg_list_t *mgtk_rc_popup_menu(arg_list_t *args);
 arg_list_t *mgtk_rc_menubar(arg_list_t *args);
-arg_list_t *mgtk_rc_animation_tab_hack(arg_list_t *args);
+arg_list_t *mgtk_rc_tree(arg_list_t *args);
 arg_list_t *mgtk_rc_toolbar(arg_list_t *args);
 arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *args);
 arg_list_t *mgtk_rc_toolbar_button(arg_list_t *args);
@@ -578,7 +578,7 @@ Resource::Resource() :
 	RegisterFunction("optionmenu", mgtk_rc_optionmenu);
 	RegisterFunction("popup_menu", mgtk_rc_popup_menu);
 	RegisterFunction("menubar", mgtk_rc_menubar);
-	RegisterFunction("tree", mgtk_rc_animation_tab_hack);
+	RegisterFunction("tree", mgtk_rc_tree);
 	RegisterFunction("toolbar", mgtk_rc_toolbar);
 	RegisterFunction("toolbar_togglebutton", mgtk_rc_toolbar_togglebutton);
 	RegisterFunction("toolbar_button", mgtk_rc_toolbar_button);

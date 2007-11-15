@@ -39,11 +39,11 @@
 
 #include <mgtk/mgtk_events.h>
 #include <mgtk/mgtk_linker.h>
+#include <mgtk/mgtk_lua.h>
 #include <mgtk/mgtk_tree.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/ConfirmationDialog.h>
 #include <mgtk/QueryDialog.h>
-#include <mgtk/MGtkLua.h>
 
 #include "FreyjaRender.h"
 #include "FreyjaControl.h"
