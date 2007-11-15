@@ -7,6 +7,12 @@
  
  * Check TODO for cleared tasks.
 
+ * Lua replacing mgtk.
+	- Refine with new unit test.
+	- Retain same functionality.
+	- Reduce the mgtk callback system.
+	- Documentation must be done before release.
+
  * New XML based freyja file format.
 	- Plugin for importing the old freyja format.
 	- Remove old text / binary format support.

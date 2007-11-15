@@ -33,6 +33,8 @@
 
 void mgtk_lua_register_functions(const Lua &lua)
 {
+	lua.RegisterFunction("mgtk_is_null", mgtk_lua_is_null);
+
 	lua.RegisterFunction("mgtk_box_pack", mgtk_lua_rc_box_pack);
 
 	lua.RegisterFunction("mgtk_window", mgtk_lua_rc_window);
@@ -61,6 +63,22 @@ void mgtk_lua_register_functions(const Lua &lua)
 }
 
 
+int mgtk_lua_is_null(lua_State *s)
+{	
+	if ( lua_gettop(s) == 1 && lua_islightuserdata(s, 1) )
+	{
+		void* ptr = (void*)lua_touserdata(s, 1);
+		lua_pushinteger(s, (unsigned long int)ptr);
+	}
+	else
+	{
+		lua_pushinteger(s, 0);
+	}
+
+	return 1;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Containers
 ////////////////////////////////////////////////////////////////////////////// 
@@ -86,13 +104,13 @@ int mgtk_lua_rc_window(lua_State *s)
 
 	gtk_widget_show(window);
 
-	//g_signal_connect(GTK_OBJECT(window), "delete_event",
-	//				 G_CALLBACK(mgtk_event_close_window),
-	//				 GINT_TO_POINTER(window));
+#if LUA_ALL_WINDOWS_CLOSE_APP
+	g_signal_connect(GTK_OBJECT(window), "delete_event",
+					 G_CALLBACK(mgtk_event_close_window),
+					 GINT_TO_POINTER(window));
+#endif
 
 	/* Push widget pointer unto the lua stack. */
-	//lua_pushlightuserdata(s, window);
-
 #if 1
 	GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
@@ -100,6 +118,8 @@ int mgtk_lua_rc_window(lua_State *s)
 	gtk_widget_show(vbox);
 
 	lua_pushlightuserdata(s, vbox);
+#else
+	lua_pushlightuserdata(s, window);
 #endif
 
 	return 1;
@@ -108,8 +128,6 @@ int mgtk_lua_rc_window(lua_State *s)
 
 int mgtk_lua_rc_box_pack(lua_State *s)
 {
-	printf("%s:%i \n", __FILE__, __LINE__);
-
 	if ( lua_gettop(s) >= 2 &&
 		 lua_islightuserdata(s, 1) && lua_islightuserdata(s, 2) )
 	{
@@ -134,8 +152,6 @@ int mgtk_lua_rc_box_pack(lua_State *s)
 			gtk_widget_show(box);
 			gtk_widget_show(widget);
 		}
-
-		printf("%s:%i \n", __FILE__, __LINE__);
 	}
 
 	return 0;
@@ -591,7 +607,10 @@ int mgtk_lua_rc_label(lua_State *s)
 
 		label = gtk_label_new(text);
 		gtk_misc_set_alignment(GTK_MISC(label), x_align, y_align);
+		gtk_widget_show(label);
 	}
+
+	MGTK_ASSERTMSG(label != NULL, "Invalid label.");
 
 	// Push widget pointer unto the lua stack.
 	lua_pushlightuserdata(s, (void *)label);

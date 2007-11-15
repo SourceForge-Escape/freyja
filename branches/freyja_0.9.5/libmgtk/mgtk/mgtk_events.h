@@ -89,14 +89,13 @@ void mgtk_handle_text_array(int event, unsigned int count, char **text_array);
 void mgtk_print(char *format, ...);
 
 
-
-void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
-
 // Working directory, resource directory, etc
 
 char *mgtk_rc_map(char *filename_or_dirname);
 
 const char *mgtk_get_resource_path();
+
+void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 
 void mgtk_toggle_value_set(int event, int val);
 

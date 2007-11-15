@@ -117,11 +117,12 @@ set(Objs
 
 add_library( ${Name}-${Major}.${Minor}.${Micro} SHARED ${Objs} )
 
+
+#######################################################################
 # Packaging
+#######################################################################
+
 #add_custom_command(TARGET libhel.deb COMMAND dpkg-buildpackage -rfakeroot)
-
-
-# Unit tests
 
 # Generate a new debian/changelog.
 FILE( WRITE debian/changelog "libmgtk (${Major}.${Minor}.${Micro}.${Revision}) feisty; urgency=low\n\n" )
@@ -131,6 +132,22 @@ FILE( APPEND debian/changelog "" )
 
 
 INSTALL( TARGETS ${Name}-${Major}.${Minor}.${Micro} LIBRARY DESTINATION /usr/lib )
+
+
+#######################################################################
+# Unit tests
+#######################################################################
+
+# Remember to run `export LD_LIBRARY_PATH=.` before running CTest!
+
+# mgtk
+add_executable( mgtk mgtk/mgtk )
+set_target_properties( mgtk PROPERTIES OUTPUT_NAME unit/mgtk )
+set_target_properties( mgtk PROPERTIES COMPILE_FLAGS 
+	"-DUNIT_TEST_MGTK" )
+set_target_properties( mgtk PROPERTIES LINK_FLAGS 
+	"-L. -l${Name}-${Major}.${Minor}.${Micro} -lpthread" )
+add_test( mgtk unit/mgtk unit/mgtk-results.xml )
 
 
 

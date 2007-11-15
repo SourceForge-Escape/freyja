@@ -5,8 +5,9 @@
  =====================================================================
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
- TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - Pak vfs plugin ported to new mgtk_tree API.
+ 20071117 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - New unit test for libmgtk.
+ - Pak VFS plugin ported to new mgtk_tree API.
  - A little more mgtk_tree clean up to make it easier to maintain.
  - *_rc_color mlisp implementation pushed down into libmgtk.
  - Enforing GTK_IS_ENTRY again for mgtk_textentry_value_set().

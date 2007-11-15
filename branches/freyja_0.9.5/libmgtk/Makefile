@@ -112,6 +112,17 @@ depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
 #=============================================================================
+# Target rules for targets named mgtk
+
+# Build rule for target.
+mgtk: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 mgtk
+
+# fast build rule for target.
+mgtk/fast:
+	$(MAKE) -f CMakeFiles/mgtk.dir/build.make CMakeFiles/mgtk.dir/build
+
+#=============================================================================
 # Target rules for targets named mgtk-0.1.1
 
 # Build rule for target.
@@ -181,6 +192,18 @@ mgtk/ResourceEvent.i:
 # target to generate assembly for a file
 mgtk/ResourceEvent.s:
 	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.s
+
+# target to build an object file
+mgtk/mgtk.o:
+	$(MAKE) -f CMakeFiles/mgtk.dir/build.make CMakeFiles/mgtk.dir/mgtk/mgtk.o
+
+# target to preprocess a source file
+mgtk/mgtk.i:
+	$(MAKE) -f CMakeFiles/mgtk.dir/build.make CMakeFiles/mgtk.dir/mgtk/mgtk.i
+
+# target to generate assembly for a file
+mgtk/mgtk.s:
+	$(MAKE) -f CMakeFiles/mgtk.dir/build.make CMakeFiles/mgtk.dir/mgtk/mgtk.s
 
 # target to build an object file
 mgtk/mgtk_callbacks.o:
@@ -276,6 +299,7 @@ help::
 	@echo "... install"
 	@echo "... install/local"
 	@echo "... list_install_components"
+	@echo "... mgtk"
 	@echo "... mgtk-0.1.1"
 	@echo "... rebuild_cache"
 	@echo "... mgtk/ConfirmationDialog.o"
@@ -293,6 +317,9 @@ help::
 	@echo "... mgtk/ResourceEvent.o"
 	@echo "... mgtk/ResourceEvent.i"
 	@echo "... mgtk/ResourceEvent.s"
+	@echo "... mgtk/mgtk.o"
+	@echo "... mgtk/mgtk.i"
+	@echo "... mgtk/mgtk.s"
 	@echo "... mgtk/mgtk_callbacks.o"
 	@echo "... mgtk/mgtk_callbacks.i"
 	@echo "... mgtk/mgtk_callbacks.s"

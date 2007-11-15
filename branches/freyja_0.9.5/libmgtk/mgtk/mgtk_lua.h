@@ -17,8 +17,8 @@
  * Mongoose - Created
  ==========================================================================*/
 
-#ifndef GUARD__MGTK_MGTKLUA_H_
-#define GUARD__MGTK_MGTKLUA_H_
+#ifndef GUARD__MGTK_LUA_H_
+#define GUARD__MGTK_LUA_H_
 
 #ifdef LUAWRAPPER_FOUND
 
@@ -34,7 +34,25 @@ void mgtk_lua_register_functions(const Lua &vm);
 
 /* Mongoose 2002.01.12, Interfaces for Resource
    must be implmented for each interface ( gtk, win32, etc ) */
+
 int mgtk_lua_rc_window(lua_State *s);
+/*------------------------------------------------------
+ *  
+ * mgtk_window("title" "icon/filename")
+ *
+ * Signal: None.
+ *
+ * Post  : 
+ *
+ ------------------------------------------------------*/
+
+int mgtk_lua_is_null(lua_State *s);
+/*------------------------------------------------------
+ * Pre : 
+ * Post: i = mgtk_is_null( widget )
+ *
+ ------------------------------------------------------*/
+
 int mgtk_lua_rc_gl_widget(lua_State *s);
 int mgtk_lua_rc_notebook(lua_State *s);
 int mgtk_lua_rc_tab(lua_State *s);
@@ -134,6 +152,11 @@ int mgtk_lua_rc_summonbox(lua_State *s);
  ------------------------------------------------------*/
 
 int mgtk_lua_rc_append_menu(lua_State *s);
+/*------------------------------------------------------
+ *  
+ * 
+ *
+ ------------------------------------------------------*/
 
 
 
@@ -174,12 +197,28 @@ int mgtk_lua_rc_spinbutton_float(lua_State *s);
 int mgtk_lua_rc_statusbar(lua_State *s);
 
 int mgtk_lua_rc_textview(lua_State *s);
+/*------------------------------------------------------
+ *  
+ * textview = 
+ * mgtk_textview( "text" )
+ *
+ * Signal: 
+ *
+ ------------------------------------------------------*/
 
 int mgtk_lua_rc_label(lua_State *s);
+/*------------------------------------------------------
+ *  
+ * label = 
+ * mgtk_label( "text", x_align, y_align )
+ *
+ * Signal: 
+ *
+ ------------------------------------------------------*/
 
 int mgtk_lua_func_toggle_set(lua_State *s);
 
 
 #endif // LUAWRAPPER_FOUND
 
-#endif // GUARD__MGTK_MGTKLUA_H_
+#endif // GUARD__MGTK_LUA_H_
