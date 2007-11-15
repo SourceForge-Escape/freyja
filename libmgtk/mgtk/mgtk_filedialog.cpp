@@ -30,8 +30,6 @@
 
 #define FILEDIALOG_IMAGE_PREVIEW
 
-void mgtk_accel_support(GtkWidget *item, arg_list_t *accel);
-
 using namespace mstl;
 
 
@@ -757,7 +755,7 @@ arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *menu)
 													   GTK_ICON_SIZE_MENU));
 
 		// Accel support
-		mgtk_accel_support(item, accel);
+		mgtk_accel_support(item, mlisp_get_string(accel) );
 
 		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
 		

@@ -50,7 +50,7 @@ int mgtk_lua_is_null(lua_State *s);
 /*------------------------------------------------------
  * Pre : 
  * Post: i = mgtk_is_null( widget )
- *
+ * 
  ------------------------------------------------------*/
 
 int mgtk_lua_rc_gl_widget(lua_State *s);
@@ -62,19 +62,33 @@ int mgtk_lua_rc_vsep(lua_State *s);
 int mgtk_lua_rc_button(lua_State *s);
 int mgtk_lua_rc_colorbutton(lua_State *s);
 int mgtk_lua_rc_togglebutton(lua_State *s);
+
 int mgtk_lua_rc_submenu(lua_State *s);
 int mgtk_lua_rc_menu_seperator(lua_State *s);
+
 int mgtk_lua_rc_menu_item(lua_State *s);
+/*------------------------------------------------------
+ * Pre : 
+ * Post: 
+ *
+ * menuitem = 
+ * mgtk_menu_item("label", eventId [, "icon" | "accel", "icon"])
+ * 
+ ------------------------------------------------------*/
+
 int mgtk_lua_rc_check_menu_item(lua_State *s);
 int mgtk_lua_rc_optionmenu(lua_State *s);
 int mgtk_lua_rc_popup_menu(lua_State *s);
 int mgtk_lua_rc_menubar(lua_State *s);
-int mgtk_lua_rc_animation_tab_hack(lua_State *s);
+
+int mgtk_lua_rc_tree(lua_State *s);
+
 int mgtk_lua_rc_toolbar(lua_State *s);
 int mgtk_lua_rc_toolbar_togglebutton(lua_State *s);
 int mgtk_lua_rc_toolbar_button(lua_State *s);
 int mgtk_lua_rc_toolbar_menu_button(lua_State *s);
 int mgtk_lua_rc_toolbar_box(lua_State *s);
+
 int mgtk_lua_rc_color(lua_State *s);
 int mgtk_lua_rc_hslider(lua_State *s);
 int mgtk_lua_rc_icon(lua_State *s);
@@ -154,7 +168,7 @@ int mgtk_lua_rc_summonbox(lua_State *s);
 int mgtk_lua_rc_append_menu(lua_State *s);
 /*------------------------------------------------------
  *  
- * 
+ * mgtk_append_menu( menu, menuitem )
  *
  ------------------------------------------------------*/
 

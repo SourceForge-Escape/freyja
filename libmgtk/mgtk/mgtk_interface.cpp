@@ -579,8 +579,8 @@ void mgtk_create_window_icon(GtkWidget *window, GdkPixbuf *icon)
 {
 	if (window && icon)
 	{
-      gtk_window_set_icon(GTK_WINDOW(window), icon);
-      gdk_pixbuf_unref(icon);
+		gtk_window_set_icon(GTK_WINDOW(window), icon);
+		gdk_pixbuf_unref(icon);
 	}
 }
 
@@ -589,19 +589,17 @@ void mgtk_destroy_pixbuf(GdkPixbuf *icon)
 {
 	if (icon)
 	{
-      gdk_pixbuf_unref(icon);
+		gdk_pixbuf_unref(icon);
 	}
 }
 
 
-GtkWidget *mgtk_create_icon(const char *icon_filename, GtkIconSize icon_size)
+GtkWidget* mgtk_create_icon(const char* icon_filename, GtkIconSize icon_size)
 {
-	GtkWidget *icon = NULL;
-
+	GtkWidget* icon = NULL;
 
 	/* If there is a leading "gtk" assume it's stock, since there is no path */
-	if (!strncmp("gtk", icon_filename, 3))
-		//		!strncmp("gnome-", icon_filename, 6))
+	if ( !strncmp("gtk", icon_filename, 3) )
 	{
 		icon = gtk_image_new_from_stock(icon_filename, icon_size);
 	}
@@ -691,14 +689,9 @@ int mgtk_create_confirm_dialog(const char *dialog_icon,
 
 void mgtk_create_info_dialog(const char *dialog_icon, const char *message)
 {
-	GtkWidget *about, *label, *icon;
-
-
-	about = gtk_dialog_new();
-	
-	icon = mgtk_create_icon(dialog_icon, GTK_ICON_SIZE_DIALOG);
-	
-	label = gtk_label_new(NULL);
+	GtkWidget* about = gtk_dialog_new();	
+	GtkWidget* icon = mgtk_create_icon(dialog_icon, GTK_ICON_SIZE_DIALOG);
+	GtkWidget* label = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(label), message);
 	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
 
@@ -717,10 +710,8 @@ void mgtk_create_query_dialog_text(const char *image, const char *message,
 								   int eventId, const char *value)
 {
 	GtkWidget *dialog = gtk_dialog_new();	
-
 	GtkWidget *icon = mgtk_create_icon(image, GTK_ICON_SIZE_DIALOG);
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), icon);
-
 	GtkWidget *label = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(label), message);
 	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
@@ -760,10 +751,8 @@ float mgtk_create_query_dialog_float(const char *image, const char *message,
 									 float step, int digits)
 {
 	GtkWidget *dialog = gtk_dialog_new();	
-
 	GtkWidget *icon = mgtk_create_icon(image, GTK_ICON_SIZE_DIALOG);
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), icon);
-
 	GtkWidget *label = gtk_label_new(NULL);
 	gtk_label_set_markup(GTK_LABEL(label), message);
 	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
@@ -790,7 +779,6 @@ GtkWidget *mgtk_create_color_picker_dialog(const char *title, void *event_func)
 {
 	GtkWidget *dialog =  gtk_color_selection_dialog_new(title);
 	gtk_widget_show(dialog);
-
 
 	if (event_func)
 	{
@@ -851,11 +839,7 @@ GtkWidget *mgtk_create_hbox(GtkWidget *box, char *name,
 							bool homogeneous, int spacing,
 							bool expand, bool fill, int pading)
 {
-	GtkWidget *hbox;
-	
-
-	hbox = gtk_hbox_new((homogeneous ? TRUE : FALSE), spacing);
-
+	GtkWidget* hbox = gtk_hbox_new((homogeneous ? TRUE : FALSE), spacing);
 	gtk_widget_ref(hbox);
 	gtk_object_set_data_full(GTK_OBJECT(box), name, hbox,
 							 (GtkDestroyNotify) gtk_widget_unref);
@@ -912,9 +896,6 @@ GtkWidget *mgtk_create_tab(GtkWidget *notebook, char *name,
 						   GtkWidget *tab_contents, char *label_text,
 						   int tab_num)
 {
-	GtkWidget *label;
-
-
 	// Setup tab_contents
 	gtk_widget_ref(tab_contents);
 	gtk_object_set_data_full(GTK_OBJECT(notebook), name, 
@@ -925,7 +906,7 @@ GtkWidget *mgtk_create_tab(GtkWidget *notebook, char *name,
 	
 
 	// Tab setup in notebook
-	label = mgtk_create_label(notebook, name, label_text, 0, 0.5);
+	GtkWidget *label = mgtk_create_label(notebook, name, label_text, 0, 0.5);
 	gtk_notebook_set_tab_label(GTK_NOTEBOOK(notebook),
 							   gtk_notebook_get_nth_page(GTK_NOTEBOOK(notebook),
 														tab_num), label);
@@ -961,9 +942,7 @@ GtkWidget *mgtk_create_color_button(void *func, int id)
 	gtk_label_set_selectable(GTK_LABEL(label), TRUE);
 	return label;
 #else
-	GtkWidget *colorbutton;
-
-	colorbutton = gtk_color_button_new();
+	GtkWidget *colorbutton = gtk_color_button_new();
 	gtk_widget_show(colorbutton);
 	gtk_color_button_set_use_alpha(GTK_COLOR_BUTTON(colorbutton), TRUE);
 
@@ -1061,4 +1040,112 @@ GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_name)
 	//mgtk_destroy_pixbuf(icon);
 
 	return window;
+}
+
+
+void mgtk_accel_support(GtkWidget *item, const char* accel)
+{
+	if ( accel )
+	{  
+		GtkAccelGroup *accel_group;
+		unsigned int i, len, key = 0, mod;
+		const char* s = accel;
+		
+		mgtk_print("Key accel %s", accel);
+		
+		len = strlen(s);
+
+		for (mod = 0, i = 0; i < len; ++i)
+		{
+			switch ( s[i] )
+			{
+			case 'C':
+				mod |= GDK_CONTROL_MASK;
+				break;
+			case 'S':
+				mod |= GDK_SHIFT_MASK;
+				break;
+			case 'M':
+				mod |= GDK_MOD1_MASK;
+				break;
+			case 'E': // Enter
+				key = GDK_Return;
+						
+				i = len + 8;
+				break;
+			case 'D': // Delete
+				key = GDK_Delete;
+						
+				i = len + 8;
+				break;
+			case 'F':
+				switch (s[i+1])
+				{
+				case '1':
+					switch (s[i+2])
+					{
+					case '0':
+						key = GDK_F10;
+						break;
+					case '1':
+						key = GDK_F11;
+						break;
+					case '2':
+						key = GDK_F12;
+						break;
+					default:
+						key = GDK_F1;
+						break;
+					}
+					break;
+				case '2':
+					key = GDK_F2;
+					break;
+				case '3':
+					key = GDK_F3;
+					break;
+				case '4':
+					key = GDK_F4;
+					break;
+				case '5':
+					key = GDK_F5;
+					break;
+				case '6':
+					key = GDK_F6;
+					break;
+				case '7':
+					key = GDK_F7;
+					break;
+				case '8':
+					key = GDK_F8;
+					break;
+				case '9':
+					key = GDK_F9;
+					break;
+				}
+
+				i = len + 8;
+				break;
+			case '-':
+				break;
+			default:
+				key = gdk_unicode_to_keyval(s[i]);
+				break;
+			}
+		}
+				
+		/* Add code here to translate accel string to GDK key / mods */
+
+		accel_group = gtk_accel_group_new();
+  
+		// GDK_CONTROL_MASK | GDK_SHIFT_MASK | GDK_MOD1_MASK
+
+		gtk_widget_add_accelerator(item, "activate", 
+								   accel_group,
+								   key, (GdkModifierType)mod,
+								   GTK_ACCEL_VISIBLE);
+
+		gtk_window_add_accel_group(GTK_WINDOW(mgtk_get_application_window()),
+								   accel_group);
+	}
 }
