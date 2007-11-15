@@ -22,8 +22,9 @@
 	- Just have a toggle for 'bones' which will enable either the ref or pose.
 
  * Scenegraph 
-	- Perhaps add a new column to mgtk_tree for string for type / metadata.
+	- Perhaps add a new column to mgtk_tree for string(indexed|int) for type / metadata.
 		- Or just replace numeric column with string.
+		- Or per node func binding.
 	- Work out new graph layout.
 	- Widget needs to be able to select / edit name correctly per 'type'.
 	- Needs to update on every object 'type' creation / name change / removal.

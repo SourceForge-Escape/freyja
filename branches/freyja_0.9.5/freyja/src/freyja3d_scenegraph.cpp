@@ -29,7 +29,7 @@
 #include <freyja/Metadata.h>
 
 #include <mgtk/mgtk_tree.h>
-#include <mgtk/MGtkLua.h>
+#include <mgtk/mgtk_lua.h>
 
 #include "FreyjaControl.h" // Only used for legacy EvBoneIteratorId use.
 

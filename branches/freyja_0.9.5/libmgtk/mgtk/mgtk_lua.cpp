@@ -28,8 +28,7 @@
 #include "mgtk_events.h"
 #include "mgtk_interface.h"
 #include "mgtk_callbacks.h"
-
-#include "MGtkLua.h"
+#include "mgtk_lua.h"
 
 
 void mgtk_lua_register_functions(const Lua &lua)

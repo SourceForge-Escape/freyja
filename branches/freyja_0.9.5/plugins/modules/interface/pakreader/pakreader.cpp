@@ -28,6 +28,7 @@
 #include <freyja/FreyjaImage.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/mgtk_events.h>
+#include <mgtk/mgtk_tree.h>
 #include <mstl/SystemIO.h>
 
 using namespace mstl;
@@ -70,7 +71,7 @@ void ePakReaderMenuUpdate()
 
 	mgtk_remove_all_items_to_menu(menu);
 
-	mgtk_tree_t *dirs = mgtk_event_tree_new(0, "Dirs");
+	mgtk_tree_t* dirs = mgtk_tree_new("Dirs", -1);
 
 	for (i = 0, count = dir->getDirCount(); i < count; ++i)
 	{
@@ -78,16 +79,16 @@ void ePakReaderMenuUpdate()
 	
 		if (tmpDir)
 		{
-			mgtk_event_tree_add_new_child(dirs, i+1, tmpDir->getName());
+			mgtk_tree_add_new_child(dirs, tmpDir->getName(), i+1);
 			mgtk_append_item_to_menu2i(menu, tmpDir->getName(), event, i);
 			freyjaPrintMessage("! %s/", tmpDir->getName());
 		}
 	}
 
 	MSTL_MSG("*** Update %i %p", gPakReaderDirs, dirs);
-	mgtk_event_update_tree(gPakReaderDirs, dirs);
+	mgtk_tree_update_widget("Directory", gPakReaderDirs, dirs);
 
-	mgtk_tree_t *files = mgtk_event_tree_new(0, "Files");
+	mgtk_tree_t* files = mgtk_tree_new("Files", -1);
 
 	for (j = 0, count = dir->getFileCount(); j < count; ++j)
 	{
@@ -95,13 +96,13 @@ void ePakReaderMenuUpdate()
 
 		if (file)
 		{
-			mgtk_event_tree_add_new_child(files, i+j+1, file->getName());
+			mgtk_tree_add_new_child(files, file->getName(), i+j+1);
 			mgtk_append_item_to_menu2i(menu, file->getName(), event, i+j);
 			freyjaPrintMessage("! %s", file->getName());
 		}
 	}
 
-	mgtk_event_update_tree(gPakReaderFiles, files);
+	mgtk_tree_update_widget("Files", gPakReaderFiles, files);
 }
 
 
@@ -112,10 +113,9 @@ void ePakReaderMenu()
 
 void pak_reader_try_upload(char *filename)
 {
-	FreyjaImage img;
-
-
 	mgtk_print("!PakReader> Trying to upload '%s'", filename);
+
+	FreyjaImage img;
 
 	if (!img.loadImage(filename))
 	{
@@ -247,7 +247,7 @@ void ePakReaderSelect(unsigned int value)
 		return;  // don't update menu
 	}
 
-	mgtk_tree_t *dirs = mgtk_event_tree_new(0, "Dirs");
+	mgtk_tree_t *dirs = mgtk_tree_new("Dirs", -1);
 
 	for (i = 0, count = dir->getDirCount(); i < count; ++i)
 	{
@@ -255,16 +255,16 @@ void ePakReaderSelect(unsigned int value)
 	
 		if (tmpDir)
 		{
-			mgtk_event_tree_add_new_child(dirs, i+1, tmpDir->getName());
+			mgtk_tree_add_new_child(dirs, tmpDir->getName(), i+1);
 			mgtk_append_item_to_menu2i(menu, tmpDir->getName(), event, i);
 			freyjaPrintMessage("! %s/", tmpDir->getName());
 		}
 	}
 
 	MSTL_MSG("*** Update %i %p", gPakReaderDirs, dirs);
-	mgtk_event_update_tree(gPakReaderDirs, dirs);
+	mgtk_tree_update_widget("Directory", gPakReaderDirs, dirs);
 
-	mgtk_tree_t *files = mgtk_event_tree_new(0, "Files");
+	mgtk_tree_t *files = mgtk_tree_new("Files", -1);
 
 	for (j = 0, count = dir->getFileCount(); j < count; ++j)
 	{
@@ -272,13 +272,13 @@ void ePakReaderSelect(unsigned int value)
 
 		if (file)
 		{
-			mgtk_event_tree_add_new_child(files, i+j+1, file->getName());
+			mgtk_tree_add_new_child(files, file->getName(), i+j+1);
 			mgtk_append_item_to_menu2i(menu, file->getName(), event, i+j);
 			freyjaPrintMessage("! %s", file->getName());
 		}
 	}
 
-	mgtk_event_update_tree(gPakReaderFiles, files);
+	mgtk_tree_update_widget("Files", gPakReaderFiles, files);
 }
 
 

@@ -786,8 +786,10 @@
 				(vbox 1 1 0 1 1
 					(expander "Scenegraph" 1
 						;(textbox eSkeletonName)
-						(tree eBoneIterator eSetBoneName)
-					
+
+						(hbox 1 1 1 1 1
+							(tree eBoneIterator eSetBoneName) )
+							
 					) ; expander
 				))
 
