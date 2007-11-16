@@ -102,7 +102,6 @@ void mgtk_refresh_glarea(GtkWidget *widget)
 	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
 
-
 	/* OpenGL calls can be done only if make_current returns true */
 	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
 		return;
@@ -124,7 +123,6 @@ void mgtk_init_glarea(GtkWidget* widget)
 {
 	GdkGLContext *glcontext = gtk_widget_get_gl_context(widget);
 	GdkGLDrawable *gldrawable = gtk_widget_get_gl_drawable(widget);
-
 
 	if (!gdk_gl_drawable_gl_begin(gldrawable, glcontext))
 	{
@@ -267,7 +265,8 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 
 
 
-	//FIXME: I bet this casting breaks the bitmap -- thanks to whoever that wrote the bad arg types for gdk_gl_config_new_by_mode
+	//FIXME: I bet this casting breaks the bitmap -- 
+	//       thanks to whoever that wrote the bad arg types for gdk_gl_config_new_by_mode
 
 	/* Get a double buffered gtk_gl context handle */
 #ifdef WIN32
@@ -329,27 +328,24 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 	gtk_widget_set_size_request(drawing_area, width, height); 
 
 	/* Set OpenGL-capability to the widget. */
-	gtk_widget_set_gl_capability(drawing_area,
-                                glconfig,
-                                NULL,
-                                TRUE,
-                                GDK_GL_RGBA_TYPE);
+	gtk_widget_set_gl_capability(drawing_area, glconfig, NULL,
+								 TRUE, GDK_GL_RGBA_TYPE);
 
 	/* Set up events and signals for OpenGL widget */
 	gtk_widget_add_events(drawing_area,
-		                        GDK_EXPOSURE_MASK |
-//                           GDK_KEY_PRESS_MASK |
-//                           GDK_KEY_RELEASE_MASK |
-                           GDK_BUTTON_RELEASE_MASK |
-//                           GDK_POINTER_MOTION_MASK
+						  GDK_EXPOSURE_MASK |
+//                        GDK_KEY_PRESS_MASK |
+//                        GDK_KEY_RELEASE_MASK |
+						  GDK_BUTTON_RELEASE_MASK |
+//                        GDK_POINTER_MOTION_MASK
 
 						  GDK_POINTER_MOTION_MASK |
 						  GDK_POINTER_MOTION_HINT_MASK |
 						  GDK_MOTION_NOTIFY |
-//				 GDK_BUTTON1_MOTION_MASK |
-//				 GDK_BUTTON2_MOTION_MASK |
-				 GDK_BUTTON_PRESS_MASK |
-				 GDK_VISIBILITY_NOTIFY_MASK);
+//						  GDK_BUTTON1_MOTION_MASK |
+//						  GDK_BUTTON2_MOTION_MASK |
+						  GDK_BUTTON_PRESS_MASK |
+						  GDK_VISIBILITY_NOTIFY_MASK);
 
 	g_signal_connect_after(G_OBJECT(drawing_area), "realize",
                            G_CALLBACK(mgtk_init_glarea), NULL);
@@ -366,16 +362,16 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 					 G_CALLBACK(mgtk_event_button_release), NULL);
 
 	g_signal_connect(G_OBJECT(drawing_area), "map_event",
-		    G_CALLBACK(map_event), NULL);
+					 G_CALLBACK(map_event), NULL);
 	g_signal_connect(G_OBJECT(drawing_area), "unmap_event",
-		    G_CALLBACK(unmap_event), NULL);
+					 G_CALLBACK(unmap_event), NULL);
 	g_signal_connect(G_OBJECT(drawing_area), "visibility_notify_event",
-		    G_CALLBACK(visibility_notify_event), NULL);
+					 G_CALLBACK(visibility_notify_event), NULL);
 
 	g_signal_connect_swapped(G_OBJECT(drawing_area), "key_press_event",
-						G_CALLBACK(mgtk_event_key_press), NULL);
+							 G_CALLBACK(mgtk_event_key_press), NULL);
 	g_signal_connect(GTK_OBJECT(drawing_area), "key_release_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
+					 GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
 
 	/* Setup GL window state */
 	mgtk_glarea_window_state_t *state = new mgtk_glarea_window_state_t;
@@ -386,7 +382,6 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 	state->width = width;
 	state->height = height;
 	gtk_object_set_data(GTK_OBJECT(drawing_area), "gl_window_state", state);
-
 
 	gtk_widget_show(drawing_area);
 
