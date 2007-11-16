@@ -453,7 +453,7 @@ int mgtk_lua_rc_tree(lua_State* s)
 	gtk_tree_view_column_add_attribute(col, renderer, "text", ID_COLUMN);
 
 	/* Append dummy node(s) */
-	GtkTreeStore* store = gtk_tree_store_new(N_COLUMNS, /* Total number of cols */
+	GtkTreeStore* store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
 											 G_TYPE_STRING,   /* Node name */
 											 G_TYPE_INT);     /* Node id */
 	GtkTreeModel* model = GTK_TREE_MODEL(store);

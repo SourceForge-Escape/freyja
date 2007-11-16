@@ -70,6 +70,14 @@ void mgtk_test_handle_application_window_close()
 
 int main(int argc, char* argv[])
 {
+	const char* ui = "test.lua";
+
+	if ( argc > 1 )
+	{
+		ui = argv[1];
+	}
+
+
 	/* Setup callbacks. */
 	mgtk_assert_handler( mgtk_assert_dialog );
 
@@ -106,7 +114,7 @@ int main(int argc, char* argv[])
 
 	/* Load the UI script here instead of using the 
 	 * mgtk_handle_resource_start() callback. */
-	if ( !gLua.ExecuteFile("test.lua") )
+	if ( !gLua.ExecuteFile( ui ) )
 	{
 		mgtk_print("Failed to load test.lua\n");
 	}
