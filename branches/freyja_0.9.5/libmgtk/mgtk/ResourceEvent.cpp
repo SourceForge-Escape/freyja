@@ -199,6 +199,8 @@ bool ResourceEvent::listen(unsigned long event)
 {
 	ResourceEvent *e = getEventById(event);
 
+	mgtk_print("listen(%i): %p\n", event, e);
+
 	if (e)
 	{
 		return e->action();

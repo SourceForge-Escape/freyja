@@ -36,6 +36,7 @@
 
 void mgtk_lua_register_functions(const Lua &lua)
 {
+	lua.RegisterFunction("mgtk_event", mgtk_lua_event);
 	lua.RegisterFunction("mgtk_is_null", mgtk_lua_is_null);
 
 	lua.RegisterFunction("mgtk_box_pack", mgtk_lua_rc_box_pack);
@@ -58,7 +59,7 @@ void mgtk_lua_register_functions(const Lua &lua)
 	lua.RegisterFunction("mgtk_append_menu", mgtk_lua_rc_append_menu);
 	lua.RegisterFunction("mgtk_menubar", mgtk_lua_rc_menubar);
 	lua.RegisterFunction("mgtk_submenu", mgtk_lua_rc_submenu);
-	lua.RegisterFunction("mgtk_menu_sep", mgtk_lua_rc_menu_separator);
+	lua.RegisterFunction("mgtk_menu_separator", mgtk_lua_rc_menu_separator);
 	lua.RegisterFunction("mgtk_optionmenu", mgtk_lua_rc_optionmenu);
 
 	lua.RegisterFunction("mgtk_button", mgtk_lua_rc_button);
@@ -80,6 +81,54 @@ void mgtk_lua_register_functions(const Lua &lua)
 
 	lua.RegisterFunction("mgtk_toggle_set", mgtk_lua_func_toggle_set);
 	lua.RegisterFunction("mgtk_window_move", mgtk_lua_window_move);
+}
+
+
+int mgtk_lua_event(lua_State* s)
+{
+	int id = -1;
+
+	if ( lua_gettop(s) == 1 && lua_isstring(s, 1) )
+	{
+		// FIXME: Use legacy mlisp resource bindings for now.
+		id = ResourceEvent::GetResourceIdBySymbol( lua_tostring(s, 1) );
+	}	
+	else if ( lua_gettop(s) == 2 && 
+			  lua_isstring(s, 1) && lua_isstring(s, 2) ) //lua_isfunction(s, 2) )
+	{
+		const char* symbol = lua_tostring(s, 1);
+		const char* script = lua_tostring(s, 2);
+
+		// 1. Check to see if this script is already bound to this symbol.
+		id = ResourceEvent::GetResourceIdBySymbol( symbol );
+
+		// 2. If not bind it.
+		if ( id == -1 )
+		{
+			ResourceEventCallbackLuaScript::add(symbol, s, script);
+
+			// 3. Return event id for this newly bound script.
+			id = ResourceEvent::GetResourceIdBySymbol( symbol );
+		}
+	}	
+
+	lua_pushinteger(s, id);
+	return 1;
+}
+
+
+int mgtk_lua_get_widget_by_name(lua_State* s)
+{
+	GtkWidget* ptr;
+
+	if ( lua_gettop(s) == 1 && lua_isstring(s, 1) )
+	{
+		// FIXME: Use legacy mlisp resource bindings for now.
+		ptr = (GtkWidget*)mlisp_recall( lua_tostring(s, 1) );
+	}
+
+	lua_pushlightuserdata(s, (void*)ptr);
+	return 1;
 }
 
 
@@ -573,9 +622,8 @@ int mgtk_lua_rc_button(lua_State *s)
 	// FIXME: Asserts, checking...
 	const char *label = lua_tostring(s, 1);
 	int event = (int)lua_tonumber(s, 2);
-	//int cmd = (int)lua_tonumber(s, 3);
 
-	GtkWidget *widget = gtk_button_new_with_label(label);
+	GtkWidget* widget = gtk_button_new_with_label(label);
 
 	// Add this widget to an event id map. 
 	mgtk_event_subscribe_gtk_widget(event, widget);

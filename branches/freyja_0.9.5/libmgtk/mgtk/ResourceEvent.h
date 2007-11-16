@@ -760,4 +760,68 @@ private:
 };
 
 
+#   ifdef LUAWRAPPER_FOUND
+#   include "lua/Lua.h"
+
+class ResourceEventCallbackLuaScript : public ResourceEvent
+{
+public:
+
+	ResourceEventCallbackLuaScript(const char* name, lua_State* state, const char* script) : 
+		ResourceEvent(name), mState(state), mScript(script)
+	{ }
+
+	static void add(const char* name, lua_State* state, const char* script)
+	{ new ResourceEventCallbackLuaScript(name, state, script); }
+
+	virtual bool action()
+	{ 
+		mgtk_print("-- Lua script test '%s'\n", mScript.c_str() );
+
+		if ( luaL_dostring( mState, mScript.c_str() ) )
+		{
+			mgtk_print("-- Lua error %s\n", lua_tostring(mState, -1) );
+			return false;
+		}
+		
+		return true;
+	}
+
+private:
+
+	lua_State* mState;
+
+	mstl::String mScript;
+};
+
+#if FIXME
+class ResourceEventCallbackLuaFunc : public ResourceEvent
+{
+public:
+
+	ResourceEventCallbackLuaFunc(const char* name, lua_State* state, void* func) : 
+		ResourceEvent(name), mState(state), mFunc(func)
+	{ }
+
+	static void add(const char* name, lua_State* state, void* func)
+	{ new ResourceEventCallbackLuaFunc(name, state, func); }
+
+	virtual bool action()
+	{
+		int nargs = 0;
+		int nresults = 0;
+		lua_pushfunction( mState, mFunc );
+		return ( lua_call( mState, nargs, nresults ) == 0 );
+	}
+
+private:
+
+	lua_State* mState;
+
+	void* mFunc;
+};
+#endif
+
+#   endif // LUAWRAPPER_FOUND
+
 #endif // GUARD__MGTK_RESOURCEEVENT_H_
