@@ -553,14 +553,13 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 #endif
 
 
-GdkPixbuf *mgtk_create_pixbuf(char *icon_filename)
+GdkPixbuf* mgtk_create_pixbuf(const char* icon_filename)
 {
 	GdkPixbuf *icon = NULL;
 
 	if (icon_filename && icon_filename[0])
 	{
 		GError *error = NULL;
-
 		icon = gdk_pixbuf_new_from_file(icon_filename, &error);
 
 		if (!icon)
@@ -877,8 +876,8 @@ GtkWidget *mgtk_create_spinbutton(GtkWidget *master, char *name,
 }
 
 
-GtkWidget *mgtk_create_label(GtkWidget *master, char *name, 
-							 char *text, float x_align, float y_align)
+GtkWidget *mgtk_create_label(GtkWidget *master, const char *name, 
+							 const char *text, float x_align, float y_align)
 {
   GtkWidget *label = gtk_label_new(text);
 
@@ -892,8 +891,8 @@ GtkWidget *mgtk_create_label(GtkWidget *master, char *name,
 }
 
 
-GtkWidget *mgtk_create_tab(GtkWidget *notebook, char *name, 
-						   GtkWidget *tab_contents, char *label_text,
+GtkWidget *mgtk_create_tab(GtkWidget *notebook, const char *name, 
+						   GtkWidget *tab_contents, const char *label_text,
 						   int tab_num)
 {
 	// Setup tab_contents
@@ -958,10 +957,10 @@ GtkWidget *mgtk_create_color_button(void *func, int id)
 }
 
 
-GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
-											 char *icon, char *label,
-											 char *help, 
-											 void *event_func, int event_cmd)
+GtkWidget* mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
+											 const char* icon, const char* label,
+											 const char* help, 
+											 void* event_func, int event_cmd)
 {
 	GtkWidget *gicon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
 	GtkToolItem *item = gtk_toggle_tool_button_new();
@@ -987,15 +986,13 @@ GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
 
 
 GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar, int is_menu,
-									  char *icon, char *label, char *help, 
+									  const char *icon, const char *label, const char *help, 
 									  void *event_func, int event_cmd)
 {
 	GtkWidget *gicon = mgtk_create_icon(icon, GTK_ICON_SIZE_LARGE_TOOLBAR);
-	GtkToolItem *item = 
-
-	((is_menu) ? 
-	 gtk_menu_tool_button_new(gicon, (!label[0]) ? NULL : label) :
-	 gtk_tool_button_new(gicon, (!label[0]) ? NULL : label) );
+	GtkToolItem *item = ((is_menu) ? 
+						 gtk_menu_tool_button_new(gicon, (!label[0]) ? NULL : label) :
+						 gtk_tool_button_new(gicon, (!label[0]) ? NULL : label) );
 
 	GtkWidget *button = (GtkWidget *)item;
 	gtk_widget_show(gicon);
@@ -1003,7 +1000,7 @@ GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar, int is_menu,
 	//gtk_toolbar_append_widget((GtkToolbar *)toolbar, button, help, NULL);
 	gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, -1); // Append to the end
 
-	GtkTooltips *tips = gtk_tooltips_new();
+	GtkTooltips* tips = gtk_tooltips_new();
 	gtk_tool_item_set_tooltip(item, tips, help, NULL);
 
 	if (event_func)
@@ -1015,8 +1012,7 @@ GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar, int is_menu,
 
 	gtk_widget_ref(button);
 	gtk_object_set_data_full(GTK_OBJECT(toolbar), "tb_btn",
-							 button,
-							 (GtkDestroyNotify)gtk_widget_unref);
+							 button, (GtkDestroyNotify)gtk_widget_unref);
 	gtk_widget_show(button);
 
 	return button;

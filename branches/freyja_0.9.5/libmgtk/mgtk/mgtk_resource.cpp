@@ -96,23 +96,6 @@ void mgtk_application_window_role(char *role)
 }
 
 
-////////////////////////////////////////////////////////////////////
-
-void *rc_gtk_event_func(int event)
-{
-	void (*agtk_event)(GtkWidget *, void *);
-
-
-	switch (event)
-	{
-	default:
-		agtk_event = mgtk_event_command;
-	}
-
-	return (void *)agtk_event;
-}
-
-
 ////////////////////////////////////////////////////////////////
 
 void mgtk_event_close_window(GtkWidget *widget, gpointer user_data)
@@ -418,13 +401,12 @@ void mgtk_tool_toggle_button_handler(GtkWidget *item, gpointer e)
 	mgtk_toggle_value_set(GPOINTER_TO_INT(e), val);
 }
 
+
 arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 {
 	arg_list_t *ret = NULL, *icon, *label, *help, *toggled, *event, *cmd;
 	GtkWidget *toggle_button;
-	void *event_func;
 	int event_cmd;
-
 
 	arg_enforce_type(&box,  ARG_GTK_TOOLBOX_WIDGET);
 	MGTK_ASSERTMSG(box, "box == ARG_GTK_TOOLBOX_WIDGET");
@@ -454,7 +436,6 @@ arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 
 	if (toggled && icon && label && help && event && cmd)
 	{
-		event_func = rc_gtk_event_func(get_int(event));
 		event_cmd = get_int(cmd);
 
 		// FIXME: Should be removed and replaced with lisp function
@@ -476,7 +457,7 @@ arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 										  get_int(toggled), 
 										  icon_filename, get_string(label),
 										  get_string(help),
-										  event_func, event_cmd);
+										  (void*)mgtk_event_command, event_cmd);
 		
 		new_adt(&ret, ARG_GTK_WIDGET, (void *)toggle_button);
 
@@ -504,7 +485,6 @@ arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 {
 	arg_list_t *ret = NULL, *icon, *label, *help, *event, *cmd;
-	void *event_func;
 	int event_cmd;
 
 	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
@@ -523,7 +503,6 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 
 	if (icon && label && help && event && cmd)
 	{
-		event_func = rc_gtk_event_func(get_int(event));
 		event_cmd = get_int(cmd);
 
 		// FIXME: Should be removed and replaced with lisp function
@@ -543,7 +522,7 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 		GtkWidget *button =
 		mgtk_create_toolbar_button((GtkWidget *)box->data, 0, icon_filename, 
 								   get_string(label), get_string(help),
-								   event_func, event_cmd);
+								   (void*)mgtk_event_command, event_cmd);
 		
 		new_adt(&ret, ARG_GTK_WIDGET, (void *)button);
 	}
@@ -560,9 +539,7 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 
 arg_list_t *mgtk_rc_toolbar_menu_button(arg_list_t *box)
 {
-
 	arg_list_t *ret = NULL, *icon, *label, *help, *event, *cmd;
-	void *event_func;
 	int event_cmd;
 
 	arg_enforce_type(&box, ARG_GTK_TOOLBOX_WIDGET);
@@ -581,7 +558,6 @@ arg_list_t *mgtk_rc_toolbar_menu_button(arg_list_t *box)
 
 	if (icon && label && help && event && cmd)
 	{
-		event_func = rc_gtk_event_func(get_int(event));
 		event_cmd = get_int(cmd);
 
 		// FIXME: Should be removed and replaced with lisp function
@@ -601,7 +577,7 @@ arg_list_t *mgtk_rc_toolbar_menu_button(arg_list_t *box)
 		GtkWidget *button =
 		mgtk_create_toolbar_button((GtkWidget *)box->data, 1, icon_filename, 
 								   get_string(label), get_string(help),
-								   event_func, event_cmd);
+								   (void*)mgtk_event_command, event_cmd);
 
 		GtkWidget *menu = NULL; //gtk_menu_new();
 
@@ -1285,7 +1261,6 @@ arg_list_t *mgtk_rc_button(arg_list_t *container)
 {
 	arg_list_t *label, *event, *cmd, *ret = NULL;
 	GtkWidget *item;
-	void *agtk_event;
 
 	arg_enforce_type(&container,  ARG_GTK_BOX_WIDGET);
 	MGTK_ASSERTMSG(container, "container == ARG_GTK_BOX_WIDGET");
@@ -1321,14 +1296,9 @@ arg_list_t *mgtk_rc_button(arg_list_t *container)
 		//index_add_gtk_widget(get_int(cmd), item);
 		mgtk_event_subscribe_gtk_widget(get_int(cmd), item);
 
-		agtk_event = rc_gtk_event_func(get_int(event));
-
-		if (agtk_event)
-		{
-			gtk_signal_connect(GTK_OBJECT(item), "pressed",
-							   GTK_SIGNAL_FUNC(agtk_event), 
-							   GINT_TO_POINTER(get_int(cmd)));
-		}
+		gtk_signal_connect(GTK_OBJECT(item), "pressed",
+						   GTK_SIGNAL_FUNC(mgtk_event_command), 
+						   GINT_TO_POINTER(get_int(cmd)));
 		
 		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
 	}

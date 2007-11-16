@@ -51,5 +51,9 @@ GtkWidget *mgtk_get_fileselection_pattern_widget(int event);
 
 void mgtk_resource_rebuild_treeview(int event, GtkTreeModel *model);
 
+void mgtk_tool_toggle_button_handler(GtkWidget *item, gpointer e);
+
+void mgtk_destroy_notebook(GtkWidget *widget);
+
 
 #endif
