@@ -1042,7 +1042,7 @@ void mgtk_accel_support(GtkWidget *item, const char* accel)
 		unsigned int i, len, key = 0, mod;
 		const char* s = accel;
 		
-		mgtk_print("Key accel %s", accel);
+		mgtk_print("Key accel %s\n", accel);
 		
 		len = strlen(s);
 

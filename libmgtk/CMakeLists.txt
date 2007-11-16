@@ -142,6 +142,7 @@ INSTALL( TARGETS ${Name}-${Major}.${Minor}.${Micro} LIBRARY DESTINATION /usr/lib
 
 # mgtk
 add_executable( mgtk mgtk/mgtk )
+add_dependencies( mgtk ${Name}-${Major}.${Minor}.${Micro} )
 set_target_properties( mgtk PROPERTIES OUTPUT_NAME unit/mgtk )
 set_target_properties( mgtk PROPERTIES COMPILE_FLAGS 
 	"-DUNIT_TEST_MGTK" )

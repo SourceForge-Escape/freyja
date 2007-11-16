@@ -24,10 +24,19 @@
 
 #   include "lua/Lua.h"
 
-void mgtk_lua_register_functions(const Lua &vm);
+void mgtk_lua_register_functions(const Lua& vm);
 /*------------------------------------------------------
  * Pre : lua is a valid VM wrapper.
  * Post: Register mgtk functions for lua use.
+ *
+ ------------------------------------------------------*/
+
+int mgtk_lua_event(lua_State* s);
+/*------------------------------------------------------
+ * Pre : 
+ * Post: 
+ *
+ * event_id = mgtk_event( [ symbol | symbol, lua_func ] )
  *
  ------------------------------------------------------*/
 

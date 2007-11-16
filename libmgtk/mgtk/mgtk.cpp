@@ -68,6 +68,26 @@ void mgtk_test_handle_application_window_close()
 }
 
 
+int mgtk_test_handle_command2i(int event, int cmd)
+{
+	if ( cmd > 0 && !ResourceEvent::listen(cmd - 10000) )
+	{
+		mgtk_print("%s(%i, %i): Event has no handler.\n",
+					 __func__, event, cmd);
+		return -1;
+	}
+
+	return 0;
+}
+
+
+void mgtk_test_handle_command(int command)
+{
+	if ( !ResourceEvent::listen(command - 10000) )
+		mgtk_print("!Event(%d): Unhandled event.\n", command);
+}
+
+
 int main(int argc, char* argv[])
 {
 	const char* ui = "test.lua";
@@ -84,8 +104,8 @@ int main(int argc, char* argv[])
 	/* 'Link' up mgtk library stubs to these implementations. */
 	//mgtk_link_import("mgtk_handle_color", (void*)freyja_handle_color);
 	mgtk_link_import("mgtk_handle_application_window_close", (void*)mgtk_test_handle_application_window_close);
-	//mgtk_link_import("mgtk_handle_command", (void*)freyja_handle_command);
-	//mgtk_link_import("mgtk_handle_command2i", (void*)freyja_handle_command2i);
+	mgtk_link_import("mgtk_handle_command", (void*)mgtk_test_handle_command);
+	mgtk_link_import("mgtk_handle_command2i", (void*)mgtk_test_handle_command2i);
 	//mgtk_link_import("mgtk_handle_event1u", (void*)freyja_handle_event1u);
 	//mgtk_link_import("mgtk_handle_event1f", (void*)freyja_handle_event1f);
 	//mgtk_link_import("mgtk_handle_gldisplay", (void*)freyja_handle_gldisplay);
