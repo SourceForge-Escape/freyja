@@ -79,10 +79,11 @@ void mgtk_lua_register_functions(const Lua &lua)
 	lua.RegisterFunction("mgtk_label", mgtk_lua_rc_label);
 
 	lua.RegisterFunction("mgtk_toggle_set", mgtk_lua_func_toggle_set);
+	lua.RegisterFunction("mgtk_window_move", mgtk_lua_window_move);
 }
 
 
-int mgtk_lua_is_null(lua_State *s)
+int mgtk_lua_is_null(lua_State* s)
 {	
 	if ( lua_gettop(s) == 1 && lua_islightuserdata(s, 1) )
 	{
@@ -108,7 +109,7 @@ int mgtk_lua_rc_window(lua_State* s)
 	gtk_object_set_data(GTK_OBJECT(window), "window", window);
 	gtk_window_set_policy(GTK_WINDOW(window), FALSE, TRUE, FALSE);
 
-	if ( lua_gettop(s) == 2 &&
+	if ( lua_gettop(s) >= 2 &&
 		 lua_isstring(s, 1) && lua_isstring(s, 2) )
 	{
 		const char* title = lua_tostring(s, 1);
@@ -125,6 +126,14 @@ int mgtk_lua_rc_window(lua_State* s)
 	}
 
 	gtk_widget_show(window);
+
+	if ( lua_gettop(s) >= 4 &&
+		 lua_isnumber(s, 3) && lua_isnumber(s, 4) )
+	{
+		int x = (int)lua_tonumber(s, 3);
+		int y = (int)lua_tonumber(s, 4);
+		gtk_window_move(GTK_WINDOW(window), x, y);
+	}
 
 #if LUA_ALL_WINDOWS_CLOSE_APP
 	g_signal_connect(GTK_OBJECT(window), "delete_event",
@@ -184,23 +193,27 @@ int mgtk_lua_rc_expander(lua_State *s)
 {
 	GtkWidget *widget = NULL;
 
-	if ( lua_gettop(s) >= 2 && 
-		 lua_isstring(s, 1) && lua_isboolean(s, 2) )
+	if ( lua_gettop(s) >= 3 &&
+		 lua_islightuserdata(s, 1) &&
+		 lua_isstring(s, 2) && lua_isboolean(s, 3) )
 	{
-		const char *label = lua_tostring(s, 1);
-		int expand = lua_toboolean(s, 2);
+		GtkWidget* box = (GtkWidget*)lua_touserdata(s, 1);
+		const char *label = lua_tostring(s, 2);
+		int expand = lua_toboolean(s, 3);
 
 		widget = gtk_expander_new(label);		
 		gtk_expander_set_expanded((GtkExpander*)widget, expand ? TRUE : FALSE);
+
+		gtk_container_add((GtkContainer *)box, widget);
 
 		GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
 		gtk_container_add((GtkContainer *)widget, vbox);
 		gtk_widget_show_all(widget);
 
 		// Optional mlisp symbol table binding.
-		if ( lua_gettop(s) == 3 && lua_isstring(s, 3) )
+		if ( lua_gettop(s) == 4 && lua_isstring(s, 4) )
 		{
-			const char *name = lua_tostring(s, 3);
+			const char *name = lua_tostring(s, 4);
 
 			// This makes a copy of the arg with a box in it for binding
 			// to the name symbol.  This is for S-Class rank only, since
@@ -1080,6 +1093,21 @@ int mgtk_lua_func_toggle_set(lua_State *s)
 		int value = (int)lua_tonumber(s, 2);
 
 		mgtk_toggle_value_set( event, value );
+	}
+
+	return 0;
+}
+
+
+int mgtk_lua_window_move(lua_State* s)
+{
+	GtkWidget* window = (GtkWidget*)lua_touserdata(s, 1);
+	int x = (int)lua_tonumber(s, 2);
+	int y = (int)lua_tonumber(s, 3);
+
+	if ( window )
+	{
+		gtk_window_move(GTK_WINDOW(window), x, y);
 	}
 
 	return 0;

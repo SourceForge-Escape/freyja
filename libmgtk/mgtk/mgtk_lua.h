@@ -283,6 +283,7 @@ int mgtk_lua_rc_label(lua_State *s);
 
 int mgtk_lua_func_toggle_set(lua_State *s);
 
+int mgtk_lua_window_move(lua_State* s);
 
 #endif // LUAWRAPPER_FOUND
 
