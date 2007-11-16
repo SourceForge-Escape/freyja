@@ -71,11 +71,11 @@ GtkWidget *mgtk_create_spinbutton2(GtkWidget *master, char *name,
 								   float val, float min, float max, float step,
 								   float page, float page_sz, int digits);
 
-GtkWidget *mgtk_create_label(GtkWidget *master, char *name, 
-							 char *text, float x_align, float y_align);
+GtkWidget *mgtk_create_label(GtkWidget *master, const char *name, 
+							 const char *text, float x_align, float y_align);
 
-GtkWidget *mgtk_create_tab(GtkWidget *notebook,  char *name, 
-						   GtkWidget *tab_contents, char *label_text,
+GtkWidget *mgtk_create_tab(GtkWidget *notebook,  const char *name, 
+						   GtkWidget *tab_contents, const char *label_text,
 						   int tab_num);
 
 GtkWidget *mgtk_create_notebook(GtkWidget *app);
@@ -83,15 +83,17 @@ GtkWidget *mgtk_create_notebook(GtkWidget *app);
 GtkWidget *mgtk_create_toolbar(GtkWidget *box);
 
 GtkWidget *mgtk_create_toolbar_toogle_button(GtkWidget *toolbar,  bool toggled,
-											 char *icon, char *label,
-											 char *help, 
+											 const char *icon, const char *label,
+											 const char *help, 
 											 void *event_func, int event_cmd);
 
 GtkWidget *mgtk_create_toolbar_button(GtkWidget *toolbar, int is_menu,
-									  char *icon, char *label, char *help, 
+									  const char *icon, const char *label, const char *help, 
 									  void *event_func, int event_cmd);
 
 GtkWidget *mgtk_create_color_button(void *func, int id);
+
+GdkPixbuf* mgtk_create_pixbuf(const char* icon_filename);
 
 void mgtk_destroy_window(GtkWidget *widget);
 

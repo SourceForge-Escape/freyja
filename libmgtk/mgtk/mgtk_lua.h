@@ -55,7 +55,11 @@ int mgtk_lua_is_null(lua_State *s);
 
 int mgtk_lua_rc_gl_widget(lua_State *s);
 int mgtk_lua_rc_notebook(lua_State *s);
+// notebook = mgtk_notebook( eventId [, width, height] )
+
 int mgtk_lua_rc_tab(lua_State *s);
+// mgtk_tab(notebook, label, eventId)
+
 int mgtk_lua_rc_textbox(lua_State *s);
 int mgtk_lua_rc_hsep(lua_State *s);
 int mgtk_lua_rc_vsep(lua_State *s);
@@ -64,7 +68,20 @@ int mgtk_lua_rc_colorbutton(lua_State *s);
 int mgtk_lua_rc_togglebutton(lua_State *s);
 
 int mgtk_lua_rc_submenu(lua_State *s);
-int mgtk_lua_rc_menu_seperator(lua_State *s);
+/*------------------------------------------------------
+ * 
+ * submenu = 
+ * mgtk_submenu("label", eventId [, "bind-symbol"] )
+ * 
+ ------------------------------------------------------*/
+
+int mgtk_lua_rc_menu_separator(lua_State *s);
+/*------------------------------------------------------
+ * 
+ * separator = 
+ * mgtk_menu_sep()
+ * 
+ ------------------------------------------------------*/
 
 int mgtk_lua_rc_menu_item(lua_State *s);
 /*------------------------------------------------------
@@ -82,12 +99,44 @@ int mgtk_lua_rc_popup_menu(lua_State *s);
 int mgtk_lua_rc_menubar(lua_State *s);
 
 int mgtk_lua_rc_tree(lua_State *s);
+// tree = mgtk_tree(label, selection_event, text_event)
 
 int mgtk_lua_rc_toolbar(lua_State *s);
-int mgtk_lua_rc_toolbar_togglebutton(lua_State *s);
-int mgtk_lua_rc_toolbar_button(lua_State *s);
-int mgtk_lua_rc_toolbar_menu_button(lua_State *s);
+/*------------------------------------------------------
+ * Pre : Must pass in existing box.
+ * Post: 
+ *
+ * toolbar = 
+ * mgtk_toolbar(box)
+ * 
+ ------------------------------------------------------*/
+
+int mgtk_lua_rc_toolbar_append(lua_State *s);
+/*------------------------------------------------------
+ * Pre : Must pass in existing box.
+ * Post: 
+ *
+ * toolbar = 
+ * mgtk_toolbar_append(toolbar, item [, item, ..., mode])
+ * 
+ ------------------------------------------------------*/
+
 int mgtk_lua_rc_toolbar_box(lua_State *s);
+/*------------------------------------------------------
+ * Pre : Must pass in existing toolbar.
+ * Post: Allows you to embed any widget in a toolbar.
+ *       Returns a box container to store widgets.
+ *
+ * box = 
+ * mgtk_toolbar_box(toolbar [, AppendMode])
+ * 
+ ------------------------------------------------------*/
+
+int mgtk_lua_rc_toolbar_button(lua_State *s);
+
+int mgtk_lua_rc_toolbar_menubutton(lua_State *s);
+
+int mgtk_lua_rc_toolbar_togglebutton(lua_State *s);
 
 int mgtk_lua_rc_color(lua_State *s);
 int mgtk_lua_rc_hslider(lua_State *s);

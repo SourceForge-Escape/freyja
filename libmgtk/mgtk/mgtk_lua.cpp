@@ -25,9 +25,12 @@
 
 #include "Resource.h"        /* Hook into mlisp symbol table and event map for compatibility. */
 #include "ResourceEvent.h"
+
+#include "mgtk_callbacks.h"
 #include "mgtk_events.h"
 #include "mgtk_interface.h"
-#include "mgtk_callbacks.h"
+#include "mgtk_resource.h"
+
 #include "mgtk_lua.h"
 
 
@@ -44,18 +47,29 @@ void mgtk_lua_register_functions(const Lua &lua)
 	lua.RegisterFunction("mgtk_handlebox", mgtk_lua_rc_handlebox);
 	lua.RegisterFunction("mgtk_summonbox", mgtk_lua_rc_summonbox);
 	lua.RegisterFunction("mgtk_expander", mgtk_lua_rc_expander);
+	lua.RegisterFunction("mgtk_notebook", mgtk_lua_rc_notebook);
+	lua.RegisterFunction("mgtk_tab", mgtk_lua_rc_tab);
+
+	lua.RegisterFunction("mgtk_tree", mgtk_lua_rc_tree);
 
 	lua.RegisterFunction("mgtk_menu_item", mgtk_lua_rc_menu_item);
 	lua.RegisterFunction("mgtk_append_menu", mgtk_lua_rc_append_menu);
 	lua.RegisterFunction("mgtk_menubar", mgtk_lua_rc_menubar);
 	lua.RegisterFunction("mgtk_submenu", mgtk_lua_rc_submenu);
-	lua.RegisterFunction("mgtk_menu_sep", mgtk_lua_rc_menu_seperator);
+	lua.RegisterFunction("mgtk_menu_sep", mgtk_lua_rc_menu_separator);
 
 	lua.RegisterFunction("mgtk_button", mgtk_lua_rc_button);
 	lua.RegisterFunction("mgtk_colorbutton", mgtk_lua_rc_colorbutton);
 	lua.RegisterFunction("mgtk_spinbutton_uint", mgtk_lua_rc_spinbutton_uint);
 	lua.RegisterFunction("mgtk_spinbutton_int", mgtk_lua_rc_spinbutton_int);
 	lua.RegisterFunction("mgtk_spinbutton_float", mgtk_lua_rc_spinbutton_float);
+
+	lua.RegisterFunction("mgtk_toolbar", mgtk_lua_rc_toolbar);
+	lua.RegisterFunction("mgtk_toolbar_button", mgtk_lua_rc_toolbar_button);
+	lua.RegisterFunction("mgtk_toolbar_menubutton", mgtk_lua_rc_toolbar_menubutton);
+	lua.RegisterFunction("mgtk_toolbar_togglebutton", mgtk_lua_rc_toolbar_togglebutton);	
+	lua.RegisterFunction("mgtk_toolbar_separator", mgtk_lua_rc_toolbar_separator);
+	lua.RegisterFunction("mgtk_toolbar_box", mgtk_lua_rc_toolbar_box);
 
 	lua.RegisterFunction("mgtk_statusbar", mgtk_lua_rc_statusbar);
 	lua.RegisterFunction("mgtk_textview", mgtk_lua_rc_textview);
@@ -85,23 +99,26 @@ int mgtk_lua_is_null(lua_State *s)
 // Containers
 ////////////////////////////////////////////////////////////////////////////// 
 
-int mgtk_lua_rc_window(lua_State *s)
+int mgtk_lua_rc_window(lua_State* s)
 {
-	GtkWidget *window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+	GtkWidget* window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_object_set_data(GTK_OBJECT(window), "window", window);
 	gtk_window_set_policy(GTK_WINDOW(window), FALSE, TRUE, FALSE);
 
 	if ( lua_gettop(s) == 2 &&
 		 lua_isstring(s, 1) && lua_isstring(s, 2) )
 	{
-		const char *title = lua_tostring(s, 1);
+		const char* title = lua_tostring(s, 1);
 		gtk_window_set_title(GTK_WINDOW(window), title);
 
-		// FIXME: Disabled
-		//const char *icon = lua_tostring(s, 2);
-		//char filename[1024];
-		//mgtk_get_pixmap_filename(filename, 1024, icon);
-		//icon_filename[1023] = 0;
+		/* Icon. */
+		GdkPixbuf* icon = mgtk_create_pixbuf( lua_tostring(s, 2) );
+
+		if ( window && icon )
+		{
+			gtk_window_set_icon(GTK_WINDOW(window), icon);
+			gdk_pixbuf_unref(icon);
+		}
 	}
 
 	gtk_widget_show(window);
@@ -296,7 +313,7 @@ int mgtk_lua_rc_summonbox(lua_State *s)
 // Event widgets
 ////////////////////////////////////////////////////////////////////////////// 
 
-int mgtk_lua_rc_menu_seperator(lua_State *s)
+int mgtk_lua_rc_menu_separator(lua_State *s)
 {
 	GtkWidget* sep = gtk_menu_item_new();
 	gtk_widget_show(sep);
@@ -349,14 +366,10 @@ int mgtk_lua_rc_submenu(lua_State *s)
 	const char *label = NULL;
 	int id = -1;
 
-	if ( lua_isnumber(s, 1) )
-	{
-		id = (int)lua_tonumber(s, 1);
-		label = lua_tostring(s, 2);
-	}
-	else if ( lua_isstring(s, 1) )
+	if ( lua_isstring(s, 1) && lua_isnumber(s, 2) )
 	{
 		label = lua_tostring(s, 1);
+		id = (int)lua_tonumber(s, 2);
 	}
 
 	GtkWidget *item = gtk_image_menu_item_new_with_mnemonic(label);
@@ -666,6 +679,180 @@ int mgtk_lua_rc_statusbar(lua_State *s)
 }
 
 
+int mgtk_lua_rc_toolbar_append(lua_State* s)
+{
+	if ( lua_gettop(s) >= 2 &&
+		 lua_islightuserdata(s, 1) && lua_islightuserdata(s, 2) )
+	{
+		GtkWidget* toolbar = (GtkWidget*)lua_touserdata(s, 1);
+		GtkToolItem* item = (GtkToolItem*)lua_touserdata(s, 2);
+
+		// FIXME: If > 2 just keep appending... and check the last stack node for mode.
+
+		int mode = -1; // Append to the end by default.
+		if ( lua_gettop(s) == 3 && lua_isnumber(s, 3) )
+		{
+			mode = (int)lua_tonumber(s, 3);
+		}
+
+		gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, mode);
+	}
+
+	return 0;
+}
+
+
+int mgtk_lua_rc_toolbar_separator(lua_State* s)
+{
+	GtkToolItem* item = gtk_separator_tool_item_new();
+	GtkWidget* widget = (GtkWidget *)item;
+	gtk_widget_show(widget);
+
+	lua_pushlightuserdata(s, (void *)widget);
+
+	return 1;
+}
+
+
+int mgtk_lua_rc_toolbar_box(lua_State* s)
+{
+	if ( lua_gettop(s) >= 1 && lua_islightuserdata(s, 1) )
+	{
+		GtkWidget* toolbar = (GtkWidget *)lua_touserdata(s, 1);
+		int mode = -1; // Append to the end by default.
+
+		if ( lua_gettop(s) == 2 && lua_isnumber(s, 2) )
+		{
+			mode = (int)lua_tonumber(s, 2);
+		}
+		
+		GtkToolItem* item = gtk_tool_item_new();
+		GtkWidget* widget = (GtkWidget*)item;
+		gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, mode); 
+		gtk_widget_show(widget);
+
+		GtkWidget* box = gtk_hbox_new(TRUE, 1);
+		gtk_widget_ref(box);
+		gtk_object_set_data_full(GTK_OBJECT(item), "ebox", box, (GtkDestroyNotify)gtk_widget_unref);
+		gtk_container_add(GTK_CONTAINER(item), box);
+		gtk_widget_show(box);
+
+		lua_pushlightuserdata(s, (void *)box);
+	}
+	else
+	{
+		lua_pushlightuserdata(s, NULL);
+	}
+
+	return 1;
+}
+
+
+int mgtk_lua_rc_toolbar(lua_State* s)
+{
+	GtkWidget* box = (GtkWidget *)lua_touserdata(s, 1);
+	GtkWidget* toolbar = mgtk_create_toolbar( box );
+	gtk_widget_ref(toolbar);
+	gtk_object_set_data_full(GTK_OBJECT(box), "toolbar", toolbar, (GtkDestroyNotify)gtk_widget_unref);
+	gtk_widget_show(toolbar);
+
+	lua_pushlightuserdata(s, (void *)toolbar);
+
+	return 1;
+}
+
+
+int mgtk_lua_rc_toolbar_togglebutton(lua_State* s)
+{
+	GtkWidget* toggle_button = NULL;
+
+	if ( lua_gettop(s) == 6 )
+	{
+		GtkWidget* toolbar = (GtkWidget *)lua_touserdata(s, 1);
+		const char* label = lua_tostring(s, 2);
+		int event = (int)lua_tonumber(s, 3);
+		int state = (int)lua_tonumber(s, 4);
+		const char* icon = lua_tostring(s, 5);
+		const char* tooltip = lua_tostring(s, 6);
+
+		void* event_func = NULL; // No longer used // rc_gtk_event_func(event);
+		
+		toggle_button =
+		mgtk_create_toolbar_toogle_button(toolbar, state, icon, label, tooltip, event_func, event);
+		
+		gtk_signal_connect(GTK_OBJECT(toggle_button), "toggled",
+						   GTK_SIGNAL_FUNC(mgtk_tool_toggle_button_handler), 
+						   GINT_TO_POINTER(event));
+
+		/* Add this widget to a map by event id key. */
+		mgtk_event_subscribe_gtk_widget(event, toggle_button);
+	}
+
+	lua_pushlightuserdata(s, (void *)toggle_button);
+
+	return 1;
+}
+
+
+int mgtk_lua_rc_toolbar_button(lua_State* s)
+{
+	GtkWidget* button = NULL;
+
+	if ( lua_gettop(s) == 5 )
+	{
+		GtkWidget* toolbar = (GtkWidget *)lua_touserdata(s, 1);
+		const char* label = lua_tostring(s, 2);
+		int event = (int)lua_tonumber(s, 3);
+		const char* icon = lua_tostring(s, 4);
+		const char* tooltip = lua_tostring(s, 5);
+
+		button = 
+		mgtk_create_toolbar_button(toolbar, 0, icon, label, tooltip, (void*)mgtk_event_command, event);
+	}
+
+	lua_pushlightuserdata(s, (void *)button);
+
+	return 1;
+}
+
+
+int mgtk_lua_rc_toolbar_menubutton(lua_State* s)
+{
+	GtkWidget* menu = NULL;
+
+	if ( lua_gettop(s) == 5 )
+	{
+		GtkWidget* toolbar = (GtkWidget *)lua_touserdata(s, 1);
+		const char* label = lua_tostring(s, 2);
+		int event = -1;
+
+		if ( lua_isnumber(s, 3) )
+		{
+			event = (int)lua_tonumber(s, 3);
+			menu = gtk_menu_new();
+			gtk_widget_show(menu);
+		}
+		else if ( lua_isstring(s, 3) )
+		{
+			// FIXME: Use legacy mlisp resource bindings via luastring for now.
+			menu = (GtkWidget*)mlisp_recall( lua_tostring(s, 3) );
+		}
+
+		const char* icon = lua_tostring(s, 4);
+		const char* tooltip = lua_tostring(s, 5);
+
+		GtkWidget* button =
+		mgtk_create_toolbar_button(toolbar, 1, icon, label, tooltip, (void*)mgtk_event_command, event);
+		gtk_menu_tool_button_set_menu( GTK_MENU_TOOL_BUTTON(button), menu );
+	}
+
+	lua_pushlightuserdata(s, (void *)menu);
+
+	return 1;
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Status widgets
 ////////////////////////////////////////////////////////////////////////////// 
@@ -711,6 +898,96 @@ int mgtk_lua_rc_label(lua_State *s)
 	lua_pushlightuserdata(s, (void *)label);
 	return 1;
 }
+
+
+int mgtk_lua_rc_notebook(lua_State* s)
+{
+	GtkWidget* notebook = gtk_notebook_new();
+	//gtk_widget_ref(notebook);
+	//gtk_object_set_data_full(GTK_OBJECT(box), "notebook", notebook, (GtkDestroyNotify)gtk_widget_unref);
+	gtk_widget_show(notebook);
+
+	if ( lua_gettop(s) > 0 )
+	{
+		int event = (int)lua_tonumber(s, 1);
+
+		// FIXME: Push this out as generic size event later.
+		if ( lua_gettop(s) == 3 )
+		{
+			int width = (int)lua_tonumber(s, 2);
+			int height = (int)lua_tonumber(s, 3);
+
+			gtk_widget_set_usize(notebook, width, height);
+		}
+
+		gtk_notebook_set_scrollable(GTK_NOTEBOOK(notebook), TRUE);
+		
+		/* Event signal */
+		gtk_signal_connect(GTK_OBJECT(notebook), "switch_page",
+						   GTK_SIGNAL_FUNC(mgtk_event_notebook_switch_page),
+						   GINT_TO_POINTER(event));
+
+		/* Hook up vector data to map tab page ids to events */
+		mgtk_notebook_eventmap_t* emap = new mgtk_notebook_eventmap_t;
+		emap->count = 0;
+		emap->events = 0x0;
+
+		gtk_object_set_data(GTK_OBJECT(notebook), "notebook_eventmap", emap);
+		gtk_signal_connect(GTK_OBJECT(notebook), "destroy",
+						   GTK_SIGNAL_FUNC(mgtk_destroy_notebook), NULL);
+	}
+
+	lua_pushlightuserdata(s, (void*)notebook);
+
+	return 1;
+}
+
+
+int mgtk_lua_rc_tab(lua_State* s)
+{
+	GtkWidget* vbox = NULL;
+
+	if ( 1 )
+	{
+		GtkWidget* notebook = (GtkWidget *)lua_touserdata(s, 1);
+		const char* label = lua_tostring(s, 2);
+		int event = (int)lua_tonumber(s, 3);
+
+		vbox = gtk_vbox_new(FALSE, 0);
+		mgtk_notebook_eventmap_t* emap =
+		(mgtk_notebook_eventmap_t*)gtk_object_get_data(GTK_OBJECT(notebook), "notebook_eventmap");
+
+		if (!emap)
+		{
+			lua_pushlightuserdata(s, NULL);
+			return 1;
+		}
+
+		//GtkWidget* item = 
+		mgtk_create_tab(notebook, label, vbox, label, emap->count);
+
+		/* Simple vector to map events */
+		emap->count++;
+		int* newEvents = new int[emap->count];
+
+		if (emap->events)
+		{
+			for (unsigned int i = 0; i < emap->count; ++i)
+			{
+				newEvents[i] = emap->events[i];
+			}
+
+			delete [] emap->events;
+		}
+
+		newEvents[emap->count-1] = event;
+		emap->events = newEvents;
+	}
+
+	lua_pushlightuserdata(s, (void*)vbox);
+	return 1;
+}
+
 
 
 int mgtk_lua_func_toggle_set(lua_State *s)
