@@ -53,7 +53,9 @@ int mgtk_lua_is_null(lua_State *s);
  * 
  ------------------------------------------------------*/
 
-int mgtk_lua_rc_gl_widget(lua_State *s);
+int mgtk_lua_rc_opengl_canvas(lua_State *s);
+// canvas = mgtk_opengl_canvas(width, height)
+
 int mgtk_lua_rc_notebook(lua_State *s);
 // notebook = mgtk_notebook( eventId [, width, height] )
 

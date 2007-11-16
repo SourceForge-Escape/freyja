@@ -52,11 +52,14 @@ void mgtk_lua_register_functions(const Lua &lua)
 
 	lua.RegisterFunction("mgtk_tree", mgtk_lua_rc_tree);
 
+	lua.RegisterFunction("mgtk_opengl_canvas", mgtk_lua_rc_opengl_canvas);
+
 	lua.RegisterFunction("mgtk_menu_item", mgtk_lua_rc_menu_item);
 	lua.RegisterFunction("mgtk_append_menu", mgtk_lua_rc_append_menu);
 	lua.RegisterFunction("mgtk_menubar", mgtk_lua_rc_menubar);
 	lua.RegisterFunction("mgtk_submenu", mgtk_lua_rc_submenu);
 	lua.RegisterFunction("mgtk_menu_sep", mgtk_lua_rc_menu_separator);
+	lua.RegisterFunction("mgtk_optionmenu", mgtk_lua_rc_optionmenu);
 
 	lua.RegisterFunction("mgtk_button", mgtk_lua_rc_button);
 	lua.RegisterFunction("mgtk_colorbutton", mgtk_lua_rc_colorbutton);
@@ -308,6 +311,51 @@ int mgtk_lua_rc_summonbox(lua_State *s)
 }
 
 
+int mgtk_lua_rc_opengl_canvas(lua_State *s)
+{
+	int width = (int)lua_tonumber(s, 1);
+	int height = (int)lua_tonumber(s, 2);
+
+	GtkWidget* canvas = mgtk_create_glarea(width, height);
+
+	if ( canvas )
+	{
+		gpointer gobj = gtk_object_get_data(GTK_OBJECT(canvas), "gl_window_state");
+		mgtk_glarea_window_state_t* state = (mgtk_glarea_window_state_t*)gobj;
+		state->appbar = NULL;
+
+#if defined HAVE_GTKGLEXT
+	gtk_signal_connect(GTK_OBJECT(canvas), "key_press_event",
+					   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
+	gtk_signal_connect(GTK_OBJECT(canvas), "key_release_event",
+					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
+	gtk_signal_connect(GTK_OBJECT(canvas), "destroy",
+					   GTK_SIGNAL_FUNC(mgtk_destroy_window), NULL);
+#endif
+
+	// FIXME: This needs to hook into a 'refresh/display' callback separately now.
+
+	//GTK_GL_AREA_WIDGET = canvas;
+		mgtk_print("@Gtk+ GL context started...");
+	}
+	else
+	{
+		canvas = gtk_label_new("Failed to create OpenGL context for canvas.");
+		gtk_widget_set_usize(canvas, width, height);
+		mgtk_print("!ERROR: OpenGL context not supported by this system?\n");
+	}
+	
+	/* Editing window */
+	//GtkWidget *vbox = mgtk_create_vbox(GTK_WIDGET(box), "box", 0, 0, 1, 1, 1);
+	//gtk_box_pack_start(GTK_BOX(box), GTK_WIDGET(canvas), TRUE, TRUE, 0);
+
+	gtk_widget_show(canvas);
+
+	lua_pushlightuserdata(s, (void*)canvas);
+
+	return 1;
+}
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Event widgets
@@ -357,6 +405,32 @@ int mgtk_lua_rc_menubar(lua_State *s)
 	// Push widget pointer unto the lua stack.
 	lua_pushlightuserdata(s, menubar);
 
+	return 1;
+}
+
+
+int mgtk_lua_rc_optionmenu(lua_State* s)
+{
+	const char* label = NULL;
+	int id = -1;
+
+	if ( lua_isstring(s, 1) && lua_isnumber(s, 2) )
+	{
+		label = lua_tostring(s, 1);
+		id = (int)lua_tonumber(s, 2);
+	}
+
+	GtkWidget* optionmenu = gtk_option_menu_new();
+	gtk_widget_ref(optionmenu);
+	gtk_widget_show(optionmenu);
+
+	GtkWidget* optionmenu_menu = gtk_menu_new();
+	gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), optionmenu_menu);
+	gtk_widget_show(optionmenu_menu);
+
+	mgtk_event_subscribe_gtk_widget(id, optionmenu);
+
+	lua_pushlightuserdata(s, (void *)optionmenu_menu);
 	return 1;
 }
 
@@ -708,6 +782,12 @@ int mgtk_lua_rc_toolbar_separator(lua_State* s)
 	GtkWidget* widget = (GtkWidget *)item;
 	gtk_widget_show(widget);
 
+	if ( lua_gettop(s) >= 1 && lua_islightuserdata(s, 1) )
+	{
+		GtkWidget* toolbar = (GtkWidget *)lua_touserdata(s, 1);
+		gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, -1);
+	}
+
 	lua_pushlightuserdata(s, (void *)widget);
 
 	return 1;
@@ -716,6 +796,8 @@ int mgtk_lua_rc_toolbar_separator(lua_State* s)
 
 int mgtk_lua_rc_toolbar_box(lua_State* s)
 {
+	GtkWidget* box = NULL;
+
 	if ( lua_gettop(s) >= 1 && lua_islightuserdata(s, 1) )
 	{
 		GtkWidget* toolbar = (GtkWidget *)lua_touserdata(s, 1);
@@ -731,18 +813,14 @@ int mgtk_lua_rc_toolbar_box(lua_State* s)
 		gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, mode); 
 		gtk_widget_show(widget);
 
-		GtkWidget* box = gtk_hbox_new(TRUE, 1);
+		box = gtk_hbox_new(TRUE, 1);
 		gtk_widget_ref(box);
-		gtk_object_set_data_full(GTK_OBJECT(item), "ebox", box, (GtkDestroyNotify)gtk_widget_unref);
+		gtk_object_set_data_full(GTK_OBJECT(item), "box", box, (GtkDestroyNotify)gtk_widget_unref);
 		gtk_container_add(GTK_CONTAINER(item), box);
 		gtk_widget_show(box);
+	}
 
-		lua_pushlightuserdata(s, (void *)box);
-	}
-	else
-	{
-		lua_pushlightuserdata(s, NULL);
-	}
+	lua_pushlightuserdata(s, (void *)box);
 
 	return 1;
 }
