@@ -84,6 +84,12 @@ void mgtk_lua_register_functions(const Lua &lua)
 }
 
 
+int mgtk_lua_get_id(const char* symbol)
+{
+	return ResourceEvent::GetResourceIdBySymbol( symbol );
+}
+
+
 int mgtk_lua_event(lua_State* s)
 {
 	int id = -1;
@@ -108,7 +114,7 @@ int mgtk_lua_event(lua_State* s)
 			ResourceEventCallbackLuaScript::add(symbol, s, script);
 
 			// 3. Return event id for this newly bound script.
-			id = ResourceEvent::GetResourceIdBySymbol( symbol );
+			id = mgtk_lua_get_id( symbol );
 		}
 	}	
 	else if ( lua_gettop(s) == 4 && 
@@ -518,7 +524,8 @@ int mgtk_lua_rc_optionmenu(lua_State* s)
 	gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), optionmenu_menu);
 	gtk_widget_show(optionmenu_menu);
 
-	mgtk_event_subscribe_gtk_widget(id, optionmenu);
+	if ( id != -1)
+		mgtk_event_subscribe_gtk_widget(id, optionmenu);
 
 	lua_pushlightuserdata(s, (void *)optionmenu_menu);
 	return 1;
@@ -530,10 +537,17 @@ int mgtk_lua_rc_submenu(lua_State *s)
 	const char *label = NULL;
 	int id = -1;
 
-	if ( lua_isstring(s, 1) && lua_isnumber(s, 2) )
+	if ( lua_gettop(s) > 0 && lua_isstring(s, 1) )
 	{
 		label = lua_tostring(s, 1);
-		id = (int)lua_tonumber(s, 2);
+	}
+
+	if ( lua_gettop(s) > 1 )
+	{
+		if ( lua_isnumber(s, 2) )
+			id = (int)lua_tonumber(s, 2);
+		else if ( lua_isstring(s, 2) )
+			id = mgtk_lua_get_id( lua_tostring(s, 2) );
 	}
 
 	GtkWidget *item = gtk_image_menu_item_new_with_mnemonic(label);
@@ -551,7 +565,7 @@ int mgtk_lua_rc_submenu(lua_State *s)
 
 	if ( lua_gettop(s) == 3 && lua_isstring(s, 3) )
 	{
-		const char *symbol = lua_tostring(s, 3);
+		const char* symbol = lua_tostring(s, 3);
 
 		if (symbol)
 		{
@@ -577,10 +591,17 @@ int mgtk_lua_rc_menu_item(lua_State *s)
 	int id = -1;
 
 
-	if ( lua_isstring(s, 1) && lua_isnumber(s, 2) )
+	if ( lua_gettop(s) > 0 && lua_isstring(s, 1) )
 	{
 		label = lua_tostring(s, 1);
-		id = (int)lua_tonumber(s, 2);
+	}
+
+	if ( lua_gettop(s) > 1 )
+	{
+		if ( lua_isnumber(s, 2) )
+			id = (int)lua_tonumber(s, 2);
+		else if ( lua_isstring(s, 2) )
+			id = mgtk_lua_get_id( lua_tostring(s, 2) );
 	}
 
 	if ( lua_gettop(s) > 3 && lua_isstring(s, 3) && lua_isstring(s, 4) )
@@ -614,6 +635,10 @@ int mgtk_lua_rc_menu_item(lua_State *s)
 		// Mongoose 2002.02.14, Add this widget to a special 
 		//   lookup table by it's event id
 		mgtk_event_subscribe_gtk_widget(id, item);
+
+		gtk_signal_connect(GTK_OBJECT(item), "activate",
+						   GTK_SIGNAL_FUNC(mgtk_event_command), 
+						   GINT_TO_POINTER(id) );
 	}
 
 #if 0
@@ -653,8 +678,9 @@ int mgtk_lua_rc_button(lua_State *s)
 
 	GtkWidget* widget = gtk_button_new_with_label(label);
 
-	// Add this widget to an event id map. 
-	mgtk_event_subscribe_gtk_widget(event, widget);
+	// Add this widget to an event id map.
+	if ( event != -1 )
+		mgtk_event_subscribe_gtk_widget(event, widget);
 
 	gtk_signal_connect(GTK_OBJECT(widget), "pressed",
 					   GTK_SIGNAL_FUNC(mgtk_event_command), 
@@ -674,7 +700,9 @@ int mgtk_lua_rc_colorbutton(lua_State *s)
 	{
 		int event = (int)lua_tonumber(s, 1);
 		widget = mgtk_create_color_button((void*)mgtk_event_color, event);
-		mgtk_event_subscribe_gtk_widget(event, widget);
+
+		if ( event != -1 )
+			mgtk_event_subscribe_gtk_widget(event, widget);
 	}
 
 	// Push widget pointer unto the lua stack.
@@ -720,10 +748,14 @@ int mgtk_lua_rc_spinbutton_uint(lua_State *s)
 
 		/* Mongoose 2002.02.01, Add this widget to a special 
 		 *   lookup table by it's event id */
-		mgtk_event_subscribe_gtk_widget(event, spinbutton);	
-		gtk_signal_connect(GTK_OBJECT(widget), "changed",
-						   GTK_SIGNAL_FUNC(mgtk_event_spinbutton_uint), 
-						   GINT_TO_POINTER(event) );
+
+		if ( event != -1 )
+		{
+			mgtk_event_subscribe_gtk_widget(event, spinbutton);	
+			gtk_signal_connect(GTK_OBJECT(widget), "changed",
+							   GTK_SIGNAL_FUNC(mgtk_event_spinbutton_uint), 
+							   GINT_TO_POINTER(event) );
+		}
 	}
 
 	// Push widget pointer unto the lua stack.
@@ -767,10 +799,13 @@ int mgtk_lua_rc_spinbutton_int(lua_State *s)
 
 		/* Mongoose 2002.02.01, Add this widget to a special 
 		 *   lookup table by it's event id */
-		mgtk_event_subscribe_gtk_widget(event, spinbutton);	
-		gtk_signal_connect(GTK_OBJECT(widget), "changed",
-						   GTK_SIGNAL_FUNC(mgtk_event_spinbutton_int), 
-						   GINT_TO_POINTER(event) );
+		if ( event != -1 )
+		{
+			mgtk_event_subscribe_gtk_widget(event, spinbutton);	
+			gtk_signal_connect(GTK_OBJECT(widget), "changed",
+							   GTK_SIGNAL_FUNC(mgtk_event_spinbutton_int), 
+							   GINT_TO_POINTER(event) );
+		}
 	}
 
 	// Push widget pointer unto the lua stack.
@@ -811,7 +846,7 @@ int mgtk_lua_rc_spinbutton_float(lua_State *s)
 
 		widget = spinbutton;
 
-		if (widget)
+		if (widget && event != -1)
 		{
 			/* Mongoose 2002.02.01, Add this widget to a special 
 			 *   lookup table by it's event id */
@@ -947,12 +982,15 @@ int mgtk_lua_rc_toolbar_togglebutton(lua_State* s)
 		toggle_button =
 		mgtk_create_toolbar_toogle_button(toolbar, state, icon, label, tooltip, event_func, event);
 		
-		gtk_signal_connect(GTK_OBJECT(toggle_button), "toggled",
-						   GTK_SIGNAL_FUNC(mgtk_tool_toggle_button_handler), 
-						   GINT_TO_POINTER(event));
+		if ( event != -1 )
+		{
+			gtk_signal_connect(GTK_OBJECT(toggle_button), "toggled",
+							   GTK_SIGNAL_FUNC(mgtk_tool_toggle_button_handler), 
+							   GINT_TO_POINTER(event));
 
-		/* Add this widget to a map by event id key. */
-		mgtk_event_subscribe_gtk_widget(event, toggle_button);
+			/* Add this widget to a map by event id key. */
+			mgtk_event_subscribe_gtk_widget(event, toggle_button);
+		}
 	}
 
 	lua_pushlightuserdata(s, (void *)toggle_button);
