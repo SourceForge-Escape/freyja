@@ -88,6 +88,12 @@ void mgtk_test_handle_command(int command)
 }
 
 
+void mgtk_test_shutdown()
+{
+	exit(0);
+}
+
+
 int main(int argc, char* argv[])
 {
 	const char* ui = "test.lua";
@@ -102,6 +108,13 @@ int main(int argc, char* argv[])
 	mgtk_assert_handler( mgtk_assert_dialog );
 
 	/* 'Link' up mgtk library stubs to these implementations. */
+	mgtk_link_import("mgtk_print", (void*)printf);
+	//mgtk_link_import("mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
+	//mgtk_link_import("mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
+	//mgtk_link_import("mgtk_rc_map", (void*)freyja_rc_map);
+	//mgtk_link_import("mgtk_get_resource_path", (void*)freyja_get_resource_path_callback);
+	
+	/* Hookup resource to event system */
 	//mgtk_link_import("mgtk_handle_color", (void*)freyja_handle_color);
 	mgtk_link_import("mgtk_handle_application_window_close", (void*)mgtk_test_handle_application_window_close);
 	mgtk_link_import("mgtk_handle_command", (void*)mgtk_test_handle_command);
@@ -116,15 +129,8 @@ int main(int argc, char* argv[])
 	//mgtk_link_import("mgtk_handle_resource_start", (void*)mgtk_test_handle_resource_start);
 	//mgtk_link_import("mgtk_handle_text_array", (void*)freyja_handle_text_array);
 	//mgtk_link_import("mgtk_handle_text", (void*)freyja_handle_text);
-
-	mgtk_link_import("mgtk_print", (void*)printf);
-	//mgtk_link_import("mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
-	//mgtk_link_import("mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
-	//mgtk_link_import("mgtk_rc_map", (void*)freyja_rc_map);
-	//mgtk_link_import("mgtk_get_resource_path", (void*)freyja_get_resource_path_callback);
-	
-	/* Hookup resource to event system */
 	ResourceEvent::setResource( &gResource );
+	ResourceEventCallback::add("eShutdown", mgtk_test_shutdown);
 
 	/* Export Lua mgtk functions to libfreyja VM. */
 	mgtk_lua_register_functions( gLua );

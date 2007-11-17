@@ -57,7 +57,13 @@ bool Lua::ExecuteFile(const char *filename)
 	int s = -1;
     if ( luaL_loadfile(mState, filename) == 0 ) 
 	{
-		s = lua_pcall(mState, 0, LUA_MULTRET, 0);
+		s = lua_pcall(mState, 0, LUA_MULTRET, 0);  
+
+		if ( s != 0 ) 
+		{
+			printf( "-- %s\n", lua_tostring(mState, -1) );
+			lua_pop(mState, 1);
+		}
 	}
 
 	return (s == 0);
