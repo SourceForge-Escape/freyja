@@ -17,16 +17,6 @@
 
 print("-- freyja3d.lua --")
 
--- Ideas
--- Event system should allow for lua func / C/C++ callbacks / event ids.
--- Try out vertical tabs for OpenGL view.
--- Widget for icon view selection for textures...
--- Try to get WIN32 mgtk_create_glarea() using gdk_gl_config_new_by_mode(..)
--- Allow setting display() callbacks on each opengl_canvas widget.
--- Abstract and hook up the animation timers for opengl_canvas.
--- Abstract widget size function.
--- Write something to translate pieces of mlisp to lua for testing.
-
 
 function freyja3d_ui_menubar( vbox )
 
@@ -97,26 +87,26 @@ function freyja3d_ui_sidebar_model( sidebar )
 	tab = mgtk_tab( sidebar, "Model", 
 					mgtk_event("sidebar_model", "freyja3d_ev_test()") )
 	handlebox = mgtk_handlebox( 1 )
-	vbox = mgtk_vbox( 1, 1, 0, 1, 1)
+	vbox = mgtk_vbox()
 	mgtk_box_pack( tab, vbox )
 	mgtk_box_pack( vbox, handlebox )
 
 	-- Transform box
 	expander = mgtk_expander( handlebox, "Transform Box", true )
-	hbox = mgtk_hbox(1, 1, 0, 1, 1)
+	hbox = mgtk_hbox()
 	mgtk_box_pack( expander, hbox )
 	eventid = mgtk_event("move", "freyja3d_ev_test()")
 	mgtk_box_pack( hbox, mgtk_button( "Move", eventid ) )
 	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -10000.0, 10000.0, 1) )
 	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -10000.0, 10000.0, 1) )
 	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -10000.0, 10000.0, 1) )
-	hbox = mgtk_hbox(1, 1, 0, 1, 1)
+	hbox = mgtk_hbox(1, 1)
 	mgtk_box_pack( expander, hbox )
 	mgtk_box_pack( hbox, mgtk_button( "Rotate", 1 ) )
 	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -180.0, 180.0, 2) )
 	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -180.0, 180.0, 2) )
 	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -180.0, 180.0, 2) )
-	hbox = mgtk_hbox(1, 1, 0, 1, 1)
+	hbox = mgtk_hbox(1, 1)
 	mgtk_box_pack( expander, hbox )
 	mgtk_box_pack( hbox, mgtk_button( "Scale", -1 ) )
 	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 1.0, -1.0, 1000.0, 2) )
@@ -131,7 +121,7 @@ function freyja3d_ui_init()
 	-- Application Window	
 	window = 
 	mgtk_window( "*test.freyja (/tmp) - freyja", "icons/freyja-dev.png", 64, 64 )
-	vbox = mgtk_vbox( 0, 0, 0, 1, 0 )
+	vbox = mgtk_vbox()
 	mgtk_box_pack( window, vbox )
 	-- FIXME Currently 'window' is actually a vbox embedded in the window.
 	--mgtk_window_move( window, 64, 64 )
@@ -150,7 +140,7 @@ function freyja3d_ui_init()
 	tab_material = mgtk_tab(shelf, "Material", -1)
 
 	-- Main UI Box
-	hbox = mgtk_hbox( 0, 1, 1, 1, 1 )
+	hbox = mgtk_hbox()
 	mgtk_box_pack( vbox, hbox )
 
 	-- OpenGL Canvas
@@ -158,7 +148,7 @@ function freyja3d_ui_init()
 	mgtk_box_pack( hbox, canvas )
 
 	-- Sidebar
-	hbox2 = mgtk_hbox( 0, 0, 0, 0, 0 )
+	hbox2 = mgtk_hbox()
 	mgtk_box_pack( hbox, hbox2 )
 	expander = mgtk_expander( hbox2, " ", true )
 	sidebar = mgtk_notebook( -1, 340, 720 )

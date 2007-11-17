@@ -94,7 +94,7 @@ int mgtk_lua_event(lua_State* s)
 		id = ResourceEvent::GetResourceIdBySymbol( lua_tostring(s, 1) );
 	}	
 	else if ( lua_gettop(s) == 2 && 
-			  lua_isstring(s, 1) && lua_isstring(s, 2) ) //lua_isfunction(s, 2) )
+			  lua_isstring(s, 1) && lua_isstring(s, 2) )
 	{
 		const char* symbol = lua_tostring(s, 1);
 		const char* script = lua_tostring(s, 2);
@@ -109,6 +109,34 @@ int mgtk_lua_event(lua_State* s)
 
 			// 3. Return event id for this newly bound script.
 			id = ResourceEvent::GetResourceIdBySymbol( symbol );
+		}
+	}	
+	else if ( lua_gettop(s) == 4 && 
+			  lua_isstring(s, 1) && lua_isstring(s, 2)  && 
+			  lua_isnumber(s, 3)  && lua_isstring(s, 4) )
+	{
+		const char* symbol = lua_tostring(s, 1);
+		const char* func = lua_tostring(s, 2);
+
+		// 1. Check to see if this script is already bound to this symbol.
+		id = ResourceEvent::GetResourceIdBySymbol( symbol );
+
+		// 2. If not bind it.
+		if ( id == -1 )
+		{
+#if FIXME
+			// Find a good way to wedge function binding to strict legacy event system.
+			ResourceEventCallbackLuaFunc::add(symbol, s, func, 0, "");
+
+			ResourceEventCallbackLuaFunc1u::add(symbol, s, func, 1, "u");
+
+			ResourceEventCallbackLuaFunc1f::add(symbol, s, func, 1, "f");
+
+			ResourceEventCallbackLuaFunc1s::add(symbol, s, func, 1, "s");
+
+			// 3. Return event id for this newly bound script.
+			id = ResourceEvent::GetResourceIdBySymbol( symbol );
+#endif
 		}
 	}	
 
@@ -228,7 +256,7 @@ int mgtk_lua_rc_box_pack(lua_State *s)
 		}
 		else
 		{
-			gtk_box_pack_start(GTK_BOX(box), widget, TRUE, TRUE, 0);
+			gtk_box_pack_start(GTK_BOX(box), widget, FALSE, FALSE, 0 );//TRUE, TRUE, 0);
 			gtk_widget_show(box);
 			gtk_widget_show(widget);
 		}
@@ -292,7 +320,7 @@ int mgtk_lua_rc_hbox(lua_State *s)
 	int spacing = 0;
 
 	/* Optional arguments */
-	if ( lua_gettop(s) == 2 && 
+	if ( lua_gettop(s) >= 2 && 
 		 lua_isboolean(s, 1) && lua_isnumber(s, 2) )
 	{
 		homogeneous = lua_toboolean(s, 1);
