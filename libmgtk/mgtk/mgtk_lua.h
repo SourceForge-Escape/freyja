@@ -36,7 +36,10 @@ int mgtk_lua_event(lua_State* s);
  * Pre : 
  * Post: 
  *
- * event_id = mgtk_event( [ symbol | symbol, lua_func ] )
+ * event_id = mgtk_event( [ symbol | symbol, lua_script | symbol, lua_func, num_args, arg_types ] )
+ *
+ * -- function do_move(x, y) bound to id:
+ * id = mgtk_event( "move", "do_move", 2, "ff" ) 
  *
  ------------------------------------------------------*/
 
