@@ -122,7 +122,6 @@ int mgtk_lua_event(lua_State* s)
 			  lua_isnumber(s, 3)  && lua_isstring(s, 4) )
 	{
 		const char* symbol = lua_tostring(s, 1);
-		const char* func = lua_tostring(s, 2);
 
 		// 1. Check to see if this script is already bound to this symbol.
 		id = ResourceEvent::GetResourceIdBySymbol( symbol );
@@ -131,6 +130,8 @@ int mgtk_lua_event(lua_State* s)
 		if ( id == -1 )
 		{
 #if FIXME
+			const char* func = lua_tostring(s, 2);
+
 			// Find a good way to wedge function binding to strict legacy event system.
 			ResourceEventCallbackLuaFunc::add(symbol, s, func, 0, "");
 
@@ -517,10 +518,10 @@ int mgtk_lua_rc_optionmenu(lua_State* s)
 	const char* label = NULL;
 	int id = -1;
 
-	if ( lua_isstring(s, 1) && lua_isnumber(s, 2) )
+	if ( lua_isstring(s, 2) && lua_isnumber(s, 3) )
 	{
-		label = lua_tostring(s, 1);
-		id = (int)lua_tonumber(s, 2);
+		label = lua_tostring(s, 2);
+		id = (int)lua_tonumber(s, 3);
 	}
 
 	GtkWidget* optionmenu = gtk_option_menu_new();
@@ -530,6 +531,8 @@ int mgtk_lua_rc_optionmenu(lua_State* s)
 	GtkWidget* optionmenu_menu = gtk_menu_new();
 	gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), optionmenu_menu);
 	gtk_widget_show(optionmenu_menu);
+
+	gtk_container_add( GTK_CONTAINER(lua_touserdata(s, 1)), optionmenu );
 
 	if ( id != -1)
 		mgtk_event_subscribe_gtk_widget(id, optionmenu);
@@ -945,10 +948,12 @@ int mgtk_lua_rc_toolbar_box(lua_State* s)
 		gtk_widget_show(widget);
 
 		box = gtk_hbox_new(TRUE, 1);
+		gtk_widget_show(box);
+
 		gtk_widget_ref(box);
 		gtk_object_set_data_full(GTK_OBJECT(item), "box", box, (GtkDestroyNotify)gtk_widget_unref);
+
 		gtk_container_add(GTK_CONTAINER(item), box);
-		gtk_widget_show(box);
 	}
 
 	lua_pushlightuserdata(s, (void *)box);
@@ -1092,16 +1097,19 @@ int mgtk_lua_rc_label(lua_State *s)
 {
 	GtkWidget *label = NULL;
 
-	if ( lua_gettop(s) == 3 && 
-		 lua_isstring(s, 1) && lua_isnumber(s, 2) && lua_isnumber(s, 3) )
+	if ( lua_gettop(s) > 0 && lua_isstring(s, 1))
 	{
 		const char *text = lua_tostring(s, 1);
+		label = gtk_label_new(text);
+		gtk_widget_show(label);
+	}
+
+	if ( lua_gettop(s) > 1 && 
+		 lua_isnumber(s, 2) && lua_isnumber(s, 3) )
+	{
 		float x_align = (float)lua_tonumber(s, 2); 
 		float y_align = (float)lua_tonumber(s, 3);
-
-		label = gtk_label_new(text);
 		gtk_misc_set_alignment(GTK_MISC(label), x_align, y_align);
-		gtk_widget_show(label);
 	}
 
 	MGTK_ASSERTMSG(label != NULL, "Invalid label.");

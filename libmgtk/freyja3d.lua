@@ -266,10 +266,10 @@ end
 
 
 function freyja3d_ui_shelf_view( shelf )
-	tab_view = mgtk_tab(shelf, "View", -1)
-	toolbar2 = mgtk_toolbar( tab_view )
+	tab = mgtk_tab(shelf, "View", -1)
+	toolbar = mgtk_toolbar( tab )
 
-	optmenu = mgtk_optionmenu("Viewport", -1)
+	optmenu = mgtk_optionmenu( mgtk_toolbar_box( toolbar ), "Viewport", -1 )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Orbit   ", -1) )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Front   ", -1) )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Back    ", -1) )
@@ -281,10 +281,9 @@ function freyja3d_ui_shelf_view( shelf )
 	mgtk_append_menu( optmenu, mgtk_menu_item("UV      ", -1) )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Curve   ", -1) )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Camera  ", -1) )
-	mgtk_box_pack( mgtk_toolbar_box( toolbar2 ), optmenu )
 
-	mgtk_toolbar_togglebutton(toolbar2, "Four Window", -1, 0, "icons/24x24/fourwin.png", "Four window view.")
-	mgtk_toolbar_togglebutton(toolbar2, "Grid", -1, 1, "icons/24x24/grid.png", "Grid lines.")
+	mgtk_toolbar_togglebutton(toolbar, "Four Window", -1, 0, "icons/24x24/fourwin.png", "Four window view.")
+	mgtk_toolbar_togglebutton(toolbar, "Grid", -1, 1, "icons/24x24/grid.png", "Grid lines.")
 end
 
 
