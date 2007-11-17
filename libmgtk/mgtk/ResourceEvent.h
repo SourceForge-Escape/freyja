@@ -794,33 +794,42 @@ private:
 	mstl::String mScript;
 };
 
-#if FIXME
+
 class ResourceEventCallbackLuaFunc : public ResourceEvent
 {
 public:
 
-	ResourceEventCallbackLuaFunc(const char* name, lua_State* state, void* func) : 
+	ResourceEventCallbackLuaFunc(const char* name, lua_State* state, const char* func) : 
 		ResourceEvent(name), mState(state), mFunc(func)
 	{ }
 
-	static void add(const char* name, lua_State* state, void* func)
+	static void add(const char* name, lua_State* state, const char* func)
 	{ new ResourceEventCallbackLuaFunc(name, state, func); }
 
 	virtual bool action()
 	{
+		// result = func(arg0, arg1)
+		//
+		// lua_pushnumber( mState, arg0 );
+		// lua_pushnumber( mState, arg1 );
+		// lua_call( mState, 2, 1 );
+		// result = (int)lua_tointeger( mState, -1 );
+		// lua_pop( mState, 1 );
+
 		int nargs = 0;
 		int nresults = 0;
-		lua_pushfunction( mState, mFunc );
-		return ( lua_call( mState, nargs, nresults ) == 0 );
+		lua_getglobal( mState, mFunc.c_str() );
+		lua_call( mState, nargs, nresults );
+		return true;
 	}
 
 private:
 
 	lua_State* mState;
 
-	void* mFunc;
+	mstl::String mFunc;
 };
-#endif
+
 
 #   endif // LUAWRAPPER_FOUND
 
