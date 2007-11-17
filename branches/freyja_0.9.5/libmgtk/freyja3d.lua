@@ -21,11 +21,9 @@ print("-- freyja3d.lua --")
 function freyja3d_ui_menubar( vbox )
 
 	menubar = mgtk_menubar()
-	mgtk_box_pack( vbox, menubar )
-
-	--handlebox = mgtk_handlebox( 1 )
-	--mgtk_box_pack( vbox, handlebox )
-	--mgtk_box_pack( handlebox, menubar )
+	handlebox = mgtk_handlebox( 1 )
+	mgtk_box_pack( vbox, handlebox )
+	mgtk_box_pack( handlebox, menubar )
 
 	-- File
 	submenu = mgtk_submenu("_File")

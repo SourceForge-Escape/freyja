@@ -250,6 +250,13 @@ int mgtk_lua_rc_box_pack(lua_State *s)
 
 		MGTK_ASSERTMSG(box != NULL, "Invalid container.");
 
+		// Handle 'non-box' containers.
+		if ( GTK_IS_HANDLE_BOX(box) )
+		{
+			gtk_container_add((GtkContainer *)box, widget);
+			return 0;
+		}
+
 		if ( lua_gettop(s) == 5 )
 		{
 			int expand = lua_toboolean(s, 3);
