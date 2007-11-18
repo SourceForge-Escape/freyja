@@ -255,16 +255,16 @@ function freyja3d_ui_shelf_file( shelf )
 
 	tab_file = mgtk_tab(shelf, "File", -1)
 	toolbar1 = mgtk_toolbar( tab_file )
-	mgtk_toolbar_button(toolbar1, "New", -1, "gtk-new", "New Model.")
+	mgtk_toolbar_button(toolbar1, "New", "eNewFile", "gtk-new", "New Model.")
 	menu_recent_model = 
-	mgtk_toolbar_menubutton(toolbar1, "Open", -1, "gtk-open", "Open Model...")
-	mgtk_toolbar_button(toolbar1, "Save", -1, "gtk-save", "Save Model.")
-	mgtk_toolbar_button(toolbar1, "Save As", -1, "gtk-save-as", "Save Model As...")
+	mgtk_toolbar_menubutton(toolbar1, "Open", "eOpenFile", "gtk-open", "Open Model...")
+	mgtk_toolbar_button(toolbar1, "Save", "eSaveFileModel", "gtk-save", "Save Model.")
+	mgtk_toolbar_button(toolbar1, "Save As", "eSaveModel", "gtk-save-as", "Save Model As...")
 	mgtk_toolbar_separator(toolbar1)
 	menu_recent_lua = 
-	mgtk_toolbar_menubutton(toolbar1, "Open", -1, "icons/24x24/lua.png", "Open Lua Script...")
+	mgtk_toolbar_menubutton(toolbar1, "Open", "eLoadLuaScript", "icons/24x24/lua.png", "Open Lua Script...", "recent_lua_bind")
 	menu_recent_python = 
-	mgtk_toolbar_menubutton(toolbar1, "Open", -1, "icons/24x24/python.png", "Open Python Script...")
+	mgtk_toolbar_menubutton(toolbar1, "Open", "eLoadPythonScript", "icons/24x24/python.png", "Open Python Script...")
 end
 
 
