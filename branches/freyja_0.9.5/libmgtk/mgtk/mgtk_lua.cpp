@@ -1040,7 +1040,8 @@ int mgtk_lua_rc_toolbar_togglebutton(lua_State* s)
 	{
 		GtkWidget* toolbar = (GtkWidget *)lua_touserdata(s, 1);
 		const char* label = lua_tostring(s, 2);
-		int event = (int)lua_tonumber(s, 3);
+		int event = ( lua_isnumber(s, 3) ? (int)lua_tonumber(s, 3) :
+					  lua_isstring(s, 3) ? mgtk_lua_get_id( lua_tostring(s, 3) ): -1 );
 		int state = (int)lua_tonumber(s, 4);
 		const char* icon = lua_tostring(s, 5);
 		const char* tooltip = lua_tostring(s, 6);
@@ -1075,7 +1076,8 @@ int mgtk_lua_rc_toolbar_button(lua_State* s)
 	{
 		GtkWidget* toolbar = (GtkWidget *)lua_touserdata(s, 1);
 		const char* label = lua_tostring(s, 2);
-		int event = (int)lua_tonumber(s, 3);
+		int event = ( lua_isnumber(s, 3) ? (int)lua_tonumber(s, 3) :
+					  lua_isstring(s, 3) ? mgtk_lua_get_id( lua_tostring(s, 3) ): -1 );
 		const char* icon = lua_tostring(s, 4);
 		const char* tooltip = lua_tostring(s, 5);
 
@@ -1093,22 +1095,24 @@ int mgtk_lua_rc_toolbar_menubutton(lua_State* s)
 {
 	GtkWidget* menu = NULL;
 
-	if ( lua_gettop(s) == 5 )
+	if ( lua_gettop(s) > 4 )
 	{
 		GtkWidget* toolbar = (GtkWidget *)lua_touserdata(s, 1);
 		const char* label = lua_tostring(s, 2);
-		int event = -1;
+		int event = ( lua_isnumber(s, 3) ? (int)lua_tonumber(s, 3) :
+					  lua_isstring(s, 3) ? mgtk_lua_get_id( lua_tostring(s, 3) ): -1 );
 
-		if ( lua_isnumber(s, 3) )
-		{
-			event = (int)lua_tonumber(s, 3);
-			menu = gtk_menu_new();
-			gtk_widget_show(menu);
-		}
-		else if ( lua_isstring(s, 3) )
+		if ( lua_gettop(s) > 5 && lua_isstring(s, 6) )
 		{
 			// FIXME: Use legacy mlisp resource bindings via luastring for now.
 			menu = (GtkWidget*)mlisp_recall( lua_tostring(s, 3) );
+			mgtk_print("*** %p\n", menu);
+		}
+
+		if ( menu == NULL )
+		{
+			menu = gtk_menu_new();
+			gtk_widget_show(menu);
 		}
 
 		const char* icon = lua_tostring(s, 4);

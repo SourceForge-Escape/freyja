@@ -1315,13 +1315,14 @@ bool Resource::Lookup(const char *symbol, int *i)
 
 bool Resource::Lookup(const char *symbol, arg_list_t **adt)
 {
-	arg_list_t *sym_tab;
+	*adt = NULL;
 
-
-	if (!symbol || !symbol[0])
+	if ( !symbol || !symbol[0] )
+	{
 		return false;
+	}
 
-	sym_tab = _sym_tab;
+	arg_list_t *sym_tab = _sym_tab;
 
 	while (sym_tab)
 	{
