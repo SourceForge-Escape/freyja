@@ -155,6 +155,10 @@ int mgtk_lua_rc_toolbar_menubutton(lua_State *s);
 
 int mgtk_lua_rc_toolbar_togglebutton(lua_State *s);
 
+int mgtk_lua_rc_toolbar_separator(lua_State *s);
+
+int mgtk_lua_rc_toolbar_item(lua_State *s);
+
 int mgtk_lua_rc_color(lua_State *s);
 int mgtk_lua_rc_hslider(lua_State *s);
 int mgtk_lua_rc_icon(lua_State *s);
@@ -166,8 +170,7 @@ int mgtk_lua_rc_fileselection_drop_down_menu(lua_State *s);
 int mgtk_lua_rc_filechooserbutton(lua_State *s);
 int mgtk_lua_rc_filechoosermenu_item(lua_State *s);
 int mgtk_lua_rc_filechoosertoolbar_button(lua_State *s);
-int mgtk_lua_rc_toolbar_separator(lua_State *s);
-int mgtk_lua_rc_toolbar_item(lua_State *s);
+
 int mgtk_lua_rc_expander(lua_State *s);
 int mgtk_lua_rc_expander_hbox(lua_State *s);
 

@@ -20,6 +20,7 @@ print("-- freyja3d.lua --")
 
 function freyja3d_ui_menubar( vbox )
 
+	-- FIXME Break up into functions, and move menubar into its own file.
 	menubar = mgtk_menubar()
 	handlebox = mgtk_handlebox( 1 )
 	mgtk_box_pack( vbox, handlebox )
@@ -264,7 +265,7 @@ function freyja3d_ui_shelf_file( shelf )
 	menu_recent_lua = 
 	mgtk_toolbar_menubutton(toolbar1, "Open", "eLoadLuaScript", "icons/24x24/lua.png", "Open Lua Script...", "recent_lua_bind")
 	menu_recent_python = 
-	mgtk_toolbar_menubutton(toolbar1, "Open", "eLoadPythonScript", "icons/24x24/python.png", "Open Python Script...")
+	mgtk_toolbar_menubutton(toolbar1, "Open", "eLoadPythonScript", "icons/24x24/python.png", "Open Python Script...", "recent_python_bind")
 end
 
 
@@ -272,6 +273,7 @@ function freyja3d_ui_shelf_view( shelf )
 	tab = mgtk_tab(shelf, "View", -1)
 	toolbar = mgtk_toolbar( tab )
 
+	-- FIXME Use double hbox to make it 'fitted' to max size of menu.
 	optmenu = mgtk_optionmenu( mgtk_toolbar_box( toolbar ), "Viewport", -1 )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Orbit   ", -1) )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Front   ", -1) )
@@ -285,8 +287,51 @@ function freyja3d_ui_shelf_view( shelf )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Curve   ", -1) )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Camera  ", -1) )
 
-	mgtk_toolbar_togglebutton(toolbar, "Four Window", -1, 0, "icons/24x24/fourwin.png", "Four window view.")
-	mgtk_toolbar_togglebutton(toolbar, "Grid", -1, 1, "icons/24x24/grid.png", "Grid lines.")
+	mgtk_toolbar_togglebutton(toolbar, "Four Window", "eViewports", false, "icons/24x24/fourwin.png", "Four window view" )
+	mgtk_toolbar_togglebutton(toolbar, "Grid", "eRenderGrid", false, "icons/24x24/grid.png", "Plane grid rendering" )
+	mgtk_toolbar_togglebutton(toolbar, "Ground", "eRenderSolidGround", false, "icons/24x24/grid.png", "Plane solid rendering" )
+	mgtk_toolbar_togglebutton(toolbar, "Pick Ray", "eRenderPickRay", false, "icons/24x24/pickray.png", "Pick ray rendering" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_togglebutton(toolbar, "Points", "eRenderVertex", false, "icons/24x24/point.png", "Point render mode" )
+	mgtk_toolbar_togglebutton(toolbar, "Normals", "eRenderNormals", false, "icons/24x24/normals.png", "Normals render mode" )
+	mgtk_toolbar_togglebutton(toolbar, "Wireframe", "eRenderWireframe", false, "icons/24x24/wireframe.png", "Wireframe render mode" )
+	mgtk_toolbar_togglebutton(toolbar, "Faces", "eRenderFace", false, "icons/24x24/solid.png", "Solid face render mode" )
+	mgtk_toolbar_togglebutton(toolbar, "Material", "eRenderMaterial", false, "icons/24x24/texture.png", "Material toggle" )
+	mgtk_toolbar_togglebutton(toolbar, "Color", "eGroupColors", false, "icons/24x24/groupcolors.png", "Group color toggle" )
+	mgtk_toolbar_togglebutton(toolbar, "Light", "eRenderLighting", false, "icons/24x24/light.png", "Lighting toggle" )
+	mgtk_toolbar_togglebutton(toolbar, "BoundingBox", "eRenderBbox", false, "icons/24x24/bvol.png", "Render Bounding boxes" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_togglebutton(toolbar, "Bones", "eRenderSkeleton", false, "icons/24x24/bone-tag.png", "Show legacy skeleton." )
+	mgtk_toolbar_togglebutton(toolbar, "Bones2", "eRenderSkeleton2", false, "icons/24x24/bone-tag.png", "Show bind pose skeleton." )
+	mgtk_toolbar_togglebutton(toolbar, "Bones3", "eRenderSkeleton3", false, "icons/24x24/bone-tag.png", "Show transformed skeleton." )
+	mgtk_toolbar_togglebutton(toolbar, "BoneName", "eRenderBoneName", false, "icons/24x24/bone-name.png", "Show bind pose bone names." )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_togglebutton(toolbar, "Shadow", "eShadowVolume", false, "icons/24x24/shadow.png", "Render shadows" )
+	mgtk_toolbar_togglebutton(toolbar, "Blend", "eSkeletalDeform", false, "icons/24x24/deform.png", "Skeletal vertex blending" )
+end
+
+
+function freyja3d_ui_shelf_create( shelf )
+	tab = mgtk_tab(shelf, "Create", -1)
+	toolbar = mgtk_toolbar( tab )	
+end
+
+
+function freyja3d_ui_shelf_modify( shelf )
+	tab = mgtk_tab(shelf, "Modify", -1)
+	toolbar = mgtk_toolbar( tab )	
+end
+
+
+function freyja3d_ui_shelf_skinning( shelf )
+	tab = mgtk_tab(shelf, "Skinning", -1)
+	toolbar = mgtk_toolbar( tab )	
+end
+
+
+function freyja3d_ui_shelf_material( shelf )
+	tab = mgtk_tab(shelf, "Material", -1)
+	toolbar = mgtk_toolbar( tab )	
 end
 
 
@@ -329,6 +374,9 @@ function freyja3d_ui_sidebar_model( sidebar )
 end
 
 
+--freyja3d_ui = { "nil", 0 }
+
+
 function freyja3d_ui_init()
 
 	-- Application Window	
@@ -347,10 +395,10 @@ function freyja3d_ui_init()
 	mgtk_box_pack( vbox, shelf )
 	freyja3d_ui_shelf_file( shelf )
 	freyja3d_ui_shelf_view( shelf )
-	tab_create = mgtk_tab(shelf, "Create", -1)
-	tab_modify = mgtk_tab(shelf, "Modify", -1)
-	tab_skinning = mgtk_tab(shelf, "Skinning", -1)
-	tab_material = mgtk_tab(shelf, "Material", -1)
+	freyja3d_ui_shelf_create( shelf )
+	freyja3d_ui_shelf_modify( shelf )
+	freyja3d_ui_shelf_skinning( shelf )
+	freyja3d_ui_shelf_material( shelf )
 
 	-- Main UI Box
 	hbox = mgtk_hbox()
