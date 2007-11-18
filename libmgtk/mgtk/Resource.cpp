@@ -796,10 +796,6 @@ void Resource::RegisterInt(char *symbol, int value)
 
 void Resource::Bind(arg_list_t *symbol, arg_list_t *data)
 {
-	arg_list_t *sym_tab;
-	unsigned int len;
-
-
 	if (!symbol || !data || (symbol->type != CSTRING) ||
 		 !symbol->data || !((char *)symbol->data)[0])
 	{
@@ -810,7 +806,7 @@ void Resource::Bind(arg_list_t *symbol, arg_list_t *data)
 	}
 
 	// Mongoose 2002.01.12, String fix for overflow
-	len = strlen((char *)symbol->data);
+	unsigned int len = strlen((char *)symbol->data);
 	data->symbol = new char[len + 4];
 	strncpy(data->symbol, (char *)symbol->data, len);
 	data->symbol[len] = 0;
@@ -823,7 +819,7 @@ void Resource::Bind(arg_list_t *symbol, arg_list_t *data)
 	}
 	else
 	{
-		sym_tab = _sym_tab;
+		arg_list_t* sym_tab = _sym_tab;
 
 		while (sym_tab->next)
 		{
@@ -1002,10 +998,9 @@ void Resource::Seperator()
 
 void Resource::String(char *string, int len)
 {
-  int i = 0;
+	int i = 0;
 
-  
-  Match('"');
+	Match('"');
 
   _string = 1;
 
@@ -1060,7 +1055,6 @@ bool Resource::Is(char c)
 void Resource::Expected(char c)
 {
 	char s[4];
-
 
 	switch (_look)
 	{
@@ -1141,9 +1135,6 @@ int Resource::Load(char *filename)
 
 int Resource::BufferFromFile(char *filename, char **buffer,unsigned int *bytes)
 {
-	FILE *f;
-
-
 	*buffer = NULL;
 
 	if (!filename || !filename[0])
@@ -1151,7 +1142,7 @@ int Resource::BufferFromFile(char *filename, char **buffer,unsigned int *bytes)
 		return -1;
 	}
 
-	f = fopen(filename, "r");
+	FILE *f = fopen(filename, "r");
 
 	if (!f)
 	{
@@ -1249,7 +1240,6 @@ int Resource::Eval(char *buffer)
 int Resource::getIntByName(const char *symbol)
 {
 	int id = -1;
-
 	Lookup(symbol, &id);
 
 	return id;	
@@ -1258,13 +1248,10 @@ int Resource::getIntByName(const char *symbol)
 
 bool Resource::Lookup(const char *symbol, float *f)
 {
-	arg_list_t *sym_tab;
-
-
 	if (!symbol || !symbol[0] || !f)
 		return false;
 
-	sym_tab = _sym_tab;
+	arg_list_t *sym_tab = _sym_tab;
 
 	while (sym_tab)
 	{
@@ -1287,13 +1274,10 @@ bool Resource::Lookup(const char *symbol, float *f)
 
 bool Resource::Lookup(const char *symbol, int *i)
 {
-	arg_list_t *sym_tab;
-
-
 	if (!symbol || !symbol[0] || !i)
 		return false;
 
-	sym_tab = _sym_tab;
+	arg_list_t *sym_tab = _sym_tab;
 
 	while (sym_tab)
 	{
@@ -1315,6 +1299,7 @@ bool Resource::Lookup(const char *symbol, int *i)
 
 bool Resource::Lookup(const char *symbol, arg_list_t **adt)
 {
+	/* Don't send back garbage if symbol isn't found. */
 	*adt = NULL;
 
 	if ( !symbol || !symbol[0] )
@@ -1345,13 +1330,12 @@ bool Resource::Lookup(const char *symbol, arg_list_t **adt)
 
 bool Resource::Lookup(const char *symbol, char **s)
 {
-	arg_list_t *sym_tab;
-
+	*s = NULL;
 
 	if (!symbol || !symbol[0])
 		return false;
 
-	sym_tab = _sym_tab;
+	arg_list_t* sym_tab = _sym_tab;
 
 	while (sym_tab)
 	{
@@ -1373,10 +1357,7 @@ bool Resource::Lookup(const char *symbol, char **s)
 
 void Resource::Print()
 {
-	arg_list_t *sym_tab;
-
-
-	sym_tab = _sym_tab;
+	arg_list_t* sym_tab = _sym_tab;
 
 	while (sym_tab)
 	{
@@ -1418,12 +1399,10 @@ void Resource::Print()
 #if 0
 arg_list_t *color(arg_list_t *args)
 {
-	arg_list_t *sym, *r, *g, *b;
-
-	sym = symbol();
-	r = symbol();
-	g = symbol();
-	b = symbol();
+	arg_list_t *sym = symbol();
+	arg_list_t *r = symbol();
+	arg_list_t *g = symbol();
+	arg_list_t *b = symbol();
 	
 	arg_enforce_type(&r, FLOAT);
 	arg_enforce_type(&g, FLOAT);
