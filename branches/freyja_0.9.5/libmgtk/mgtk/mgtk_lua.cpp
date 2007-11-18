@@ -56,6 +56,7 @@ void mgtk_lua_register_functions(const Lua &lua)
 	lua.RegisterFunction("mgtk_opengl_canvas", mgtk_lua_rc_opengl_canvas);
 
 	lua.RegisterFunction("mgtk_menu_item", mgtk_lua_rc_menu_item);
+	lua.RegisterFunction("mgtk_menu_item_check", mgtk_lua_rc_menu_item_check);
 	lua.RegisterFunction("mgtk_append_menu", mgtk_lua_rc_append_menu);
 	lua.RegisterFunction("mgtk_menubar", mgtk_lua_rc_menubar);
 	lua.RegisterFunction("mgtk_submenu", mgtk_lua_rc_submenu);
@@ -672,6 +673,61 @@ int mgtk_lua_rc_menu_item(lua_State *s)
 							   GINT_TO_POINTER(get_int(event)));
 		}
 #endif
+
+	// Push widget pointer unto the lua stack.
+	lua_pushlightuserdata(s, (void *)item);
+
+	return 1;
+}
+
+
+int mgtk_lua_rc_menu_item_check(lua_State *s)
+{
+	const char* label = NULL;
+	int id = -1;
+
+	if ( lua_gettop(s) > 0 && lua_isstring(s, 1) )
+	{
+		label = lua_tostring(s, 1);
+	}
+
+	if ( lua_gettop(s) > 1 )
+	{
+		if ( lua_isnumber(s, 2) )
+			id = (int)lua_tonumber(s, 2);
+		else if ( lua_isstring(s, 2) )
+			id = mgtk_lua_get_id( lua_tostring(s, 2) );
+	}
+
+	GtkWidget *item = gtk_check_menu_item_new_with_mnemonic( label );
+	gtk_widget_show(item);
+
+	if ( lua_gettop(s) > 2 && lua_isnumber(s, 3) )
+	{
+		int value = (int)lua_tonumber(s, 3);
+
+		if ( value )
+		{
+			gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), TRUE);
+		}
+	}
+
+	//const char* accel = NULL;
+	//if ( accel )
+	//{
+	//	mgtk_accel_support(item, accel);
+	//}
+
+	if (id != -1)
+	{
+		// Mongoose 2002.02.14, Add this widget to a special 
+		//   lookup table by it's event id
+		mgtk_event_subscribe_gtk_widget(id, item);
+
+		gtk_signal_connect(GTK_OBJECT(item), "toggled",
+						   GTK_SIGNAL_FUNC(mgtk_check_menu_item_handler), 
+						   GINT_TO_POINTER(id) );
+	}
 
 	// Push widget pointer unto the lua stack.
 	lua_pushlightuserdata(s, (void *)item);

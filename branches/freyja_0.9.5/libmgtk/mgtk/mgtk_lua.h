@@ -107,7 +107,10 @@ int mgtk_lua_rc_menu_item(lua_State *s);
  * 
  ------------------------------------------------------*/
 
-int mgtk_lua_rc_check_menu_item(lua_State *s);
+int mgtk_lua_rc_menu_item_check(lua_State *s);
+// menuitem_check =
+// mgtk_menu_item( "label" [, event | , event, value ] )
+
 int mgtk_lua_rc_optionmenu(lua_State *s);
 int mgtk_lua_rc_popup_menu(lua_State *s);
 int mgtk_lua_rc_menubar(lua_State *s);

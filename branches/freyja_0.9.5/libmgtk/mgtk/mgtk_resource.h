@@ -55,5 +55,6 @@ void mgtk_tool_toggle_button_handler(GtkWidget *item, gpointer e);
 
 void mgtk_destroy_notebook(GtkWidget *widget);
 
+void mgtk_check_menu_item_handler(GtkCheckMenuItem *item, gpointer e);
 
 #endif
