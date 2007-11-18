@@ -6,6 +6,7 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071117 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Bugfixes and minor clean up in Resource.
  - Mgtk Lua support and clean up cont.
  - New unit test for libmgtk.
  - Pak VFS plugin ported to new mgtk_tree API.
