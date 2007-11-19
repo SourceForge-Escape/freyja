@@ -6,6 +6,7 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071117 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Window title reflects save state.
  - mgtk_lua cont: more widgets, signal fixes, etc
  - mgtk icon support improvements.
  - Bugfixes and minor clean up in Resource.

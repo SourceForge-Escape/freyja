@@ -254,18 +254,24 @@ end
 
 function freyja3d_ui_shelf_file( shelf )
 
-	tab_file = mgtk_tab(shelf, "File", -1)
-	toolbar1 = mgtk_toolbar( tab_file )
-	mgtk_toolbar_button(toolbar1, "New", "eNewFile", "gtk-new", "New Model.")
+	tab = mgtk_tab(shelf, "File", -1)
+	toolbar = mgtk_toolbar( tab )
+
+	mgtk_toolbar_button(toolbar, "New", "eNewFile", "gtk-new", "New Model.")
 	menu_recent_model = 
-	mgtk_toolbar_menubutton(toolbar1, "Open", "eOpenFile", "gtk-open", "Open Model...", "recent_models_bind" )
-	mgtk_toolbar_button(toolbar1, "Save", "eSaveFileModel", "gtk-save", "Save Model.")
-	mgtk_toolbar_button(toolbar1, "Save As", "eSaveModel", "gtk-save-as", "Save Model As...")
-	mgtk_toolbar_separator(toolbar1)
+	mgtk_toolbar_menubutton(toolbar, "Open", "eOpenFile", "gtk-open", "Open Model...", "recent_models_bind" )
+	mgtk_toolbar_button(toolbar, "Save", "eSaveFileModel", "gtk-save", "Save Model.")
+	mgtk_toolbar_button(toolbar, "Save As", "eSaveModel", "gtk-save-as", "Save Model As...")
+	mgtk_toolbar_separator(toolbar)
 	menu_recent_lua = 
-	mgtk_toolbar_menubutton(toolbar1, "Open", "eLoadLuaScript", "icons/24x24/lua.png", "Open Lua Script...", "recent_lua_bind")
+	mgtk_toolbar_menubutton(toolbar, "Open", "eLoadLuaScript", "icons/24x24/lua.png", "Open Lua Script...", "recent_lua_bind")
 	menu_recent_python = 
-	mgtk_toolbar_menubutton(toolbar1, "Open", "eLoadPythonScript", "icons/24x24/python.png", "Open Python Script...", "recent_python_bind")
+	mgtk_toolbar_menubutton(toolbar, "Open", "eLoadPythonScript", "icons/24x24/python.png", "Open Python Script...", "recent_python_bind")
+
+	mgtk_toolbar_separator(toolbar)
+	eventid = mgtk_event("move", "freyja3d_ev_test()")
+	mgtk_toolbar_button(toolbar, "lua_test", eventid, "icons/24x24/lua.png", "Embedded lua script test." )
+
 end
 
 
@@ -344,9 +350,6 @@ function freyja3d_ui_sidebar_model( sidebar )
 
 	tab = mgtk_tab( sidebar, "Model", "eModeModel" )
 
-	eventid = mgtk_event("move", "freyja3d_ev_test()")
-	mgtk_box_pack( tab, mgtk_button( "lua_test", eventid ) )
-
 	-- Transform box
 	handlebox = mgtk_handlebox( 1 )
 	mgtk_box_pack( tab, handlebox )
@@ -389,14 +392,14 @@ function freyja3d_ui_sidebar_model( sidebar )
 
 	hbox = mgtk_hbox( 1, 0 )
 	mgtk_box_pack( expander, hbox )
-	mgtk_box_pack( hbox, mgtk_togglebutton( " 9", "eSmooth", 8 ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_togglebutton( "10", "eSmooth", 9 ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_togglebutton( "11", "eSmooth", 10 ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_togglebutton( "12", "eSmooth", 11 ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_togglebutton( "13", "eSmooth", 12 ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_togglebutton( "14", "eSmooth", 13 ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_togglebutton( "15", "eSmooth", 14 ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_togglebutton( "16", "eSmooth", 15 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 9 ", "eSmooth", 8 ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "10", "eSmooth", 9 ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "11", "eSmooth", 10 ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "12", "eSmooth", 11 ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "13", "eSmooth", 12 ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "14", "eSmooth", 13 ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "15", "eSmooth", 14 ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "16", "eSmooth", 15 ), 1, 0, 0 )
 
 	hbox = mgtk_hbox( 1, 0 )
 	mgtk_box_pack( expander, hbox )
@@ -411,13 +414,13 @@ function freyja3d_ui_sidebar_model( sidebar )
 
 	hbox = mgtk_hbox( 1, 0 )
 	mgtk_box_pack( expander, hbox )
-	mgtk_box_pack( hbox, mgtk_button( "Assign", "eGroupAssign" ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_button( "Clear ", "eGroupClear" ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Assign", "eGroupAssign" ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Clear ", "eGroupClear" ), 1, 0, 0 )
 
 	hbox = mgtk_hbox( 1, 0 )
 	mgtk_box_pack( expander, hbox )
-	mgtk_box_pack( hbox, mgtk_button( "Smooth", "eSelectedFacesGenerateNormals" ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_button( "Flip  ", "eSelectedFacesFlipNormals" ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Smooth", "eSelectedFacesGenerateNormals" ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Flip  ", "eSelectedFacesFlipNormals" ), 1, 0, 0 )
 
 
 	-- Scenegraph box
