@@ -118,6 +118,9 @@ int mgtk_lua_rc_menubar(lua_State *s);
 int mgtk_lua_rc_tree(lua_State *s);
 // tree = mgtk_tree(label, selection_event, text_event)
 
+int mgtk_lua_rc_hslider(lua_State *s);
+// slider = mgtk_hslider(event, min, max)
+
 int mgtk_lua_rc_toolbar(lua_State *s);
 /*------------------------------------------------------
  * Pre : Must pass in existing box.
