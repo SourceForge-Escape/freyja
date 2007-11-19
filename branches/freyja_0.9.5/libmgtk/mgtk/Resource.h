@@ -85,8 +85,8 @@ char *get_string(arg_list_t *a);
 float get_float(arg_list_t *a);
 int get_int(arg_list_t *a);
 
-void new_string(arg_list_t **a, char *s);
-void new_adt(arg_list_t **a, int type, void *data);
+void mlisp_new_string(arg_list_t **a, const char *s);
+void mlisp_new_adt(arg_list_t **a, int type, void *data);
 
 void arg_enforce_type_assert(arg_list_t **a, int type);
 void arg_enforce_type(arg_list_t **a, int type);
@@ -95,6 +95,7 @@ char mlisp_peek_for_vargs();
 int mlisp_get_line_num();
 const char *mlisp_get_filename();
 void mlisp_bind(arg_list_t *symbol, arg_list_t *data);
+void mlisp_bind_string(const char* symbol, const char* s);
 void *mlisp_recall(const char *symbol);
 
 

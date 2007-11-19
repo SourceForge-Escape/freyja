@@ -133,7 +133,7 @@ arg_list_t *mgtk_rc_window(arg_list_t *container)
 						 G_CALLBACK(mgtk_event_close_window),
 						 GINT_TO_POINTER(window));
 
-		new_adt(&ret, ARG_GTK_WINDOW, (void *)window);
+		mlisp_new_adt(&ret, ARG_GTK_WINDOW, (void *)window);
 	}
 
 	return ret;
@@ -258,7 +258,7 @@ arg_list_t *mgtk_rc_statusbar(arg_list_t *box)
 	gtk_widget_show(widget);
 
 	arg_list_t *ret = NULL;
-	new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
+	mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
 
 	return ret;
 }
@@ -281,7 +281,7 @@ arg_list_t *mgtk_rc_toolbar_separator(arg_list_t *box)
 	gtk_widget_show(widget);
 
 	arg_list_t *ret = NULL;
-	new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
+	mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
 
 	return ret;
 }
@@ -312,10 +312,10 @@ arg_list_t *mgtk_rc_toolbar_item(arg_list_t *toolbar)
 	gtk_widget_show(box);
 
 	arg_list_t *ret = NULL;
-	new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)box);
+	mlisp_new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)box);
 #else
 	arg_list_t *ret = NULL;
-	new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
+	mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)widget);
 #endif
 
 	return ret;
@@ -342,7 +342,7 @@ arg_list_t *mgtk_rc_toolbar(arg_list_t *box)
 							 (GtkDestroyNotify)gtk_widget_unref);
 	gtk_widget_show(toolbar);
 
-	new_adt(&ret, ARG_GTK_TOOLBOX_WIDGET, (void *)toolbar);
+	mlisp_new_adt(&ret, ARG_GTK_TOOLBOX_WIDGET, (void *)toolbar);
 
 	return ret;
 }
@@ -459,7 +459,7 @@ arg_list_t *mgtk_rc_toolbar_togglebutton(arg_list_t *box)
 										  get_string(help),
 										  (void*)mgtk_event_command, event_cmd);
 		
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)toggle_button);
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)toggle_button);
 
 		gtk_signal_connect(GTK_OBJECT(toggle_button), "toggled",
 						   GTK_SIGNAL_FUNC(mgtk_tool_toggle_button_handler), 
@@ -524,7 +524,7 @@ arg_list_t *mgtk_rc_toolbar_button(arg_list_t *box)
 								   get_string(label), get_string(help),
 								   (void*)mgtk_event_command, event_cmd);
 		
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)button);
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)button);
 	}
 
 	delete_arg(&icon);
@@ -600,7 +600,7 @@ arg_list_t *mgtk_rc_toolbar_menu_button(arg_list_t *box)
 		gtk_menu_tool_button_set_menu( GTK_MENU_TOOL_BUTTON(button),  menu );
 		//gtk_menu_tool_button_get_menu( GTK_MENU_TOOL_BUTTON(button) );
 
-		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)menu);
+		mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)menu);
 	}
 
 	delete_arg(&icon);
@@ -637,7 +637,7 @@ arg_list_t *mgtk_rc_summonbox(arg_list_t *box)
 	if (name)
 	{
 		void *summonbox = mlisp_recall((char *)name->data);
-		new_adt(&ret, ARG_GTK_BOX_WIDGET, summonbox);
+		mlisp_new_adt(&ret, ARG_GTK_BOX_WIDGET, summonbox);
 	}
 
 	return ret;
@@ -686,7 +686,7 @@ arg_list_t *mgtk_rc_expander(arg_list_t *box)
 		gtk_expander_set_expanded((GtkExpander*)expander, 
 								  get_int(show)? TRUE : FALSE);
 
-		new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)vbox);
+		mlisp_new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)vbox);
 
 		if (name)
 		{
@@ -696,7 +696,7 @@ arg_list_t *mgtk_rc_expander(arg_list_t *box)
 			//
 			// To get the box back use the (summonbox ...) function.
 			arg_list_t *sealing_jutsu;
-			new_adt(&sealing_jutsu, ARG_GTK_BOX_WIDGET, (void *)vbox);
+			mlisp_new_adt(&sealing_jutsu, ARG_GTK_BOX_WIDGET, (void *)vbox);
 			mlisp_bind(name, sealing_jutsu);
 		}
 	}
@@ -751,7 +751,7 @@ arg_list_t *mgtk_rc_expander_hbox(arg_list_t *box)
 		gtk_expander_set_expanded((GtkExpander*)expander, 
 								  get_int(show)? TRUE : FALSE);
 
-		new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)hbox);
+		mlisp_new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)hbox);
 
 		if (name)
 		{
@@ -761,7 +761,7 @@ arg_list_t *mgtk_rc_expander_hbox(arg_list_t *box)
 			//
 			// To get the box back use the (summonbox ...) function.
 			arg_list_t *sealing_jutsu;
-			new_adt(&sealing_jutsu, ARG_GTK_BOX_WIDGET, (void *)hbox);
+			mlisp_new_adt(&sealing_jutsu, ARG_GTK_BOX_WIDGET, (void *)hbox);
 			mlisp_bind(name, sealing_jutsu);
 		}
 	}
@@ -855,7 +855,7 @@ arg_list_t *mgtk_rc_notebook(arg_list_t *box)
 		gtk_container_add(GTK_CONTAINER(box->data), notebook);
 #endif
 
-		new_adt(&ret, ARG_GTK_NOTEBOOK, (void *)notebook);
+		mlisp_new_adt(&ret, ARG_GTK_NOTEBOOK, (void *)notebook);
 	}
 
 	delete_arg(&width);
@@ -926,7 +926,7 @@ arg_list_t *mgtk_rc_tab(arg_list_t *notebook)
 		newEvents[emap->count-1] = get_int(event);
 		emap->events = newEvents;
 
-		new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)vbox);
+		mlisp_new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)vbox);
 	}
 
 	delete_arg(&label);
@@ -980,7 +980,7 @@ arg_list_t *mgtk_rc_vbox(arg_list_t *box)
 								get_int(fill),
 								get_int(pading));
 
-		new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)vbox);
+		mlisp_new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)vbox);
 	}
 
 	delete_arg(&homogeneous);
@@ -1038,7 +1038,7 @@ arg_list_t *mgtk_rc_hbox(arg_list_t *box)
 								get_int(fill),
 								get_int(pading));
 
-		new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)hbox);
+		mlisp_new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)hbox);
 	}
 
 	delete_arg(&homogeneous);
@@ -1086,7 +1086,7 @@ arg_list_t *mgtk_rc_dialog(arg_list_t *box)
 						 G_CALLBACK(mgtk_event_hide_dialog),
 						 GINT_TO_POINTER(0));
 	
-		new_adt(&ret, ARG_GTK_WINDOW, (void *)widget);
+		mlisp_new_adt(&ret, ARG_GTK_WINDOW, (void *)widget);
 
 		/* Mongoose 2002.02.01, Add this widget to a special
 		 *   lookup table by it's event id */
@@ -1133,7 +1133,7 @@ arg_list_t *mgtk_rc_handlebox(arg_list_t *box)
 											((get_int(type) == 1) ? 
 											 GTK_POS_LEFT : GTK_POS_RIGHT)));
 
-		new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)handlebox);
+		mlisp_new_adt(&ret, ARG_GTK_BOX_WIDGET, (void *)handlebox);
 	}
 
 	delete_arg(&type);
@@ -1200,7 +1200,7 @@ arg_list_t *mgtk_rc_togglebutton(arg_list_t *container)
 							   GINT_TO_POINTER(get_int(cmd)));
 		}
 
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item);
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item);
 	}
 
 	delete_arg(&label);
@@ -1247,7 +1247,7 @@ arg_list_t *mgtk_rc_colorbutton(arg_list_t *container)
 		//index_add_gtk_widget(get_int(cmd), item);
 		mgtk_event_subscribe_gtk_widget(get_int(cmd), item);
 
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item);
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item);
 	}
 
 	delete_arg(&event);
@@ -1300,7 +1300,7 @@ arg_list_t *mgtk_rc_button(arg_list_t *container)
 						   GTK_SIGNAL_FUNC(mgtk_event_command), 
 						   GINT_TO_POINTER(get_int(cmd)));
 		
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
 	}
 
 	delete_arg(&label);
@@ -1353,7 +1353,7 @@ arg_list_t *mgtk_rc_hslider(arg_list_t *container)
 						   item, TRUE, TRUE, 0);
 		gtk_widget_show(item);
 	
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
 	}
 
 	delete_arg(&event);
@@ -1383,7 +1383,7 @@ arg_list_t *mgtk_rc_textbox(arg_list_t *container)
 	if (event)
 	{
 		item = mgtk_create_text_entry((GtkWidget *)container->data);
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_TEXTENTRY_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_TEXTENTRY_WIDGET
 
 		gtk_signal_connect(GTK_OBJECT(item), "changed",
 						   GTK_SIGNAL_FUNC(mgtk_event_text),
@@ -1419,7 +1419,7 @@ arg_list_t *mgtk_rc_hsep(arg_list_t *container)
 					   item, TRUE, TRUE, 0);
 	gtk_widget_show(item);
 	
-	new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
+	mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
 
 	return ret;
 }
@@ -1443,7 +1443,7 @@ arg_list_t *mgtk_rc_vsep(arg_list_t *container)
 					   item, TRUE, TRUE, 0);
 	gtk_widget_show(item);
 	
-	new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
+	mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
 
 	return ret;
 }
@@ -1475,7 +1475,7 @@ arg_list_t *mgtk_rc_label2(arg_list_t *container)
 
 		gtk_widget_show(item);
 	
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); 
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); 
 	}
 
 	delete_arg(&label);
@@ -1519,7 +1519,7 @@ arg_list_t *mgtk_rc_label(arg_list_t *container)
 
 		gtk_widget_show(item);
 	
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); //ARG_GTK_SPINBUTTON_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); //ARG_GTK_SPINBUTTON_WIDGET
 	}
 
 	delete_arg(&label);
@@ -1582,7 +1582,7 @@ arg_list_t *mgtk_rc_icon(arg_list_t *container)
 		gtk_container_add(GTK_CONTAINER((GtkWidget *)container->data), icon);
 		gtk_widget_show(icon);
 
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)icon); // ARG_GTK_ICON_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)icon); // ARG_GTK_ICON_WIDGET
 	}
 
 	delete_arg(&name);
@@ -1655,7 +1655,7 @@ arg_list_t *mgtk_rc_spinbutton(arg_list_t *container)
 							   GINT_TO_POINTER(get_int(event)));
 		}
 
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_SPINBUTTON_WIDGET
 	}
 
 	delete_arg(&start);
@@ -1747,7 +1747,7 @@ arg_list_t *mgtk_rc_spinbutton2(arg_list_t *container)
 							   GINT_TO_POINTER(get_int(event)));
 		}
 
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); //ARG_GTK_SPINBUTTON_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); //ARG_GTK_SPINBUTTON_WIDGET
 	}
 
 	delete_arg(&start);
@@ -1818,7 +1818,7 @@ arg_list_t *mgtk_rc_optionmenu(arg_list_t *box)
 		optionmenu_menu = gtk_menu_new();
 		gtk_option_menu_set_menu(GTK_OPTION_MENU(optionmenu), optionmenu_menu);
 		
-		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)optionmenu_menu);
+		mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)optionmenu_menu);
 
 		// Mongoose 2002.02.14, FIXME should use both keys event:cmd, 
 		//   not just command
@@ -1865,13 +1865,12 @@ arg_list_t *mgtk_rc_menu_seperator(arg_list_t *container)
 	}
 
 	gtk_widget_show(sep);
-	new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)sep);
+	mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)sep);
 
 	return ret;
 }
 
 
-void mgtk_toggle_value_set(int event, int val);
 arg_list_t *mgtk_func_toggle_set(arg_list_t *args)
 {
 	arg_list_t *event, *val;
@@ -1941,7 +1940,7 @@ arg_list_t *mgtk_rc_check_menu_item(arg_list_t *menu)
 	{
 		item = gtk_check_menu_item_new_with_mnemonic((char *)text->data);
 
-		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
 		
 		gtk_menu_append(GTK_MENU(menu->data), item);
 		gtk_widget_show(item);
@@ -2049,7 +2048,7 @@ arg_list_t *mgtk_rc_menu_item(arg_list_t *menu)
 			mgtk_accel_support(item, mlisp_get_string(accel) );
 		}
 
-		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item);		
+		mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item);		
 		gtk_menu_append(GTK_MENU(menu->data), item);
 		gtk_widget_show(item);
 
@@ -2139,12 +2138,12 @@ arg_list_t *mgtk_rc_submenu(arg_list_t *menu)
 			if (symbol)
 			{
 				arg_list_t *binding; 
-				new_adt(&binding, ARG_GTK_MENU_WIDGET, (void *)submenu);
+				mlisp_new_adt(&binding, ARG_GTK_MENU_WIDGET, (void *)submenu);
 				mlisp_bind(symbol, binding);
 			}
 		}
 
-		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)submenu);
+		mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)submenu);
 	}
 
 	delete_arg(&label);
@@ -2179,7 +2178,7 @@ arg_list_t *mgtk_rc_popup_menu(arg_list_t *arg)
 
 	menu = gtk_menu_new();
 
-	new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)menu);
+	mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)menu);
 	
 	gtk_menu_attach_to_widget(GTK_MENU(menu), 
 							  GTK_WIDGET(app),
@@ -2216,7 +2215,7 @@ arg_list_t *mgtk_rc_menubar(arg_list_t *arg)
 		GtkWidget *menubar = gtk_menu_bar_new();
 		gtk_widget_show(menubar);
 		gtk_container_add(GTK_CONTAINER(arg->data), menubar);
-		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)menubar);
+		mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)menubar);
 	}
 
 	return ret;

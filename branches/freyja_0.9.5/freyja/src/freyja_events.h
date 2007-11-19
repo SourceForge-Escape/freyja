@@ -317,7 +317,7 @@ mstl::String freyja_rc_map_string(const char *filename);
  *
  ------------------------------------------------------*/
 
-char *freyja_rc_map(char *s);
+const char* freyja_rc_map(const char* s);
 /*------------------------------------------------------
  * Pre  : <s> is a valid filename or dir in resource dir
  * Post : Returns fullpath filename as C string or NULL

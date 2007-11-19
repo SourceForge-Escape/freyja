@@ -834,11 +834,11 @@ String freyja_rc_map_string(const char *filename)
 }
 
 
-char *freyja_rc_map(char *basename)
+const char* freyja_rc_map(const char* basename)
 {
 	String s = freyja_get_resource_path();
 	s += basename;
-	return mstl::String::Strdup(s.c_str());;
+	return mstl::String::Strdup( s.c_str() );
 }
 
 
@@ -963,6 +963,10 @@ int main(int argc, char *argv[])
 	mgtk_lua_register_functions( freyjaGetLuaVM() );
 
 	mgtk_init(argc, argv);
+
+
+	// FIXME: Move UI init here...
+
 
 	/* Load file passed by command line args, CLI parser isn't really needed. */
 	if (argc > 1 && argv[1][0] != '-')

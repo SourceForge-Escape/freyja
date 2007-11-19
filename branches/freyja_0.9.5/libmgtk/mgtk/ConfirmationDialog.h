@@ -149,6 +149,12 @@ class ConfirmationDialog
 	 *
 	 ------------------------------------------------------*/
 
+	bool AddToPool();
+	/*------------------------------------------------------
+	 * Pre  : ConfirmationDialog object is allocated
+	 * Post : Add this ConfirmationDialog to the gobal pool.
+	 *
+	 ------------------------------------------------------*/
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators

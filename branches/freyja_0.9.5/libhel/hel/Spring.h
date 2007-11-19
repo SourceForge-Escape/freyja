@@ -175,7 +175,7 @@ public:
 			/* 2003.06.08, Mongoose - Setup springs here too, faster */
 			if (i > 0)
 			{
-				mSprings.pushBack(new Spring(a, b, length, stiffness, friction));
+				mSprings.push_back(new Spring(a, b, length, stiffness, friction));
 			}
 
 			a = b;

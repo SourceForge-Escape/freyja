@@ -57,4 +57,6 @@ void mgtk_destroy_notebook(GtkWidget *widget);
 
 void mgtk_check_menu_item_handler(GtkCheckMenuItem *item, gpointer e);
 
+void mgtk_event_hide_dialog(GtkWidget *widget, gpointer user_data);
+
 #endif

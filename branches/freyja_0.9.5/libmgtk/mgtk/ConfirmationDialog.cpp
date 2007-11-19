@@ -69,6 +69,12 @@ bool ExecuteConfirmationDialog(const char *name)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
+bool ConfirmationDialog::AddToPool()
+{
+	gConfirmationDialogs.push_back( *this );
+	return true;
+}
+
 
 ////////////////////////////////////////////////////////////
 // Private Accessors

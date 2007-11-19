@@ -113,6 +113,13 @@ void mgtk_set_query_dialog_string_default(const char* dialog, const char* symbol
 }
 
 
+bool QueryDialog::AddToPool()
+{
+	gQueryDialogs.push_back( *this );
+	return true;
+}
+
+
 bool QueryDialog::Execute()
 {
 	GtkWidget *dialog, *icon, *info, *cancel, *accept, *hbox;

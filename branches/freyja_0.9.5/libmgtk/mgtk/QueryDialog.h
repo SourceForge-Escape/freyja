@@ -281,6 +281,14 @@ class QueryDialog
 	 *
 	 ------------------------------------------------------*/
 
+	bool AddToPool();
+	/*------------------------------------------------------
+	 * Pre  : QueryDialog object is allocated
+	 * Post : Add this QueryDialog to the gobal pool.
+	 *
+	 ------------------------------------------------------*/
+
+
 	mstl::String mName;
 
 	mstl::String mDialogIcon;

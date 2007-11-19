@@ -7,20 +7,27 @@
  
  * Check TODO for cleared tasks.
 
- * Lua replacing mgtk.
-	- Finish: hbox 
-	- Push the event system back into mgtk -- make the 'linker' handlers optional.
-	- Refine with new unit test.
-	- Retain same functionality.
+ * Integrate toplevel cmake and make makefiles.
+
+ * Lua
+	- Lua support for libfreyja ABI 100%.
+	- Check for string/int event issues.
+	- mgtk_label_pango() or some such to accept pango rich text.
+	- Documentation for mgtk_lua API must be done before release.
+	- String table support for lua_mgtk.
+	- mgtk_lua widgets to finalize: tree, slider, dialog.
 	- Reduce the mgtk callback system.
-	- Documentation must be done before release.
+		- Push the event system back into libmgtk. 
+		- Make the 'linker' handlers competely optional.
 	- Event system should allow for lua func / C/C++ callbacks / event ids.
-	- Widget for icon view selection for textures...
-	- Try to get WIN32 mgtk_create_glarea() using gdk_gl_config_new_by_mode(..)
-	- Allow setting display() callbacks on each opengl_canvas widget.
-	- Abstract and hook up the animation timers for opengl_canvas.
-	- Abstract widget size function.
-	- Write something to translate pieces of mlisp to lua for testing.
+	- Opengl_canvas widget
+		- Hookup old mouse handlers!
+		- Try to get WIN32 mgtk_create_glarea() using gdk_gl_config_new_by_mode(..)
+			- May require rewriting parts of the gdk/gtk canvas.
+		- Allow setting display() callbacks on each opengl_canvas widget.
+		- Abstract and hook up the new animation timers.
+	- Abstract widget size function in mgtk_lua.
+	- New selection widget with icon view -- for things like textures.
 
  * New XML based freyja file format.
 	- Plugin for importing the old freyja format.

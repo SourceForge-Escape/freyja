@@ -34,10 +34,10 @@ RM = /usr/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/mongoose/Projects/freyja_0.9.5/freyja
+CMAKE_SOURCE_DIR = /home/mongoose/Projects/freyja_0.9.5
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja_0.9.5/freyja
+CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja_0.9.5
 
 # Include the progress variables for this target.
 include CMakeFiles/progress.make
@@ -48,7 +48,7 @@ include CMakeFiles/progress.make
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/mongoose/Projects/freyja_0.9.5/freyja && /usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target edit_cache
 edit_cache/fast: edit_cache
@@ -56,17 +56,17 @@ edit_cache/fast: edit_cache
 # Special rule for the target install
 install: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	cd /home/mongoose/Projects/freyja_0.9.5/freyja && /usr/bin/cmake -P cmake_install.cmake
 
 # Special rule for the target install
 install/fast: preinstall/fast
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	cd /home/mongoose/Projects/freyja_0.9.5/freyja && /usr/bin/cmake -P cmake_install.cmake
 
 # Special rule for the target install/local
 install/local: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+	cd /home/mongoose/Projects/freyja_0.9.5/freyja && /usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
 
 # Special rule for the target install/local
 install/local/fast: install/local
@@ -81,214 +81,214 @@ list_install_components/fast: list_install_components
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/mongoose/Projects/freyja_0.9.5/freyja && /usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target rebuild_cache
 rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/freyja/CMakeFiles $(CMAKE_ALL_PROGRESS)
-	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/freyja/CMakeFiles 0
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/CMakeFiles $(CMAKE_ALL_PROGRESS)
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 freyja/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/CMakeFiles 0
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 freyja/clean
 
 # The main clean target
 clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 freyja/preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 freyja/preinstall
 
 # clear depends
 depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
-#=============================================================================
-# Target rules for targets named freyja
+# Convenience name for target.
+freyja/CMakeFiles/freyja.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 freyja/CMakeFiles/freyja.dir/rule
 
-# Build rule for target.
-freyja: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 freyja
+# Convenience name for target.
+freyja: freyja/CMakeFiles/freyja.dir/rule
 
 # fast build rule for target.
 freyja/fast:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/build
 
 # target to build an object file
 src/Control.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Control.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Control.o
 
 # target to preprocess a source file
 src/Control.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Control.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Control.i
 
 # target to generate assembly for a file
 src/Control.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Control.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Control.s
 
 # target to build an object file
 src/ControlPrinter.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/ControlPrinter.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/ControlPrinter.o
 
 # target to preprocess a source file
 src/ControlPrinter.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/ControlPrinter.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/ControlPrinter.i
 
 # target to generate assembly for a file
 src/ControlPrinter.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/ControlPrinter.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/ControlPrinter.s
 
 # target to build an object file
 src/Cursor.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Cursor.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Cursor.o
 
 # target to preprocess a source file
 src/Cursor.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Cursor.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Cursor.i
 
 # target to generate assembly for a file
 src/Cursor.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Cursor.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Cursor.s
 
 # target to build an object file
 src/FreyjaControl.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/FreyjaControl.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaControl.o
 
 # target to preprocess a source file
 src/FreyjaControl.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/FreyjaControl.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaControl.i
 
 # target to generate assembly for a file
 src/FreyjaControl.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/FreyjaControl.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaControl.s
 
 # target to build an object file
 src/FreyjaOpenGL.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/FreyjaOpenGL.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaOpenGL.o
 
 # target to preprocess a source file
 src/FreyjaOpenGL.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/FreyjaOpenGL.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaOpenGL.i
 
 # target to generate assembly for a file
 src/FreyjaOpenGL.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/FreyjaOpenGL.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaOpenGL.s
 
 # target to build an object file
 src/FreyjaRender.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/FreyjaRender.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaRender.o
 
 # target to preprocess a source file
 src/FreyjaRender.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/FreyjaRender.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaRender.i
 
 # target to generate assembly for a file
 src/FreyjaRender.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/FreyjaRender.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaRender.s
 
 # target to build an object file
 src/MaterialControl.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/MaterialControl.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/MaterialControl.o
 
 # target to preprocess a source file
 src/MaterialControl.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/MaterialControl.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/MaterialControl.i
 
 # target to generate assembly for a file
 src/MaterialControl.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/MaterialControl.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/MaterialControl.s
 
 # target to build an object file
 src/OpenGLPrinter.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/OpenGLPrinter.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/OpenGLPrinter.o
 
 # target to preprocess a source file
 src/OpenGLPrinter.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/OpenGLPrinter.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/OpenGLPrinter.i
 
 # target to generate assembly for a file
 src/OpenGLPrinter.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/OpenGLPrinter.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/OpenGLPrinter.s
 
 # target to build an object file
 src/Plugins.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Plugins.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Plugins.o
 
 # target to preprocess a source file
 src/Plugins.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Plugins.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Plugins.i
 
 # target to generate assembly for a file
 src/Plugins.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Plugins.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Plugins.s
 
 # target to build an object file
 src/RecentFiles.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/RecentFiles.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/RecentFiles.o
 
 # target to preprocess a source file
 src/RecentFiles.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/RecentFiles.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/RecentFiles.i
 
 # target to generate assembly for a file
 src/RecentFiles.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/RecentFiles.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/RecentFiles.s
 
 # target to build an object file
 src/Texture.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Texture.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Texture.o
 
 # target to preprocess a source file
 src/Texture.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Texture.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Texture.i
 
 # target to generate assembly for a file
 src/Texture.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/Texture.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Texture.s
 
 # target to build an object file
 src/freyja3d_scenegraph.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja3d_scenegraph.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/freyja3d_scenegraph.o
 
 # target to preprocess a source file
 src/freyja3d_scenegraph.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja3d_scenegraph.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/freyja3d_scenegraph.i
 
 # target to generate assembly for a file
 src/freyja3d_scenegraph.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja3d_scenegraph.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/freyja3d_scenegraph.s
 
 # target to build an object file
 src/freyja_events.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja_events.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/freyja_events.o
 
 # target to preprocess a source file
 src/freyja_events.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja_events.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/freyja_events.i
 
 # target to generate assembly for a file
 src/freyja_events.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/freyja_events.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/freyja_events.s
 
 # target to build an object file
 src/misc.o:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/misc.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/misc.o
 
 # target to preprocess a source file
 src/misc.i:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/misc.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/misc.i
 
 # target to generate assembly for a file
 src/misc.s:
-	$(MAKE) -f CMakeFiles/freyja.dir/build.make CMakeFiles/freyja.dir/src/misc.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/misc.s
 
 # Help Target
 help::
@@ -354,5 +354,5 @@ help::
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 

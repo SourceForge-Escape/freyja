@@ -91,9 +91,10 @@ void mgtk_print(char *format, ...);
 
 // Working directory, resource directory, etc
 
-char *mgtk_rc_map(char *filename_or_dirname);
+const char* mgtk_rc_map(const char* filename_or_dirname);
+// Remeber to free this string!
 
-const char *mgtk_get_resource_path();
+const char* mgtk_get_resource_path();
 
 void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name);
 
