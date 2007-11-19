@@ -30,6 +30,7 @@
 
 #include "mgtk_callbacks.h"
 #include "mgtk_events.h"
+#include "mgtk_opengl_canvas.h"
 #include "mgtk_interface.h"
 #include "mgtk_resource.h"
 
@@ -492,22 +493,13 @@ int mgtk_lua_rc_opengl_canvas(lua_State *s)
 	int width = (int)lua_tonumber(s, 1);
 	int height = (int)lua_tonumber(s, 2);
 
-	GtkWidget* canvas = mgtk_create_glarea(width, height);
+	GtkWidget* canvas = mgtk_opengl_canvas_new(width, height);
 
 	if ( canvas )
 	{
 		gpointer gobj = gtk_object_get_data(GTK_OBJECT(canvas), "gl_window_state");
-		mgtk_glarea_window_state_t* state = (mgtk_glarea_window_state_t*)gobj;
+		mgtk_opengl_canvas_state_t* state = (mgtk_opengl_canvas_state_t*)gobj;
 		state->appbar = NULL;
-
-#if defined HAVE_GTKGLEXT
-		gtk_signal_connect(GTK_OBJECT(canvas), "key_press_event",
-						   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
-		gtk_signal_connect(GTK_OBJECT(canvas), "key_release_event",
-						   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
-		gtk_signal_connect(GTK_OBJECT(canvas), "destroy",
-						   GTK_SIGNAL_FUNC(mgtk_destroy_window), NULL);
-#endif
 
 		// FIXME: This needs to hook into a 'refresh/display' callback separately now.
 		// Old mlisp hook-up for testing.
@@ -547,7 +539,7 @@ int mgtk_lua_rc_hslider(lua_State *s)
 		int min = (int)lua_tonumber(s, 3);
 		int max = (int)lua_tonumber(s, 3);
 
-		GtkObject* adj = gtk_adjustment_new(min, min, max, 1, 2, 0);
+		GtkObject* adj = gtk_adjustment_new( min, min, max, 1, 1, 10 );
 		slider = gtk_hscale_new( GTK_ADJUSTMENT(adj) );
 		gtk_widget_show(slider);
 		gtk_scale_set_digits( GTK_SCALE(slider), 0);
@@ -1163,7 +1155,7 @@ int mgtk_lua_rc_toolbar_box(lua_State* s)
 		gtk_toolbar_insert(GTK_TOOLBAR(toolbar), item, mode); 
 		gtk_widget_show(widget);
 
-		box = gtk_hbox_new(TRUE, 1);
+		box = gtk_hbox_new(FALSE, 1);
 		gtk_widget_show(box);
 
 		gtk_widget_ref(box);

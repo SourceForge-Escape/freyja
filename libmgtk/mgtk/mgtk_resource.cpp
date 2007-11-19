@@ -33,6 +33,7 @@
 #include "ResourceEvent.h"
 
 #include "mgtk_interface.h"
+#include "mgtk_opengl_canvas.h"
 #include "mgtk_callbacks.h"
 #include "mgtk_resource.h"
 #include "mgtk_events.h"
@@ -162,12 +163,12 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 	}
 
 	/* Gtk GL Area widget */
-	GtkWidget *gl = mgtk_create_glarea(get_int(width), get_int(height));
+	GtkWidget *gl = mgtk_opengl_canvas_new(get_int(width), get_int(height));
 
 	if (gl)
 	{
 		gpointer gobj = gtk_object_get_data(GTK_OBJECT(gl), "gl_window_state");
-		mgtk_glarea_window_state_t *state = (mgtk_glarea_window_state_t*)gobj;
+		mgtk_opengl_canvas_state_t *state = (mgtk_opengl_canvas_state_t*)gobj;
 		state->appbar = NULL;
 
 		GTK_GL_AREA_WIDGET = gl;
@@ -180,15 +181,6 @@ arg_list_t *mgtk_rc_gl_widget(arg_list_t *box)
 		gtk_widget_set_usize(gl, get_int(width), get_int(height));
 		mgtk_print("!ERROR: OpenGL display not supported by this system?\n");
 	}
-
-#if defined HAVE_GTKGLEXT
-	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "key_press_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
-	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "key_release_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
-	gtk_signal_connect(GTK_OBJECT(mgtk_get_gl_widget()), "destroy",
-					   GTK_SIGNAL_FUNC(mgtk_destroy_window), NULL);
-#endif
 	
 	/* Editing window */
 	GtkWidget *vbox = mgtk_create_vbox(GTK_WIDGET(box->data), "gl_vbox", 

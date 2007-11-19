@@ -33,21 +33,6 @@
 
 #include <gtk/gtk.h>
 
-typedef struct 
-{
-	bool init;
-	int plane;
-	int mouse_x;
-	int mouse_y;
-	int width;
-	int height;
-	GtkWidget *appbar;
-
-} mgtk_glarea_window_state_t;
-
-
-GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height);
-
 GtkWidget *mgtk_create_color_picker_dialog(char *title, void *event_func);
 
 GtkWidget *mgtk_create_window(char *title, char *wmclass, char *icon_filename);
@@ -96,8 +81,6 @@ GtkWidget *mgtk_create_color_button(void *func, int id);
 GdkPixbuf* mgtk_create_pixbuf(const char* icon_filename);
 
 void mgtk_destroy_window(GtkWidget *widget);
-
-void mgtk_refresh_glarea(GtkWidget *glarea);
 
 void mgtk_accel_support(GtkWidget *item, const char* accel);
 
