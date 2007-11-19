@@ -342,39 +342,43 @@ end
 
 function freyja3d_ui_sidebar_model( sidebar )
 
-	tab = mgtk_tab( sidebar, "Model", 
-					mgtk_event("sidebar_model", "freyja3d_ev_test()") )
-	handlebox = mgtk_handlebox( 1 )
-	vbox = mgtk_vbox( 1, 1 )
-	mgtk_box_pack( tab, vbox, 0, 1, 1 )
-	mgtk_box_pack( vbox, handlebox )
+	tab = mgtk_tab( sidebar, "Model", "eModeModel" )
+
+	eventid = mgtk_event("move", "freyja3d_ev_test()")
+	mgtk_box_pack( tab, mgtk_button( "lua_test", eventid ) )
 
 	-- Transform box
+	handlebox = mgtk_handlebox( 1 )
+	mgtk_box_pack( tab, handlebox )
 	expander = mgtk_expander( handlebox, "Transform Box", true )
-	hbox = mgtk_hbox( 1, 1 )
-	mgtk_box_pack( expander, hbox, 0, 1, 1 )
-	eventid = mgtk_event("move", "freyja3d_ev_test()")
-	mgtk_box_pack( hbox, mgtk_button( "Move", eventid ), 1, 1, 1 )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -900.0, 1000.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -900.0, 1000.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -900.0, 1000.0, 1, 0.1, 0.1 ) )
 	hbox = mgtk_hbox()
-	mgtk_box_pack( expander, hbox, 0, 1, 1 )
-	mgtk_box_pack( hbox, mgtk_button( "Rotate", -1 ), 1, 1, 1 )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -180.0, 180.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -180.0, 180.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 0.0, -180.0, 180.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( expander, hbox )
+	mgtk_box_pack( hbox, mgtk_button( "Move", "eMove" ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eMove_X" , 0.0, -900.0, 1000.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eMove_Y" , 0.0, -900.0, 1000.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eMove_Z", 0.0, -900.0, 1000.0, 1, 0.1, 0.1 ) )
 	hbox = mgtk_hbox()
-	mgtk_box_pack( expander, hbox, 0, 1, 1 )
-	mgtk_box_pack( hbox, mgtk_button( "Scale", -1 ), 1, 1, 1 )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float(-1, 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( expander, hbox )
+	mgtk_box_pack( hbox, mgtk_button( "Rotate", "eRotate" ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eRotate_X", 0.0, -180.0, 180.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eRotate_Y", 0.0, -180.0, 180.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eRotate_Z", 0.0, -180.0, 180.0, 1, 0.1, 0.1 ) )
+	hbox = mgtk_hbox()
+	mgtk_box_pack( expander, hbox )
+	mgtk_box_pack( hbox, mgtk_button( "Scale", "eScale" ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_X", 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_Y", 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_Z", 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
 
+	-- ...
+
+	-- Scenegraph box
+	handlebox = mgtk_handlebox( 1 )
+	mgtk_box_pack( tab, handlebox, 1, 1, 0 )
+	expander = mgtk_expander( handlebox, "Scenegraph", true )
+	mgtk_box_pack( handlebox, expander, 1, 1, 0 )
+	mgtk_box_pack( expander, mgtk_tree( "Scenegraph", "eBoneIterator", "eSetBoneName" ), 1, 1, 1 )
 end
-
-
---freyja3d_ui = { "nil", 0 }
 
 
 function freyja3d_ui_init()
@@ -401,7 +405,7 @@ function freyja3d_ui_init()
 	freyja3d_ui_shelf_material( shelf )
 
 	-- Main UI Box
-	hbox = mgtk_hbox()
+	hbox = mgtk_hbox( )
 	mgtk_box_pack( vbox, hbox )
 
 	-- OpenGL Canvas
@@ -410,17 +414,18 @@ function freyja3d_ui_init()
 
 	-- Sidebar
 	hbox2 = mgtk_hbox()
-	mgtk_box_pack( hbox, hbox2 )
-	expander = mgtk_expander( hbox2, " ", true )
+	mgtk_box_pack( hbox, hbox2, 0, 0, 0 )
+	--mgtk_box_pack( hbox2, mgtk_button( ">", -1 ) )	
+	expander = mgtk_expander( hbox2, " ", false )
 	sidebar = mgtk_notebook( -1, 340, 720 )
 	mgtk_box_pack( expander, sidebar )
 	freyja3d_ui_sidebar_model( sidebar )
 
-	tab = mgtk_tab(sidebar, "UV", -1)
+	tab = mgtk_tab( sidebar, "UV", "eModeUV" )
 
-	tab = mgtk_tab(sidebar, "Material", -1)
+	tab = mgtk_tab( sidebar, "Material", "eModeMaterial" )
 
-	tab = mgtk_tab(sidebar, "Plugins", -1)
+	tab = mgtk_tab( sidebar, "Plugins", -1 )
 	mgtk_expander( tab, "Freyja Plugins   ", true, "FirstPartyPluginSlot" )
 	mgtk_expander( tab, "Community Plugins", true, "ThirdPartyPluginSlot" )
 
