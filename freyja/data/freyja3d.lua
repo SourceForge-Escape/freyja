@@ -370,7 +370,55 @@ function freyja3d_ui_sidebar_model( sidebar )
 	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_Y", 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
 	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_Z", 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
 
-	-- ...
+	-- Groups box
+	handlebox = mgtk_handlebox( 1 )
+	mgtk_box_pack( tab, handlebox )
+	expander = mgtk_expander( handlebox, "Groups Box", true )
+	mgtk_box_pack( handlebox, expander )
+
+	hbox = mgtk_hbox( 1, 0 )
+	mgtk_box_pack( expander, hbox )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 1", "eSmooth", 0 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 2", "eSmooth", 1 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 3", "eSmooth", 2 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 4", "eSmooth", 3 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 5", "eSmooth", 4 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 6", "eSmooth", 5 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 7", "eSmooth", 6 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 8", "eSmooth", 7 ), 1, 1, 0 )
+
+	hbox = mgtk_hbox( 1, 0 )
+	mgtk_box_pack( expander, hbox )
+	mgtk_box_pack( hbox, mgtk_togglebutton( " 9", "eSmooth", 8 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "10", "eSmooth", 9 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "11", "eSmooth", 10 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "12", "eSmooth", 11 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "13", "eSmooth", 12 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "14", "eSmooth", 13 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "15", "eSmooth", 14 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "16", "eSmooth", 15 ), 1, 1, 0 )
+
+	hbox = mgtk_hbox( 1, 0 )
+	mgtk_box_pack( expander, hbox )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "17", "eSmooth", 16 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "18", "eSmooth", 17 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "19", "eSmooth", 18 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "20", "eSmooth", 19 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "21", "eSmooth", 20 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "22", "eSmooth", 21 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "23", "eSmooth", 22 ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "24", "eSmooth", 23 ), 1, 1, 0 )
+
+	hbox = mgtk_hbox( 1, 0 )
+	mgtk_box_pack( expander, hbox )
+	mgtk_box_pack( hbox, mgtk_button( "Assign", "eGroupAssign" ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Clear ", "eGroupClear" ), 1, 1, 0 )
+
+	hbox = mgtk_hbox( 1, 0 )
+	mgtk_box_pack( expander, hbox )
+	mgtk_box_pack( hbox, mgtk_button( "Smooth", "eSelectedFacesGenerateNormals" ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Flip  ", "eSelectedFacesFlipNormals" ), 1, 1, 0 )
+
 
 	-- Scenegraph box
 	handlebox = mgtk_handlebox( 1 )
