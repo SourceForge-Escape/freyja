@@ -279,20 +279,22 @@ function freyja3d_ui_shelf_view( shelf )
 	tab = mgtk_tab(shelf, "View", -1)
 	toolbar = mgtk_toolbar( tab )
 
-	-- FIXME Use double hbox to make it 'fitted' to max size of menu.
-	optmenu = mgtk_optionmenu( mgtk_toolbar_box( toolbar ), "Viewport", -1 )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Orbit   ", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Front   ", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Back    ", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Right   ", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Left    ", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Top     ", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Bottom  ", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Material", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("UV      ", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Curve   ", -1) )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Camera  ", -1) )
+	-- View mode selection
+	box = mgtk_toolbar_box( toolbar )
+	optmenu = mgtk_optionmenu( box, "Viewport", "eViewportModeMenu" )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Orbit   ", "eViewportOrbit") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Front   ", "eViewportFront") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Back    ", "eViewportBack") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Right   ", "eViewportRight") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Left    ", "eViewportLeft") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Top     ", "eViewportTop") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Bottom  ", "eViewportBottom") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Material", "eViewportMaterial") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("UV      ", "eViewportUV") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Curve   ", "eViewportCurve") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Camera  ", "eViewportCamera") )
 
+	-- Render options
 	mgtk_toolbar_togglebutton(toolbar, "Four Window", "eViewports", false, "icons/24x24/fourwin.png", "Four window view" )
 	mgtk_toolbar_togglebutton(toolbar, "Grid", "eRenderGrid", false, "icons/24x24/grid.png", "Plane grid rendering" )
 	mgtk_toolbar_togglebutton(toolbar, "Ground", "eRenderSolidGround", false, "icons/24x24/grid.png", "Plane solid rendering" )
@@ -314,30 +316,136 @@ function freyja3d_ui_shelf_view( shelf )
 	mgtk_toolbar_separator( toolbar )
 	mgtk_toolbar_togglebutton(toolbar, "Shadow", "eShadowVolume", false, "icons/24x24/shadow.png", "Render shadows" )
 	mgtk_toolbar_togglebutton(toolbar, "Blend", "eSkeletalDeform", false, "icons/24x24/deform.png", "Skeletal vertex blending" )
+
+	-- Zoom
+	mgtk_toolbar_separator( toolbar )
+	box = mgtk_toolbar_box( toolbar )
+	mgtk_box_pack( box, mgtk_label( "Zoom" ) )
+	spnbtn = mgtk_spinbutton_float( "eZoom", 1.0, 0.0001, 1000.0, 4, 0.0001, 1.0, 1.0 )
+	mgtk_box_pack( box, spnbtn )
 end
 
 
 function freyja3d_ui_shelf_create( shelf )
 	tab = mgtk_tab(shelf, "Create", -1)
-	toolbar = mgtk_toolbar( tab )	
+	toolbar = mgtk_toolbar( tab )
+	mgtk_toolbar_button(toolbar, " ", "eGeneratePlane", "icons/24x24/sheet.png", "Polygon plane" )
+	mgtk_toolbar_button(toolbar, " ", "eGenerateRing", "icons/24x24/ring.png", "Polygon ring" )
+	mgtk_toolbar_button(toolbar, " ", "eGenerateCircle", "icons/24x24/circle.png", "Polygon circle" )
+	mgtk_toolbar_button(toolbar, " ", "eGenerateCube", "icons/24x24/cube.png", "Polygon cube" )
+	mgtk_toolbar_button(toolbar, " ", "eGenerateTube", "icons/24x24/tube.png", "Polygon tube" )
+	mgtk_toolbar_button(toolbar, " ", "eGenerateCone", "icons/24x24/cone.png", "Polygon cone" )
+	mgtk_toolbar_button(toolbar, " ", "eGenerateCylinder", "icons/24x24/cylinder.png", "Polygon cylinder" )
+	mgtk_toolbar_button(toolbar, " ", "eGenerateSphere", "icons/24x24/sphere.png", "Polygon sphere" )
+	mgtk_toolbar_button(toolbar, " ", "eBezierPolygonPatch", "icons/24x24/patch.png", "Patch" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, " ", "eExtrude", "icons/24x24/extrude.png", "Extrude face" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, "UVMap", "eMeshTexcoordPlaneProj", "icons/24x24/plane.png", "Planar UVMap selected faces"  )
+	mgtk_toolbar_button(toolbar, "UVMap", "eMeshTexcoordSpherical", "icons/24x24/texgen-sphere.png",  "Spherical UVMap selected faces"  )
+	mgtk_toolbar_button(toolbar, "UVMap", "eMeshTexcoordCylindrical", "icons/24x24/cylinder.png",  "Cylindrical UVMap selected faces" )
 end
 
 
 function freyja3d_ui_shelf_modify( shelf )
 	tab = mgtk_tab(shelf, "Modify", -1)
 	toolbar = mgtk_toolbar( tab )	
+
+	-- Edit mode selection
+	box = mgtk_toolbar_box( toolbar )
+	optmenu = mgtk_optionmenu( box, "Edit Mode", "eTransformMenu" )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Model      ", "eTransformModel") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Mesh       ", "eTransformMesh") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Meshes...  ", "eTransformMeshes") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Face       ", "eTransformFace") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Faces...   ", "eTransformFaces") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Vertex     ", "eTransformVertex") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Vertices...", "eTransformVertices") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Skeleton   ", "eTransformSkeleton") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Bone       ", "eTransformBone") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Metadata   ", "eTransformMetadata") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Light      ", "eTransformLight") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Camera     ", "eTransformCamera") )
+
+	mgtk_toolbar_togglebutton(toolbar, "SelectB", "eSelectionByBox", false, "icons/24x24/bbox-select.png",  "Select by bounding box, Ctrl+RMouse ends selection" )
+	mgtk_toolbar_togglebutton(toolbar, "Info", "eInfoObject", false, "gtk-info", "Info on selected object" )
+	mgtk_toolbar_togglebutton(toolbar, "Select", "eSelect", true, "icons/24x24/cursor-select.png", "Select object by cursor" )
+	mgtk_toolbar_togglebutton(toolbar, "Move", "eMoveObject", false, "icons/24x24/move.png", "Move object" )
+	mgtk_toolbar_togglebutton(toolbar, "Rotate", "eRotateObject", false, "icons/24x24/rotate.png", "Rotate object" )
+	mgtk_toolbar_togglebutton(toolbar, "Scale", "eScaleObject", false, "icons/24x24/scale.png", "Scale object" )
+	mgtk_toolbar_togglebutton(toolbar, "Paint", "ePaintObject", false, "icons/24x24/paint.png", "Paint object" )
+
+	-- Paint mode selection
+	box = mgtk_toolbar_box( toolbar )
+	optmenu = mgtk_optionmenu( box, "Paint Mode", -1 )
+	mgtk_append_menu( optmenu, mgtk_menu_item( "Weight", "ePaintWeight" ) )
+	mgtk_append_menu( optmenu, mgtk_menu_item( "Unweight", "ePaintUnweight" ) )
+	mgtk_append_menu( optmenu, mgtk_menu_item( "Select", "ePaintSelect" ) )
+	mgtk_append_menu( optmenu, mgtk_menu_item( "Unselect", "ePaintUnselect" ) )
+	mgtk_append_menu( optmenu, mgtk_menu_item( "Material", "ePaintMaterial" ) )
+	mgtk_append_menu( optmenu, mgtk_menu_item( "Height", "ePaintHeight" ) )
+	mgtk_append_menu( optmenu, mgtk_menu_item( "Dmap", "ePaintDmap" ) )
+
+	mgtk_toolbar_separator( toolbar )
+
+	mgtk_toolbar_button(toolbar, "Undo", "eUndo", "gtk-undo", "Undo" )
+	mgtk_toolbar_button(toolbar, "Redo", "eRedo", "gtk-redo", "Redo" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, "Cut", "eCut", "gtk-cut", "Cut object" )
+	mgtk_toolbar_button(toolbar, "Copy", "eCopy", "gtk-copy", "Copy object" )
+	mgtk_toolbar_button(toolbar, "Paste", "ePaste", "gtk-paste", "Paste object" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, "Create", "eCreate", "gtk-new", "Create new object" )
+	mgtk_toolbar_button(toolbar, "Delete", "eDelete", "gtk-delete", "Delete selected object" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, "Duplicate", "eDupeObject", "icons/24x24/mdupe.png", "Duplicate object" )
+	mgtk_toolbar_button(toolbar, "Split", "eSplitObject", "icons/24x24/msplit.png", "Split object" )
+	mgtk_toolbar_button(toolbar, "Merge", "eMergeObject", "icons/24x24/mmerge.png", "Merge objects" )
+
+	mgtk_toolbar_separator( toolbar )
+
+	mgtk_toolbar_button(toolbar, "SubDiv", "eMeshSubDivLoop", "gtk-add", "SubDiv Mesh" )
+	--(toolbar_menu_button "icons/24x24/subdiv.png" "Subdiv"	"Subdivide mesh..." eEvent eMeshSubDivLoop
+	--mgtk_append_menu( submenu, mgtk_menu_item_check( "Flat", "eNone", 1 ) )
 end
 
 
 function freyja3d_ui_shelf_skinning( shelf )
 	tab = mgtk_tab(shelf, "Skinning", -1)
 	toolbar = mgtk_toolbar( tab )	
+
+	mgtk_toolbar_button(toolbar, " ", "eAssignWeight", "gtk-add", "Assign vertices to joint " )
+	mgtk_toolbar_button(toolbar, " ", "eClearWeight", "gtk-remove", "Remove vertices weighting " )	
+
+	-- Bone Iterator
+	mgtk_toolbar_separator( toolbar )
+	box = mgtk_toolbar_box( toolbar )
+	mgtk_box_pack( box, mgtk_label( "Bone: " ) )
+	spnbtn = mgtk_spinbutton_uint( "eBoneIterator", 0, 0, 512 )
+	mgtk_box_pack( box, spnbtn )
+
+	-- Weight value
+	mgtk_toolbar_separator( toolbar )
+	box = mgtk_toolbar_box( toolbar )
+	mgtk_box_pack( box, mgtk_label( "Weight: " ) )
+	spnbtn = mgtk_spinbutton_float( "eWeight", 1.0, 0.0, 1.0, 3, 0.01, 0.1, 0.1 )
+	mgtk_box_pack( box, spnbtn )
 end
 
 
 function freyja3d_ui_shelf_material( shelf )
 	tab = mgtk_tab(shelf, "Material", -1)
 	toolbar = mgtk_toolbar( tab )	
+	mgtk_toolbar_button(toolbar, " ", "eSetMeshTexture", "gtk-add", "Set Mesh Material" )
+	mgtk_toolbar_button(toolbar, " ", "eSetFacesMaterial", "gtk-add", "Set Selected Faces Material" )
+
+	-- Material selection by id.
+	mgtk_toolbar_separator( toolbar )
+	box = mgtk_toolbar_box( toolbar )
+	mgtk_box_pack( box, mgtk_label( "Material index: " ) )
+	spnbtn = mgtk_spinbutton_uint( "eSetMaterial", 0, 0, 128 )
+	mgtk_box_pack( box, spnbtn )
+	--;(textbox eSetMaterialName)
 end
 
 
@@ -357,21 +465,21 @@ function freyja3d_ui_sidebar_model( sidebar )
 	hbox = mgtk_hbox()
 	mgtk_box_pack( expander, hbox )
 	mgtk_box_pack( hbox, mgtk_button( "Move", "eMove" ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float("eMove_X" , 0.0, -900.0, 1000.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float("eMove_Y" , 0.0, -900.0, 1000.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float("eMove_Z", 0.0, -900.0, 1000.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eMove_X", 0.0, -900.0, 1000.0, 1, 0.1, 1, 1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eMove_Y", 0.0, -900.0, 1000.0, 1, 0.1, 1, 1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eMove_Z", 0.0, -900.0, 1000.0, 1, 0.1, 1, 1 ) )
 	hbox = mgtk_hbox()
 	mgtk_box_pack( expander, hbox )
 	mgtk_box_pack( hbox, mgtk_button( "Rotate", "eRotate" ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float("eRotate_X", 0.0, -180.0, 180.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float("eRotate_Y", 0.0, -180.0, 180.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float("eRotate_Z", 0.0, -180.0, 180.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eRotate_X", 0.0, -180.0, 180.0, 1, 0.1, 1, 1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eRotate_Y", 0.0, -180.0, 180.0, 1, 0.1, 1, 1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eRotate_Z", 0.0, -180.0, 180.0, 1, 0.1, 1, 1 ) )
 	hbox = mgtk_hbox()
 	mgtk_box_pack( expander, hbox )
 	mgtk_box_pack( hbox, mgtk_button( "Scale", "eScale" ), 1, 1, 0 )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_X", 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_Y", 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_Z", 1.0, -1.0, 1000.0, 1, 0.1, 0.1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_X", 1.0, -1.0, 1000.0, 1, 0.1, 1, 1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_Y", 1.0, -1.0, 1000.0, 1, 0.1, 1, 1 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float("eScale_Z", 1.0, -1.0, 1000.0, 1, 0.1, 1, 1 ) )
 
 	-- Groups box
 	handlebox = mgtk_handlebox( 1 )
@@ -422,7 +530,6 @@ function freyja3d_ui_sidebar_model( sidebar )
 	mgtk_box_pack( hbox, mgtk_button( "Smooth", "eSelectedFacesGenerateNormals" ), 1, 0, 0 )
 	mgtk_box_pack( hbox, mgtk_button( "Flip  ", "eSelectedFacesFlipNormals" ), 1, 0, 0 )
 
-
 	-- Scenegraph box
 	handlebox = mgtk_handlebox( 1 )
 	mgtk_box_pack( tab, handlebox, 1, 1, 0 )
@@ -443,6 +550,67 @@ function freyja3d_ui_sidebar_model( sidebar )
 	mgtk_toolbar_button( toolbar, "", -1, "gtk-media-forward", "" )
 	mgtk_toolbar_button( toolbar, "Next", "eAnimationNext", "gtk-media-next", "Next Track" )
 
+end
+
+
+function freyja3d_ui_sidebar_uv( sidebar )
+	tab = mgtk_tab( sidebar, "UV", "eModeUV" )
+
+	-- Material selection by id.
+	hbox = mgtk_hbox( )
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Material index: " ) )
+	spnbtn = mgtk_spinbutton_uint( "eSetMaterial", 0, 0, 128 )
+	mgtk_box_pack( hbox, spnbtn )
+
+	-- FIXME (hsep)	
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( " " ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Assign material to:" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )	
+	vbox2 = mgtk_vbox()
+	mgtk_box_pack( hbox, vbox2 )
+	mgtk_box_pack( vbox2, mgtk_button( "Mesh Index", "eSetMeshTexture" ) )
+	mgtk_box_pack( vbox2, mgtk_button( "Face Index", "eSetPolygonTexture" ) )
+	mgtk_box_pack( vbox2, mgtk_button( "Selected Faces...", "eSetFacesMaterial" ) )
+	vbox2 = mgtk_vbox()
+	mgtk_box_pack( hbox, vbox2 )		
+	mgtk_box_pack( vbox2, mgtk_spinbutton_uint( "eMeshIterator", 0, 0, 100000 ) )
+	mgtk_box_pack( vbox2, mgtk_spinbutton_uint( "ePolygonIterator", 0, 0, 100000 ) )
+	mgtk_box_pack( vbox2, mgtk_label( " " ) )
+
+	-- FIXME (hsep)
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( " " ) )
+		
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Texcoord operations" ) )
+
+	vbox2 = mgtk_vbox()
+	mgtk_box_pack( tab, vbox2 )
+	mgtk_box_pack( vbox2, mgtk_button( "Texcoord weld mode", "eTexcoordCombine" ) )
+	mgtk_box_pack( vbox2, mgtk_button( "Generate UVMap", "eUVMapCreate" ) )
+	mgtk_box_pack( vbox2, mgtk_button( "Clear UVMap", "eUVMapDelete" ) )
+	mgtk_box_pack( vbox2, mgtk_button( "PolyMap", "ePolyMapTexturePolygon" ) )
+	mgtk_box_pack( vbox2, mgtk_button( "Mirror X", "eMirrorUV_X" ) )
+	mgtk_box_pack( vbox2, mgtk_button( "Mirror Y", "eMirrorUV_Y" ) )
+	mgtk_box_pack( vbox2, mgtk_button( "Set Alpha", "eSetSelectedFacesAlpha" ) )
+	mgtk_box_pack( vbox2, mgtk_button( "Clear Alpha", "eClearSelectedFacesAlpha" ) )
+end
+
+
+function freyja3d_ui_sidebar_material( sidebar )
+	tab = mgtk_tab( sidebar, "Material", "eModeMaterial" )
+
+	-- FIXME Not translated.
 end
 
 
@@ -485,10 +653,8 @@ function freyja3d_ui_init()
 	sidebar = mgtk_notebook( -1, 340, 720 )
 	mgtk_box_pack( expander, sidebar )
 	freyja3d_ui_sidebar_model( sidebar )
-	-- FIXME
-	tab = mgtk_tab( sidebar, "UV", "eModeUV" )
-	-- FIXME
-	tab = mgtk_tab( sidebar, "Material", "eModeMaterial" )
+	freyja3d_ui_sidebar_uv( sidebar )
+	freyja3d_ui_sidebar_material( sidebar )
 	tab = mgtk_tab( sidebar, "Plugins", -1 )
 	mgtk_expander( tab, "Freyja Plugins   ", true, "FirstPartyPluginSlot" )
 	mgtk_expander( tab, "Community Plugins", true, "ThirdPartyPluginSlot" )

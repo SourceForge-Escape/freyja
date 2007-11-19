@@ -86,7 +86,8 @@ if (NOT GTKGLEXT_INCLUDE_DIR)
 	message(FATAL_ERROR "GTKGLEXT was not found.  Ensure you have the GTKGLEXT development libraries installed, and GTKGLEXT's pkgconfig files are in your pkgconfig search path.")
 endif (NOT GTKGLEXT_INCLUDE_DIR)
 message(STATUS "GtkGlExt cflags: ${GTKGLEXT_CFLAGS}")
-add_definitions( ${GTKGLEXT_CFLAGS} -DHAVE_GTKGLAREA )
+#add_definitions( ${GTKGLEXT_CFLAGS} -DHAVE_GTKGLAREA )
+add_definitions( ${GTKGLEXT_CFLAGS} -DHAVE_GTKGLEXT )
 link_directories( ${GTKGLEXT_LIB_DIR} )
 link_libraries( ${GTKGLEXT_LINK_FLAGS} )
 include_directories( ${GTKGLEXT_INCLUDE_DIR} )
@@ -106,11 +107,12 @@ set(Objs
 	mgtk/Resource
 	mgtk/ResourceEvent
 	mgtk/mgtk_callbacks
+	mgtk/mgtk_filedialog
 	mgtk/mgtk_interface
 	mgtk/mgtk_linker
 	mgtk/mgtk_lua
 	mgtk/mgtk_resource
-	mgtk/mgtk_filedialog
+	mgtk/mgtk_opengl_canvas
 	mgtk/mgtk_tree
 )
 

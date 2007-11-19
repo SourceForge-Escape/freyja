@@ -788,96 +788,6 @@ float mgtk_event_get_float(int event)
 }
 
 
-void mgtk_event_swap_gl_buffers()
-{
-	/* Hhhmm...  nothing really needed here, swapping is handled in 
-	 * the gtk glarea interfacing code after draw requests */
-	// Hhmm... avoid back to back redraws give time to finish
-	//SystemIO::MicroSleep(250);
-}
-
-
-void mgtk_event_gl_refresh()
-{
-	if (mgtk_get_gl_widget())
-	{
-		mgtk_refresh_glarea(mgtk_get_gl_widget());
-	}
-}
-
-
-// FIXME: factor out key mapping from GDK and mgtk!
-void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event)
-{
-	GdkModifierType state;
-	mgtk_glarea_window_state_t *gl_state;
-	int x, y, mod, btn_state, button;
-
-
-	gl_state = (mgtk_glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(widget),
-														   "gl_window_state");
-	
-	/* Beginning of drag, reset mouse position */
-	gdk_window_get_pointer(event->window, &x, &y, &state);
-  
-	gl_state->mouse_x = x;
-	gl_state->mouse_y = y;
-
-	btn_state = MOUSE_BTN_STATE_PRESSED;
-	button = 0;
-	mod = 0;
-
-	if (event->state & GDK_CONTROL_MASK)
-		mod |= KEY_LCTRL;
-
-	if (event->state & GDK_SHIFT_MASK)
-		mod |= KEY_LSHIFT;
-
-	if (state & GDK_BUTTON1_MASK)
-	{
-		button |= MOUSE_BTN_LEFT;
-	}
-
-	if (state & GDK_BUTTON2_MASK)
-	{
-		button |= MOUSE_BTN_MIDDLE;
-	}
-
-	if (state & GDK_BUTTON3_MASK)
-	{
-		button |= MOUSE_BTN_RIGHT;
-	}
-
-	if (state & GDK_BUTTON4_MASK)
-	{
-		button |= MOUSE_BTN_UP;
-	}
-
-	if (state & GDK_BUTTON5_MASK)
-	{
-		button |= MOUSE_BTN_DOWN;
-	}
-
-#ifdef DEBUG_GTK_MOUSE
-	char foo[32];
-	sprintf(foo, "MOUSE_BTN_%i", button);
-	mgtk_print("Sending mouse event to Freya; x: %i y: %i, %s, %s\n", 
-					x, y, 
-					(button == MOUSE_BTN_LEFT) ? "MOUSE_BTN_LEFT" :
-					(button == MOUSE_BTN_RIGHT) ? "MOUSE_BTN_RIGHT" :
-					(button == MOUSE_BTN_MIDDLE) ? "MOUSE_BTN_MIDDLE" :
-					(button == MOUSE_BTN_4) ? "MOUSE_BTN_4" :
-					(button == MOUSE_BTN_5) ? "MOUSE_BTN_5" :
-					foo, 
-					(btn_state==MOUSE_BTN_STATE_PRESSED)?"MOUSE_BTN_STATE_PRESSED":
-					"MOUSE_BTN_STATE_NONE");
-#endif
-
-	mgtk_handle_mouse(button, btn_state, mod, x, y);
-	mgtk_refresh_glarea(widget); // Seems a little much
-}
-
-
 void mgtk_event_button_release(GtkWidget *widget, GdkEventButton *event)
 {
 	//mgtk_callback_mouse_button_release(); /* assumes no chording */
@@ -990,34 +900,6 @@ void mgtk_event_key_release(GtkWidget *widget, GdkEventKey *event)
 #endif
 
 	//mgtk_handle_key_release(key, mod);
-}
-
-
-void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
-{
-	int x, y;
-	GdkModifierType state;
-	mgtk_glarea_window_state_t *gl_state;
-
-
-	gl_state = (mgtk_glarea_window_state_t*)gtk_object_get_data(GTK_OBJECT(widget),
-																			 "gl_window_state");
-
-	if (event->is_hint)
-	{
-		gdk_window_get_pointer(event->window, &x, &y, &state);
-	} 
-	else 
-	{
-		x = (int)event->x;
-		y = (int)event->y;
-		state = (GdkModifierType)event->state;
-	}
-
-	gl_state->mouse_x = x;
-	gl_state->mouse_y = y;
-	mgtk_handle_motion(x, y);
-	mgtk_refresh_glarea(widget);
 }
 
 
