@@ -299,7 +299,18 @@ int mgtk_lua_rc_label(lua_State *s);
  *
  ------------------------------------------------------*/
 
-int mgtk_lua_func_toggle_set(lua_State *s);
+int mgtk_lua_dialog(lua_State *s);
+int mgtk_lua_confirmation_dialog(lua_State *s);
+int mgtk_lua_query_dialog(lua_State *s);
+
+int mgtk_lua_boolean_set(lua_State *s);
+// mgtk_boolean_set( "boolean_symbol", boolean_value )
+
+int mgtk_lua_color_set(lua_State *s);
+// mgtk_color_set( "color_symbole", redf, greenf, bulef, alphaf ) 
+
+int mgtk_lua_string_set(lua_State *s);
+// mgtk_string_set( "string_symbol", "string_value" )
 
 int mgtk_lua_window_move(lua_State* s);
 

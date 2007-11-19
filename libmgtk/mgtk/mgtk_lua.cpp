@@ -25,6 +25,8 @@
 
 #include "Resource.h"        /* Hook into mlisp symbol table and event map for compatibility. */
 #include "ResourceEvent.h"
+#include "ConfirmationDialog.h"
+#include "QueryDialog.h"
 
 #include "mgtk_callbacks.h"
 #include "mgtk_events.h"
@@ -53,6 +55,8 @@ void mgtk_lua_register_functions(const Lua &lua)
 
 	lua.RegisterFunction("mgtk_tree", mgtk_lua_rc_tree);
 
+	lua.RegisterFunction("mgtk_icon", mgtk_lua_rc_icon);
+
 	lua.RegisterFunction("mgtk_opengl_canvas", mgtk_lua_rc_opengl_canvas);
 
 	lua.RegisterFunction("mgtk_menu_item", mgtk_lua_rc_menu_item);
@@ -80,7 +84,15 @@ void mgtk_lua_register_functions(const Lua &lua)
 	lua.RegisterFunction("mgtk_textview", mgtk_lua_rc_textview);
 	lua.RegisterFunction("mgtk_label", mgtk_lua_rc_label);
 
-	lua.RegisterFunction("mgtk_toggle_set", mgtk_lua_func_toggle_set);
+	// Dialogs
+	lua.RegisterFunction( "mgtk_dialog", mgtk_lua_dialog );
+	lua.RegisterFunction( "mgtk_confirmation_dialog", mgtk_lua_confirmation_dialog );
+	lua.RegisterFunction( "mgtk_query_dialog", mgtk_lua_query_dialog );
+
+	// Utiliy functions.
+	lua.RegisterFunction("mgtk_boolean_set", mgtk_lua_boolean_set);
+	lua.RegisterFunction("mgtk_color_set", mgtk_lua_color_set);
+	lua.RegisterFunction("mgtk_string_set", mgtk_lua_string_set);
 	lua.RegisterFunction("mgtk_window_move", mgtk_lua_window_move);
 }
 
@@ -211,6 +223,11 @@ int mgtk_lua_rc_window(lua_State* s)
 	}
 
 	gtk_widget_show(window);
+	
+	// FIXME: This needs to hook into a 'refresh/display' callback separately now.
+	// Old mlisp hook-up for testing.
+	extern GtkWidget* GTK_MAIN_WINDOW;
+	GTK_MAIN_WINDOW = window;
 
 	if ( lua_gettop(s) >= 4 &&
 		 lua_isnumber(s, 3) && lua_isnumber(s, 4) )
@@ -242,6 +259,53 @@ int mgtk_lua_rc_window(lua_State* s)
 }
 
 
+int mgtk_lua_rc_icon(lua_State* s)
+{
+	GtkWidget* icon = NULL;
+	
+	if ( lua_gettop(s) == 2 && lua_isstring(s, 1) )
+	{
+		GtkIconSize sz = GTK_ICON_SIZE_DIALOG;
+		int id = ( lua_isnumber(s, 2) ? (int)lua_tonumber(s, 2) :
+					  lua_isstring(s, 2) ? mgtk_lua_get_id( lua_tostring(s, 2) ): -1 );
+
+		switch ( id )
+		{
+		case 1:
+			sz = GTK_ICON_SIZE_MENU; 
+			break;
+
+		case 2:
+			sz = GTK_ICON_SIZE_SMALL_TOOLBAR; 
+			break;
+
+		case 3:
+			sz = GTK_ICON_SIZE_LARGE_TOOLBAR; 
+			break;
+
+		case 4:
+			sz = GTK_ICON_SIZE_BUTTON; 
+			break;
+
+		case 5:
+			sz = GTK_ICON_SIZE_DIALOG; 
+			break;
+
+		default:
+			;
+		}
+
+		icon = mgtk_create_icon( lua_tostring(s, 1), sz );
+		gtk_widget_show( icon );
+	}
+
+	// Push widget pointer unto the lua stack.
+	lua_pushlightuserdata(s, (void *)icon);
+
+	return 1;
+}
+
+
 int mgtk_lua_rc_box_pack(lua_State *s)
 {
 	if ( lua_gettop(s) >= 2 &&
@@ -251,6 +315,10 @@ int mgtk_lua_rc_box_pack(lua_State *s)
 		GtkWidget *widget = (GtkWidget *)lua_touserdata(s, 2);
 
 		MGTK_ASSERTMSG(box != NULL, "Invalid container.");
+		//MGTK_ASSERTMSG(widget != NULL, "Invalid widget.");
+
+		//if ( widget || !box )
+		//	return 0;
 
 		// Handle 'non-box' containers.
 		if ( GTK_IS_HANDLE_BOX(box) )
@@ -314,8 +382,8 @@ int mgtk_lua_rc_expander(lua_State *s)
 			// To get the box back use the (summonbox ...) function.
 
 			arg_list_t *symbol, *sealing_jutsu;
-			new_string(&symbol, (char *)name);
-			new_adt(&sealing_jutsu, ARG_GTK_BOX_WIDGET, (void *)vbox);
+			mlisp_new_string(&symbol, (char *)name);
+			mlisp_new_adt(&sealing_jutsu, ARG_GTK_BOX_WIDGET, (void *)vbox);
 			mlisp_bind(symbol, sealing_jutsu);
 		}
 
@@ -430,17 +498,20 @@ int mgtk_lua_rc_opengl_canvas(lua_State *s)
 		state->appbar = NULL;
 
 #if defined HAVE_GTKGLEXT
-	gtk_signal_connect(GTK_OBJECT(canvas), "key_press_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
-	gtk_signal_connect(GTK_OBJECT(canvas), "key_release_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
-	gtk_signal_connect(GTK_OBJECT(canvas), "destroy",
-					   GTK_SIGNAL_FUNC(mgtk_destroy_window), NULL);
+		gtk_signal_connect(GTK_OBJECT(canvas), "key_press_event",
+						   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
+		gtk_signal_connect(GTK_OBJECT(canvas), "key_release_event",
+						   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
+		gtk_signal_connect(GTK_OBJECT(canvas), "destroy",
+						   GTK_SIGNAL_FUNC(mgtk_destroy_window), NULL);
 #endif
 
-	// FIXME: This needs to hook into a 'refresh/display' callback separately now.
-
-	//GTK_GL_AREA_WIDGET = canvas;
+		// FIXME: This needs to hook into a 'refresh/display' callback separately now.
+		// Old mlisp hook-up for testing.
+		extern GtkWidget* GTK_GL_AREA_WIDGET;
+		GTK_GL_AREA_WIDGET = canvas;
+		
+		
 		mgtk_print("@Gtk+ GL context started...");
 	}
 	else
@@ -522,7 +593,9 @@ int mgtk_lua_rc_optionmenu(lua_State* s)
 	if ( lua_isstring(s, 2) && lua_isnumber(s, 3) )
 	{
 		label = lua_tostring(s, 2);
-		id = (int)lua_tonumber(s, 3);
+		id = ( lua_isnumber(s, 3) ? (int)lua_tonumber(s, 3) :
+			   lua_isstring(s, 3) ? mgtk_lua_get_id( lua_tostring(s, 3) ): -1 );
+		//id = (int)lua_tonumber(s, 3);
 	}
 
 	GtkWidget* optionmenu = gtk_option_menu_new();
@@ -581,8 +654,8 @@ int mgtk_lua_rc_submenu(lua_State *s)
 		if (symbol)
 		{
 			arg_list_t *symbol_arg, *binding; 
-			new_string(&symbol_arg, (char *)symbol);
-			new_adt(&binding, ARG_GTK_MENU_WIDGET, (void *)submenu);
+			mlisp_new_string(&symbol_arg, (char *)symbol);
+			mlisp_new_adt(&binding, ARG_GTK_MENU_WIDGET, (void *)submenu);
 			mlisp_bind(symbol_arg, binding);
 		}
 	}
@@ -740,7 +813,10 @@ int mgtk_lua_rc_button(lua_State *s)
 {
 	// FIXME: Asserts, checking...
 	const char *label = lua_tostring(s, 1);
-	int event = (int)lua_tonumber(s, 2);
+	//int event = (int)lua_tonumber(s, 2);
+	int event = ( lua_isnumber(s, 2) ? (int)lua_tonumber(s, 2) :
+				  lua_isstring(s, 2) ? mgtk_lua_get_id( lua_tostring(s, 2) ): -1 );
+
 
 	GtkWidget* widget = gtk_button_new_with_label(label);
 
@@ -762,9 +838,11 @@ int mgtk_lua_rc_colorbutton(lua_State *s)
 {
 	GtkWidget *widget = NULL;
 
-	if ( lua_gettop(s) == 1 && lua_isnumber(s, 1) )
+	if ( lua_gettop(s) == 1 && lua_isnumber(s, 1) || lua_isstring(s, 1) )
 	{
-		int event = (int)lua_tonumber(s, 1);
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+		//int event = (int)lua_tonumber(s, 1);
 		widget = mgtk_create_color_button((void*)mgtk_event_color, event);
 
 		if ( event != -1 )
@@ -783,10 +861,13 @@ int mgtk_lua_rc_spinbutton_uint(lua_State *s)
 	GtkWidget *widget = NULL;
 
 	if ( lua_gettop(s) >= 4 && 
-		 lua_isnumber(s, 1) && lua_isnumber(s, 2) &&
-		 lua_isnumber(s, 3) && lua_isnumber(s, 4) )
+		 lua_isnumber(s, 1) || lua_isstring(s, 1) && 
+		 lua_isnumber(s, 2) && lua_isnumber(s, 3) && lua_isnumber(s, 4) )
 	{
-		int event = (int)lua_tonumber(s, 1);
+
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+//		int event = (int)lua_tonumber(s, 1);
 		float initial = (float)lua_tonumber(s, 2);
 		float min = (float)lua_tonumber(s, 3);
 		float max = (float)lua_tonumber(s, 4);
@@ -836,10 +917,13 @@ int mgtk_lua_rc_spinbutton_int(lua_State *s)
 	GtkWidget *widget = NULL;
 
 	if ( lua_gettop(s) >= 4 && 
-		 lua_isnumber(s, 1) && lua_isnumber(s, 2) &&
+		 lua_isnumber(s, 1) || lua_isstring(s, 1) && lua_isnumber(s, 2) &&
 		 lua_isnumber(s, 3) && lua_isnumber(s, 4) )
 	{
-		int event = (int)lua_tonumber(s, 1);
+
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+		//		int event = (int)lua_tonumber(s, 1);
 		float initial = (float)lua_tonumber(s, 2);
 		float min = (float)lua_tonumber(s, 3);
 		float max = (float)lua_tonumber(s, 4);
@@ -886,10 +970,13 @@ int mgtk_lua_rc_spinbutton_float(lua_State *s)
 	GtkWidget *widget = NULL;
 
 	if ( lua_gettop(s) >= 4 && 
-		 lua_isnumber(s, 1) && lua_isnumber(s, 2) &&
+		 lua_isnumber(s, 1) || lua_isstring(s, 1) && lua_isnumber(s, 2) &&
 		 lua_isnumber(s, 3) && lua_isnumber(s, 4) )
 	{
-		int event = (int)lua_tonumber(s, 1);
+
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+		//		int event = (int)lua_tonumber(s, 1);
 		float initial = (float)lua_tonumber(s, 2);
 		float min = (float)lua_tonumber(s, 3);
 		float max = (float)lua_tonumber(s, 4);
@@ -1105,7 +1192,7 @@ int mgtk_lua_rc_toolbar_menubutton(lua_State* s)
 		if ( lua_gettop(s) > 5 && lua_isstring(s, 6) )
 		{
 			// FIXME: Use legacy mlisp resource bindings via luastring for now.
-			menu = (GtkWidget*)mlisp_recall( lua_tostring(s, 3) );
+			menu = (GtkWidget*)mlisp_recall( lua_tostring(s, 6) );
 			mgtk_print("*** %p\n", menu);
 		}
 
@@ -1189,7 +1276,8 @@ int mgtk_lua_rc_notebook(lua_State* s)
 
 	if ( lua_gettop(s) > 0 )
 	{
-		int event = (int)lua_tonumber(s, 1);
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
 
 		// FIXME: Push this out as generic size event later.
 		if ( lua_gettop(s) == 3 )
@@ -1231,7 +1319,10 @@ int mgtk_lua_rc_tab(lua_State* s)
 	{
 		GtkWidget* notebook = (GtkWidget *)lua_touserdata(s, 1);
 		const char* label = lua_tostring(s, 2);
-		int event = (int)lua_tonumber(s, 3);
+
+		int event = ( lua_isnumber(s, 3) ? (int)lua_tonumber(s, 3) :
+					  lua_isstring(s, 3) ? mgtk_lua_get_id( lua_tostring(s, 3) ): -1 );
+		//				int event = (int)lua_tonumber(s, 3);
 
 		vbox = gtk_vbox_new(FALSE, 0);
 		mgtk_notebook_eventmap_t* emap =
@@ -1269,19 +1360,177 @@ int mgtk_lua_rc_tab(lua_State* s)
 }
 
 
-
-int mgtk_lua_func_toggle_set(lua_State *s)
+int mgtk_lua_dialog(lua_State *s)
 {
-	//symbol_enforce_type_assert(&event, INT);
-	//symbol_enforce_type_assert(&val, INT);
+	GtkWidget* dialog = NULL;
 
-	if ( lua_gettop(s) == 2 && 
-		 lua_isnumber(s, 1) && lua_isnumber(s, 2) )
+	if ( lua_gettop(s) == 3 )
 	{
-		int event = (int)lua_tonumber(s, 1);
-		int value = (int)lua_tonumber(s, 2);
+		dialog = mgtk_create_window( (char*)lua_tostring(s, 1), "", "" );
 
-		mgtk_toggle_value_set( event, value );
+		// Don't show by default, since these are 'cached/hidden' dialogs.
+		//gtk_widget_show(dialog);
+
+		// FIXME: Using legacy pointer
+		extern GtkWidget* GTK_MAIN_WINDOW;
+		gtk_window_set_transient_for( GTK_WINDOW(dialog), GTK_WINDOW(GTK_MAIN_WINDOW) );
+
+		g_signal_connect( GTK_OBJECT(dialog), "delete_event",
+						  G_CALLBACK(mgtk_event_hide_dialog),
+						  GINT_TO_POINTER(0) );
+
+		/* Mongoose 2002.02.01, Add this widget to a special
+		 *   lookup table by it's event id */
+		int open_id = ( lua_isnumber(s, 2) ? (int)lua_tonumber(s, 2) :
+						lua_isstring(s, 2) ? mgtk_lua_get_id( lua_tostring(s, 2) ): -1 );
+		mgtk_event_subscribe_gtk_widget( open_id, dialog );
+
+		// FIXME: Not sure this is required anymore -- leaving it here for future review.
+		//        'Bug for bug' compatibility is more important right now.
+		int close_id = ( lua_isnumber(s, 3) ? (int)lua_tonumber(s, 3) :
+						 lua_isstring(s, 3) ? mgtk_lua_get_id( lua_tostring(s, 3) ): -1 );
+		mgtk_event_subscribe_gtk_widget( close_id, dialog );
+
+		GtkWidget* vbox = gtk_vbox_new( FALSE, 0 );
+		gtk_container_add( GTK_CONTAINER(dialog), vbox );
+		gtk_widget_ref( vbox );
+		gtk_widget_show( vbox );
+
+		lua_pushlightuserdata( s, vbox );
+	}
+	else
+	{
+		lua_pushlightuserdata(s, dialog);
+	}
+
+	return 1;
+}
+
+
+int mgtk_lua_confirmation_dialog(lua_State *s)
+{
+	ConfirmationDialog d;
+	d.mName = lua_tostring(s, 1);
+	d.mDialogIcon = lua_tostring(s, 2);
+	d.mInformationMessage = lua_tostring(s, 3);
+	d.mQuestionMessage = lua_tostring(s, 4);
+	d.mCancelIcon = lua_tostring(s, 5);
+	d.mCancelText = lua_tostring(s, 6);
+	d.mAcceptIcon = lua_tostring(s, 7);
+	d.mAcceptText = lua_tostring(s, 8);
+	d.AddToPool();
+
+	return 0;
+}
+
+
+int mgtk_lua_query_dialog(lua_State *s)
+{
+	QueryDialog d;
+
+	d.mName = lua_tostring(s, 1);
+	d.mDialogIcon = lua_tostring(s, 2);
+	d.mInformationMessage = lua_tostring(s, 3); 
+
+	for (unsigned int i = 4, n = lua_gettop(s); i < n; ++i)
+	{
+		mstl::String symbol = lua_tostring(s, i++);
+
+		if ( symbol == "float" )
+		{
+			const char* symbol = lua_tostring(s, i++);
+			const char* question = lua_tostring(s, i++);
+			float value = (float)lua_tonumber(s, i++);
+			QueryDialogValue<float> v(symbol, question, value);
+			d.mFloats.push_back(v);
+		}
+		else if ( symbol == "int" )
+		{
+			const char* symbol = lua_tostring(s, i++);
+			const char* question = lua_tostring(s, i++);
+			int value = (int)lua_tonumber(s, i++);
+			QueryDialogValue<int> v(symbol, question, value);
+			d.mInts.push_back(v);
+		}
+		else if ( symbol == "textarea" )
+		{
+			const char* symbol = lua_tostring(s, i++);
+			const char* question = lua_tostring(s, i++);
+			const char* value = lua_tostring(s, i++);
+			QueryDialogValue<mstl::String> v(symbol, question, mstl::String(value));
+			d.mTextAreaStrings.push_back(v);
+		}
+		else if ( symbol == "textentry" )
+		{
+			const char *symbol = lua_tostring(s, i++);
+			const char *question = lua_tostring(s, i++);
+			const char *value =lua_tostring(s, i++);
+			QueryDialogValue<mstl::String> v(symbol, question, mstl::String(value));
+			d.mTextEntryStrings.push_back(v);
+
+		}
+		else
+		{
+			d.mCancelIcon = symbol.c_str();
+			d.mCancelText = lua_tostring(s, i++);
+			d.mAcceptIcon = lua_tostring(s, i++);
+			d.mAcceptText = lua_tostring(s, i++);
+			break;
+		}
+	}
+
+	d.AddToPool();
+
+	//lua_pushlightuserdata(s, NULL);
+	return 0;
+}
+
+
+int mgtk_lua_boolean_set(lua_State *s)
+{
+	if ( lua_gettop(s) == 2 && 
+		 lua_isnumber(s, 1) || lua_isstring(s, 1) && 
+		 lua_isnumber(s, 2) )
+	{
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+
+		mgtk_toggle_value_set( event, (int)lua_tonumber(s, 2) );
+	}
+
+	return 0;
+}
+
+
+int mgtk_lua_color_set(lua_State *s)
+{
+	if ( lua_gettop(s) == 5 && 
+		 lua_isnumber(s, 1) || lua_isstring(s, 1) && 
+		 lua_isnumber(s, 2) && lua_isnumber(s, 3) && lua_isnumber(s, 4)&& lua_isnumber(s, 5) )
+	{
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+
+		mgtk_event_set_color( event, 
+							  (float)lua_tonumber(s, 2), 
+							  (float)lua_tonumber(s, 3), 
+							  (float)lua_tonumber(s, 4), 
+							  (float)lua_tonumber(s, 5) );
+	}
+
+	return 0;
+}
+
+
+int mgtk_lua_string_set(lua_State *s)
+{
+	if ( lua_gettop(s) == 2 && 
+		 lua_isstring(s, 1) && lua_isstring(s, 2) )
+	{
+		//int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+		//			  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+
+		mlisp_bind_string( lua_tostring(s, 1), lua_tostring(s, 2) );
 	}
 
 	return 0;

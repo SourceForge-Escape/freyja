@@ -34,10 +34,10 @@ RM = /usr/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/mongoose/Projects/freyja_0.9.5/libmgtk
+CMAKE_SOURCE_DIR = /home/mongoose/Projects/freyja_0.9.5
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja_0.9.5/libmgtk
+CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja_0.9.5
 
 # Include the progress variables for this target.
 include CMakeFiles/progress.make
@@ -48,7 +48,7 @@ include CMakeFiles/progress.make
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/mongoose/Projects/freyja_0.9.5/libmgtk && /usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target edit_cache
 edit_cache/fast: edit_cache
@@ -56,17 +56,17 @@ edit_cache/fast: edit_cache
 # Special rule for the target install
 install: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	cd /home/mongoose/Projects/freyja_0.9.5/libmgtk && /usr/bin/cmake -P cmake_install.cmake
 
 # Special rule for the target install
 install/fast: preinstall/fast
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	cd /home/mongoose/Projects/freyja_0.9.5/libmgtk && /usr/bin/cmake -P cmake_install.cmake
 
 # Special rule for the target install/local
 install/local: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+	cd /home/mongoose/Projects/freyja_0.9.5/libmgtk && /usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
 
 # Special rule for the target install/local
 install/local/fast: install/local
@@ -81,213 +81,213 @@ list_install_components/fast: list_install_components
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/mongoose/Projects/freyja_0.9.5/libmgtk && /usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target rebuild_cache
 rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/libmgtk/CMakeFiles $(CMAKE_ALL_PROGRESS)
-	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/libmgtk/CMakeFiles 0
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/CMakeFiles $(CMAKE_ALL_PROGRESS)
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 libmgtk/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/CMakeFiles 0
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 libmgtk/clean
 
 # The main clean target
 clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 libmgtk/preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 libmgtk/preinstall
 
 # clear depends
 depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
-#=============================================================================
-# Target rules for targets named mgtk
+# Convenience name for target.
+libmgtk/CMakeFiles/mgtk.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 libmgtk/CMakeFiles/mgtk.dir/rule
 
-# Build rule for target.
-mgtk: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 mgtk
+# Convenience name for target.
+mgtk: libmgtk/CMakeFiles/mgtk.dir/rule
 
 # fast build rule for target.
 mgtk/fast:
-	$(MAKE) -f CMakeFiles/mgtk.dir/build.make CMakeFiles/mgtk.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk.dir/build.make libmgtk/CMakeFiles/mgtk.dir/build
 
-#=============================================================================
-# Target rules for targets named mgtk-0.1.1
+# Convenience name for target.
+libmgtk/CMakeFiles/mgtk-0.1.1.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 libmgtk/CMakeFiles/mgtk-0.1.1.dir/rule
 
-# Build rule for target.
-mgtk-0.1.1: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 mgtk-0.1.1
+# Convenience name for target.
+mgtk-0.1.1: libmgtk/CMakeFiles/mgtk-0.1.1.dir/rule
 
 # fast build rule for target.
 mgtk-0.1.1/fast:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/build
 
 # target to build an object file
 mgtk/ConfirmationDialog.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.o
 
 # target to preprocess a source file
 mgtk/ConfirmationDialog.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.i
 
 # target to generate assembly for a file
 mgtk/ConfirmationDialog.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/ConfirmationDialog.s
 
 # target to build an object file
 mgtk/MLisp.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.o
 
 # target to preprocess a source file
 mgtk/MLisp.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.i
 
 # target to generate assembly for a file
 mgtk/MLisp.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/MLisp.s
 
 # target to build an object file
 mgtk/QueryDialog.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/QueryDialog.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/QueryDialog.o
 
 # target to preprocess a source file
 mgtk/QueryDialog.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/QueryDialog.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/QueryDialog.i
 
 # target to generate assembly for a file
 mgtk/QueryDialog.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/QueryDialog.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/QueryDialog.s
 
 # target to build an object file
 mgtk/Resource.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/Resource.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/Resource.o
 
 # target to preprocess a source file
 mgtk/Resource.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/Resource.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/Resource.i
 
 # target to generate assembly for a file
 mgtk/Resource.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/Resource.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/Resource.s
 
 # target to build an object file
 mgtk/ResourceEvent.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.o
 
 # target to preprocess a source file
 mgtk/ResourceEvent.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.i
 
 # target to generate assembly for a file
 mgtk/ResourceEvent.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/ResourceEvent.s
 
 # target to build an object file
 mgtk/mgtk.o:
-	$(MAKE) -f CMakeFiles/mgtk.dir/build.make CMakeFiles/mgtk.dir/mgtk/mgtk.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk.dir/build.make libmgtk/CMakeFiles/mgtk.dir/mgtk/mgtk.o
 
 # target to preprocess a source file
 mgtk/mgtk.i:
-	$(MAKE) -f CMakeFiles/mgtk.dir/build.make CMakeFiles/mgtk.dir/mgtk/mgtk.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk.dir/build.make libmgtk/CMakeFiles/mgtk.dir/mgtk/mgtk.i
 
 # target to generate assembly for a file
 mgtk/mgtk.s:
-	$(MAKE) -f CMakeFiles/mgtk.dir/build.make CMakeFiles/mgtk.dir/mgtk/mgtk.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk.dir/build.make libmgtk/CMakeFiles/mgtk.dir/mgtk/mgtk.s
 
 # target to build an object file
 mgtk/mgtk_callbacks.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_callbacks.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_callbacks.o
 
 # target to preprocess a source file
 mgtk/mgtk_callbacks.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_callbacks.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_callbacks.i
 
 # target to generate assembly for a file
 mgtk/mgtk_callbacks.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_callbacks.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_callbacks.s
 
 # target to build an object file
 mgtk/mgtk_filedialog.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_filedialog.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_filedialog.o
 
 # target to preprocess a source file
 mgtk/mgtk_filedialog.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_filedialog.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_filedialog.i
 
 # target to generate assembly for a file
 mgtk/mgtk_filedialog.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_filedialog.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_filedialog.s
 
 # target to build an object file
 mgtk/mgtk_interface.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_interface.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_interface.o
 
 # target to preprocess a source file
 mgtk/mgtk_interface.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_interface.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_interface.i
 
 # target to generate assembly for a file
 mgtk/mgtk_interface.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_interface.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_interface.s
 
 # target to build an object file
 mgtk/mgtk_linker.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.o
 
 # target to preprocess a source file
 mgtk/mgtk_linker.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.i
 
 # target to generate assembly for a file
 mgtk/mgtk_linker.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_linker.s
 
 # target to build an object file
 mgtk/mgtk_lua.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_lua.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_lua.o
 
 # target to preprocess a source file
 mgtk/mgtk_lua.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_lua.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_lua.i
 
 # target to generate assembly for a file
 mgtk/mgtk_lua.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_lua.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_lua.s
 
 # target to build an object file
 mgtk/mgtk_resource.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.o
 
 # target to preprocess a source file
 mgtk/mgtk_resource.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.i
 
 # target to generate assembly for a file
 mgtk/mgtk_resource.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.s
 
 # target to build an object file
 mgtk/mgtk_tree.o:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.o
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.o
 
 # target to preprocess a source file
 mgtk/mgtk_tree.i:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.i
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.i
 
 # target to generate assembly for a file
 mgtk/mgtk_tree.s:
-	$(MAKE) -f CMakeFiles/mgtk-0.1.1.dir/build.make CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.s
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.s
 
 # Help Target
 help::
@@ -351,5 +351,5 @@ help::
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 

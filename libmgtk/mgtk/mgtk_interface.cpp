@@ -52,6 +52,9 @@
 #   endif
 #endif
 
+#include <mstl/String.h>
+#include <mstl/SystemIO.h>
+
 #include "mgtk_interface.h"
 #include "mgtk_callbacks.h"
 #include "mgtk_resource.h"
@@ -548,20 +551,31 @@ GtkWidget *mgtk_create_glarea(unsigned int width, unsigned int height)
 #endif
 
 
-GdkPixbuf* mgtk_create_pixbuf(const char* icon_filename)
+GdkPixbuf* mgtk_create_pixbuf( const char* icon_filename )
 {
-	GdkPixbuf *icon = NULL;
+	GdkPixbuf* icon = NULL;
 
-	if (icon_filename && icon_filename[0])
+	if ( icon_filename && icon_filename[0] )
 	{
-		GError *error = NULL;
-		icon = gdk_pixbuf_new_from_file(icon_filename, &error);
+		GError* error = NULL;
+		icon = gdk_pixbuf_new_from_file( icon_filename, &error );
 
-		if (!icon)
+		// Try to find missing icons via relative path in resource system.
+		if ( !icon )
+		{
+			g_error_free( error );
+			GError* error = NULL;
+
+			const char* tmp = mgtk_rc_map( icon_filename );
+			icon = gdk_pixbuf_new_from_file( tmp, &error );
+			delete [] tmp;
+		}
+
+		if ( !icon )
 		{
 			fprintf(stderr, "Failed to load icon file: %s: %s\n",
-					  icon_filename, error->message);
-			g_error_free(error);
+					icon_filename, error->message);
+			g_error_free( error );
 		}
 	}
 
@@ -599,7 +613,17 @@ GtkWidget* mgtk_create_icon(const char* icon_filename, GtkIconSize icon_size)
 	}
 	else
 	{
-		icon = gtk_image_new_from_file(icon_filename);
+		if ( !mstl::SystemIO::File::DoesFileExist( icon_filename ) )
+		{
+			// Try to find missing icons via relative path in resource system.
+			const char* tmp = mgtk_rc_map( icon_filename );
+			icon = gtk_image_new_from_file( tmp );
+			delete [] tmp;
+		}
+		else
+		{
+			icon = gtk_image_new_from_file( icon_filename );
+		}
 	}
 
 	return icon;

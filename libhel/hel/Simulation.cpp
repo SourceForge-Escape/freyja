@@ -58,7 +58,7 @@ Mass *Simulation::getMass(unsigned int i)
 
 void Simulation::attachCollisionObject(CollisionObject *obj)
 {
-	mObjects.pushBack(obj);
+	mObjects.push_back(obj);
 }
 
 
@@ -118,7 +118,7 @@ void Simulation::generateMasses(unsigned int count, vec_t mass,
 
 	for (i = 0; i < count; ++i)
 	{
-		mMasses.pushBack(new Mass(mass, position, velocity));
+		mMasses.push_back(new Mass(mass, position, velocity));
 	}
 }
 

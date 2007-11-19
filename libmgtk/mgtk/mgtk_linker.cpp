@@ -56,7 +56,7 @@ void (*mgtk_link_handle_text_array)(int, unsigned int, char **) = NULL;
 void (*mgtk_link_handle_text)(int, char *) = NULL;
 void (*mgtk_link_print)(const char*, ...) = NULL;
 void (*mgtk_link_get_pixmap_filename)(char *, unsigned int, char *) = NULL;
-char *(*mgtk_link_rc_map)(char *) = NULL;
+const char *(*mgtk_link_rc_map)(const char* ) = NULL;
 const char *(*mgtk_link_get_resource_path)() = NULL;
 
 
@@ -140,7 +140,7 @@ int mgtk_link_import(const char *symbol, void *func)
 	}
 	else if (strncmp("mgtk_rc_map", symbol, 18) == 0)
 	{
-		mgtk_link_rc_map = (char *(*)(char *))func;
+		mgtk_link_rc_map = (const char*(*)(const char*))func;
 	}
 	else
 	{
@@ -334,7 +334,7 @@ void mgtk_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 }
 
 
-char *mgtk_rc_map(char *filename_or_dirname)
+const char* mgtk_rc_map(const char* filename_or_dirname)
 {
 	if (mgtk_link_rc_map != NULL)
 	{

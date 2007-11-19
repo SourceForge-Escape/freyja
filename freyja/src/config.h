@@ -23,6 +23,8 @@
 
 #define ENABLE_FREYJA_ASSERTS 1
 
+#define LUA_UI 0
+
 
 // Hardcoded strings ///////////////////////////
 

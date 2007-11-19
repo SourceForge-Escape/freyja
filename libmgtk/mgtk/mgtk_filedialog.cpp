@@ -64,7 +64,7 @@ void mgtk_event_fileselection_pattern(int event, const char *pattern)
 
 void mgtk_event_fileselection_homedir(GtkWidget *file, void *data)
 {
-	char *path = mgtk_rc_map("/");
+	const char* path = mgtk_rc_map("/");
 	
 	if (path)
 	{
@@ -231,7 +231,7 @@ char *mgtk_filechooser_blocking(const char *title,
 #endif
 
 	// Shortcut
-	char *spath = mgtk_rc_map("/");
+	const char* spath = mgtk_rc_map("/");
 		
 	if (spath)
 	{
@@ -404,7 +404,7 @@ GtkWidget *mgtk_link_filechooser_from_rc(int event, const char *title, const cha
 
 
 	/* 'Home' directory links */
-	char *path = mgtk_rc_map("/");
+	const char* path = mgtk_rc_map("/");
 		
 	if (path)
 	{
@@ -504,7 +504,6 @@ GtkWidget *mgtk_link_filechooser_from_rc(int event, const char *title, const cha
 GtkWidget *mgtk_get_fileselection_widget(int event)
 {
 	GtkWidget *file = gFileDialogWidgetMap[event];
-	char *path;
 
 	if (!file)
 	{
@@ -512,7 +511,7 @@ GtkWidget *mgtk_get_fileselection_widget(int event)
 
 		gFileDialogWidgetMap.Add(event, file);
 
-		path = mgtk_rc_map("/");
+		const char* path = mgtk_rc_map("/");
 		
 		if (path)
 		{
@@ -559,7 +558,7 @@ arg_list_t *mgtk_rc_fileselection_drop_down_menu(arg_list_t *box)
 		return NULL;
 	}
 
-	new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)dd);
+	mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)dd);
 	delete_arg(&event);
 
 	return ret;
@@ -614,7 +613,7 @@ arg_list_t *mgtk_rc_filechooserbutton(arg_list_t *box)
 						   GTK_SIGNAL_FUNC(mgtk_filechooser_spawn_event), 
 						   GINT_TO_POINTER(get_int(event)));
 		
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)item); // ARG_GTK_WIDGET
 	}
 
 	delete_arg(&label);
@@ -685,7 +684,7 @@ arg_list_t *mgtk_rc_filechoosertoolbar_button(arg_list_t *box)
 						   GTK_SIGNAL_FUNC(mgtk_filechooser_spawn_event), 
 						   GINT_TO_POINTER(get_int(event)));
 
-		new_adt(&ret, ARG_GTK_WIDGET, (void *)button);
+		mlisp_new_adt(&ret, ARG_GTK_WIDGET, (void *)button);
 	}
 
 	delete_arg(&icon);
@@ -757,7 +756,7 @@ arg_list_t *mgtk_rc_filechoosermenu_item(arg_list_t *menu)
 		// Accel support
 		mgtk_accel_support(item, mlisp_get_string(accel) );
 
-		new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
+		mlisp_new_adt(&ret, ARG_GTK_MENU_WIDGET, (void *)item); // ARG_GTK_MENU_WIDGET
 		
 		gtk_menu_append(GTK_MENU(menu->data), item);
 		gtk_widget_show(item);

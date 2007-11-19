@@ -212,13 +212,13 @@ function freyja3d_ui_menubar( vbox )
 	submenu = mgtk_submenu( "_Snippets" )
 	mgtk_append_menu( menubar, submenu )
 	mgtk_append_menu( submenu, mgtk_submenu( "Import..." ) )
-	mgtk_append_menu( submenu, mgtk_submenu( "Export..." ) )
-	mgtk_append_menu( submenu, mgtk_menu_item( "Export Model...", "eNone", "gtk-save-as" ) )
-	mgtk_append_menu( submenu, mgtk_menu_separator() )
-	mgtk_append_menu( submenu, mgtk_menu_item( "Export Weights...", "eNone", "gtk-save-as" ) )
-	mgtk_append_menu( submenu, mgtk_menu_separator() )
-	mgtk_append_menu( submenu, mgtk_menu_item( "Export Track...", "eNone", "gtk-save-as" ) )
-	mgtk_append_menu( submenu, mgtk_menu_separator() )
+	submenu2 = mgtk_submenu( "Export..." )
+	mgtk_append_menu( submenu, submenu2 )
+	mgtk_append_menu( submenu2, mgtk_menu_item( "Export Model...", "eNone", "gtk-save-as" ) )
+	mgtk_append_menu( submenu2, mgtk_menu_separator() )
+	mgtk_append_menu( submenu2, mgtk_menu_item( "Export Weights...", "eNone", "gtk-save-as" ) )
+	mgtk_append_menu( submenu2, mgtk_menu_separator() )
+	mgtk_append_menu( submenu2, mgtk_menu_item( "Export Track...", "eNone", "gtk-save-as" ) )
 	mgtk_append_menu( submenu, mgtk_menu_separator() )
 	mgtk_append_menu( submenu, mgtk_submenu( "Recent _Mesh...", "eRecentMeshXML" ) )
 	mgtk_append_menu( submenu, mgtk_menu_item( "Import Mesh...", "eXMLToMesh", "gtk-open" ) )
@@ -258,7 +258,7 @@ function freyja3d_ui_shelf_file( shelf )
 	toolbar1 = mgtk_toolbar( tab_file )
 	mgtk_toolbar_button(toolbar1, "New", "eNewFile", "gtk-new", "New Model.")
 	menu_recent_model = 
-	mgtk_toolbar_menubutton(toolbar1, "Open", "eOpenFile", "gtk-open", "Open Model...")
+	mgtk_toolbar_menubutton(toolbar1, "Open", "eOpenFile", "gtk-open", "Open Model...", "recent_models_bind" )
 	mgtk_toolbar_button(toolbar1, "Save", "eSaveFileModel", "gtk-save", "Save Model.")
 	mgtk_toolbar_button(toolbar1, "Save As", "eSaveModel", "gtk-save-as", "Save Model As...")
 	mgtk_toolbar_separator(toolbar1)
@@ -405,7 +405,7 @@ function freyja3d_ui_init()
 	mgtk_box_pack( vbox, hbox )
 
 	-- OpenGL Canvas
-	canvas = mgtk_opengl_canvas(1280-340, 720)
+	canvas = mgtk_opengl_canvas( 1280 - 340, 720 )
 	mgtk_box_pack( hbox, canvas )
 
 	-- Sidebar
@@ -415,15 +415,368 @@ function freyja3d_ui_init()
 	sidebar = mgtk_notebook( -1, 340, 720 )
 	mgtk_box_pack( expander, sidebar )
 	freyja3d_ui_sidebar_model( sidebar )
+
 	tab = mgtk_tab(sidebar, "UV", -1)
+
 	tab = mgtk_tab(sidebar, "Material", -1)
+
 	tab = mgtk_tab(sidebar, "Plugins", -1)
-	
+	mgtk_expander( tab, "Freyja Plugins   ", true, "FirstPartyPluginSlot" )
+	mgtk_expander( tab, "Community Plugins", true, "ThirdPartyPluginSlot" )
+
 	-- Statusbar
 	statusbar1 = mgtk_statusbar()
 	mgtk_box_pack( vbox, statusbar1 )
 end
 
 
+function freyja3d_ui_dialogs()
+
+	-- Confirmation dialogs
+	mgtk_confirmation_dialog( "CloseNewFileDialog",
+		"gtk-dialog-question",
+		"Creating a new model will close the current model.",
+		"Would you like to close the model and possibly lose unsaved changes?",
+		"gtk-cancel", "_Cancel", "gtk-close", "C_lose" )
+
+	mgtk_confirmation_dialog( "CloseToOpenFileDialog",
+		"gtk-dialog-question",
+		"You must close the current model to open a new one.",
+		"Open the new model and lose unsaved changes?",
+		"gtk-cancel", "_Cancel", "gtk-open", "_Open")
+
+	mgtk_confirmation_dialog( "RevertFileDialog",
+		"gtk-dialog-question",
+		"You will lose all changes you made by reverting.",
+		"Would you like to revert the model and lose unsaved changes?",
+		"gtk-cancel",	"_Cancel",	"gtk-revert",	"_Revert")
+
+	mgtk_confirmation_dialog( "OverwriteFileDialog",
+		"gtk-dialog-question",
+		"You are about to overwrite a file.",
+		"Are you sure you want to overwrite the file?",
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Overwrite")
+
+	mgtk_confirmation_dialog( "PolyMapDialog",
+		"gtk-dialog-question",
+		"You just generated a UV map using vertex UVs." ,
+		-- "Some model formats perfer polygon-mapped UVs, and may not export without being polymapped.",
+		"Would you like to promote it to ploymapped texcoords instead?",
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Promote")
+
+	mgtk_confirmation_dialog( "DupeMeshDialog",
+		"gtk-dialog-question",
+		"You are about to duplicate the selected mesh.",
+		"Would you like to continue?",
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Duplicate")
+
+	mgtk_confirmation_dialog( "DupeObjectDialog",
+		"gtk-dialog-question",
+		"You are about to duplicate the selected object.",
+		"Would you like to continue?",
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Duplicate")
+
+	mgtk_confirmation_dialog( "SplitMeshDialog",
+		"gtk-dialog-question",
+		"You are about to split the selected faces \n from the currently selected mesh into a new mesh.\n",
+		"Would you like to continue?",
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Split")
+
+	mgtk_confirmation_dialog( "MergeObjDialog",
+		"gtk-dialog-question",
+		"You are about to merge two objects.\n",
+		"Would you like to continue the merge?",
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Merge")
+
+	mgtk_confirmation_dialog( "MergeDelObjDialog",
+		"gtk-dialog-question",
+		"You have the option to delete the mesh being merged.\n",
+		"Would you like to delete or keep the merged mesh?",
+		"gtk-cancel",	"_Keep",	"gtk-ok",	"_Delete")
+
+	mgtk_confirmation_dialog( "SplitMeshCullDialog",
+		"gtk-dialog-question",
+		"You have the option to cull or duplicate the selected faces\n from the current mesh.\n",
+		"Would you like to duplicate or cull the selected faces?",
+		"gtk-cancel",	"_Cull",	"gtk-ok",	"_Duplicate")
+
+	mgtk_confirmation_dialog( "DelVertDialog",
+		"gtk-dialog-question",
+		"You are about to delete the selected vertices.",
+		"Are you sure you want to delete these vertices?",
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Delete")
+
+	mgtk_confirmation_dialog( "DelBoneDialog",
+		"gtk-dialog-question",
+		"You are about to delete the selected joint/bone.",
+		"Are you sure you want to delete this bone?",
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Delete")
+
+	mgtk_confirmation_dialog( "CloseNewFileDialog",
+		"gtk-dialog-question",
+		"Creating a new model will close the current model.",
+		"Would you like to close the model and possibly lose unsaved changes?",
+		"gtk-cancel",	"_Cancel",	"gtk-close",	"C_lose")
+
+	mgtk_confirmation_dialog( "ExitWarningDialog",
+		"gtk-dialog-question",
+		"If you exit you will lose any unsaved data.",
+		"Would you still like to exit?",
+		"gtk-cancel",	"_Cancel",	"gtk-quit",	"_Exit")
+
+
+	-- Query Dialogs 
+	mgtk_query_dialog( "MetadataPropertyDialog",
+		"gtk-dialog-question",
+		"Metadata property editor.",
+		"textentry",	"name",		"Name    ",		"  ",
+		"textentry",	"type",		"Type    ",		"  ",
+		"textarea",		"metadata",	"Metadata",		" ",
+		"textentry",	"model",	"Model   ",		"  ",
+		"textentry",	"material",	"Material",		"  ",
+		"gtk-cancel", "_Cancel", "gtk-ok", "_Update")
+
+	mgtk_query_dialog( "GenerateSheetDialog",
+		"gtk-dialog-question",
+		"Sheet mesh generation.",
+		"int",	"rows",	"How many rows?   ",	1, 1, 64,  -- default min max
+		"int",	"cols",	"How many columns?",	1, 1, 64,  -- default min max
+		"float",	"size",	"How large?       ",	8, 1, 128, -- default min max
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Create")
+
+	mgtk_query_dialog( "GenerateCubeDialog",
+		"gtk-dialog-question",
+		"Cube mesh generation.",
+		"int",	"rows",	"How many rows?   ",	1, 1, 64,  -- default min max
+		"int",	"cols",	"How many columns?",	1, 1, 64,  -- default min max
+		"float",	"size",	"How large?       ",	8, 1, 64,  -- default min max
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Create")
+
+	mgtk_query_dialog( "GenerateRingDialog",
+		"gtk-dialog-question",
+		"Ring mesh generation.",
+		"int",	"rings",	"How many rings?   ",	1, 1, 64,  -- default min max
+		"int",	"count",	"How many sections?",	16, 4, 64,  -- default min max
+		"float",	"radius",	"Radius?",	8, 1, 64,  -- default min max
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Create")
+
+	mgtk_query_dialog( "GenerateCircleDialog",
+		"gtk-dialog-question",
+		"Circle mesh generation.",
+		"int",	"count",	"How many sections?",	16, 4, 64,  -- default min max
+		"float",	"radius",	"Radius?",	8, 0.5, 64,  -- default min max
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Create")
+
+	mgtk_query_dialog( "GenerateTubeDialog",
+		"gtk-dialog-question",
+		"Tube mesh generation.",
+		"int",	"segments",	"How many segments?",	4, 1, 64,  -- default min max
+		"int",	"count",	"Vertex count per ring?",	16, 4, 64,  -- default min max
+		"float", "radius",	"Radius?",	8, 0.1, 128,  -- default min max
+		"float",	"height",	"Height?",	16, 0.1, 128,  -- default min max
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Create")
+
+	mgtk_query_dialog( "GenerateSphereDialog",
+		"gtk-dialog-question",
+		"Sphere mesh generation.",
+		"int",	"count",	"Vertex count per ring?",	16, 4, 64,  -- default min max
+		"float",	"radius",	"Radius?",	8, 0.1, 128,  -- default min max
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Create")
+
+	mgtk_query_dialog( "DuplicateBoneDialog",
+		"gtk-dialog-question",
+		"Would you like to duplicate the selected bone?",
+		"int", "recurse", "Recursively duplicate children?", 0, 0, 1,  -- default min max
+		"gtk-cancel", "_Cancel", "gtk-ok", "_Duplicate")
+
+
+	-- Help dialog
+	dialog = mgtk_dialog( "Help freyja", "eHelpDialog", 0 )
+	vbox = mgtk_vbox( )
+	mgtk_box_pack( dialog, vbox )
+	mgtk_box_pack( vbox, mgtk_label( "If you'd like to work on documentation email me.\nHelp, bug reports, and feature requests:\n  · http://icculus.org/freyja\n  · http://icculus.org/freyja/forum.html\n  · irc://irc.freenode.net/#freyja\n  · mongooseichiban@gmail.com" ) )
+	mgtk_box_pack( vbox, mgtk_label( "  <u>Common keys</u>\n\n\t· F4 - Extrude\t· F5 - Move\t· Ctrl  (held) - tSelect\n\t· F6 - Rotate\t· Shift (held) - tUnSelect\n\t· F7 - Scale\n" ) )
+	mgtk_box_pack( vbox, mgtk_label( "The last viewport you click in becomes your main window" ) ) 
+
+	-- About dialog
+	dialog = mgtk_dialog( "About freyja", "eAboutDialog", 0 )
+	vbox = mgtk_vbox( )
+	mgtk_box_pack( dialog, vbox )
+	hbox = mgtk_hbox( )
+	mgtk_box_pack( vbox, hbox )
+	mgtk_box_pack( hbox, mgtk_icon( "freyja.png", "IconSize_Dialog" ) )
+	mgtk_box_pack( hbox, mgtk_label(" <big>Freyja 0.9.5 Development Branch</big>\nFreyja is an Open Source 3d modeling system.\nThis build is from the development branch.\n\n\t· mongooseichiban@gmail.com ·\n<small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II </small>" ) )
+
+	-- Preferences dialog
+	-- dialog = mgtk_dialog( "趣味 freyja", "ePreferencesDialog", 0 )
+	dialog = mgtk_dialog( "Preferences freyja", "ePreferencesDialog", 0 )
+	vbox = mgtk_vbox( )
+	mgtk_box_pack( dialog, vbox )
+	notebook = mgtk_notebook( -1 )
+	mgtk_box_pack( vbox, notebook )
+
+	-- General
+	tab = mgtk_tab( notebook, "General", -1 )
+
+	-- (spinbutton2 20.0 20.0 60.0 20.0 20.0 20.0 3 eSetNearHeight)
+	--hbox = mgtk_box()
+	--mgtk_box_pack( tab, hbox )
+	--mgtk_box_pack( hbox, mgtk_label("Near Height ") )
+	--mgtk_box_pack( hbox, mgtk_spinbutton_float("eSetNearHeight", 20.0, 20.0, 60.0 ) )
+
+	-- (spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label("Render scaling") )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eZoom", 1.0, 0.0001, 1000.0 ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label("Polygon # of sides") )
+	mgtk_box_pack( hbox, mgtk_spinbutton_uint( "ePolygonSize", 3, 3, 6 ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label("UV texcoord pick radius") )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eUVPickRadius", 0.1, 0.0001, 1000.0 ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label("Vertex pick radius") )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eVertexPickRadius", 0.1, 0.0001, 1000.0 ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label("Vertex snap-weld dist") )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eSnapWeldVertsDist", 0.1, 0.0001, 1000.0 ) )
+
+	-- Colors
+	tab = mgtk_tab( notebook, "Colors", -1 )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Background color" ) ) -- 遠景の呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorBackground" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Grid color" ) ) -- 基底の呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorGrid" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Vertex color" ) ) -- 天頂の呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorVertex" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Vertex highlight" ) ) -- 現行天頂の呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorVertexHighlight" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Wireframe color" ) ) -- Meshの呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMesh" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Wireframe highlight" ) ) -- 現行Meshの呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMeshHighlight" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Bone color" ) ) -- 骨の呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorBone" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Bone highlight" ) ) -- 現行骨の呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorBoneHighlight" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Joint color" ) ) -- Jointの呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorJoint" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Joint highlight" ) ) -- 現行Jointの呈色
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorJointHighlight" ) )
+
+	mgtk_box_pack( tab, mgtk_button( "Reset to defaults", "eResetColorsToDefault" ) )
+
+	-- Lights
+	tab = mgtk_tab( notebook, "Lights", -1 )	
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Light" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Ambient" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Diffuse" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Specular" ) )
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_spinbutton_uint( "eSelectLight", 0, 0, 100 ) )
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorLightAmbient" ) )
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorLightDiffuse" ) )
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorLightSpecular" ) )
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eLightPosX", 0.0, 10000.0, 10000.0 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eLightPosY", 0.0, 10000.0, 10000.0 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eLightPosZ", 0.0, 10000.0, 10000.0 ) )
+
+	-- Cameras
+	tab = mgtk_tab( notebook, "Cameras", -1 )
+end
+
+
+function freyja3d_ui_defaults()
+	--Custom integer values.
+	--mgtk_integer_set( "ASSERT_BREAKPOINT", 1 )
+
+	-- Custom string values.
+	mgtk_string_set( "FONT", "vera.ttf" )
+
+	-- Custom color values.
+	mgtk_color_set( "eColorBackground", 0.5, 0.5, 0.5, 1.0 ) 
+	mgtk_color_set( "eColorGrid", 0.4, 0.4, 0.4, 0.9 )
+	mgtk_color_set( "eColorMesh", 0.0, 0.0, 0.0, 1.0 )
+	mgtk_color_set( "eColorMeshHighlight", 0.2, 0.2, 1.0, 1.0 )
+	mgtk_color_set( "eColorVertex", 0.2, 1.0, 1.0, 1.0 )
+	mgtk_color_set( "eColorVertexHighlight", 1.0, 0.0, 0.86, 1.0 )
+	mgtk_color_set( "eColorBone", 0.882352941, 0.654901961, 0.219607843, 1.0 )
+	mgtk_color_set( "eColorBoneHighlight", 0.956862745, 0.415686275, 0.2, 1.0 )
+	mgtk_color_set( "eColorJoint", 1.0, 1.0, 0.0, 1.0 )
+	mgtk_color_set( "eColorJointHighlight",	1.0, 0.75, 0.75, 1.0 )
+	mgtk_color_set( "eColorLightAmbient", 0.8, 0.8, 0.8, 1.0 )
+	mgtk_color_set( "eColorLightDiffuse", 0.8, 0.8, 0.8, 1.0 )
+	mgtk_color_set( "eColorLightSpecular", 0.8, 0.8, 0.8, 1.0 )
+
+	-- Custom boolean values.
+	mgtk_boolean_set( "eSelect", 1 )
+	mgtk_boolean_set( "eRenderBoneZClear", 1 )
+	mgtk_boolean_set( "eRenderGrid", 1 )
+	mgtk_boolean_set( "eRenderFace", 1 )
+	mgtk_boolean_set( "eRenderMaterial", 1 )
+	mgtk_boolean_set( "eRenderLighting", 1 )
+	mgtk_boolean_set( "eRenderMaterial", 1 )
+	mgtk_boolean_set( "eRenderBbox", 1 )
+	mgtk_boolean_set( "eRenderSkeleton", 1 )
+	mgtk_boolean_set( "eRenderPickRay", 0 )
+	mgtk_boolean_set( "ePointJoint", 1 )
+	mgtk_boolean_set( "ePolyMeshBone", 1 )
+	mgtk_boolean_set( "eGLSLFragmentMode", 1 )
+	mgtk_boolean_set( "eGroupColors", 1 )
+	mgtk_boolean_set( "eFPSCap", 1 )
+end
+
+
+
+-- Generate the user interface.
 freyja3d_ui_init()
+freyja3d_ui_dialogs()
+
+-- Call this after widgets are loaded so widgets can be updated. 
+freyja3d_ui_defaults()
+
 

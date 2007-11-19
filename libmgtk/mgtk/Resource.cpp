@@ -80,7 +80,7 @@ void new_float(arg_list_t **a, float n)
 }
 
 
-void new_adt(arg_list_t **a, int type, void *data)
+void mlisp_new_adt(arg_list_t **a, int type, void *data)
 {
 	*a = new arg_list_t;
 
@@ -108,7 +108,7 @@ void new_int(arg_list_t **a, int n)
 }
 
 
-void new_string(arg_list_t **a, char *s)
+void mlisp_new_string(arg_list_t** a, const char* s)
 {
 	*a = NULL;
 
@@ -399,6 +399,23 @@ void seperator()
 }
 
 
+void mlisp_bind_string(const char* symbol, const char* s)
+{
+	if (!__RESOURCE_AGENT_)
+		return;
+
+	// Bind() will free this arg -- don't free.
+	arg_list_t* sym = new arg_list_t;
+	mlisp_new_string( &sym, symbol );
+
+	// Bind() will retain this arg -- don't free.
+	arg_list_t* arg = new arg_list_t;
+	mlisp_new_string( &arg, s );
+
+	__RESOURCE_AGENT_->Bind( sym, arg );
+}
+
+
 void mlisp_bind(arg_list_t *symbol, arg_list_t *data)
 {
 	if (!__RESOURCE_AGENT_)
@@ -450,19 +467,16 @@ int mlisp_get_line_num()
 
 /// External built-in funcs //////////////////////////////////////
 
-arg_list_t *nil(arg_list_t *arg)
+arg_list_t* nil(arg_list_t* arg)
 {
 	return NULL;
 }
 
-arg_list_t *setq(arg_list_t *arg)
+arg_list_t* setq(arg_list_t* arg)
 {
-	arg_list_t *a, *b;
-
-
-	a = symbol();
-	b = symbol();
-	mlisp_bind(a, b);
+	arg_list_t* a = symbol();
+	arg_list_t* b = symbol();
+	mlisp_bind( a, b );
 
 	return NULL;
 }
@@ -699,13 +713,13 @@ int Resource::RegisterSymbol(char *symbol, arg_type_t type, void *data)
 		new_float(&sym, *((float *)data));
 		break;
 	case CSTRING:
-		new_string(&sym, (char *)data);
+		mlisp_new_string(&sym, (char *)data);
 		break;
 	default:
-		new_adt(&sym, type, data);
+		mlisp_new_adt(&sym, type, data);
 	}
 
-	new_string(&sym_name, symbol);
+	mlisp_new_string(&sym_name, symbol);
 	Bind(sym_name, sym);
 
 	return 0;
@@ -939,17 +953,17 @@ arg_list_t *Resource::Symbol()
 	  }
 	  else if (string)
 	  {
-		  new_string(&a, _symbol);
+		  mlisp_new_string(&a, _symbol);
 	  }
 	  else if (Lookup(_symbol, &adt))
 	  {
-		  new_adt(&a, adt->type, adt->data);
+		  mlisp_new_adt(&a, adt->type, adt->data);
 	  }
 	  else
 	  {
 		  // Mongoose 2002.01.21, FIXME: hack to handle old string
 		  //   use for def symbols
-		  new_string(&a, _symbol);
+		  mlisp_new_string(&a, _symbol);
 	  }
   }
 

@@ -4704,26 +4704,30 @@ void FreyjaControl::SetSelectedMesh(uint32 i)
 
 void FreyjaControl::LoadResource()
 {
-	String s = freyja_rc_map_string(mResourceFilename.c_str());
-	int i, x, y;
-	bool failed = true;
-
-
 	// Setup the UI
-	if (!mResource.Load((char *)s.c_str()))
-	{
-		failed = false;
-	}
+#if LUA_UI
+	String s = freyja_rc_map_string( "freyja3d.lua" );
+	Lua* lua = (Lua*)&freyjaGetLuaVM();
 
-	if (failed)
+	if ( !lua->ExecuteFile( s.c_str() ) )
 	{
-		FREYJA_ASSERTMSG(0, "ERROR: Couldn't find resource file '%s'\n", s.c_str());
+		FREYJA_ASSERTMSG(0, "ERROR: Couldn't find resource file '%s'\n", s.c_str() );
 		freyja_event_shutdown();
 	}
+#else
+	String s = freyja_rc_map_string( mResourceFilename.c_str() );
 
+	if ( mResource.Load((char *)s.c_str()) )
+	{
+		FREYJA_ASSERTMSG(0, "ERROR: Couldn't find resource file '%s'\n", s.c_str() );
+		freyja_event_shutdown();
+	}
+#endif
 
 	/* GUI stuff */
-	LoadUserPreferences();
+	LoadUserPreferences( );
+
+	int i, x, y;
 
 	if (mResource.Lookup("WINDOW_X", &x))
 	{
