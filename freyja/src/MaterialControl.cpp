@@ -1312,6 +1312,8 @@ int freyja3d_load_texture(const char* filename)
 	}
 
 	freyja_print("! Texture callback %i : '%s'...", id, filename);
+
+	return id;
 }
 	
 

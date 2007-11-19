@@ -1021,7 +1021,10 @@ int mgtk_lua_rc_spinbutton_float(lua_State *s)
 int mgtk_lua_rc_statusbar(lua_State *s)
 {
 	GtkWidget *widget = gtk_statusbar_new();
-	//GTK_STATUS_BAR_WIDGET = widget;
+	
+	// FIXME: Using legacy pointers.
+	extern GtkWidget* GTK_STATUS_BAR_WIDGET;
+	GTK_STATUS_BAR_WIDGET = widget;
 
 	// Push widget pointer unto the lua stack.
 	lua_pushlightuserdata(s, (void *)widget);
@@ -1356,6 +1359,86 @@ int mgtk_lua_rc_tab(lua_State* s)
 	}
 
 	lua_pushlightuserdata(s, (void*)vbox);
+	return 1;
+}
+
+
+extern void mgtk_tree_set_treeview(int event, GtkTreeView *tree);
+extern void mgtk_tree_cell_edited_callback (GtkCellRendererText *cell,
+											gchar               *path_string,
+											gchar               *new_text,
+											gpointer             userdata);
+extern gboolean mgtk_GtkTreeSelectionFunc(GtkTreeSelection *selection,
+										  GtkTreeModel *model,
+										  GtkTreePath *path,
+										  gboolean path_currently_selected,
+										  gpointer data);
+extern void mgtk_treeview_onRowActivated(GtkTreeView *treeview,
+										 GtkTreePath        *path,
+										 GtkTreeViewColumn  *col,
+										 gpointer            userdata);
+
+int mgtk_lua_rc_tree(lua_State* s)
+{
+	const char* label = lua_tostring(s, 1);
+	int event = ( lua_isnumber(s, 2) ? (int)lua_tonumber(s, 2) :
+				  lua_isstring(s, 2) ? mgtk_lua_get_id( lua_tostring(s, 2) ): -1 );
+	int event2 = ( lua_isnumber(s, 3) ? (int)lua_tonumber(s, 3) :
+				   lua_isstring(s, 3) ? mgtk_lua_get_id( lua_tostring(s, 3) ): -1 );
+
+	GtkWidget* view = gtk_tree_view_new();	
+	mgtk_tree_set_treeview( event, GTK_TREE_VIEW(view) );
+	g_signal_connect( view, "row-activated", (GCallback)mgtk_treeview_onRowActivated, GINT_TO_POINTER(event) );
+
+	GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(view));
+	if ( selection )
+	{
+		gtk_tree_selection_set_mode(selection, GTK_SELECTION_BROWSE);
+		gtk_tree_selection_set_select_function(selection, mgtk_GtkTreeSelectionFunc, GINT_TO_POINTER(event), NULL);
+	}
+
+	/* Column "Name" */
+	GtkTreeViewColumn* col = gtk_tree_view_column_new();
+	gtk_tree_view_column_set_title(col, label);
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
+	GtkCellRenderer* renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_column_pack_start(col, renderer, TRUE);
+	gtk_tree_view_column_add_attribute(col, renderer, "text", NAME_COLUMN);
+	g_object_set(renderer, "editable", TRUE, NULL);
+	g_signal_connect( renderer, "edited", (GCallback)mgtk_tree_cell_edited_callback, GINT_TO_POINTER(event2) );
+
+	/* Column "Id" */
+	col = gtk_tree_view_column_new();
+	gtk_tree_view_column_set_title(col, "Id");
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_column_pack_start(col, renderer, TRUE);
+	gtk_tree_view_column_add_attribute(col, renderer, "text", ID_COLUMN);
+
+	/* Append dummy node(s) */
+	GtkTreeStore* store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
+											 G_TYPE_STRING,   /* Node name */
+											 G_TYPE_INT);     /* Node id */
+	GtkTreeModel* model = GTK_TREE_MODEL(store);
+
+	/* Add view to container */
+	gtk_tree_view_set_model(GTK_TREE_VIEW(view), model);
+	g_object_unref(model); 
+	gtk_tree_selection_set_mode(gtk_tree_view_get_selection(GTK_TREE_VIEW(view)), GTK_SELECTION_NONE);
+	gtk_widget_show(view);
+
+
+	/* Tree inside scrolled window, instead of box. */
+	GtkWidget* scroll = gtk_scrolled_window_new(NULL, NULL);
+	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scroll),
+								   GTK_POLICY_AUTOMATIC,
+								   GTK_POLICY_AUTOMATIC);
+	gtk_widget_show(scroll);
+	//gtk_widget_set_usize(scroll, 100, 250);
+	gtk_container_add(GTK_CONTAINER(scroll), view);
+
+	lua_pushlightuserdata(s, scroll);
+
 	return 1;
 }
 
