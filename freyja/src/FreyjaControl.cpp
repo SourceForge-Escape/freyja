@@ -289,7 +289,7 @@ void FreyjaControl::Init()
 	if (!freyjaGetBoneCount() && !freyjaGetMeshCount())
 		mCleared = true;
 	else
-		mCleared = false;
+		ModelAltered();
 }
 
 
@@ -519,7 +519,7 @@ void FreyjaControl::ActionModelModified(Action *action)
 		}
 	}
 
-	mCleared = false;
+	ModelAltered();
 	mToken = false;
 }
 
@@ -753,12 +753,14 @@ bool FreyjaControl::LoadModel(const char *filename)
 		}
 	}
 
-	String title;
-	title.Set("%s - Freyja", filename);
-	freyja_set_main_window_title(title.c_str());
+	ModelOpened( filename );
+	//String title;
+	//title.Set("%s - Freyja", filename);
+	//freyja_set_main_window_title(title.c_str());
+
 	mRecentModel.AddFilename(filename);
 	mCurrentlyOpenFilename = String(filename);
-	mCleared = false;
+	ModelAltered();
 
 	return true;
 }
@@ -1283,7 +1285,7 @@ void FreyjaControl::RevertFile()
 		freyja_set_main_window_title(BUILD_NAME);
 		
 		if (LoadModel(mCurrentlyOpenFilename.c_str()))
-			mCleared = false;
+			ModelAltered();
 	}
 }
 
@@ -2992,7 +2994,7 @@ void FreyjaControl::CreateObject()
 	{
 	case tPoint:
 		mEventMode = aVertexNew;
-		mCleared = false;
+		ModelAltered();
 		RefreshContext();
 		break;
 
@@ -3030,7 +3032,7 @@ void FreyjaControl::CreateObject()
 				freyjaSkeletonAddBone(skel, idx);
 				freyjaSkeletonUpdateBones(skel);
 
-				mCleared = false;
+				ModelAltered();
 				SetSelectedBone(idx);
 				UpdateSkeletalUI();
 				RefreshContext();
@@ -3046,7 +3048,7 @@ void FreyjaControl::CreateObject()
 	case tMesh:
 		//MeshNew();
 		ActionModelModified(NULL);
-		mCleared = false;
+		ModelAltered();
 		RefreshContext();
 		break;
 
@@ -3065,7 +3067,7 @@ void FreyjaControl::CreateObject()
 		}
 
 		ActionModelModified(NULL);
-		mCleared = false;
+		ModelAltered();
 		RefreshContext();
 		break;
 

@@ -942,6 +942,10 @@ class FreyjaControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
+	void ModelAltered();
+
+	void ModelOpened(const char *filename);
+
 	void RecordSavedModel(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : Successfully saved a model file.
@@ -1383,13 +1387,64 @@ bool FreyjaControl::LoadTexture(const char *filename, int &id)
 	return false;
 }
 
+inline
+void FreyjaControl::ModelOpened(const char *filename)
+{
+	mstl::String path = filename;
+	mstl::String base = "";
+	int i = path.find_last_of( '/' );
+	if ( i > 0 )
+	{
+		base = path.c_str()+i+1;
+		path[i] = '\0';
+	}
+
+	mstl::String title;
+	title.Set( "%s (%s) - freyja", base.c_str(), path.c_str() );
+	freyja_set_main_window_title( title.c_str() );
+	//mCleared = false;
+}
+
+
+inline
+void FreyjaControl::ModelAltered()
+{
+	if ( mCleared )
+	{
+		mstl::String path = mCurrentlyOpenFilename;
+		mstl::String base = "";
+		int i = path.find_last_of( '/' );
+		if ( i > 0 )
+		{
+			base = path.c_str()+i+1;
+			path[i] = '\0';
+		}
+
+		mstl::String title;
+		title.Set( "*%s (%s) - freyja", base.c_str(), path.c_str() );
+		freyja_set_main_window_title( title.c_str() );
+	}
+
+	mCleared = false;
+}
+
 
 inline
 void FreyjaControl::RecordSavedModel(const char *filename)
 {
+	mstl::String path = filename;
+	mstl::String base = "";
+	int i = path.find_last_of( '/' );
+	if ( i > 0 )
+	{
+		base = path.c_str()+i+1;
+		path[i] = '\0';
+	}
+
 	mstl::String title;
-	title.Set("%s - Freyja", filename);
-	freyja_set_main_window_title(title.c_str());
+	title.Set( "%s (%s) - freyja", base.c_str(), path.c_str() );
+	freyja_set_main_window_title( title.c_str() );
+
 	mCleared = true;
 	mCurrentlyOpenFilename = filename;
 	mRecentModel.AddFilename(filename);
