@@ -9,6 +9,10 @@
 
  * Integrate toplevel cmake and make makefiles.
 
+ * 'Hide' debug spew in logs to avoid user confusion.
+
+ * tree selection with event pairs.
+
  * Lua
 	- Finish sidebar translation for mgtk_lua.
 	- Lua support for libfreyja ABI 100%.
@@ -18,12 +22,9 @@
 	- mgtk_label_pango() or some such to accept pango rich text.
 	- Documentation for mgtk_lua API must be done before release.
 	- String table support for lua_mgtk.
-	- mgtk_frame() ?
-	- mgtk_lua widgets to finalize: tree, slider, dialog.
 	- Reduce the mgtk callback system.
 		- Push the event system back into libmgtk. 
 		- Make the 'linker' handlers competely optional.
-	- Event system should allow for lua func / C/C++ callbacks / event ids.
 	- Opengl_canvas widget
 		- Hookup old mouse handlers!
 		- Try to get WIN32 mgtk_create_glarea() using gdk_gl_config_new_by_mode(..)

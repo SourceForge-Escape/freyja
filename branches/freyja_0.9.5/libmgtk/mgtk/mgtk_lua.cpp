@@ -67,6 +67,8 @@ void mgtk_lua_register_functions(const Lua &lua)
 	lua.RegisterFunction("mgtk_menu_separator", mgtk_lua_rc_menu_separator);
 	lua.RegisterFunction("mgtk_optionmenu", mgtk_lua_rc_optionmenu);
 
+	lua.RegisterFunction("mgtk_hslider", mgtk_lua_rc_hslider);
+
 	lua.RegisterFunction("mgtk_button", mgtk_lua_rc_button);
 	lua.RegisterFunction("mgtk_colorbutton", mgtk_lua_rc_colorbutton);
 	lua.RegisterFunction("mgtk_spinbutton_uint", mgtk_lua_rc_spinbutton_uint);
@@ -529,6 +531,33 @@ int mgtk_lua_rc_opengl_canvas(lua_State *s)
 
 	lua_pushlightuserdata(s, (void*)canvas);
 
+	return 1;
+}
+
+
+int mgtk_lua_rc_hslider(lua_State *s)
+{
+	GtkWidget* slider = NULL;
+
+	if ( lua_gettop(s) == 3 )
+	{
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+		int min = (int)lua_tonumber(s, 3);
+		int max = (int)lua_tonumber(s, 3);
+
+		GtkObject* adj = gtk_adjustment_new(min, min, max, 1, 2, 0);
+		slider = gtk_hscale_new( GTK_ADJUSTMENT(adj) );
+		gtk_widget_show(slider);
+		gtk_scale_set_digits( GTK_SCALE(slider), 0);
+		gtk_widget_ref(slider);
+
+		gtk_signal_connect( GTK_OBJECT(adj), "value_changed",
+							GTK_SIGNAL_FUNC(mgtk_event_slider1u), 
+							GINT_TO_POINTER(event) );
+	}
+
+	lua_pushlightuserdata(s, slider);
 	return 1;
 }
 

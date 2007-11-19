@@ -378,6 +378,20 @@ function freyja3d_ui_sidebar_model( sidebar )
 	expander = mgtk_expander( handlebox, "Scenegraph", true )
 	mgtk_box_pack( handlebox, expander, 1, 1, 0 )
 	mgtk_box_pack( expander, mgtk_tree( "Scenegraph", "eBoneIterator", "eSetBoneName" ), 1, 1, 1 )
+
+	-- Animation control
+	hbox = mgtk_hbox( )
+	mgtk_box_pack( tab, hbox )
+	toolbar = mgtk_toolbar( hbox )
+	mgtk_toolbar_togglebutton( toolbar, "Auto", "eModeAnim", false, "gtk-media-record", "Animation mode (Auto Keyframe)" ) 
+	mgtk_toolbar_button( toolbar, "Set", "eSetKeyFrame", "icons/24x24/key.png", "Set Keyframe" )
+	mgtk_toolbar_button( toolbar, "Prev", "eAnimationPrev", "gtk-media-previous", "Previous" )
+	mgtk_toolbar_button( toolbar, "", -1, "gtk-media-rewind", "" )
+	mgtk_toolbar_button( toolbar, "Play", "eAnimationPlay", "gtk-media-play", "Play" )
+	mgtk_toolbar_button( toolbar, "Stop", "eAnimationStop", "gtk-media-stop", "Stop" )
+	mgtk_toolbar_button( toolbar, "", -1, "gtk-media-forward", "" )
+	mgtk_toolbar_button( toolbar, "Next", "eAnimationNext", "gtk-media-next", "Next Track" )
+
 end
 
 
@@ -416,18 +430,20 @@ function freyja3d_ui_init()
 	hbox2 = mgtk_hbox()
 	mgtk_box_pack( hbox, hbox2, 0, 0, 0 )
 	--mgtk_box_pack( hbox2, mgtk_button( ">", -1 ) )	
-	expander = mgtk_expander( hbox2, " ", false )
+	expander = mgtk_expander( hbox2, " ", true )
 	sidebar = mgtk_notebook( -1, 340, 720 )
 	mgtk_box_pack( expander, sidebar )
 	freyja3d_ui_sidebar_model( sidebar )
-
+	-- FIXME
 	tab = mgtk_tab( sidebar, "UV", "eModeUV" )
-
+	-- FIXME
 	tab = mgtk_tab( sidebar, "Material", "eModeMaterial" )
-
 	tab = mgtk_tab( sidebar, "Plugins", -1 )
 	mgtk_expander( tab, "Freyja Plugins   ", true, "FirstPartyPluginSlot" )
 	mgtk_expander( tab, "Community Plugins", true, "ThirdPartyPluginSlot" )
+
+	-- Animation scrubber
+	mgtk_box_pack( vbox, mgtk_hslider( "eAnimationSlider", 0, 500 ) )
 
 	-- Statusbar
 	statusbar1 = mgtk_statusbar()
