@@ -70,6 +70,7 @@ void mgtk_lua_register_functions(const Lua &lua)
 	lua.RegisterFunction("mgtk_hslider", mgtk_lua_rc_hslider);
 
 	lua.RegisterFunction("mgtk_button", mgtk_lua_rc_button);
+	lua.RegisterFunction("mgtk_togglebutton", mgtk_lua_rc_togglebutton);
 	lua.RegisterFunction("mgtk_colorbutton", mgtk_lua_rc_colorbutton);
 	lua.RegisterFunction("mgtk_spinbutton_uint", mgtk_lua_rc_spinbutton_uint);
 	lua.RegisterFunction("mgtk_spinbutton_int", mgtk_lua_rc_spinbutton_int);
@@ -834,6 +835,46 @@ int mgtk_lua_rc_menu_item_check(lua_State *s)
 	// Push widget pointer unto the lua stack.
 	lua_pushlightuserdata(s, (void *)item);
 
+	return 1;
+}
+
+
+int mgtk_lua_rc_togglebutton(lua_State *s)
+{
+	GtkWidget* button = NULL;
+
+	if ( 1 )
+	{
+		button = gtk_toggle_button_new_with_label( lua_tostring(s, 1) );
+		gtk_widget_show(button);
+		gtk_widget_ref(button);
+
+		int event = ( lua_isnumber(s, 2) ? (int)lua_tonumber(s, 2) :
+					  lua_isstring(s, 2) ? mgtk_lua_get_id( lua_tostring(s, 2) ): -1 );
+		int event2 = ( (lua_gettop(s) == 3) ? (int)lua_tonumber(s, 3) : -1 );
+
+		if ( event2 != -1 )
+		{
+			gtk_object_set_data(GTK_OBJECT(button), "mlisp_event", 
+								GINT_TO_POINTER(event2));
+
+			gtk_signal_connect(GTK_OBJECT(button), "toggled",
+							   GTK_SIGNAL_FUNC(mgtk_tool_toggle_button_dual_handler), 
+							   GINT_TO_POINTER(event));
+		}
+		else
+		{
+			gtk_signal_connect(GTK_OBJECT(button), "toggled",
+							   GTK_SIGNAL_FUNC(mgtk_tool_toggle_button_handler), 
+							   GINT_TO_POINTER(event));
+		}
+
+		// Mongoose 2002.02.01, Add this widget to a special 
+		//   lookup table by it's event id
+		//mgtk_event_subscribe_gtk_widget(event, button);
+	}
+
+	lua_pushlightuserdata(s, (void *)button);
 	return 1;
 }
 

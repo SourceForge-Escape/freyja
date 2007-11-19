@@ -59,4 +59,6 @@ void mgtk_check_menu_item_handler(GtkCheckMenuItem *item, gpointer e);
 
 void mgtk_event_hide_dialog(GtkWidget *widget, gpointer user_data);
 
+void mgtk_tool_toggle_button_dual_handler(GtkWidget *item, gpointer e);
+
 #endif
