@@ -4713,7 +4713,7 @@ void FreyjaControl::LoadResource()
 
 	if ( !lua->ExecuteFile( s.c_str() ) )
 	{
-		FREYJA_ASSERTMSG(0, "ERROR: Couldn't find resource file '%s'\n", s.c_str() );
+		FREYJA_ASSERTMSG(0, "ERROR: Resource file '%s':\n%s\n", s.c_str(), lua->GetLastError() );
 		freyja_event_shutdown();
 	}
 #else

@@ -541,7 +541,7 @@ int mgtk_lua_rc_hslider(lua_State *s)
 	{
 		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
 					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
-		int min = (int)lua_tonumber(s, 3);
+		int min = (int)lua_tonumber(s, 2);
 		int max = (int)lua_tonumber(s, 3);
 
 		GtkObject* adj = gtk_adjustment_new( min, min, max, 1, 1, 10 );
@@ -917,6 +917,7 @@ int mgtk_lua_rc_filechooserbutton(lua_State *s)
 {
 	GtkWidget* button = NULL;
 	
+	// FIXME: Asserts, checking...
 	{
 		const char* label = lua_tostring(s, 1);
 		const char* title = lua_tostring(s, 1);
