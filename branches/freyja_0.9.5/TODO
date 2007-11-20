@@ -17,7 +17,12 @@
 
  * Bundle object / objects... event modes using grouping contexts.
 
+ * Audio support for syncing A/V.
+
  * Mesh 'hide' ala layers.
+	- Depends on new scenegraph widget mesh selection fix.
+
+ * Refactor FreyjaControl::LoadResource() and related functions.
 
  * Lua / mgtk
 	- Get Lua support for libfreyja ABI up to 100%.
