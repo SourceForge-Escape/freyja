@@ -79,6 +79,8 @@ int mgtk_lua_rc_hsep(lua_State *s);
 int mgtk_lua_rc_vsep(lua_State *s);
 int mgtk_lua_rc_button(lua_State *s);
 int mgtk_lua_rc_colorbutton(lua_State *s);
+// clrbtn = mgtk_colorbutton( event )
+
 int mgtk_lua_rc_togglebutton(lua_State *s);
 
 int mgtk_lua_rc_submenu(lua_State *s);
@@ -172,10 +174,14 @@ int mgtk_lua_rc_label2(lua_State *s);
 int mgtk_lua_rc_fileselection_drop_down_menu(lua_State *s);
 int mgtk_lua_rc_filechooserbutton(lua_State *s);
 int mgtk_lua_rc_filechoosermenu_item(lua_State *s);
+
 int mgtk_lua_rc_filechoosertoolbar_button(lua_State *s);
+// btn = mgtk_filechooserbutton("label", "title", event, "your_mgtk_rc_pattern_callback") 
 
 int mgtk_lua_rc_expander(lua_State *s);
 int mgtk_lua_rc_expander_hbox(lua_State *s);
+
+int mgtk_lua_rc_textbox(lua_State* s);
 
 
 //////////////////////////////////////////////////////////////////////////////
