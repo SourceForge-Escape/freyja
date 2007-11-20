@@ -62,8 +62,9 @@ bool Lua::ExecuteFile(const char *filename)
 		
 	if ( s ) 
 	{
-		printf( "-- %s\n", lua_tostring(mState, -1) );
+		mError = lua_tostring(mState, -1);
 		lua_pop(mState, 1);
+		printf( "-- %s\n", mError.c_str() );
 	}
 
 

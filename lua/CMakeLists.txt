@@ -23,6 +23,7 @@ add_definitions(
 
 add_definitions( -DDEBUG -g	-Wall )
 
+include_directories( ../mstl )
 include_directories( lua )
 
 # Lua

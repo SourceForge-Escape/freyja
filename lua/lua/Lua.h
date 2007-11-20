@@ -25,6 +25,7 @@ extern "C" {
 #include "lua5.1/lauxlib.h"
 }
 
+#include <mstl/String.h>
 
 class Lua
 {
@@ -37,7 +38,7 @@ class Lua
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Lua() : mState(NULL) { mState = lua_open(); luaL_openlibs(mState); }
+	Lua() : mError(), mState(NULL) { mState = lua_open(); luaL_openlibs(mState); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs Lua script interface.
@@ -114,6 +115,8 @@ class Lua
 	 *
 	 ------------------------------------------------------*/
 
+	const char* GetLastError()
+	{ return mError.c_str(); }
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
@@ -166,6 +169,8 @@ private:
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
+
+	mstl::String mError;        /* Error string cached outside lua vm. */
 
 	lua_State *mState;          /* State handle */
 };
