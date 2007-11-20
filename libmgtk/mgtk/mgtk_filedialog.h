@@ -56,4 +56,19 @@ void mgtk_event_filedialog_pattern(int event, char *pattern);
  *
  ------------------------------------------------------*/
 
+void mgtk_filechooser_spawn_event(GtkWidget *widget, gpointer user_data);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ *
+ ------------------------------------------------------*/
+
+GtkWidget* mgtk_link_filechooser_from_rc(int event, const char *title, const char *option);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ *
+ ------------------------------------------------------*/
+
+
 #endif // GUARD__MGTK_FILEDIALOG_H_

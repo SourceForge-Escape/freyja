@@ -607,10 +607,140 @@ function freyja3d_ui_sidebar_uv( sidebar )
 end
 
 
+function freyja3d_ui_sidebar_material_color( box, name )
+	hbox = mgtk_hbox()
+	mgtk_box_pack( box, hbox )
+	mgtk_box_pack( hbox, mgtk_label( name ) )
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	spnbtn = 
+	mgtk_spinbutton_float( "eMaterial" .. name .. "0", 0.0, 0.0, 1.0, 3, 0.001, 0.1, 0.1 )
+	mgtk_box_pack( hbox, spnbtn )
+	spnbtn =
+	mgtk_spinbutton_float( "eMaterial" .. name .. "1", 0.0, 0.0, 1.0, 3, 0.001, 0.1, 0.1 )
+	mgtk_box_pack( hbox, spnbtn )
+	spnbtn =
+	mgtk_spinbutton_float( "eMaterial" .. name .. "2", 0.0, 0.0, 1.0, 3, 0.001, 0.1, 0.1 )
+	mgtk_box_pack( hbox, spnbtn )
+	spnbtn = 
+	mgtk_spinbutton_float( "eMaterial" .. name .. "3", 0.0, 0.0, 1.0, 3, 0.001, 0.1, 0.1 )
+	mgtk_box_pack( hbox, spnbtn )
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMaterial" .. name ) )
+end
+
 function freyja3d_ui_sidebar_material( sidebar )
 	tab = mgtk_tab( sidebar, "Material", "eModeMaterial" )
 
-	-- FIXME Not translated.
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	toolbar = mgtk_toolbar( hbox )
+	mgtk_toolbar_button(toolbar, "New", "eNewMaterial", "gtk-new", "New material" )
+	mgtk_toolbar_menubutton(toolbar, "Open Material", "eOpenMaterial", "gtk-open", "Open Material...", "recent_material_bind" )
+	mgtk_toolbar_togglebutton(toolbar, "Lock", "eMaterialSlotLoad", false, "gtk-apply", "Overwrite material on load" )
+	mgtk_toolbar_button(toolbar, "Save as...", "eSaveMaterial", "gtk-save-as", "Save Material..." )
+
+	-- Material selection by id.
+	hbox = mgtk_hbox( )
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Material Select: " ) )
+	hbox = mgtk_hbox( )
+	mgtk_box_pack( tab, hbox )
+	spnbtn = mgtk_spinbutton_uint( "eSetMaterial", 0, 0, 128 )
+	mgtk_box_pack( hbox, spnbtn )
+	mgtk_box_pack( hbox, mgtk_textbox( "eSetMaterialName" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	toolbar = mgtk_toolbar( hbox )
+	mgtk_toolbar_togglebutton(toolbar, "Texture", "eEnableMaterialTexture", false, "gtk-add", "Enable texture mapping" )
+	mgtk_toolbar_togglebutton(toolbar, "Blend", "eEnableMaterialBlending", false, "gtk-add", "Enable blending" )
+	mgtk_toolbar_togglebutton(toolbar, "Fragment", "eEnableMaterialFragment", false, "gtk-add", "Enable fragment" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_togglebutton(toolbar, "GLSL Fragment", "eGLSLFragmentMode", false, "gtk-add", "GLSL fragment mode" )
+	mgtk_toolbar_togglebutton(toolbar, "ARB Fragment", "eARBFragmentMode", false, "gtk-add", "ARB fragment mode" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_togglebutton(toolbar, "Detail", "eEnableDetailTexture", false, "gtk-add", "Enable detail texture" )
+	mgtk_toolbar_togglebutton(toolbar, "Normalize", "eEnableNormalize", false, "gtk-add", "Enable normalization for render scaling lighting" )
+
+	-- FIXME (hbox 1 0 0 1 0 (hsep))
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Texture" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_spinbutton_uint( "eSetMaterialTexture", 0, 0, 128 ) )
+	mgtk_box_pack( hbox, mgtk_textbox( "eSetTextureNameA" ) )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "Slot", "eTextureSlotLoad" ) )
+	mgtk_box_pack( hbox, mgtk_filechooserbutton( "...", "Open Texture...", "eOpenTexture", "texture_pattern" ) )
+				
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Fragment" ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_spinbutton_uint( "eSetMaterialShader", 0, 0, 128 ) )
+	mgtk_box_pack( hbox, mgtk_textbox( "eSetMaterialShaderFilename" ) )
+	mgtk_box_pack( hbox, mgtk_togglebutton( "Slot", "eShaderSlotLoad" ) )
+	mgtk_box_pack( hbox, mgtk_filechooserbutton( "...", "Open Fragment program...", "eOpenShader", "shader_pattern") )
+	
+
+	-- FIXME (hbox 1 0 0 1 0 (hsep))
+
+	-- Material colors
+	freyja3d_ui_sidebar_material_color( tab, "Ambient" )
+	freyja3d_ui_sidebar_material_color( tab, "Diffuse" )
+	freyja3d_ui_sidebar_material_color( tab, "Specular" )
+	freyja3d_ui_sidebar_material_color( tab, "Emissive" )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Shininess" ) )
+	spnbtn = 
+	mgtk_spinbutton_float( "eMaterialShine", 1.0, 0.0, 100.0, 3, 0.01, 0.1, 0.1 )
+	mgtk_box_pack( hbox, spnbtn )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Blend Source" ) )
+	submenu = mgtk_optionmenu( hbox, "Blend Source", "eBlendSrcMenu" )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ZERO", "eBlendSrc", 0 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE", "eBlendSrc", 1 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__SRC__COLOR", "eBlendSrc", 2 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__SRC__COLOR", "eBlendSrc", 3 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__DST__COLOR", "eBlendSrc", 4 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__DST__COLOR", "eBlendSrc", 5 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__SRC__ALPHA", "eBlendSrc", 6 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__SRC__ALPHA", "eBlendSrc", 7 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__DST__ALPHA", "eBlendSrc", 8 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__DST__ALPHA", "eBlendSrc", 9 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__SRC__ALPHA__SATURATE", "eBlendSrc", 10 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__CONSTANT__COLOR", "eBlendSrc", 11 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__CONSTANT__COLOR", "eBlendSrc", 12 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__CONSTANT__ALPHA", "eBlendSrc", 13 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__CONSTANT__ALPHA", "eBlendSrc", 14 ) )
+
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_label( "Blend Dest  " ) )
+	submenu = mgtk_optionmenu( hbox, "Blend Dest", "eBlendDestMenu" )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ZERO", "eBlendDest", 0 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE", "eBlendDest", 1 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__SRC__COLOR", "eBlendDest", 2 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__SRC__COLOR", "eBlendDest", 3 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__DST__COLOR", "eBlendDest", 4 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__DST__COLOR", "eBlendDest", 5 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__SRC__ALPHA", "eBlendDest", 6 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__SRC__ALPHA", "eBlendDest", 7 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__DST__ALPHA", "eBlendDest", 8 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__DST__ALPHA", "eBlendDest", 9 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__SRC__ALPHA__SATURATE", "eBlendDest", 10 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__CONSTANT__COLOR", "eBlendDest", 11 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__CONSTANT__COLOR", "eBlendDest", 12 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__CONSTANT__ALPHA", "eBlendDest", 13 ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE__MINUS__CONSTANT__ALPHA", "eBlendDest", 14 ) )
 end
 
 

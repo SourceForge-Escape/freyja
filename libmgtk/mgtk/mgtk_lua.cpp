@@ -32,6 +32,7 @@
 #include "mgtk_events.h"
 #include "mgtk_opengl_canvas.h"
 #include "mgtk_interface.h"
+#include "mgtk_filedialog.h"
 #include "mgtk_resource.h"
 
 #include "mgtk_lua.h"
@@ -68,7 +69,11 @@ void mgtk_lua_register_functions(const Lua &lua)
 	lua.RegisterFunction("mgtk_menu_separator", mgtk_lua_rc_menu_separator);
 	lua.RegisterFunction("mgtk_optionmenu", mgtk_lua_rc_optionmenu);
 
+	lua.RegisterFunction("mgtk_filechooserbutton", mgtk_lua_rc_filechooserbutton);
+
 	lua.RegisterFunction("mgtk_hslider", mgtk_lua_rc_hslider);
+
+	lua.RegisterFunction("mgtk_textbox", mgtk_lua_rc_textbox);
 
 	lua.RegisterFunction("mgtk_button", mgtk_lua_rc_button);
 	lua.RegisterFunction("mgtk_togglebutton", mgtk_lua_rc_togglebutton);
@@ -555,6 +560,32 @@ int mgtk_lua_rc_hslider(lua_State *s)
 }
 
 
+int mgtk_lua_rc_textbox(lua_State* s)
+{
+	GtkWidget* textbox = NULL;
+
+	{
+		textbox = gtk_entry_new();
+		gtk_widget_show( textbox );
+
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+
+		gtk_signal_connect( GTK_OBJECT( textbox ), "changed",
+						    GTK_SIGNAL_FUNC( mgtk_event_text ),
+						    GINT_TO_POINTER( event ) );
+
+		// Mongoose 2002.02.14, Add this widget to a special 
+		//   lookup table by it's event id
+		//index_add_gtk_widget(get_int(event), item);
+		mgtk_event_subscribe_gtk_widget( event, textbox );
+	}
+
+	lua_pushlightuserdata( s, textbox );
+	return 1;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////
 // Event widgets
 ////////////////////////////////////////////////////////////////////////////// 
@@ -720,7 +751,6 @@ int mgtk_lua_rc_menu_item(lua_State *s)
 		icon = lua_tostring(s, 3);
 	}
 
-
 	GtkWidget *item = gtk_image_menu_item_new_with_mnemonic( label );
 
 	if ( icon )
@@ -738,13 +768,25 @@ int mgtk_lua_rc_menu_item(lua_State *s)
 
 	if (id != -1)
 	{
-		// Mongoose 2002.02.14, Add this widget to a special 
-		//   lookup table by it's event id
-		mgtk_event_subscribe_gtk_widget(id, item);
+		if ( lua_gettop(s) > 2 && lua_isnumber(s, 3) )
+		{
+			int subevent = (int)lua_tonumber(s, 3);
+			gtk_object_set_data(GTK_OBJECT(item), "mlisp_event", 
+								GINT_TO_POINTER(subevent));
+			gtk_signal_connect(GTK_OBJECT(item), "activate",
+							   GTK_SIGNAL_FUNC(mgtk_event_dual_command), 
+							   GINT_TO_POINTER(id));
+		}
+		else
+		{
+			// Mongoose 2002.02.14, Add this widget to a special 
+			//   lookup table by it's event id
+			mgtk_event_subscribe_gtk_widget(id, item);
 
-		gtk_signal_connect(GTK_OBJECT(item), "activate",
-						   GTK_SIGNAL_FUNC(mgtk_event_command), 
-						   GINT_TO_POINTER(id) );
+			gtk_signal_connect(GTK_OBJECT(item), "activate",
+							   GTK_SIGNAL_FUNC(mgtk_event_command), 
+							   GINT_TO_POINTER(id) );
+		}
 	}
 
 #if 0
@@ -864,6 +906,32 @@ int mgtk_lua_rc_togglebutton(lua_State *s)
 		// Mongoose 2002.02.01, Add this widget to a special 
 		//   lookup table by it's event id
 		//mgtk_event_subscribe_gtk_widget(event, button);
+	}
+
+	lua_pushlightuserdata(s, (void *)button);
+	return 1;
+}
+
+
+int mgtk_lua_rc_filechooserbutton(lua_State *s)
+{
+	GtkWidget* button = NULL;
+	
+	{
+		const char* label = lua_tostring(s, 1);
+		const char* title = lua_tostring(s, 1);
+		int event = ( lua_isnumber(s, 3) ? (int)lua_tonumber(s, 3) :
+					  lua_isstring(s, 3) ? mgtk_lua_get_id( lua_tostring(s, 3) ): -1 );	
+		const char* pattern_func = lua_tostring(s, 4);
+
+		mgtk_link_filechooser_from_rc( event, title, pattern_func );
+
+		button = gtk_button_new_with_label(label);
+		gtk_widget_show(button);
+
+		gtk_signal_connect( GTK_OBJECT(button), "pressed",
+							GTK_SIGNAL_FUNC( mgtk_filechooser_spawn_event ), 
+							GINT_TO_POINTER(event) );
 	}
 
 	lua_pushlightuserdata(s, (void *)button);
