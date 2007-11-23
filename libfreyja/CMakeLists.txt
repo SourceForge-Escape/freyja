@@ -50,15 +50,6 @@ include_directories( ../libhel )
 link_directories( ../libhel )
 link_libraries(	-lhel-0.2.2 )
 
-# Lua
-FIND_LIBRARY(LUA_FOUND lua5.1)
-if (LUA_FOUND)
-	add_definitions( -DLUA_FOUND )
-#	link_libraries( -llua5.1 )  # libfreyja doesn't link directly to liblua anymore
-	include_directories( ../lua/lua  )
-	message( STATUS "Lua 5.1 library found." )
-endif (LUA_FOUND)
-
 # Python
 FIND_LIBRARY(PYTHON_FOUND python2.4)
 if (PYTHON_FOUND)

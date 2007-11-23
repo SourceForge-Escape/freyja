@@ -3,9 +3,12 @@
 # of the project as ${FREYJA_BINARY_DIR}.
 project(freyja)
 
+set( PLUGIN_DIR plugins/ )
+
 # Recurse into the project subdirectories.
-SUBDIRS( lua libhel libfreyja libmgtk freyja ) 
-#SUBDIRS( plugins tools )
+SUBDIRS( lua libhel libfreyja libmgtk freyja )
+#SUBDIRS( plugins ) 
+#SUBDIRS( tools )
 
 #GET_TARGET_PROPERTY(LIB_NAME Foo LOCATION)
 #GET_TARGET_PROPERTY(Bar_prefix Foo PREFIX)
