@@ -26,24 +26,11 @@
 #include "MeshABI.h"
 #include "freyja.h"
 #include "LuaABI.h"
-#ifdef LUA_FOUND
 
-
-extern "C" {
-#include "lua5.1/lua.h"
-#include "lua5.1/lualib.h"
-#include "lua5.1/lauxlib.h"
-}
-
-#   ifdef LUAWRAPPER_FOUND
-#       include "Lua.h"
-#   else
-#       include "Lua.cpp"
-#   endif // LUAWRAPPER_FOUND
+#ifdef LUAWRAPPER_FOUND
+#   include <lua/Lua.h>
 
 Lua gLuaVM;
-
-
 
 const Lua &freyjaGetLuaVM()
 {
@@ -3530,13 +3517,12 @@ void Freyja_BindLua()
 }
 
 
-#include "Lua.cpp"
-#endif // LUA_FOUND
+#endif // LUAWRAPPER_FOUND
 
 
 void freyjaLuaCommand1s(const char *s)
 {
-#ifdef LUA_FOUND
+#ifdef LUAWRAPPER_FOUND
 	Freyja_BindLua();
 	
 	if (s && s[0])
@@ -3544,15 +3530,13 @@ void freyjaLuaCommand1s(const char *s)
 	
 #else
 	freyjaPrintError("[Module '%s' failed to load.  Rebuild with Lua support.]", s);
-#endif // LUA_FOUND
+#endif // LUAWRAPPER_FOUND
 }
-
-
 
 
 void freyjaLuaScript1s(const char *s)
 {
-#ifdef LUA_FOUND
+#ifdef LUAWRAPPER_FOUND
 	Freyja_BindLua();
 	
 	if (s && s[0])
@@ -3560,7 +3544,7 @@ void freyjaLuaScript1s(const char *s)
 	
 #else
 	freyjaPrintError("[Module '%s' failed to load.  Rebuild with Lua support.]", s);
-#endif // LUA_FOUND
+#endif // LUAWRAPPER_FOUND
 }
 
 

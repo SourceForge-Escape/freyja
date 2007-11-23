@@ -7,6 +7,8 @@
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071117 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - 
+ - Old toplevel GNU Makefiles are back as Makefile.old in ./ and ./plugins/
+ - Fixes for Lua optional/required builds by making wrapper the dependency.
  - Showing Lua errors in assert dialog.
  - Finished UI rollover to mgtk_lua / freyja3d.lua script.
  - New opengl_canvas API to replace glarea/glext mess.

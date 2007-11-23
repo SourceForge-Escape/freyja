@@ -26,6 +26,7 @@
 
  * Lua / mgtk
 	- Get Lua support for libfreyja ABI up to 100%.
+		- Requires C/C++ wrapper functions for some C type manipulation.
 	- Create mgtk_label_richtext() to accept pango rich text.
 	- Create mgtk_icon_view_dialog() -- for things like texture selection.
 	- Documentation for mgtk_lua API must be done before release.
