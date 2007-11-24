@@ -20,9 +20,15 @@
 #define GUARD__MIDGARD_LUA_H_
 
 extern "C" {
-#include "lua5.1/lua.h"
-#include "lua5.1/lualib.h"
-#include "lua5.1/lauxlib.h"
+#if LUA_FOUND_FEDORA
+#   include "lua.h"
+#   include "lualib.h"
+#   include "lauxlib.h"
+#else
+#   include "lua5.1/lua.h"
+#   include "lua5.1/lualib.h"
+#   include "lua5.1/lauxlib.h"
+#endif
 }
 
 #include <mstl/String.h>
