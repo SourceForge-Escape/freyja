@@ -3,10 +3,10 @@
 # of the project as ${FREYJA_BINARY_DIR}.
 project(freyja)
 
-set( PLUGIN_DIR plugins/ )
+#set( PLUGIN_DIR plugins/ )
 
 # Recurse into the project subdirectories.
-SUBDIRS( lua libhel libfreyja libmgtk freyja )
+SUBDIRS( lua libhel libfreyja libmgtk freyja plugins )
 #SUBDIRS( plugins ) 
 #SUBDIRS( tools )
 

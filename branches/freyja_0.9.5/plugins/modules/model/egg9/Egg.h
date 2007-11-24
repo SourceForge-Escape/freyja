@@ -86,7 +86,7 @@
 #include <hel/math.h>
 #include <hel/Vec3.h>
 
-#include <freyja/FreyjaPrinter.h>
+#include <freyja/Printer.h>
 
 using namespace mstl;
 using namespace hel;
@@ -370,7 +370,7 @@ public:
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void setPrinter(FreyjaPrinter *printer);
+	void setPrinter(freyja::Printer *printer);
 
 	void setDebugLevel(unsigned int n);
 	/*------------------------------------------------------
@@ -1433,7 +1433,7 @@ private:
 	
 	Vector<egg_animation_t *> mAnimations;   /* Animation list */
 
-	FreyjaPrinter *mPrinter;
+	freyja::Printer *mPrinter;
 
 	unsigned int mDebugLevel;                /* Set debug output at runtime */
 };
