@@ -13,6 +13,9 @@
 
  * mgtk_tree selection with event pairs per node.
 
+ * Move the lua/mlisp UI init code back into libmgtk too.
+	- init / *load / start
+
  * Move all mlisp resource code into mgtk_mlisp.
 
  * Bundle object / objects... event modes using grouping contexts.
