@@ -413,7 +413,7 @@ void PerlinNoiseEventsAttach()
 void PerlinNoiseGUIAttach()
 {
 	char *basename = "plugins/perlinnoise.mlisp";
-	char *filename = mgtk_rc_map(basename);
+	const char *filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);
 	delete [] filename;
 

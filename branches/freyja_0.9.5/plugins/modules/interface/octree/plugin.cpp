@@ -217,7 +217,7 @@ void freyja_octree_visibility()
 
 void freyja_octree_import()
 {
-	char *path = mgtk_rc_map("/");
+	const char *path = mgtk_rc_map("/");
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Import Octree...", path, 0,
 							  "Octree object (*.xml)", "*.xml");
@@ -239,7 +239,7 @@ void freyja_octree_import()
 
 void freyja_octree_export()
 {
-	char *path = mgtk_rc_map("/");
+	const char *path = mgtk_rc_map("/");
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Export Octree...", path, 1,
 							  "Octree object (*.xml)", "*.xml");

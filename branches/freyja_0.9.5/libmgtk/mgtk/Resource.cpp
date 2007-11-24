@@ -1109,7 +1109,7 @@ void Resource::Comment()
 }
 
 
-int Resource::Load(char *filename)
+int Resource::Load(const char *filename)
 {
 #ifdef MULTI_EVAL
 	printf("Resource::Load> '%s'\n", filename);
@@ -1147,7 +1147,7 @@ int Resource::Load(char *filename)
 }
 
 
-int Resource::BufferFromFile(char *filename, char **buffer,unsigned int *bytes)
+int Resource::BufferFromFile(const char *filename, char **buffer,unsigned int *bytes)
 {
 	*buffer = NULL;
 

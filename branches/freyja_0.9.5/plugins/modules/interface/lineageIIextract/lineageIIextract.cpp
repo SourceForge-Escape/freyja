@@ -257,7 +257,7 @@ void eL2ExtractMenu()
 
 void eL2ExtractOpenRaw()
 {
-	char *path = mgtk_rc_map("/");
+	const char *path = mgtk_rc_map("/");
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Open Raw...", path, 0,
 							  "UE2 SkeletalMesh (*.raw)", "*.raw");
@@ -275,7 +275,7 @@ void eL2ExtractOpenRaw()
 
 void eL2ExtractOpenUT()
 {
-	char *path = mgtk_rc_map("/");
+	const char *path = mgtk_rc_map("/");
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Open UT2 Pak...", path, 0,
 							  "UE2 Pak File (*.utx)", "*.utx");
@@ -311,7 +311,7 @@ void L2ExtractEventsAttach()
 void L2ExtractGUIAttach()
 {
 	char *basename = "plugins/lineageIIextract.mlisp";
-	char *filename = mgtk_rc_map(basename);
+	const char *filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);
 	delete [] filename;
 
