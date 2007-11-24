@@ -29,18 +29,24 @@ include_directories( lua )
 # Lua
 FIND_LIBRARY(LUA_FOUND lua5.1)
 if (LUA_FOUND)
+
 	add_definitions( -DLUA_FOUND )
 	link_libraries( -llua5.1 )
 	message( STATUS "Lua 5.1 library found." )
+
 elseif ( NOT LUA_FOUND )
 
 	FIND_LIBRARY(LUA_FOUND_FEDORA lua-5.1)
 	if ( LUA_FOUND_FEDORA )
-		FIND_LIBRARY(LUA_FOUND lua-5.1)
+
+		link_libraries( -llua-5.1 )
 		add_definitions( -DLUA_FOUND_FEDORA -DLUA_FOUND )
-		message( STATUS "Lua 5.1 library found." )
+		message( STATUS "Lua 5.1 library found (Fedora quirk)." )
+
 	elseif ( NOT LUA_FOUND_FEDORA )
+
 		message(FATAL_ERROR "The library LUA 5.1 was not found.  Ensure you have the development libraries installed, and the files are in the correct search path.")
+
 	endif ( LUA_FOUND_FEDORA )
 endif (LUA_FOUND)
 
