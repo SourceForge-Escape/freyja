@@ -20,7 +20,7 @@
 #define GUARD__MIDGARD_LUA_H_
 
 extern "C" {
-#if LUA_FOUND_FEDORA
+#if LUA_FOUND_INCLUDE
 #   include <lua.h>
 #   include <lualib.h>
 #   include <lauxlib.h>

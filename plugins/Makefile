@@ -34,10 +34,10 @@ RM = /usr/bin/cmake -E remove -f
 CMAKE_EDIT_COMMAND = /usr/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/mongoose/Projects/freyja_0.9.5/plugins
+CMAKE_SOURCE_DIR = /home/mongoose/Projects/freyja_0.9.5
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja/freyja_0.9.5/plugins
+CMAKE_BINARY_DIR = /home/mongoose/Projects/freyja_0.9.5
 
 # Include the progress variables for this target.
 include CMakeFiles/progress.make
@@ -48,505 +48,530 @@ include CMakeFiles/progress.make
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/mongoose/Projects/freyja_0.9.5/plugins && /usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target edit_cache
 edit_cache/fast: edit_cache
 
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	cd /home/mongoose/Projects/freyja_0.9.5/plugins && /usr/bin/cmake -P cmake_install.cmake
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	cd /home/mongoose/Projects/freyja_0.9.5/plugins && /usr/bin/cmake -P cmake_install.cmake
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	cd /home/mongoose/Projects/freyja_0.9.5/plugins && /usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+
+# Special rule for the target install/local
+install/local/fast: install/local
+
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Only default component available"
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	cd /home/mongoose/Projects/freyja_0.9.5/plugins && /usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 
 # Special rule for the target rebuild_cache
 rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja/freyja_0.9.5/plugins/CMakeFiles $(CMAKE_ALL_PROGRESS)
-	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja/freyja_0.9.5/plugins/CMakeFiles 0
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/CMakeFiles $(CMAKE_ALL_PROGRESS)
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/mongoose/Projects/freyja_0.9.5/CMakeFiles 0
 
 # The main clean target
 clean:
-	$(MAKE) -f CMakeFiles/Makefile2 clean
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/clean
 
 # The main clean target
 clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	$(MAKE) -f CMakeFiles/Makefile2 preinstall
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/preinstall
 
 # clear depends
 depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
-#=============================================================================
-# Target rules for targets named image-plugin-bmp
+# Convenience name for target.
+plugins/CMakeFiles/image-plugin-bmp.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/image-plugin-bmp.dir/rule
 
-# Build rule for target.
-image-plugin-bmp: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 image-plugin-bmp
+# Convenience name for target.
+image-plugin-bmp: plugins/CMakeFiles/image-plugin-bmp.dir/rule
 
 # fast build rule for target.
 image-plugin-bmp/fast:
-	$(MAKE) -f CMakeFiles/image-plugin-bmp.dir/build.make CMakeFiles/image-plugin-bmp.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/image-plugin-bmp.dir/build.make plugins/CMakeFiles/image-plugin-bmp.dir/build
 
-#=============================================================================
-# Target rules for targets named image-plugin-dds
+# Convenience name for target.
+plugins/CMakeFiles/image-plugin-dds.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/image-plugin-dds.dir/rule
 
-# Build rule for target.
-image-plugin-dds: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 image-plugin-dds
+# Convenience name for target.
+image-plugin-dds: plugins/CMakeFiles/image-plugin-dds.dir/rule
 
 # fast build rule for target.
 image-plugin-dds/fast:
-	$(MAKE) -f CMakeFiles/image-plugin-dds.dir/build.make CMakeFiles/image-plugin-dds.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/image-plugin-dds.dir/build.make plugins/CMakeFiles/image-plugin-dds.dir/build
 
-#=============================================================================
-# Target rules for targets named image-plugin-jpg
+# Convenience name for target.
+plugins/CMakeFiles/image-plugin-jpg.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/image-plugin-jpg.dir/rule
 
-# Build rule for target.
-image-plugin-jpg: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 image-plugin-jpg
+# Convenience name for target.
+image-plugin-jpg: plugins/CMakeFiles/image-plugin-jpg.dir/rule
 
 # fast build rule for target.
 image-plugin-jpg/fast:
-	$(MAKE) -f CMakeFiles/image-plugin-jpg.dir/build.make CMakeFiles/image-plugin-jpg.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/image-plugin-jpg.dir/build.make plugins/CMakeFiles/image-plugin-jpg.dir/build
 
-#=============================================================================
-# Target rules for targets named image-plugin-pcx
+# Convenience name for target.
+plugins/CMakeFiles/image-plugin-pcx.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/image-plugin-pcx.dir/rule
 
-# Build rule for target.
-image-plugin-pcx: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 image-plugin-pcx
+# Convenience name for target.
+image-plugin-pcx: plugins/CMakeFiles/image-plugin-pcx.dir/rule
 
 # fast build rule for target.
 image-plugin-pcx/fast:
-	$(MAKE) -f CMakeFiles/image-plugin-pcx.dir/build.make CMakeFiles/image-plugin-pcx.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/image-plugin-pcx.dir/build.make plugins/CMakeFiles/image-plugin-pcx.dir/build
 
-#=============================================================================
-# Target rules for targets named image-plugin-png
+# Convenience name for target.
+plugins/CMakeFiles/image-plugin-png.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/image-plugin-png.dir/rule
 
-# Build rule for target.
-image-plugin-png: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 image-plugin-png
+# Convenience name for target.
+image-plugin-png: plugins/CMakeFiles/image-plugin-png.dir/rule
 
 # fast build rule for target.
 image-plugin-png/fast:
-	$(MAKE) -f CMakeFiles/image-plugin-png.dir/build.make CMakeFiles/image-plugin-png.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/image-plugin-png.dir/build.make plugins/CMakeFiles/image-plugin-png.dir/build
 
-#=============================================================================
-# Target rules for targets named image-plugin-ppm
+# Convenience name for target.
+plugins/CMakeFiles/image-plugin-ppm.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/image-plugin-ppm.dir/rule
 
-# Build rule for target.
-image-plugin-ppm: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 image-plugin-ppm
+# Convenience name for target.
+image-plugin-ppm: plugins/CMakeFiles/image-plugin-ppm.dir/rule
 
 # fast build rule for target.
 image-plugin-ppm/fast:
-	$(MAKE) -f CMakeFiles/image-plugin-ppm.dir/build.make CMakeFiles/image-plugin-ppm.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/image-plugin-ppm.dir/build.make plugins/CMakeFiles/image-plugin-ppm.dir/build
 
-#=============================================================================
-# Target rules for targets named image-plugin-tga
+# Convenience name for target.
+plugins/CMakeFiles/image-plugin-tga.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/image-plugin-tga.dir/rule
 
-# Build rule for target.
-image-plugin-tga: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 image-plugin-tga
+# Convenience name for target.
+image-plugin-tga: plugins/CMakeFiles/image-plugin-tga.dir/rule
 
 # fast build rule for target.
 image-plugin-tga/fast:
-	$(MAKE) -f CMakeFiles/image-plugin-tga.dir/build.make CMakeFiles/image-plugin-tga.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/image-plugin-tga.dir/build.make plugins/CMakeFiles/image-plugin-tga.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-3ds
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-3ds.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-3ds.dir/rule
 
-# Build rule for target.
-model-plugin-3ds: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-3ds
+# Convenience name for target.
+model-plugin-3ds: plugins/CMakeFiles/model-plugin-3ds.dir/rule
 
 # fast build rule for target.
 model-plugin-3ds/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-3ds.dir/build.make CMakeFiles/model-plugin-3ds.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-3ds.dir/build.make plugins/CMakeFiles/model-plugin-3ds.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-ase
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-ase.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-ase.dir/rule
 
-# Build rule for target.
-model-plugin-ase: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-ase
+# Convenience name for target.
+model-plugin-ase: plugins/CMakeFiles/model-plugin-ase.dir/rule
 
 # fast build rule for target.
 model-plugin-ase/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-ase.dir/build.make CMakeFiles/model-plugin-ase.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-ase.dir/build.make plugins/CMakeFiles/model-plugin-ase.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-bsa
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-bsa.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-bsa.dir/rule
 
-# Build rule for target.
-model-plugin-bsa: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-bsa
+# Convenience name for target.
+model-plugin-bsa: plugins/CMakeFiles/model-plugin-bsa.dir/rule
 
 # fast build rule for target.
 model-plugin-bsa/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-bsa.dir/build.make CMakeFiles/model-plugin-bsa.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-bsa.dir/build.make plugins/CMakeFiles/model-plugin-bsa.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-bvh
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-bvh.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-bvh.dir/rule
 
-# Build rule for target.
-model-plugin-bvh: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-bvh
+# Convenience name for target.
+model-plugin-bvh: plugins/CMakeFiles/model-plugin-bvh.dir/rule
 
 # fast build rule for target.
 model-plugin-bvh/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-bvh.dir/build.make CMakeFiles/model-plugin-bvh.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-bvh.dir/build.make plugins/CMakeFiles/model-plugin-bvh.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-dof
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-dof.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-dof.dir/rule
 
-# Build rule for target.
-model-plugin-dof: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-dof
+# Convenience name for target.
+model-plugin-dof: plugins/CMakeFiles/model-plugin-dof.dir/rule
 
 # fast build rule for target.
 model-plugin-dof/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-dof.dir/build.make CMakeFiles/model-plugin-dof.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-dof.dir/build.make plugins/CMakeFiles/model-plugin-dof.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-egg9
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-egg9.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-egg9.dir/rule
 
-# Build rule for target.
-model-plugin-egg9: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-egg9
+# Convenience name for target.
+model-plugin-egg9: plugins/CMakeFiles/model-plugin-egg9.dir/rule
 
 # fast build rule for target.
 model-plugin-egg9/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-egg9.dir/build.make CMakeFiles/model-plugin-egg9.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-egg9.dir/build.make plugins/CMakeFiles/model-plugin-egg9.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-et
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-et.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-et.dir/rule
 
-# Build rule for target.
-model-plugin-et: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-et
+# Convenience name for target.
+model-plugin-et: plugins/CMakeFiles/model-plugin-et.dir/rule
 
 # fast build rule for target.
 model-plugin-et/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-et.dir/build.make CMakeFiles/model-plugin-et.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-et.dir/build.make plugins/CMakeFiles/model-plugin-et.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-glm
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-glm.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-glm.dir/rule
 
-# Build rule for target.
-model-plugin-glm: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-glm
+# Convenience name for target.
+model-plugin-glm: plugins/CMakeFiles/model-plugin-glm.dir/rule
 
 # fast build rule for target.
 model-plugin-glm/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-glm.dir/build.make CMakeFiles/model-plugin-glm.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-glm.dir/build.make plugins/CMakeFiles/model-plugin-glm.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-halflife
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-halflife.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-halflife.dir/rule
 
-# Build rule for target.
-model-plugin-halflife: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-halflife
+# Convenience name for target.
+model-plugin-halflife: plugins/CMakeFiles/model-plugin-halflife.dir/rule
 
 # fast build rule for target.
 model-plugin-halflife/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-halflife.dir/build.make CMakeFiles/model-plugin-halflife.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-halflife.dir/build.make plugins/CMakeFiles/model-plugin-halflife.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-llm
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-llm.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-llm.dir/rule
 
-# Build rule for target.
-model-plugin-llm: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-llm
+# Convenience name for target.
+model-plugin-llm: plugins/CMakeFiles/model-plugin-llm.dir/rule
 
 # fast build rule for target.
 model-plugin-llm/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-llm.dir/build.make CMakeFiles/model-plugin-llm.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-llm.dir/build.make plugins/CMakeFiles/model-plugin-llm.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-lwo
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-lwo.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-lwo.dir/rule
 
-# Build rule for target.
-model-plugin-lwo: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-lwo
+# Convenience name for target.
+model-plugin-lwo: plugins/CMakeFiles/model-plugin-lwo.dir/rule
 
 # fast build rule for target.
 model-plugin-lwo/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-lwo.dir/build.make CMakeFiles/model-plugin-lwo.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-lwo.dir/build.make plugins/CMakeFiles/model-plugin-lwo.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-md2
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-md2.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-md2.dir/rule
 
-# Build rule for target.
-model-plugin-md2: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-md2
+# Convenience name for target.
+model-plugin-md2: plugins/CMakeFiles/model-plugin-md2.dir/rule
 
 # fast build rule for target.
 model-plugin-md2/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-md2.dir/build.make CMakeFiles/model-plugin-md2.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-md2.dir/build.make plugins/CMakeFiles/model-plugin-md2.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-md3
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-md3.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-md3.dir/rule
 
-# Build rule for target.
-model-plugin-md3: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-md3
+# Convenience name for target.
+model-plugin-md3: plugins/CMakeFiles/model-plugin-md3.dir/rule
 
 # fast build rule for target.
 model-plugin-md3/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-md3.dir/build.make CMakeFiles/model-plugin-md3.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-md3.dir/build.make plugins/CMakeFiles/model-plugin-md3.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-md5
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-md5.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-md5.dir/rule
 
-# Build rule for target.
-model-plugin-md5: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-md5
+# Convenience name for target.
+model-plugin-md5: plugins/CMakeFiles/model-plugin-md5.dir/rule
 
 # fast build rule for target.
 model-plugin-md5/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-md5.dir/build.make CMakeFiles/model-plugin-md5.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-md5.dir/build.make plugins/CMakeFiles/model-plugin-md5.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-mdl
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-mdl.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-mdl.dir/rule
 
-# Build rule for target.
-model-plugin-mdl: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-mdl
+# Convenience name for target.
+model-plugin-mdl: plugins/CMakeFiles/model-plugin-mdl.dir/rule
 
 # fast build rule for target.
 model-plugin-mdl/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-mdl.dir/build.make CMakeFiles/model-plugin-mdl.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-mdl.dir/build.make plugins/CMakeFiles/model-plugin-mdl.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-milkshape
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-milkshape.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-milkshape.dir/rule
 
-# Build rule for target.
-model-plugin-milkshape: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-milkshape
+# Convenience name for target.
+model-plugin-milkshape: plugins/CMakeFiles/model-plugin-milkshape.dir/rule
 
 # fast build rule for target.
 model-plugin-milkshape/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-milkshape.dir/build.make CMakeFiles/model-plugin-milkshape.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-milkshape.dir/build.make plugins/CMakeFiles/model-plugin-milkshape.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-nad
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-nad.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-nad.dir/rule
 
-# Build rule for target.
-model-plugin-nad: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-nad
+# Convenience name for target.
+model-plugin-nad: plugins/CMakeFiles/model-plugin-nad.dir/rule
 
 # fast build rule for target.
 model-plugin-nad/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-nad.dir/build.make CMakeFiles/model-plugin-nad.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-nad.dir/build.make plugins/CMakeFiles/model-plugin-nad.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-nif4
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-nif4.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-nif4.dir/rule
 
-# Build rule for target.
-model-plugin-nif4: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-nif4
+# Convenience name for target.
+model-plugin-nif4: plugins/CMakeFiles/model-plugin-nif4.dir/rule
 
 # fast build rule for target.
 model-plugin-nif4/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-nif4.dir/build.make CMakeFiles/model-plugin-nif4.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-nif4.dir/build.make plugins/CMakeFiles/model-plugin-nif4.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-nif5
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-nif5.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-nif5.dir/rule
 
-# Build rule for target.
-model-plugin-nif5: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-nif5
+# Convenience name for target.
+model-plugin-nif5: plugins/CMakeFiles/model-plugin-nif5.dir/rule
 
 # fast build rule for target.
 model-plugin-nif5/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-nif5.dir/build.make CMakeFiles/model-plugin-nif5.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-nif5.dir/build.make plugins/CMakeFiles/model-plugin-nif5.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-nod
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-nod.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-nod.dir/rule
 
-# Build rule for target.
-model-plugin-nod: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-nod
+# Convenience name for target.
+model-plugin-nod: plugins/CMakeFiles/model-plugin-nod.dir/rule
 
 # fast build rule for target.
 model-plugin-nod/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-nod.dir/build.make CMakeFiles/model-plugin-nod.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-nod.dir/build.make plugins/CMakeFiles/model-plugin-nod.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-obj
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-obj.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-obj.dir/rule
 
-# Build rule for target.
-model-plugin-obj: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-obj
+# Convenience name for target.
+model-plugin-obj: plugins/CMakeFiles/model-plugin-obj.dir/rule
 
 # fast build rule for target.
 model-plugin-obj/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-obj.dir/build.make CMakeFiles/model-plugin-obj.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-obj.dir/build.make plugins/CMakeFiles/model-plugin-obj.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-psk
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-psk.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-psk.dir/rule
 
-# Build rule for target.
-model-plugin-psk: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-psk
+# Convenience name for target.
+model-plugin-psk: plugins/CMakeFiles/model-plugin-psk.dir/rule
 
 # fast build rule for target.
 model-plugin-psk/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-psk.dir/build.make CMakeFiles/model-plugin-psk.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-psk.dir/build.make plugins/CMakeFiles/model-plugin-psk.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-sims
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-sims.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-sims.dir/rule
 
-# Build rule for target.
-model-plugin-sims: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-sims
+# Convenience name for target.
+model-plugin-sims: plugins/CMakeFiles/model-plugin-sims.dir/rule
 
 # fast build rule for target.
 model-plugin-sims/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-sims.dir/build.make CMakeFiles/model-plugin-sims.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-sims.dir/build.make plugins/CMakeFiles/model-plugin-sims.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-skel
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-skel.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-skel.dir/rule
 
-# Build rule for target.
-model-plugin-skel: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-skel
+# Convenience name for target.
+model-plugin-skel: plugins/CMakeFiles/model-plugin-skel.dir/rule
 
 # fast build rule for target.
 model-plugin-skel/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-skel.dir/build.make CMakeFiles/model-plugin-skel.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-skel.dir/build.make plugins/CMakeFiles/model-plugin-skel.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-skn
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-skn.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-skn.dir/rule
 
-# Build rule for target.
-model-plugin-skn: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-skn
+# Convenience name for target.
+model-plugin-skn: plugins/CMakeFiles/model-plugin-skn.dir/rule
 
 # fast build rule for target.
 model-plugin-skn/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-skn.dir/build.make CMakeFiles/model-plugin-skn.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-skn.dir/build.make plugins/CMakeFiles/model-plugin-skn.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-smd
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-smd.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-smd.dir/rule
 
-# Build rule for target.
-model-plugin-smd: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-smd
+# Convenience name for target.
+model-plugin-smd: plugins/CMakeFiles/model-plugin-smd.dir/rule
 
 # fast build rule for target.
 model-plugin-smd/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-smd.dir/build.make CMakeFiles/model-plugin-smd.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-smd.dir/build.make plugins/CMakeFiles/model-plugin-smd.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-tombraider
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-tombraider.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-tombraider.dir/rule
 
-# Build rule for target.
-model-plugin-tombraider: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-tombraider
+# Convenience name for target.
+model-plugin-tombraider: plugins/CMakeFiles/model-plugin-tombraider.dir/rule
 
 # fast build rule for target.
 model-plugin-tombraider/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-tombraider.dir/build.make CMakeFiles/model-plugin-tombraider.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-tombraider.dir/build.make plugins/CMakeFiles/model-plugin-tombraider.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-trmesh
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-trmesh.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-trmesh.dir/rule
 
-# Build rule for target.
-model-plugin-trmesh: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-trmesh
+# Convenience name for target.
+model-plugin-trmesh: plugins/CMakeFiles/model-plugin-trmesh.dir/rule
 
 # fast build rule for target.
 model-plugin-trmesh/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-trmesh.dir/build.make CMakeFiles/model-plugin-trmesh.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-trmesh.dir/build.make plugins/CMakeFiles/model-plugin-trmesh.dir/build
 
-#=============================================================================
-# Target rules for targets named model-plugin-utpackage
+# Convenience name for target.
+plugins/CMakeFiles/model-plugin-utpackage.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-utpackage.dir/rule
 
-# Build rule for target.
-model-plugin-utpackage: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-utpackage
+# Convenience name for target.
+model-plugin-utpackage: plugins/CMakeFiles/model-plugin-utpackage.dir/rule
 
 # fast build rule for target.
 model-plugin-utpackage/fast:
-	$(MAKE) -f CMakeFiles/model-plugin-utpackage.dir/build.make CMakeFiles/model-plugin-utpackage.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-utpackage.dir/build.make plugins/CMakeFiles/model-plugin-utpackage.dir/build
 
-#=============================================================================
-# Target rules for targets named ui-plugin-lineageIIextract
+# Convenience name for target.
+plugins/CMakeFiles/ui-plugin-lineageIIextract.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/ui-plugin-lineageIIextract.dir/rule
 
-# Build rule for target.
-ui-plugin-lineageIIextract: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ui-plugin-lineageIIextract
+# Convenience name for target.
+ui-plugin-lineageIIextract: plugins/CMakeFiles/ui-plugin-lineageIIextract.dir/rule
 
 # fast build rule for target.
 ui-plugin-lineageIIextract/fast:
-	$(MAKE) -f CMakeFiles/ui-plugin-lineageIIextract.dir/build.make CMakeFiles/ui-plugin-lineageIIextract.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/ui-plugin-lineageIIextract.dir/build.make plugins/CMakeFiles/ui-plugin-lineageIIextract.dir/build
 
-#=============================================================================
-# Target rules for targets named ui-plugin-octree
+# Convenience name for target.
+plugins/CMakeFiles/ui-plugin-octree.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/ui-plugin-octree.dir/rule
 
-# Build rule for target.
-ui-plugin-octree: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ui-plugin-octree
+# Convenience name for target.
+ui-plugin-octree: plugins/CMakeFiles/ui-plugin-octree.dir/rule
 
 # fast build rule for target.
 ui-plugin-octree/fast:
-	$(MAKE) -f CMakeFiles/ui-plugin-octree.dir/build.make CMakeFiles/ui-plugin-octree.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/ui-plugin-octree.dir/build.make plugins/CMakeFiles/ui-plugin-octree.dir/build
 
-#=============================================================================
-# Target rules for targets named ui-plugin-pakreader
+# Convenience name for target.
+plugins/CMakeFiles/ui-plugin-pakreader.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/ui-plugin-pakreader.dir/rule
 
-# Build rule for target.
-ui-plugin-pakreader: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ui-plugin-pakreader
+# Convenience name for target.
+ui-plugin-pakreader: plugins/CMakeFiles/ui-plugin-pakreader.dir/rule
 
 # fast build rule for target.
 ui-plugin-pakreader/fast:
-	$(MAKE) -f CMakeFiles/ui-plugin-pakreader.dir/build.make CMakeFiles/ui-plugin-pakreader.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/ui-plugin-pakreader.dir/build.make plugins/CMakeFiles/ui-plugin-pakreader.dir/build
 
-#=============================================================================
-# Target rules for targets named ui-plugin-perlinnoise
+# Convenience name for target.
+plugins/CMakeFiles/ui-plugin-perlinnoise.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/ui-plugin-perlinnoise.dir/rule
 
-# Build rule for target.
-ui-plugin-perlinnoise: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ui-plugin-perlinnoise
+# Convenience name for target.
+ui-plugin-perlinnoise: plugins/CMakeFiles/ui-plugin-perlinnoise.dir/rule
 
 # fast build rule for target.
 ui-plugin-perlinnoise/fast:
-	$(MAKE) -f CMakeFiles/ui-plugin-perlinnoise.dir/build.make CMakeFiles/ui-plugin-perlinnoise.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/ui-plugin-perlinnoise.dir/build.make plugins/CMakeFiles/ui-plugin-perlinnoise.dir/build
 
-#=============================================================================
-# Target rules for targets named ui-plugin-reverseengineer
+# Convenience name for target.
+plugins/CMakeFiles/ui-plugin-reverseengineer.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/ui-plugin-reverseengineer.dir/rule
 
-# Build rule for target.
-ui-plugin-reverseengineer: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 ui-plugin-reverseengineer
+# Convenience name for target.
+ui-plugin-reverseengineer: plugins/CMakeFiles/ui-plugin-reverseengineer.dir/rule
 
 # fast build rule for target.
 ui-plugin-reverseengineer/fast:
-	$(MAKE) -f CMakeFiles/ui-plugin-reverseengineer.dir/build.make CMakeFiles/ui-plugin-reverseengineer.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/ui-plugin-reverseengineer.dir/build.make plugins/CMakeFiles/ui-plugin-reverseengineer.dir/build
 
-#=============================================================================
-# Target rules for targets named win32
+# Convenience name for target.
+plugins/CMakeFiles/win32.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/win32.dir/rule
 
-# Build rule for target.
-win32: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 win32
+# Convenience name for target.
+win32: plugins/CMakeFiles/win32.dir/rule
 
 # fast build rule for target.
 win32/fast:
-	$(MAKE) -f CMakeFiles/win32.dir/build.make CMakeFiles/win32.dir/build
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/win32.dir/build.make plugins/CMakeFiles/win32.dir/build
 
 # Help Target
 help::
@@ -562,6 +587,9 @@ help::
 	@echo "... image-plugin-png"
 	@echo "... image-plugin-ppm"
 	@echo "... image-plugin-tga"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... list_install_components"
 	@echo "... model-plugin-3ds"
 	@echo "... model-plugin-ase"
 	@echo "... model-plugin-bsa"
@@ -608,5 +636,5 @@ help::
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 

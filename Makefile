@@ -650,6 +650,17 @@ ui-plugin-reverseengineer: cmake_check_build_system
 ui-plugin-reverseengineer/fast:
 	$(MAKE) -f plugins/CMakeFiles/ui-plugin-reverseengineer.dir/build.make plugins/CMakeFiles/ui-plugin-reverseengineer.dir/build
 
+#=============================================================================
+# Target rules for targets named win32
+
+# Build rule for target.
+win32: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 win32
+
+# fast build rule for target.
+win32/fast:
+	$(MAKE) -f plugins/CMakeFiles/win32.dir/build.make plugins/CMakeFiles/win32.dir/build
+
 # Help Target
 help::
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -710,6 +721,7 @@ help::
 	@echo "... ui-plugin-pakreader"
 	@echo "... ui-plugin-perlinnoise"
 	@echo "... ui-plugin-reverseengineer"
+	@echo "... win32"
 
 
 
