@@ -11,20 +11,24 @@
 
  * 'Hide' debug spew in logs to avoid user confusion.
 
- * mgtk_tree selection with event pairs.
+ * mgtk_tree selection with event pairs per node.
 
  * Move all mlisp resource code into mgtk_mlisp.
 
  * Bundle object / objects... event modes using grouping contexts.
 
- * Audio support for syncing A/V.
+ * Audio support for syncing A/V via audio plugin module.
 
- * Mesh 'hide' ala layers.
+ * Mesh 'hide' render option from GUI.  
 	- Depends on new scenegraph widget mesh selection fix.
+
+ * libfreyja AnimationControl instances for more... well control options.
+	- UV / Skeletal / Motion / Vertex / etc
 
  * Refactor FreyjaControl::LoadResource() and related functions.
 
  * Lua / mgtk
+	- Macro editor: textarea, save, open, cancel, run for lua scripts
 	- Get Lua support for libfreyja ABI up to 100%.
 		- Requires C/C++ wrapper functions for some C type manipulation.
 	- Create mgtk_label_richtext() to accept pango rich text.
@@ -72,7 +76,7 @@
  * Low-poly model creation by vertices features.
 	- Fix vertex deletion.
 	- Vertex / Knife based face splitting (edge midpoint/sliding edge points).
-	- Low-poly 'draw' face creation to fill in gaps in models by vertices.
+	- Low-poly 'draw/stitching' face creation to fill in gaps in models by vertices.
 	 	- Select 3 vertices = action for making triangle.
 		- Select 4 vertices = action for making quad.
 

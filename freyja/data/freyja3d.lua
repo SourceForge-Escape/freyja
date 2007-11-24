@@ -32,6 +32,7 @@ function freyja3d_ui_menubar( vbox )
 
 	mgtk_append_menu( submenu, mgtk_menu_item( "_New", "eNewFile", "C-n", "gtk-new" ) )
 	mgtk_append_menu( submenu, mgtk_menu_item( "Ap_pend Model...", "eAppendFile", "gtk-paste" ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "_Open Model...", "eOpenFile", "C-o", "gtk-open" ) )
 	mgtk_append_menu( submenu, mgtk_menu_separator() )
 	mgtk_append_menu( submenu, mgtk_submenu( "R_ecent Models...", "eRecentFiles", "recent_models_bind" ) )
 	mgtk_append_menu( submenu, mgtk_menu_separator() )
@@ -293,6 +294,7 @@ function freyja3d_ui_shelf_view( shelf )
 	mgtk_append_menu( optmenu, mgtk_menu_item("UV      ", "eViewportUV") )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Curve   ", "eViewportCurve") )
 	mgtk_append_menu( optmenu, mgtk_menu_item("Camera  ", "eViewportCamera") )
+	mgtk_optionmenu_set_by_id( "eViewportModeMenu", 1 )
 
 	-- Render options
 	mgtk_toolbar_togglebutton(toolbar, "Four Window", "eViewports", false, "icons/24x24/fourwin.png", "Four window view" )
@@ -520,15 +522,15 @@ function freyja3d_ui_sidebar_model( sidebar )
 	mgtk_box_pack( hbox, mgtk_togglebutton( "23", "eSmooth", 22 ), 1, 1, 0 )
 	mgtk_box_pack( hbox, mgtk_togglebutton( "24", "eSmooth", 23 ), 1, 1, 0 )
 
-	hbox = mgtk_hbox( 1, 0 )
+	hbox = mgtk_hbox( 1, 1 )
 	mgtk_box_pack( expander, hbox )
-	mgtk_box_pack( hbox, mgtk_button( "Assign", "eGroupAssign" ), 1, 0, 0 )
-	mgtk_box_pack( hbox, mgtk_button( "Clear ", "eGroupClear" ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Assign", "eGroupAssign" ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Clear ", "eGroupClear" ), 1, 1, 0 )
 
-	hbox = mgtk_hbox( 1, 0 )
+	hbox = mgtk_hbox( 1, 1 )
 	mgtk_box_pack( expander, hbox )
-	mgtk_box_pack( hbox, mgtk_button( "Smooth", "eSelectedFacesGenerateNormals" ), 1, 0, 0 )
-	mgtk_box_pack( hbox, mgtk_button( "Flip  ", "eSelectedFacesFlipNormals" ), 1, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Smooth", "eSelectedFacesGenerateNormals" ), 1, 1, 0 )
+	mgtk_box_pack( hbox, mgtk_button( "Flip    ", "eSelectedFacesFlipNormals" ), 1, 1, 0 )
 
 	-- Scenegraph box
 	handlebox = mgtk_handlebox( 1 )
@@ -647,7 +649,7 @@ function freyja3d_ui_sidebar_material( sidebar )
 	mgtk_box_pack( tab, hbox )
 	spnbtn = mgtk_spinbutton_uint( "eSetMaterial", 0, 0, 128 )
 	mgtk_box_pack( hbox, spnbtn )
-	mgtk_box_pack( hbox, mgtk_textbox( "eSetMaterialName" ) )
+	mgtk_box_pack( hbox, mgtk_textbox( "eSetMaterialName" ), 1, 1, 0 )
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
@@ -671,7 +673,7 @@ function freyja3d_ui_sidebar_material( sidebar )
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_spinbutton_uint( "eSetMaterialTexture", 0, 0, 128 ) )
-	mgtk_box_pack( hbox, mgtk_textbox( "eSetTextureNameA" ) )
+	mgtk_box_pack( hbox, mgtk_textbox( "eSetTextureNameA" ), 1, 1, 0 )
 	mgtk_box_pack( hbox, mgtk_togglebutton( "Slot", "eTextureSlotLoad" ) )
 	mgtk_box_pack( hbox, mgtk_filechooserbutton( "...", "Open Texture...", "eOpenTexture", "texture_pattern" ) )
 				
@@ -682,7 +684,7 @@ function freyja3d_ui_sidebar_material( sidebar )
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_spinbutton_uint( "eSetMaterialShader", 0, 0, 128 ) )
-	mgtk_box_pack( hbox, mgtk_textbox( "eSetMaterialShaderFilename" ) )
+	mgtk_box_pack( hbox, mgtk_textbox( "eSetMaterialShaderFilename" ), 1, 1, 0 )
 	mgtk_box_pack( hbox, mgtk_togglebutton( "Slot", "eShaderSlotLoad" ) )
 	mgtk_box_pack( hbox, mgtk_filechooserbutton( "...", "Open Fragment program...", "eOpenShader", "shader_pattern") )
 	
@@ -786,8 +788,8 @@ function freyja3d_ui_init()
 	freyja3d_ui_sidebar_uv( sidebar )
 	freyja3d_ui_sidebar_material( sidebar )
 	tab = mgtk_tab( sidebar, "Plugins", -1 )
-	mgtk_expander( tab, "Freyja Plugins   ", true, "FirstPartyPluginSlot" )
-	mgtk_expander( tab, "Community Plugins", true, "ThirdPartyPluginSlot" )
+	mgtk_expander( tab, "Plugin Dock", true, "FirstPartyPluginSlot" )
+	--mgtk_expander( tab, "Community Plugins", true, "ThirdPartyPluginSlot" )
 
 	-- Animation scrubber
 	mgtk_box_pack( vbox, mgtk_hslider( "eAnimationSlider", 0, 500 ) )
@@ -897,28 +899,28 @@ function freyja3d_ui_dialogs()
 	mgtk_query_dialog( "MetadataPropertyDialog",
 		"gtk-dialog-question",
 		"Metadata property editor.",
-		"textentry",	"name",		"Name    ",		"  ",
-		"textentry",	"type",		"Type    ",		"  ",
+		"textentry",	"name",		"Name    ",		" ",
+		"textentry",	"type",		"Type    ",		" ",
 		"textarea",		"metadata",	"Metadata",		" ",
-		"textentry",	"model",	"Model   ",		"  ",
-		"textentry",	"material",	"Material",		"  ",
+		"textentry",	"model",	"Model   ",		" ",
+		"textentry",	"material",	"Material",		" ",
 		"gtk-cancel", "_Cancel", "gtk-ok", "_Update")
 
 	mgtk_query_dialog( "GenerateSheetDialog",
 		"gtk-dialog-question",
 		"Sheet mesh generation.",
-		"int",	"rows",	"How many rows?   ",	1, 1, 64,  -- default min max
-		"int",	"cols",	"How many columns?",	1, 1, 64,  -- default min max
-		"float",	"size",	"How large?       ",	8, 1, 128, -- default min max
-		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Create")
+		"int", "rows", "How many rows?   ",	1, 1, 64,  -- default min max
+		"int", "cols", "How many columns?",	1, 1, 64,  -- default min max
+		"float", "size", "How large?       ", 8, 1, 128, -- default min max
+		"gtk-cancel", "_Cancel", "gtk-ok", "_Create")
 
 	mgtk_query_dialog( "GenerateCubeDialog",
 		"gtk-dialog-question",
 		"Cube mesh generation.",
-		"int",	"rows",	"How many rows?   ",	1, 1, 64,  -- default min max
-		"int",	"cols",	"How many columns?",	1, 1, 64,  -- default min max
-		"float",	"size",	"How large?       ",	8, 1, 64,  -- default min max
-		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Create")
+		"int", "rows", "How many rows?   ",	1, 1, 64,  -- default min max
+		"int", "cols", "How many columns?",	1, 1, 64,  -- default min max
+		"float", "size", "How large?       ", 8, 1, 64,  -- default min max
+		"gtk-cancel", "_Cancel", "gtk-ok", "_Create")
 
 	mgtk_query_dialog( "GenerateRingDialog",
 		"gtk-dialog-question",
@@ -956,6 +958,23 @@ function freyja3d_ui_dialogs()
 		"Would you like to duplicate the selected bone?",
 		"int", "recurse", "Recursively duplicate children?", 0, 0, 1,  -- default min max
 		"gtk-cancel", "_Cancel", "gtk-ok", "_Duplicate")
+
+	-- Macro editor dialog
+	dialog = mgtk_dialog( "Macro Editor freyja", "eMacroDialog", 0 )
+	vbox = mgtk_vbox( )
+	mgtk_box_pack( dialog, vbox )
+	menubar = mgtk_menubar()
+	mgtk_box_pack( vbox, menubar )
+	submenu = mgtk_submenu("_File")
+	mgtk_append_menu( menubar, submenu )
+	mgtk_append_menu( submenu, mgtk_menu_item( "_New", "eMacroNew", "gtk-new" ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "_Open", "eMacroOpen", "gtk-open" ) )
+	mgtk_append_menu( submenu, mgtk_menu_separator() )
+	mgtk_append_menu( submenu, mgtk_menu_item( "_Save", "eMacroSave", "gtk-save" ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "Save _As...", "eMacroSaveAs", "gtk-save-as" ) )
+	mgtk_append_menu( submenu, mgtk_menu_item( "_Revert", "eMacroRevert", "gtk-revert-to-saved" ) )
+	mgtk_append_menu( submenu, mgtk_menu_separator() )
+	mgtk_append_menu( submenu, mgtk_menu_item( "_Close", "eMacroClose", "C-w", "gtk-close" ) )
 
 
 	-- Help dialog
@@ -996,7 +1015,7 @@ function freyja3d_ui_dialogs()
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_label("Render scaling") )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eZoom", 1.0, 0.0001, 1000.0 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eZoom", 1.0, 0.0001, 1000.0, 4 ) )
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
@@ -1006,70 +1025,70 @@ function freyja3d_ui_dialogs()
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_label("UV texcoord pick radius") )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eUVPickRadius", 0.1, 0.0001, 1000.0 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eUVPickRadius", 0.1, 0.0001, 1000.0, 4 ) )
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_label("Vertex pick radius") )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eVertexPickRadius", 0.1, 0.0001, 1000.0 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eVertexPickRadius", 0.1, 0.0001, 1000.0, 4 ) )
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_label("Vertex snap-weld dist") )
-	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eSnapWeldVertsDist", 0.1, 0.0001, 1000.0 ) )
+	mgtk_box_pack( hbox, mgtk_spinbutton_float( "eSnapWeldVertsDist", 0.1, 0.0001, 1000.0, 4 ) )
 
 	-- Colors
 	tab = mgtk_tab( notebook, "Colors", -1 )
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Background color" ) ) -- 遠景の呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorBackground" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Background color" ) ) -- 遠景の呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Grid color" ) ) -- 基底の呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorGrid" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Grid color" ) ) -- 基底の呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Vertex color" ) ) -- 天頂の呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorVertex" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Vertex color" ) ) -- 天頂の呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Vertex highlight" ) ) -- 現行天頂の呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorVertexHighlight" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Vertex highlight" ) ) -- 現行天頂の呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Wireframe color" ) ) -- Meshの呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMesh" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Wireframe color" ) ) -- Meshの呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Wireframe highlight" ) ) -- 現行Meshの呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMeshHighlight" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Wireframe highlight" ) ) -- 現行Meshの呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Bone color" ) ) -- 骨の呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorBone" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Bone color" ) ) -- 骨の呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Bone highlight" ) ) -- 現行骨の呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorBoneHighlight" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Bone highlight" ) ) -- 現行骨の呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Joint color" ) ) -- Jointの呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorJoint" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Joint color" ) ) -- Jointの呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_label( "Joint highlight" ) ) -- 現行Jointの呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorJointHighlight" ) )
+	mgtk_box_pack( hbox, mgtk_label( "Joint highlight" ) ) -- 現行Jointの呈色
 
 	mgtk_box_pack( tab, mgtk_button( "Reset to defaults", "eResetColorsToDefault" ) )
 

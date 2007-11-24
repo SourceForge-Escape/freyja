@@ -101,8 +101,12 @@ void mgtk_lua_register_functions(const Lua &lua)
 	// Utiliy functions.
 	lua.RegisterFunction("mgtk_boolean_set", mgtk_lua_boolean_set);
 	lua.RegisterFunction("mgtk_color_set", mgtk_lua_color_set);
+	lua.RegisterFunction("mgtk_integer_set", mgtk_lua_integer_set);
+	lua.RegisterFunction("mgtk_float_set", mgtk_lua_float_set);
 	lua.RegisterFunction("mgtk_string_set", mgtk_lua_string_set);
-	lua.RegisterFunction("mgtk_window_move", mgtk_lua_window_move);
+
+	lua.RegisterFunction( "mgtk_window_move", mgtk_lua_window_move );
+	lua.RegisterFunction( "mgtk_optionmenu_set_by_id", mgtk_lua_optionmenu_set_by_id );
 }
 
 
@@ -662,7 +666,9 @@ int mgtk_lua_rc_optionmenu(lua_State* s)
 	gtk_container_add( GTK_CONTAINER(lua_touserdata(s, 1)), optionmenu );
 
 	if ( id != -1)
-		mgtk_event_subscribe_gtk_widget(id, optionmenu);
+	{
+		mgtk_event_subscribe_gtk_widget( id, optionmenu );
+	}
 
 	lua_pushlightuserdata(s, (void *)optionmenu_menu);
 	return 1;
@@ -1646,7 +1652,7 @@ int mgtk_lua_query_dialog(lua_State *s)
 	d.mDialogIcon = lua_tostring(s, 2);
 	d.mInformationMessage = lua_tostring(s, 3); 
 
-	for (unsigned int i = 4, n = lua_gettop(s); i < n; ++i)
+	for (unsigned int i = 4, n = lua_gettop(s); i < n; )
 	{
 		mstl::String symbol = lua_tostring(s, i++);
 
@@ -1655,6 +1661,8 @@ int mgtk_lua_query_dialog(lua_State *s)
 			const char* symbol = lua_tostring(s, i++);
 			const char* question = lua_tostring(s, i++);
 			float value = (float)lua_tonumber(s, i++);
+			float min = (float)lua_tonumber(s, i++);
+			float max = (float)lua_tonumber(s, i++);
 			QueryDialogValue<float> v(symbol, question, value);
 			d.mFloats.push_back(v);
 		}
@@ -1663,6 +1671,8 @@ int mgtk_lua_query_dialog(lua_State *s)
 			const char* symbol = lua_tostring(s, i++);
 			const char* question = lua_tostring(s, i++);
 			int value = (int)lua_tonumber(s, i++);
+			int min = (int)lua_tonumber(s, i++);
+			int max = (int)lua_tonumber(s, i++);
 			QueryDialogValue<int> v(symbol, question, value);
 			d.mInts.push_back(v);
 		}
@@ -1678,12 +1688,12 @@ int mgtk_lua_query_dialog(lua_State *s)
 		{
 			const char *symbol = lua_tostring(s, i++);
 			const char *question = lua_tostring(s, i++);
-			const char *value =lua_tostring(s, i++);
+			const char *value = lua_tostring(s, i++);
 			QueryDialogValue<mstl::String> v(symbol, question, mstl::String(value));
 			d.mTextEntryStrings.push_back(v);
 
 		}
-		else
+		else 
 		{
 			d.mCancelIcon = symbol.c_str();
 			d.mCancelText = lua_tostring(s, i++);
@@ -1736,6 +1746,38 @@ int mgtk_lua_color_set(lua_State *s)
 }
 
 
+int mgtk_lua_integer_set(lua_State *s)
+{
+	if ( lua_gettop(s) == 2 && 
+		 lua_isnumber(s, 1) || lua_isstring(s, 1) && 
+		 lua_isnumber(s, 2) )
+	{
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+
+		//mgtk_toggle_value_set( event, (int)lua_tonumber(s, 2) );
+	}
+
+	return 0;
+}
+
+
+int mgtk_lua_float_set(lua_State *s)
+{
+	if ( lua_gettop(s) == 2 && 
+		 lua_isnumber(s, 1) || lua_isstring(s, 1) && 
+		 lua_isnumber(s, 2) )
+	{
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+
+		//mgtk_toggle_value_set( event, (float)lua_tonumber(s, 2) );
+	}
+
+	return 0;
+}
+
+
 int mgtk_lua_string_set(lua_State *s)
 {
 	if ( lua_gettop(s) == 2 && 
@@ -1761,6 +1803,18 @@ int mgtk_lua_window_move(lua_State* s)
 	{
 		gtk_window_move(GTK_WINDOW(window), x, y);
 	}
+
+	return 0;
+}
+
+
+int mgtk_lua_optionmenu_set_by_id(lua_State* s)
+{
+	int id = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+			   lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ) : -1 );
+	int value = (int)lua_tonumber(s, 3);
+
+	mgtk_option_menu_value_set( id, value );
 
 	return 0;
 }
