@@ -54,6 +54,25 @@ include_directories( /usr/include/freetype2 )
 link_libraries(	-lfreetype -lz )
 
 
+# Lua
+FIND_LIBRARY( LUA_FOUND NAMES lua5.1 lua-5.1 )
+FIND_PATH( LUA_INCLUDE_PATH lua.h  PATH_SUFFIXES lua5.1 )
+FIND_FILE( LUA_INCLUDE lua.h PATH_SUFFIXES lua5.1 )
+FIND_FILE( LUALIB_INCLUDE lualib.h PATH_SUFFIXES lua5.1 )
+FIND_FILE( LAUXLIB_INCLUDE lauxlib.h PATH_SUFFIXES lua5.1 )
+if (LUA_FOUND)
+
+	add_definitions( -DLUA_FOUND -DLUA_FOUND_INCLUDE )
+	include_directories( ${LUA_INCLUDE_PATH} )
+	link_libraries( ${LUA_FOUND} )
+	message( STATUS "Lua 5.1 library found.\n\t${LUA_FOUND}\n\t${LUA_INCLUDE_PATH}\n\t${LUA_INCLUDE}\n\t${LUALIB_INCLUDE}\n\t${LAUXLIB_INCLUDE}" )
+
+elseif ( NOT LUA_FOUND )
+
+	message(FATAL_ERROR "The library LUA 5.1 was not found.  Ensure you have the development libraries installed, and the files are in the correct search path.")
+
+endif (LUA_FOUND)
+
 
 # OpenGL Framework and freetype2 for MacOS
 #if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
