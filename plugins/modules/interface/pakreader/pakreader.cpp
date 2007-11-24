@@ -302,7 +302,7 @@ void ePakReaderTextEvent(char *text)
 
 void ePakReaderOpenPak()
 {
-	char *path = mgtk_rc_map("/");
+	const char *path = mgtk_rc_map("/");
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Open Pak...", path, 0,
 							  "All Files (*.*)", "*.*");
@@ -351,7 +351,7 @@ void PakReaderGUIAttach()
 	int item = Resource::mInstance->getIntByName("ePakReaderOpenPak");
 	mgtk_append_item_to_menu(submenu, "Open Pak...", item);
 
-	char *filename = mgtk_rc_map("plugins/pakreader.mlisp");
+	const char *filename = mgtk_rc_map("plugins/pakreader.mlisp");
 	Resource::mInstance->Load(filename);
 	delete [] filename;
 }

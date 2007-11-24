@@ -349,7 +349,7 @@ class Resource
    ------------------------------------------------------*/
 
 
-	int Load(char *filename);
+	int Load(const char *filename);
   /*------------------------------------------------------
    * Pre  : 
 	*
@@ -363,7 +363,7 @@ class Resource
    ------------------------------------------------------*/
 
 
-	int BufferFromFile(char *filename, char **buffer, unsigned int *bytes);
+	int BufferFromFile(const char *filename, char **buffer, unsigned int *bytes);
   /*------------------------------------------------------
    * Pre  : 
 	*
