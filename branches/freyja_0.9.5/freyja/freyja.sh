@@ -1,19 +1,16 @@
 #!/bin/bash
-# Local libs used to run local bin tests
-FBIN=freyja
+# Local libs path setup used to run tests.
+FBIN=./freyja
 FPATH=..
-
-if [ -d  ~/Projects/freyja/freyja_0.9.5/freyja ]
-then
-	FPATH=/home/mongoose/Projects/freyja_0.9.5
-	FBIN=${FPATH}/freyja/freyja
-fi
+cd `dirname $0`
 
 export LD_LIBRARY_PATH=${FPATH}/lua:${FPATH}/tinyxml:${FPATH}/libhel:${FPATH}/libfreyja:${FPATH}/libmgtk
 
 # Show which libraries we're linking to from here.
 ldd ${FBIN} | grep ${FPATH}
 echo "  ========================================================="
+echo ${FPATH}
+echo ${FBIN}
 
 # Handle special script arguments for debugging.
 ARG1="none"

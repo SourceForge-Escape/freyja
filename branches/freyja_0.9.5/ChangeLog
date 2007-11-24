@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071117 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fixes for freyja.sh pathing. (1117)
+ - Fixes for Lua build issues on fedora. (1116)
  - Fixes for freyja3d.lua -- querydialogs, misc issues, etc. (1104)
  - Fixes for interface plugins. (1103)
  - Legacy egg plugin fix. (1102)
