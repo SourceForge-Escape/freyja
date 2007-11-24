@@ -211,29 +211,24 @@ void mgtk_event_dialog_visible_set(int dialog, int visible)
 }
 
 
-void mgtk_option_menu_value_set(int event, int index)
+void mgtk_option_menu_value_set( int event, int value )
 {
-	Vector<GtkWidget*> *widgets;
-	GtkWidget *test;
-	unsigned int i;
-
-
-	widgets = gWidgetMap[event];
+	Vector<GtkWidget*>* widgets = gWidgetMap[event];
 
 	if (!widgets)
 		return;
 
-	for (i = widgets->begin(); i < widgets->end(); ++i)
+	for (unsigned int i = widgets->begin(); i < widgets->end(); ++i)
 	{
-		test = (*widgets)[i];
+		GtkWidget* widget = (*widgets)[i];
 
-		if (test && GTK_IS_OPTION_MENU(test))
+		if ( widget && GTK_IS_OPTION_MENU(widget) )
 		{
-			gtk_option_menu_set_history(GTK_OPTION_MENU(test), index);
+			gtk_option_menu_set_history( GTK_OPTION_MENU(widget), value );
 		}
 		else
 		{
-			mgtk_print("mgtk_option_menu_value_set> %i:%d failed\n", event, i);
+			mgtk_print( "mgtk_option_menu_value_set> %i:%d is not an optionmenu.\n", event, i );
 		}
 	}
 }

@@ -399,13 +399,13 @@ void ReverseEngineerEventsAttach()
 void ReverseEngineerGUIAttach()
 {
 	char *basename = "plugins/reverseengineer.mlisp";
-	int id = Resource::mInstance->getIntByName("eDialogReverseEngineer");
-	int menuId = Resource::mInstance->getIntByName("ePluginMenu");
-	//mgtk_append_item_to_menu(menuId, "Reverse Engineer", id);
-
 	const char *filename = mgtk_rc_map(basename);
 	Resource::mInstance->Load(filename);
 	delete [] filename;
+
+	//int id = Resource::mInstance->getIntByName("eDialogReverseEngineer");
+	//int menuId = Resource::mInstance->getIntByName("ePluginMenu");
+	//mgtk_append_item_to_menu(menuId, "Reverse Engineer", id);
 
 	uint32 e = resourceGetEventId1s("eReverseEngineerFString");
 	mgtk_textentry_value_set(e, "FAsBsCs");

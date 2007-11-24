@@ -21,11 +21,13 @@ mkdir -p ~/.freyja/plugins/python/
 
 # Plugins 
 cp ../bin/plugins/ui/debug/*.mlisp ~/.freyja/plugins/
+cp ../bin/plugins/ui/debug/*.lua ~/.freyja/plugins/
 cp ../bin/plugins/ui/debug/*.{so,bundle} ~/.freyja/plugins/
 cp ../bin/plugins/model/debug/*.{so,bundle} ~/.freyja/plugins/model/
 cp ../bin/plugins/image/debug/*.{so,bundle} ~/.freyja/plugins/image/
 
 # Main data
+cp ./data/freyja3d.lua ~/.freyja/
 cp ./data/freyja-dev.mlisp ~/.freyja/
 cp ./data/*.ttf ~/.freyja/
 cp ./data/shaders/*.frag ~/.freyja/shaders/

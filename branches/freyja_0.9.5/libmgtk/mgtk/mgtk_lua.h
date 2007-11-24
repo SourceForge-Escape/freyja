@@ -114,6 +114,7 @@ int mgtk_lua_rc_menu_item_check(lua_State *s);
 // mgtk_menu_item( "label" [, event | , event, value ] )
 
 int mgtk_lua_rc_optionmenu(lua_State *s);
+int mgtk_lua_optionmenu_set_by_id(lua_State *s);
 int mgtk_lua_rc_popup_menu(lua_State *s);
 int mgtk_lua_rc_menubar(lua_State *s);
 
@@ -317,6 +318,12 @@ int mgtk_lua_boolean_set(lua_State *s);
 
 int mgtk_lua_color_set(lua_State *s);
 // mgtk_color_set( "color_symbole", redf, greenf, bulef, alphaf ) 
+
+int mgtk_lua_float_set(lua_State *s);
+// mgtk_float_set( "float_symbol", float_value )
+
+int mgtk_lua_integer_set(lua_State *s);
+// mgtk_integer_set( "integer_symbol", integer_value )
 
 int mgtk_lua_string_set(lua_State *s);
 // mgtk_string_set( "string_symbol", "string_value" )
