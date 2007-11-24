@@ -754,10 +754,8 @@ int mgtk_event_set_range(int event, unsigned int value,
 /* Shutdown / exit handlers */
 void mgtk_event_shutdown()
 {
-/* Mongoose 2004.10.29, 
- * FIXME clean up gWidgetMap here too! */
-
-
+	/* Mongoose 2004.10.29, 
+	 * FIXME clean up gWidgetMap here too! */
 	mgtk_print("@Gtk+ shuting down...\n");
 	gtk_exit(0);
 }
@@ -775,10 +773,8 @@ void mgtk_destroy_window(GtkWidget *widget)
 
 float mgtk_event_get_float(int event)
 {
-	float value;
 	bool error;
-
-	value = spinbutton_value_get_float(event, &error);
+	float value = spinbutton_value_get_float(event, &error);
 	return value;
 }
 
@@ -1050,27 +1046,23 @@ void mgtk_event_color(GtkWidget *colorbutton, gpointer id)
 }
 
 
-void mgtk_event_spinbutton_int(GtkSpinButton *spin, gpointer event_id)
+void mgtk_event_spinbutton_int(GtkSpinButton* spin, gpointer event_id)
 {
-	//	int old_value;
-	int new_value;
+	MGTK_ASSERTMSG( spin != NULL, "WARNING: Invalid spinbutton." );
 
-
-	if (spin)
+	// Obsolete method of widget refresh? 
+	if ( spin )
 	{
-		new_value = gtk_spin_button_get_value_as_int(spin);
+		//int new_value = 
+		gtk_spin_button_get_value_as_int( spin );
 
-		switch (GPOINTER_TO_INT(event_id))
+		// FIXME 2007.11.24: Audit this code to see why it's still here.
+		switch ( GPOINTER_TO_INT(event_id) )
 		{
 		default:
-			mgtk_print("spinbutton_int_event> event %i not handled, email bug", 
-							GPOINTER_TO_INT(event_id));
+			mgtk_print("%s> WARNING: Event %i not handled.", 
+					   __func__, GPOINTER_TO_INT(event_id) );
 		}
-	}
-	else
-	{
-		mgtk_print("spinbutton_int_event> ERROR: Assertion '%s' failed",
-						"spin != NULL");
 	}
 }
 
@@ -1091,44 +1083,29 @@ int spinbutton_uint_set_range(GtkSpinButton *spin,
 }
 
 
-void mgtk_event_spinbutton_uint(GtkSpinButton *spin, gpointer event_id)
+void mgtk_event_spinbutton_uint(GtkSpinButton* spin, gpointer event_id)
 {
-	unsigned int event;
-	unsigned int value;
+	MGTK_ASSERTMSG( spin != NULL, "WARNING: Invalid spinbutton." );
 
-
-	if (!spin)
+	if ( spin )
 	{
-		mgtk_print("ERROR: Assertion '%s' failed %s:%d",
-					"spin != NULL", __FILE__, __LINE__);
-		return;
+		unsigned int value = gtk_spin_button_get_value_as_int(spin);
+		unsigned int event = GPOINTER_TO_INT(event_id);
+		mgtk_handle_event1u(event, value);
 	}
-
-	value = gtk_spin_button_get_value_as_int(spin);
-	event = GPOINTER_TO_INT(event_id);
-
-	mgtk_handle_event1u(event, value);
 }
 
 
-void mgtk_event_spinbutton_float(GtkSpinButton *spin, gpointer event_id)
+void mgtk_event_spinbutton_float(GtkSpinButton* spin, gpointer event_id)
 {
-	int event = GPOINTER_TO_INT(event_id);
-	float value;
+	MGTK_ASSERTMSG( spin != NULL, "WARNING: Invalid spinbutton." );
 
-
-	if (spin)
+	if ( spin )
 	{
-		value = gtk_spin_button_get_value_as_float(spin);
+		int event = GPOINTER_TO_INT(event_id);
+		float value = gtk_spin_button_get_value_as_float(spin);
+		mgtk_handle_event1f(event, value);
 	}
-	else
-	{
-		mgtk_print("spinbutton_float_event> ERROR: Assertion '%s' failed",
-					"spin != NULL");
-		return;
-	}
-
-	mgtk_handle_event1f(event, value);
 }
 
 
@@ -1154,7 +1131,6 @@ void mgtk_event_notebook_switch_page(GtkNotebook *notebook,
 void mgtk_event_notify_statusbar(const char *message)
 {
 	GtkWidget *widget = mgtk_get_statusbar_widget();
-
 
 	if (widget)
 	{
