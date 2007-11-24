@@ -160,7 +160,7 @@ void FreyjaModel::UpdateRenderList(int msh, int frame)
 		{
 			key = current->vertex[j];
 			vert = grp->vertex[key];
-			vlist.pushBack(vert);
+			vlist.push_back(vert);
 
 			//printf("key = %u, vert = %u\n", key, vert);
 		}
@@ -168,7 +168,7 @@ void FreyjaModel::UpdateRenderList(int msh, int frame)
 		poly->vertex.clear();
 
 		for (j = vlist.begin(); j < vlist.end(); ++j)
-			poly->vertex.pushBack(j);
+			poly->vertex.push_back(j);
 
 		//printf("-\n");
 	}
@@ -187,7 +187,7 @@ bool Egg::isDebugLevel(unsigned int level)
 }
 
 
-void Egg::setPrinter(FreyjaPrinter *printer)
+void Egg::setPrinter(freyja::Printer *printer)
 {
 	mPrinter = printer;
 }
@@ -200,7 +200,7 @@ void Egg::print(char *s, ...)
 	va_start(args, s);
 	if (mPrinter)
 	{
-		mPrinter->messageArgs(s, &args);
+		mPrinter->MessageArgs(s, &args);
 	}
 	else
 	{
@@ -727,7 +727,7 @@ bool Egg::Load(const char *filename)
 		for (j = 0; j < n; ++j)
 		{
 			u = r.ReadLongU();
-			vertexlist.pushBack(transV[u]);
+			vertexlist.push_back(transV[u]);
 		}
 
 		// Texel indices, translated to new ids
@@ -736,7 +736,7 @@ bool Egg::Load(const char *filename)
 		for (j = 0; j < n; ++j)
 		{
 			u = r.ReadLongU();
-			texellist.pushBack(transT[u]);
+			texellist.push_back(transT[u]);
 		}
 
 		if (isDebugLevel(5))
@@ -795,7 +795,7 @@ bool Egg::Load(const char *filename)
 		for (j = 0; j < n; ++j)
 		{
 			u = r.ReadLongU();
-			group->vertex.pushBack(transV[u]);
+			group->vertex.push_back(transV[u]);
 		}
 
 		vertex = getVertex(group->vertex[0]);
@@ -952,7 +952,7 @@ unsigned int Egg::addTexel(float s, float t)
 	texel->st[0] = s;
 	texel->st[1] = t;
 
-	mTexels.pushBack(texel);
+	mTexels.push_back(texel);
 	texel->id = mTexels.size() - 1;
 
 	return texel->id;
@@ -995,7 +995,7 @@ void Egg::combineTexels(unsigned int A, unsigned int B)
 			// Must be replace B with A to match sorted list ids
 			polygon->texel.Replace(B, A);
 
-			a->ref.pushBack(b->ref[i]);
+			a->ref.push_back(b->ref[i]);
 		}
 	}
 
@@ -1045,7 +1045,7 @@ void Egg::combineVertices(unsigned int A, unsigned int B)
 		{
 			// Must be replace B with A to match sorted list ids
 			polygon->vertex.Replace(B, A);
-			a->ref.pushBack(b->ref[i]);
+			a->ref.push_back(b->ref[i]);
 		}
 	}
 
@@ -1104,7 +1104,7 @@ egg_vertex_t *Egg::addVertex(vec_t x, vec_t y, vec_t z,
 	vertex->uv[0] = u;
 	vertex->uv[1] = v;
 
-	mVertices.pushBack(vertex);
+	mVertices.push_back(vertex);
 	vertex->id = mVertices.size() - 1;
 
 	return vertex;
@@ -1158,7 +1158,7 @@ void Egg::delVertex(egg_vertex_t *v)
 		{
 			if (tmp[j] != v->id && getVertex(tmp[j]))
 			{
-				grp->vertex.pushBack(tmp[j]);
+				grp->vertex.push_back(tmp[j]);
 			}
 		}
 	}
@@ -1206,7 +1206,7 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 	//}
 
 	polygon = new egg_polygon_t;
-	mPolygons.pushBack(polygon);
+	mPolygons.push_back(polygon);
 	polygon->id = mPolygons.size() - 1;
 	polygon->shader = shader;
 	polygon->flags = 0;
@@ -1222,9 +1222,9 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 			return UINT_MAX;
 		}
 
-		tex->ref.pushBack(polygon->id);
-		polygon->texel.pushBack(tex->id);
-		polygon->r_texel.pushBack(tex);
+		tex->ref.push_back(polygon->id);
+		polygon->texel.push_back(tex->id);
+		polygon->r_texel.push_back(tex);
 	}
 
 	for (i = vertex.begin(); i < vertex.end(); ++i)
@@ -1238,9 +1238,9 @@ unsigned int Egg::addPolygon(Vector<unsigned int> &vertex,
 			return UINT_MAX;
 		}
 
-		vert->ref.pushBack(polygon->id);
-		polygon->vertex.pushBack(vert->id);
-		polygon->r_vertex.pushBack(vert);
+		vert->ref.push_back(polygon->id);
+		polygon->vertex.push_back(vert->id);
+		polygon->r_vertex.push_back(vert);
 	}
 
 	return polygon->id;
@@ -1291,8 +1291,8 @@ void Egg::delPolygon(egg_polygon_t *polygon)
 		{
 			if (tmp[j] != polygon->id && getPolygon(tmp[j]))
 			{
-				mesh->polygon.pushBack(tmp[j]);
-				mesh->r_polygon.pushBack(getPolygon(tmp[j]));
+				mesh->polygon.push_back(tmp[j]);
+				mesh->r_polygon.push_back(getPolygon(tmp[j]));
 			}
 		}
 	}
@@ -1374,7 +1374,7 @@ void Egg::addGroup(egg_group_t *group)
 	if (!group)
 		return;
 
-	mGroups.pushBack(group);
+	mGroups.push_back(group);
 	group->id = mGroups.size() - 1;
 }
 
@@ -1508,7 +1508,7 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 	addMesh(msh);
 	grp = newGroup();
 	addGroup(grp);
-	msh->group.pushBack(grp->id);
+	msh->group.push_back(grp->id);
 
 	// Copy vertices, add to group|frame, and make a translation table
 	for (i = vertices->begin(); i < vertices->end(); ++i)
@@ -1523,7 +1523,7 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 		if (!vert2)
 			continue;
 
-		grp->vertex.pushBack(vert2->id); // Add(vert2->id);
+		grp->vertex.push_back(vert2->id); // Add(vert2->id);
 		trans.Add(vert->id, vert2->id);
 	} 
 
@@ -1550,7 +1550,7 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 			}
 			else
 			{
-				vertex_list.pushBack(trans[poly->vertex[j]]);
+				vertex_list.push_back(trans[poly->vertex[j]]);
 			}
 		}
 		
@@ -1564,7 +1564,7 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 			if (!texel)
 				continue;
 
-			texel_list.pushBack(addTexel(texel->st[0], texel->st[1]));
+			texel_list.push_back(addTexel(texel->st[0], texel->st[1]));
 		}
 		
 		poly2 = addPolygon(vertex_list, texel_list, poly->shader);
@@ -1572,7 +1572,7 @@ egg_mesh_t *Egg::MeshCopy(egg_mesh_t *mesh, Vector<unsigned int> *vertices)
 		if (poly2 != UINT_MAX)
 			continue;
 
-		msh->polygon.pushBack(poly2);
+		msh->polygon.push_back(poly2);
 	}
 
 	return msh;
@@ -1633,7 +1633,7 @@ void Egg::delMesh(egg_mesh_t *mesh)
 	for (i = mMeshes.begin(); i < i = mMeshes.end(); ++i)
 	{
 		if (mMeshes[i])
-			tmp.pushBack(mMeshes[i]);
+			tmp.push_back(mMeshes[i]);
 	}
 
 	mMeshes.copy(tmp);
@@ -1655,7 +1655,7 @@ void Egg::addMesh(egg_mesh_t *mesh)
 	if (!mesh)
 		return;
 
-	mMeshes.pushBack(mesh);
+	mMeshes.push_back(mesh);
 	mesh->id = mMeshes.size() - 1;
 }
 
@@ -1729,7 +1729,7 @@ egg_mesh_t *Egg::MeshLoad(SystemIO::FileReader &r)
 	for (i = 0; i < n; ++i)
 	{
 		u = r.ReadLongU();
-		mesh->group.pushBack(u);
+		mesh->group.push_back(u);
 	}
 
 	// Check point
@@ -1747,7 +1747,7 @@ egg_mesh_t *Egg::MeshLoad(SystemIO::FileReader &r)
 	for (i = 0; i < n; ++i)
 	{
 		u = r.ReadLongU();
-		mesh->polygon.pushBack(u);
+		mesh->polygon.push_back(u);
 		//printDebug(5, "MeshLoad> Adding polygon[%i] = %i\n", i, u);
 	}
 
@@ -1911,7 +1911,7 @@ egg_tag_t *Egg::loadTag(SystemIO::FileReader &r)
 	for (i = 0; i < n; i++)
 	{
 		lu = r.ReadLongU();
-		tag->slave.pushBack(lu);
+		tag->slave.push_back(lu);
 	}
 
 	lu = r.ReadLongU();
@@ -1920,7 +1920,7 @@ egg_tag_t *Egg::loadTag(SystemIO::FileReader &r)
 	for (i = 0; i < n; i++)
 	{
 		lu = r.ReadLongU();
-		tag->mesh.pushBack(lu);
+		tag->mesh.push_back(lu);
 	}
 
 	tag->flag = r.ReadByte();
@@ -1951,7 +1951,7 @@ void Egg::addTag(egg_tag_t *tag)
 {
 	if (tag)
 	{
-		mTags.pushBack(tag);
+		mTags.push_back(tag);
 		tag->id = mTags.size() - 1;
 	}
 }
@@ -2209,7 +2209,7 @@ void Egg::connectTag(unsigned int master, unsigned int slave)
 		return;
 
 	tagB->parent = master;
-	tagA->slave.pushBack(slave);
+	tagA->slave.push_back(slave);
 }
 
 
@@ -2218,7 +2218,7 @@ void Egg::TagAddMesh(egg_tag_t *tag, unsigned int mesh)
 	if (!tag || !getMesh(mesh))
 		return;
 
-	tag->mesh.pushBack(mesh);
+	tag->mesh.push_back(mesh);
 }
 
 
@@ -2242,7 +2242,7 @@ unsigned int Egg::getBoneFrameCount()
 
 void Egg::BoneFrameAdd(egg_boneframe_t *boneframe)
 {
-	mBoneFrames.pushBack(boneframe);
+	mBoneFrames.push_back(boneframe);
 	boneframe->id = mBoneFrames.size() - 1;
 }
 
@@ -2323,7 +2323,7 @@ egg_boneframe_t *Egg::BoneFrameLoad(SystemIO::FileReader &r)
 	for (i = 0; i < n; i++)
 	{
 		lu = r.ReadLongU();
-		boneframe->tag.pushBack(lu);
+		boneframe->tag.push_back(lu);
 	}
 
 	boneframe->center[0] = r.ReadFloat32();
@@ -2347,13 +2347,13 @@ unsigned int Egg::BoneFrameAdd(vec_t x, vec_t y, vec_t z)
 	egg_boneframe_t *boneframe = new egg_boneframe_t;
 
 
-	mBoneFrames.pushBack(boneframe);
+	mBoneFrames.push_back(boneframe);
 	boneframe->id = mBoneFrames.size() - 1;
 	boneframe->center[0] = x;
 	boneframe->center[1] = y;
 	boneframe->center[2] = z;
 
-	mBoneFrames.pushBack(boneframe);
+	mBoneFrames.push_back(boneframe);
 
 	return (boneframe->id);
 }
@@ -2369,7 +2369,7 @@ void Egg::addAnimation(egg_animation_t *a)
 {
 	if (a)
 	{
-		mAnimations.pushBack(a);
+		mAnimations.push_back(a);
 		a->id = mAnimations.size() - 1;
 	}
 }
@@ -2443,7 +2443,7 @@ egg_animation_t *Egg::AnimationLoad(SystemIO::FileReader &r)
 	for (i = 0; i < n; i++)
 	{
 		lu = r.ReadLongU();
-		a->frame.pushBack(lu);
+		a->frame.push_back(lu);
 	}
 
 	// Check point
@@ -3046,7 +3046,7 @@ void Egg::printError(char *s, ...)
 	va_start(args, s);
 	if (mPrinter)
 	{
-		mPrinter->errorArgs(s, &args);
+		mPrinter->ErrorArgs(s, &args);
 	}
 	else
 	{
@@ -3212,7 +3212,7 @@ int main(int argc, char *argv[])
 
 #include <mstl/Vector.h>
 #include <mstl/Map.h>
-#include <mstl/List.h>
+#include <mstl/list.h>
 #include <freyja/PluginABI.h>
 #include <freyja/BoneABI.h>
 #include <freyja/MeshABI.h>
@@ -3354,7 +3354,7 @@ int freyja_model__eggv9_import(char *filename)
 				if (vertices.SearchIndex(vv) == vertices.GetErrorIndex())
 				{
 					verticesMap.Add(vv, vertices.size());
-					vertices.pushBack(vv);
+					vertices.push_back(vv);
 	
 					egg_vertex_t *vertex = egg.GetVertices()[vv];
 
@@ -3412,8 +3412,8 @@ int freyja_model__eggv7_import(char *filename)
 	float center[3];
 	float pos[3];
 	float st[2];
-	List<unsigned int> trans;
-	List<unsigned int> actual;
+	mstl::list<unsigned int> trans;
+	mstl::list<unsigned int> actual;
 	Map<unsigned int, unsigned int> transM;
 	Map<unsigned int, unsigned int> transT;
 	unsigned int vertex, vt;
@@ -3492,8 +3492,8 @@ int freyja_model__eggv7_import(char *filename)
 				// Mongoose: Here I track the loaded id and actual id vs the ii id
 				//           You fear it, I'm sure... this let's us map on 1:n 
 				//           objects ( why we don't use Map here )
-				trans.Add(id);
-				actual.Add(vertex);
+				trans.push_back(id);
+				actual.push_back(vertex);
 
 				//printf("LoadV7> trans[%i] = %i\n", id, vertex);
 			}
@@ -3520,9 +3520,26 @@ int freyja_model__eggv7_import(char *filename)
 				st[1] = r.ReadFloat32();
 
 				// Mongoose: Get actual id based on loaded id and packed id 
-				//printf("trans[%i] = ", id);
-				id = actual[trans.SearchKey(id)];
-				//printf("%i\n", id);
+
+				/* Replace map hybrid list with less efficent true list for now. */
+				// id = actual[trans.SearchKey(id)];
+				mstl::list<unsigned int>::iterator it = trans.begin();
+				unsigned int tmp = 0;
+				while ( it != trans.end() )
+				{
+					if ( (int)*it == id )
+						break;
+
+					++tmp;
+				}
+
+				// id = actual[ tmp ];
+				mstl::list<unsigned int>::iterator it2 = actual.begin();
+				for ( unsigned int k = 0; k < tmp; ++k ) 
+				{
+					id = *it2;
+					it2++;
+				}
 
 				freyjaPolygonVertex1i(id);  
 				freyjaPolygonTexCoord1i(freyjaTexCoordCreate2f(st[0], st[1]));
@@ -3538,8 +3555,8 @@ int freyja_model__eggv7_import(char *filename)
 		}
 
 		// Mongoose: Flush the id translation tables per "frame"
-		trans.Clear();
-		actual.Clear();
+		trans.clear();
+		actual.clear();
 
 		for (i = 0; i < marker_count; i++)
 		{
