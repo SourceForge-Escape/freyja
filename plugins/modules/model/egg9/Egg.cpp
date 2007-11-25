@@ -42,6 +42,7 @@ using namespace mstl;
 using namespace hel;
 
 
+
 void __print_unsigned_int(unsigned int u)
 {
 	printf("<%u>\n", u);
@@ -3219,6 +3220,8 @@ int main(int argc, char *argv[])
 #include <freyja/LegacyABI.h>
 #include <freyja/freyja.h>
 
+template <>
+unsigned int list<unsigned int>::mDefault = 0;
 
 extern "C" {
 
