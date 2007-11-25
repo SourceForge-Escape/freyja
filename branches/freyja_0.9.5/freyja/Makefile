@@ -112,6 +112,17 @@ depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
 # Convenience name for target.
+freyja/CMakeFiles/deb.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 freyja/CMakeFiles/deb.dir/rule
+
+# Convenience name for target.
+deb: freyja/CMakeFiles/deb.dir/rule
+
+# fast build rule for target.
+deb/fast:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/deb.dir/build.make freyja/CMakeFiles/deb.dir/build
+
+# Convenience name for target.
 freyja/CMakeFiles/freyja.dir/rule:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 freyja/CMakeFiles/freyja.dir/rule
 
@@ -121,6 +132,17 @@ freyja: freyja/CMakeFiles/freyja.dir/rule
 # fast build rule for target.
 freyja/fast:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/build
+
+# Convenience name for target.
+freyja/CMakeFiles/win32.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 freyja/CMakeFiles/win32.dir/rule
+
+# Convenience name for target.
+win32: freyja/CMakeFiles/win32.dir/rule
+
+# fast build rule for target.
+win32/fast:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f freyja/CMakeFiles/win32.dir/build.make freyja/CMakeFiles/win32.dir/build
 
 # target to build an object file
 src/Control.o:
@@ -296,12 +318,14 @@ help::
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... deb"
 	@echo "... edit_cache"
 	@echo "... freyja"
 	@echo "... install"
 	@echo "... install/local"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... win32"
 	@echo "... src/Control.o"
 	@echo "... src/Control.i"
 	@echo "... src/Control.s"

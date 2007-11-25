@@ -13,22 +13,22 @@ BACK=../../../
 debug:
 	@-rm -f ../bin/plugins/model/debug
 	@-mkdir -p ../bin/plugins/model/debug/
-	$(MAKE) foreach RULE="debug" 
+	$(MAKE) -f Makefile.old foreach RULE="debug" 
 
 
 release:
-	$(MAKE) foreach RULE="release" 
+	$(MAKE) -f Makefile.old foreach RULE="release" 
 
 
 win32:
-	$(MAKE) foreach RULE="win32" 
+	$(MAKE) -f Makefile.old foreach RULE="win32" 
 
 osx:
-	$(MAKE) foreach RULE="osx" 
+	$(MAKE) -f Makefile.old foreach RULE="osx" 
 
 
 clean:
-	$(MAKE) foreach RULE="clean" 
+	$(MAKE) -f Makefile.old foreach RULE="clean" 
 
 
 #user-install: 

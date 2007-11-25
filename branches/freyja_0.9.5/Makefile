@@ -112,6 +112,17 @@ depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
 #=============================================================================
+# Target rules for targets named deb
+
+# Build rule for target.
+deb: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 deb
+
+# fast build rule for target.
+deb/fast:
+	$(MAKE) -f lua/CMakeFiles/deb.dir/build.make lua/CMakeFiles/deb.dir/build
+
+#=============================================================================
 # Target rules for targets named luawrapper
 
 # Build rule for target.
@@ -121,6 +132,28 @@ luawrapper: cmake_check_build_system
 # fast build rule for target.
 luawrapper/fast:
 	$(MAKE) -f lua/CMakeFiles/luawrapper.dir/build.make lua/CMakeFiles/luawrapper.dir/build
+
+#=============================================================================
+# Target rules for targets named win32
+
+# Build rule for target.
+win32: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 win32
+
+# fast build rule for target.
+win32/fast:
+	$(MAKE) -f lua/CMakeFiles/win32.dir/build.make lua/CMakeFiles/win32.dir/build
+
+#=============================================================================
+# Target rules for targets named tinyxml
+
+# Build rule for target.
+tinyxml: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 tinyxml
+
+# fast build rule for target.
+tinyxml/fast:
+	$(MAKE) -f tinyxml/CMakeFiles/tinyxml.dir/build.make tinyxml/CMakeFiles/tinyxml.dir/build
 
 #=============================================================================
 # Target rules for targets named hel-0.2.2
@@ -596,6 +629,17 @@ model-plugin-utpackage/fast:
 	$(MAKE) -f plugins/CMakeFiles/model-plugin-utpackage.dir/build.make plugins/CMakeFiles/model-plugin-utpackage.dir/build
 
 #=============================================================================
+# Target rules for targets named osx
+
+# Build rule for target.
+osx: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 osx
+
+# fast build rule for target.
+osx/fast:
+	$(MAKE) -f plugins/CMakeFiles/osx.dir/build.make plugins/CMakeFiles/osx.dir/build
+
+#=============================================================================
 # Target rules for targets named ui-plugin-lineageIIextract
 
 # Build rule for target.
@@ -650,17 +694,6 @@ ui-plugin-reverseengineer: cmake_check_build_system
 ui-plugin-reverseengineer/fast:
 	$(MAKE) -f plugins/CMakeFiles/ui-plugin-reverseengineer.dir/build.make plugins/CMakeFiles/ui-plugin-reverseengineer.dir/build
 
-#=============================================================================
-# Target rules for targets named win32
-
-# Build rule for target.
-win32: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 win32
-
-# fast build rule for target.
-win32/fast:
-	$(MAKE) -f plugins/CMakeFiles/win32.dir/build.make plugins/CMakeFiles/win32.dir/build
-
 # Help Target
 help::
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -672,7 +705,10 @@ help::
 	@echo "... install/local"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... deb"
 	@echo "... luawrapper"
+	@echo "... win32"
+	@echo "... tinyxml"
 	@echo "... hel-0.2.2"
 	@echo "... mat44"
 	@echo "... ray"
@@ -716,12 +752,12 @@ help::
 	@echo "... model-plugin-tombraider"
 	@echo "... model-plugin-trmesh"
 	@echo "... model-plugin-utpackage"
+	@echo "... osx"
 	@echo "... ui-plugin-lineageIIextract"
 	@echo "... ui-plugin-octree"
 	@echo "... ui-plugin-pakreader"
 	@echo "... ui-plugin-perlinnoise"
 	@echo "... ui-plugin-reverseengineer"
-	@echo "... win32"
 
 
 

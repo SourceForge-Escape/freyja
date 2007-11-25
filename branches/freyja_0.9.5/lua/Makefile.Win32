@@ -97,7 +97,7 @@ debug:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
 	$(MAKE_CMD) targets \
 	BUILDDIR=$(BUILD_DEBUG_DIR) \
-	MODULE="lib$(NAME).dll" \
+	MODULE="$(NAME)" \
 	CFLAGS="$(DEBUG_CFLAGS)" \
 	LD_FLAGS="$(LD_FLAGS)" \
 	CC=$(WIN32_CC) \

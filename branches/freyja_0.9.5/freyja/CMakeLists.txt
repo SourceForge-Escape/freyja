@@ -108,8 +108,11 @@ set(Objs
 	src/Texture
 )
 
-
 add_executable( ${Name} ${Objs} )
+
+
+add_custom_target( deb
+	COMMAND fakeroot dpkg-buildpackage )
 
 FILE( WRITE debian/changelog "freyja (${Version}) feisty; urgency=low\n\n" )
 FILE( APPEND debian/changelog "  * Generated release\n\n" )
@@ -120,5 +123,9 @@ FILE( APPEND debian/changelog "" )
 INSTALL( TARGETS ${Name} RUNTIME DESTINATION /usr/bin )
 INSTALL( FILES data/freyja-dev.mlisp data/vera.ttf DESTINATION /usr/share/freyja )
 INSTALL( DIRECTORY data/icons data/shaders DESTINATION /usr/share/freyja )
+
+
+add_custom_target( win32 
+	COMMAND make -f Makefile.Win32 )
 
 

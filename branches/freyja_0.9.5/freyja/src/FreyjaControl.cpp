@@ -60,6 +60,8 @@
 #include <freyja/PluginABI.h>
 #include <freyja/TextureABI.h>
 
+//#include <lua/Lua.h>
+
 #include "Plugins.h"
 #include "freyja_events.h"
 #include "FreyjaControl.h"

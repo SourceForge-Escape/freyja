@@ -1,13 +1,12 @@
 # CMakeLists files in this project can refer to the root source directory
 # of the project as ${FREYJA_SOURCE_DIR} and to the root binary directory
 # of the project as ${FREYJA_BINARY_DIR}.
-project(freyja)
+PROJECT( freyja )
 
 #set( PLUGIN_DIR plugins/ )
 
 # Recurse into the project subdirectories.
-SUBDIRS( lua libhel libfreyja libmgtk freyja plugins )
-#SUBDIRS( plugins ) 
+SUBDIRS( lua tinyxml libhel libfreyja libmgtk freyja plugins )
 #SUBDIRS( tools )
 
 #GET_TARGET_PROPERTY(LIB_NAME Foo LOCATION)
@@ -21,6 +20,31 @@ SUBDIRS( lua libhel libfreyja libmgtk freyja plugins )
 #   COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${NEW_LIB_NAME}
 #)
 
+
+#add_custom_target( deb 
+#	COMMAND 
+#	cd tinyxml; cmake .; fakeroot dpkg-buildpackage 
+#	cd ..
+#	cd lua; cmake .; fakeroot dpkg-buildpackage 
+#	cd ..
+#	cd libhel; cmake .; fakeroot dpkg-buildpackage 
+#	cd ..
+#	cd libmgtk; cmake .; fakeroot dpkg-buildpackage 
+#	cd ..
+#	cd libfreyja; cmake .; fakeroot dpkg-buildpackage 
+#	cd ..
+#	cd plugins; cmake .; fakeroot dpkg-buildpackage 
+#	cd ..
+#	cd freyja; cmake .; fakeroot dpkg-buildpackage 
+#	cd .. )
+
+
+#apt:
+#	@-mkdir -p $(APT_DIR)
+#	@-for i in *.deb; do mv $${i%_*.deb}.tar.gz $(APT_DIR)/; done
+#	@-mv *.deb *.dsc *.changes $(APT_DIR)/
+#	cd $(APT_DIR) && dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
+#	cd $(APT_DIR) && dpkg-scansources . /dev/null | gzip -9c > Sources.gz
 
 
 #ARCH = $(shell uname -m)
@@ -76,28 +100,6 @@ SUBDIRS( lua libhel libfreyja libmgtk freyja plugins )
 #	@-printf "\n\n o Now 'make user-install' as a user\n\n"
 
 
-#native:
-#	@-printf "Building libhel\n" && \
-#	cd libhel && ./autogen.sh && make && cd .. &&  \
-#	\
-#	printf "Building libfreyja\n" && \
-#	cd libfreyja && ./autogen.sh && make && cd .. &&  \
-#	\
-#	printf "Building libmgtk\n" && \
-#	cd libmgtk && ./autogen.sh && make && cd .. &&  \
-#	\
-#	printf "Building plugins\n" && \
-#	cd plugins && make && cd .. &&  \
-#	\
-#	printf "Building freyja\n" && \
-#	cd freyja && ./autogen.sh && make
-
-#	@-printf "\n\n o If your build failed:\n"
-#	@-printf "       * Make sure you have a complete glext.h header\n"
-#	@-printf "       * Look in freyja/Makefile for options to disable\n"
-#	@-printf "\n\n o Now 'make user-install' as a user\n\n"
-
-
 #osx:
 #	@-printf "Building libhel\n"
 #	@-cd libhel && ./autogen.sh && make osx
@@ -137,5 +139,4 @@ SUBDIRS( lua libhel libfreyja libmgtk freyja plugins )
 #	@-printf "Building libmgtk\n" 
 #	cd libmgtk && rm -f depend.win32 && make -f Makefile.Win32 
 
-#endif( FIXME )
 

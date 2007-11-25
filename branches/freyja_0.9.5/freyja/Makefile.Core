@@ -49,12 +49,12 @@ COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
 		-DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGL -DHAVE_HEL \
 		-DPLANE_NOTIFY_WITH_AXIS -DUSING_OPENGL_EXT \
 		-DHAVE_FREETYPE2 $(shell freetype-config --cflags) \
-		-DLUAWRAPPER_FOUND -DLUA_FOUND
+		-DLUAWRAPPER_FOUND -DLUA_FOUND -DLUA_WRAPPER_FOUND
 
 COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES)
 
 COMMON_LD_FLAGS=-lhel-0.0.2 -lfreyja-0.9.5 -lmgtk-0.2.10 \
-		-lluawrapper -llua51 -ltinyxml \
+		-lluawrapper -llua51 -ltinyxml -lluawrapper \
 		-lGL -lGLU \
 		$(shell freetype-config --libs)
 
@@ -64,6 +64,8 @@ COMMON_LD_FLAGS=-lhel-0.0.2 -lfreyja-0.9.5 -lmgtk-0.2.10 \
 
 OBJS = \
 	$(BUILD_DIR)/freyja_events.o \
+	$(BUILD_DIR)/freyja3d_scenegraph.o \
+	$(BUILD_DIR)/misc.o \
 	$(BUILD_DIR)/Control.o \
 	$(BUILD_DIR)/ControlPrinter.o \
 	$(BUILD_DIR)/Cursor.o \
@@ -72,6 +74,7 @@ OBJS = \
 	$(BUILD_DIR)/FreyjaOpenGL.o \
 	$(BUILD_DIR)/MaterialControl.o \
 	$(BUILD_DIR)/OpenGLPrinter.o \
+	$(BUILD_DIR)/Plugins.o \
 	$(BUILD_DIR)/RecentFiles.o \
 	$(BUILD_DIR)/Texture.o
 

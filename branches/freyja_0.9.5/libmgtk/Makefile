@@ -112,6 +112,17 @@ depend:
 	$(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 
 # Convenience name for target.
+libmgtk/CMakeFiles/deb.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 libmgtk/CMakeFiles/deb.dir/rule
+
+# Convenience name for target.
+deb: libmgtk/CMakeFiles/deb.dir/rule
+
+# fast build rule for target.
+deb/fast:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/deb.dir/build.make libmgtk/CMakeFiles/deb.dir/build
+
+# Convenience name for target.
 libmgtk/CMakeFiles/mgtk.dir/rule:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 libmgtk/CMakeFiles/mgtk.dir/rule
 
@@ -132,6 +143,17 @@ mgtk-0.1.1: libmgtk/CMakeFiles/mgtk-0.1.1.dir/rule
 # fast build rule for target.
 mgtk-0.1.1/fast:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/build
+
+# Convenience name for target.
+libmgtk/CMakeFiles/win32.dir/rule:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 libmgtk/CMakeFiles/win32.dir/rule
+
+# Convenience name for target.
+win32: libmgtk/CMakeFiles/win32.dir/rule
+
+# fast build rule for target.
+win32/fast:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/win32.dir/build.make libmgtk/CMakeFiles/win32.dir/build
 
 # target to build an object file
 mgtk/ConfirmationDialog.o:
@@ -307,6 +329,7 @@ help::
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... deb"
 	@echo "... edit_cache"
 	@echo "... install"
 	@echo "... install/local"
@@ -314,6 +337,7 @@ help::
 	@echo "... mgtk"
 	@echo "... mgtk-0.1.1"
 	@echo "... rebuild_cache"
+	@echo "... win32"
 	@echo "... mgtk/ConfirmationDialog.o"
 	@echo "... mgtk/ConfirmationDialog.i"
 	@echo "... mgtk/ConfirmationDialog.s"
