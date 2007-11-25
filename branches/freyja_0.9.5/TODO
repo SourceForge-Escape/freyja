@@ -7,8 +7,6 @@
  
  * Check TODO for cleared tasks.
 
- * Integrate toplevel Cmake and GNU makefiles fully.
-
  * 'Hide' debug spew in logs to avoid user confusion.
 
  * mgtk_tree selection with event pairs per node.
@@ -94,6 +92,10 @@
  -----------------------------------------------------------------------------
 
  * Single joint animation shishi odoshi tutorial demo.
+
+ * ThreadPool test integration.
+
+ * VBO based rendering test integration.
 
  * Break up remaining monolithic source files into modules. (cont)
  

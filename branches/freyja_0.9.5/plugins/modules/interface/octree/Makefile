@@ -151,9 +151,8 @@ win32:
 	LD=$(WIN32_LD)  \
 	CFLAGS="$(BASE_CFLAGS) $(WIN32_INC_DIR)" \
 	LD_FLAGS="$(CONFIGURE_LNK) -lm" \
-	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK)"
+	LIBS="-lstdc++ -lm $(WIN32_LIB_DIR) $(LOCAL_WIN32_LIBS) $(WIN32_LIBHEL) $(WIN32_LIBFREYJA) $(WIN32_LIBMGTK) $(WIN32_TINYXML) "
 	@-mkdir -p $(BUILD_INSTALL_DIR)/win32/
-	@-cp $(BUILD_WIN32_DIR)/$(NAME).dll $(BUILD_INSTALL_DIR)/win32/
 
 osx:
 	@-mkdir -p $(BUILD_DEBUG_DIR)
@@ -194,7 +193,6 @@ $(BUILDDIR)/$(MODULE).so : $(PROG_OBJS)
 
 $(BUILDDIR)/$(MODULE).dll : $(PROG_OBJS)
 	@-mkdir -p $(WIN32_UI_PLUGIN_DIR)
-	@-cp $(NAME).mlisp $(WIN32_UI_PLUGIN_DIR)/
 	$(CC) -shared -o $(WIN32_UI_PLUGIN_DIR)/$(MODULE).dll \
 	-Wl,--out-implib=$(BUILDDIR)/lib$(MODULE).a \
 	-Wl,--export-all-symbols \

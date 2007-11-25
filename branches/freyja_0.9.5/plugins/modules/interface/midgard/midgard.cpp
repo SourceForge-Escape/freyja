@@ -296,7 +296,7 @@ void eMidgardLoadXML1s(const char *filename)
 
 void eMidgardLoadXML()
 {
-	char *path = mgtk_rc_map("/");
+	const char* path = mgtk_rc_map("/");
 	char *filename =
 	mgtk_filechooser_blocking("freyja - Open Midgard XML...", path, 0,
 							  "Midgard Demo Models (*.xml)", "*.xml");
