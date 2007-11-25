@@ -125,6 +125,10 @@ add_library( ${Name}-${Major}.${Minor}.${Micro} SHARED ${Objs} )
 
 # Unit tests
 
+
+add_custom_target( deb
+	COMMAND fakeroot dpkg-buildpackage )
+
 # Generate a new debian/changelog.
 FILE( WRITE debian/changelog "libfreyja (${Major}.${Minor}.${Micro}.${Revision}) feisty; urgency=low\n\n" )
 FILE( APPEND debian/changelog "  * Generated release\n\n" )
@@ -134,4 +138,6 @@ FILE( APPEND debian/changelog "" )
 INSTALL( TARGETS ${Name}-${Major}.${Minor}.${Micro} LIBRARY DESTINATION /usr/lib )
 
 
+add_custom_target( win32 
+	COMMAND make -f Makefile.Win32 )
 

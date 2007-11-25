@@ -215,9 +215,7 @@ deb:
 apt:
 	@-mkdir -p $(APT_DIR)
 	@-for i in *.deb; do mv $${i%_*.deb}.tar.gz $(APT_DIR)/; done
-	@-mv *.deb $(APT_DIR)/
-	@-mv *.dsc $(APT_DIR)/
-	@-mv *.changes $(APT_DIR)/
+	@-mv *.deb *.dsc *.changes $(APT_DIR)/
 	cd $(APT_DIR) && dpkg-scanpackages . /dev/null | gzip -9c > Packages.gz
 	cd $(APT_DIR) && dpkg-scansources . /dev/null | gzip -9c > Sources.gz
 

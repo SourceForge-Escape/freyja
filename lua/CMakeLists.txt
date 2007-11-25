@@ -64,8 +64,12 @@ FILE( APPEND debian/changelog "" )
 
 INSTALL( TARGETS ${Name} LIBRARY DESTINATION /usr/lib )
 
+add_custom_target( deb
+	COMMAND fakeroot dpkg-buildpackage )
 
-
+add_custom_target( win32 
+	COMMAND make -f Makefile.Win32 
+	COMMENT "luawrapper (win32)" )
 
 
 

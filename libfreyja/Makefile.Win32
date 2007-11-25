@@ -35,14 +35,14 @@ BUILD_TEST_DIR=$(BUILD_ROOT_DIR)/win32/test
 ################################################################
 
 LD_FLAGS=-shared -lstdc++ -lm $(WIN32_LIB_DIR) -lpthreadGC2 \
-	$(WIN32_LIBHEL) -ltinyxml2 -llua51
+	$(WIN32_LIBHEL) -ltinyxml2 -llua51 -lzlib1 -lluawrapper
 
 RELEASE_CFLAGS=$(COMMON_CFLAGS) \
 	-Wall \
 	-ffast-math -funroll-loops \
-	-fomit-frame-pointer -fexpensive-optimizations -O2
+	-fomit-frame-pointer -fexpensive-optimizations -O2 -DLUA_WRAPPER_FOUND
 
-DEBUG_CFLAGS=$(COMMON_CFLAGS) -Wall -g -DDEBUG -DEXPERIMENTAL
+DEBUG_CFLAGS=$(COMMON_CFLAGS) -Wall -g -DDEBUG -DEXPERIMENTAL -DLUA_WRAPPER_FOUND
 
 BASE_DEFS=-I$(SRC_DIR)
 

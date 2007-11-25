@@ -143,6 +143,9 @@ add_library( ${Name}-${Major}.${Minor}.${Micro} SHARED ${Objs} )
 # Packaging
 #######################################################################
 
+add_custom_target( deb
+	COMMAND fakeroot dpkg-buildpackage )
+
 #add_custom_command(TARGET libhel.deb COMMAND dpkg-buildpackage -rfakeroot)
 
 # Generate a new debian/changelog.
@@ -171,5 +174,9 @@ set_target_properties( mgtk PROPERTIES LINK_FLAGS
 	"-L. -l${Name}-${Major}.${Minor}.${Micro} -lpthread" )
 add_test( mgtk unit/mgtk unit/mgtk-results.xml )
 
+
+
+add_custom_target( win32 
+	COMMAND make -f Makefile.Win32 )
 
 
