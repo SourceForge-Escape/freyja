@@ -317,7 +317,7 @@ function freyja3d_ui_shelf_view( shelf )
 	mgtk_toolbar_togglebutton(toolbar, "BoneName", "eRenderBoneName", false, "icons/24x24/bone-name.png", "Show bind pose bone names." )
 	mgtk_toolbar_separator( toolbar )
 	mgtk_toolbar_togglebutton(toolbar, "Shadow", "eShadowVolume", false, "icons/24x24/shadow.png", "Render shadows" )
-	mgtk_toolbar_togglebutton(toolbar, "Blend", "eSkeletalDeform", false, "icons/24x24/deform.png", "Skeletal vertex blending" )
+	--mgtk_toolbar_togglebutton(toolbar, "Blend", "eSkeletalDeform", false, "icons/24x24/deform.png", "Skeletal vertex blending" )
 
 	-- Zoom
 	mgtk_toolbar_separator( toolbar )
@@ -325,6 +325,44 @@ function freyja3d_ui_shelf_view( shelf )
 	mgtk_box_pack( box, mgtk_label( "Zoom" ) )
 	spnbtn = mgtk_spinbutton_float( "eZoom", 1.0, 0.0001, 1000.0, 4, 0.0001, 1.0, 1.0 )
 	mgtk_box_pack( box, spnbtn )
+end
+
+
+function freyja3d_ui_shelf_animation( shelf )
+	tab = mgtk_tab(shelf, "Animation", -1)
+	toolbar = mgtk_toolbar( tab )
+
+	-- FIXME currently this is a viewmode, but for .18 it'll be a mesh state/type.
+	mgtk_toolbar_togglebutton(toolbar, "Blend", "eSkeletalDeform", false, "icons/24x24/deform.png", "SkeletalMesh animation." )
+
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, " ", "eExportKeyAsMesh", "gtk-convert", "Export skeletal keyframe as mesh." )
+	mgtk_toolbar_button(toolbar, " ", "eImportMeshAsKey", "gtk-convert", "Import mesh as vertex keyframe." )	
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, "Convert", "eConvertSkelToMeshAnim", "gtk-convert", "Convert skeletal animation to mesh animation." )
+
+	-- Skinning --
+	mgtk_toolbar_separator( toolbar )
+
+	-- Joint iterator
+	--mgtk_toolbar_separator( toolbar )
+	box = mgtk_toolbar_box( toolbar )
+	mgtk_box_pack( box, mgtk_label( "Joint: " ) )
+	spnbtn = mgtk_spinbutton_uint( "eBoneIterator", 0, 0, 512 )
+	mgtk_box_pack( box, spnbtn )
+
+	-- Weight value
+	mgtk_toolbar_separator( toolbar )
+	box = mgtk_toolbar_box( toolbar )
+	mgtk_box_pack( box, mgtk_label( "Weight: " ) )
+	spnbtn = mgtk_spinbutton_float( "eWeight", 1.0, 0.0, 1.0, 3, 0.01, 0.1, 0.1 )
+	mgtk_box_pack( box, spnbtn )
+
+	-- Weighting
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, " ", "eAssignWeight", "gtk-add", "Assign vertices to joint " )
+	mgtk_toolbar_button(toolbar, " ", "eClearWeight", "gtk-remove", "Remove vertices weighting " )	
+
 end
 
 
@@ -410,31 +448,7 @@ function freyja3d_ui_shelf_modify( shelf )
 	--(toolbar_menu_button "icons/24x24/subdiv.png" "Subdiv"	"Subdivide mesh..." eEvent eMeshSubDivLoop
 	--mgtk_append_menu( submenu, mgtk_menu_item_check( "Flat", "eNone", 1 ) )
 
-	mgtk_toolbar_separator( toolbar )
-	mgtk_toolbar_button(toolbar, "Convert", -1, "gtk-convert", "Convert Skeletal to Mesh Animation" )
-end
 
-
-function freyja3d_ui_shelf_skinning( shelf )
-	tab = mgtk_tab(shelf, "Skinning", -1)
-	toolbar = mgtk_toolbar( tab )	
-
-	mgtk_toolbar_button(toolbar, " ", "eAssignWeight", "gtk-add", "Assign vertices to joint " )
-	mgtk_toolbar_button(toolbar, " ", "eClearWeight", "gtk-remove", "Remove vertices weighting " )	
-
-	-- Bone Iterator
-	mgtk_toolbar_separator( toolbar )
-	box = mgtk_toolbar_box( toolbar )
-	mgtk_box_pack( box, mgtk_label( "Bone: " ) )
-	spnbtn = mgtk_spinbutton_uint( "eBoneIterator", 0, 0, 512 )
-	mgtk_box_pack( box, spnbtn )
-
-	-- Weight value
-	mgtk_toolbar_separator( toolbar )
-	box = mgtk_toolbar_box( toolbar )
-	mgtk_box_pack( box, mgtk_label( "Weight: " ) )
-	spnbtn = mgtk_spinbutton_float( "eWeight", 1.0, 0.0, 1.0, 3, 0.01, 0.1, 0.1 )
-	mgtk_box_pack( box, spnbtn )
 end
 
 
@@ -541,9 +555,7 @@ function freyja3d_ui_sidebar_model( sidebar )
 	mgtk_box_pack( expander, mgtk_tree( "Scenegraph", "eBoneIterator", "eSetBoneName" ), 1, 1, 1 )
 
 	-- Animation control
-	hbox = mgtk_hbox( )
-	mgtk_box_pack( tab, hbox )
-	toolbar = mgtk_toolbar( hbox )
+	toolbar = mgtk_toolbar( tab )
 	mgtk_toolbar_togglebutton( toolbar, "Auto", "eModeAnim", false, "gtk-media-record", "Animation mode (Auto Keyframe)" ) 
 	mgtk_toolbar_button( toolbar, "Set", "eSetKeyFrame", "icons/24x24/key.png", "Set Keyframe" )
 	mgtk_toolbar_button( toolbar, "Prev", "eAnimationPrev", "gtk-media-previous", "Previous" )
@@ -634,9 +646,8 @@ end
 function freyja3d_ui_sidebar_material( sidebar )
 	tab = mgtk_tab( sidebar, "Material", "eModeMaterial" )
 
-	hbox = mgtk_hbox()
-	mgtk_box_pack( tab, hbox )
-	toolbar = mgtk_toolbar( hbox )
+	-- Material I/O toolbar.
+	toolbar = mgtk_toolbar( tab )
 	mgtk_toolbar_button(toolbar, "New", "eNewMaterial", "gtk-new", "New material" )
 	mgtk_toolbar_menubutton(toolbar, "Open Material", "eOpenMaterial", "gtk-open", "Open Material...", "recent_material_bind" )
 	mgtk_toolbar_togglebutton(toolbar, "Lock", "eMaterialSlotLoad", false, "gtk-apply", "Overwrite material on load" )
@@ -652,9 +663,8 @@ function freyja3d_ui_sidebar_material( sidebar )
 	mgtk_box_pack( hbox, spnbtn )
 	mgtk_box_pack( hbox, mgtk_textbox( "eSetMaterialName" ), 1, 1, 0 )
 
-	hbox = mgtk_hbox()
-	mgtk_box_pack( tab, hbox )
-	toolbar = mgtk_toolbar( hbox )
+	-- Render options.
+	toolbar = mgtk_toolbar( tab )
 	mgtk_toolbar_togglebutton(toolbar, "Texture", "eEnableMaterialTexture", false, "gtk-add", "Enable texture mapping" )
 	mgtk_toolbar_togglebutton(toolbar, "Blend", "eEnableMaterialBlending", false, "gtk-add", "Enable blending" )
 	mgtk_toolbar_togglebutton(toolbar, "Fragment", "eEnableMaterialFragment", false, "gtk-add", "Enable fragment" )
@@ -767,22 +777,47 @@ function freyja3d_ui_init()
 	freyja3d_ui_shelf_view( shelf )
 	freyja3d_ui_shelf_create( shelf )
 	freyja3d_ui_shelf_modify( shelf )
-	freyja3d_ui_shelf_skinning( shelf )
+	--freyja3d_ui_shelf_skinning( shelf )
+	freyja3d_ui_shelf_animation( shelf )
 	freyja3d_ui_shelf_material( shelf )
 
 	-- Main UI Box
 	hbox = mgtk_hbox( )
 	mgtk_box_pack( vbox, hbox )
 
+	-- Test for vertical toolbar
+	toolbar = mgtk_toolbar( hbox, 0 )	
+	mgtk_toolbar_togglebutton(toolbar, "SelectB", "eSelectionByBox", false, "icons/24x24/bbox-select.png",  "Select by bounding box, Ctrl+RMouse ends selection" )
+	mgtk_toolbar_togglebutton(toolbar, "Info", "eInfoObject", false, "gtk-info", "Info on selected object" )
+	mgtk_toolbar_togglebutton(toolbar, "Select", "eSelect", true, "icons/24x24/cursor-select.png", "Select object by cursor" )
+	mgtk_toolbar_togglebutton(toolbar, "Move", "eMoveObject", false, "icons/24x24/move.png", "Move object" )
+	mgtk_toolbar_togglebutton(toolbar, "Rotate", "eRotateObject", false, "icons/24x24/rotate.png", "Rotate object" )
+	mgtk_toolbar_togglebutton(toolbar, "Scale", "eScaleObject", false, "icons/24x24/scale.png", "Scale object" )
+	mgtk_toolbar_togglebutton(toolbar, "Paint", "ePaintObject", false, "icons/24x24/paint.png", "Paint object" )
+	mgtk_toolbar_separator( toolbar );
+	mgtk_toolbar_button(toolbar, "Undo", "eUndo", "gtk-undo", "Undo" )
+	mgtk_toolbar_button(toolbar, "Redo", "eRedo", "gtk-redo", "Redo" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, "Cut", "eCut", "gtk-cut", "Cut object" )
+	mgtk_toolbar_button(toolbar, "Copy", "eCopy", "gtk-copy", "Copy object" )
+	mgtk_toolbar_button(toolbar, "Paste", "ePaste", "gtk-paste", "Paste object" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, "Create", "eCreate", "gtk-new", "Create new object" )
+	mgtk_toolbar_button(toolbar, "Delete", "eDelete", "gtk-delete", "Delete selected object" )
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, "Duplicate", "eDupeObject", "icons/24x24/mdupe.png", "Duplicate object" )
+	mgtk_toolbar_button(toolbar, "Split", "eSplitObject", "icons/24x24/msplit.png", "Split object" )
+	mgtk_toolbar_button(toolbar, "Merge", "eMergeObject", "icons/24x24/mmerge.png", "Merge objects" )
+
 	-- OpenGL Canvas
 	canvas = mgtk_opengl_canvas( 1280 - 340, 720 )
-	mgtk_box_pack( hbox, canvas )
+	mgtk_box_pack( hbox, canvas, 1, 1, 0 )
 
 	-- Sidebar
 	hbox2 = mgtk_hbox()
-	mgtk_box_pack( hbox, hbox2, 0, 0, 0 )
+	--mgtk_box_pack( hbox, hbox2, 0, 0, 0 )
 	--mgtk_box_pack( hbox2, mgtk_button( ">", -1 ) )	
-	expander = mgtk_expander( hbox2, " ", true )
+	expander = mgtk_expander( hbox, " ", true )
 	sidebar = mgtk_notebook( -1, 340, 720 )
 	mgtk_box_pack( expander, sidebar )
 	freyja3d_ui_sidebar_model( sidebar )
@@ -793,7 +828,7 @@ function freyja3d_ui_init()
 	--mgtk_expander( tab, "Community Plugins", true, "ThirdPartyPluginSlot" )
 
 	-- Animation scrubber
-	mgtk_box_pack( vbox, mgtk_hslider( "eAnimationSlider", 0, 500 ) )
+	mgtk_box_pack( vbox, mgtk_hslider( "eAnimationSlider", 0, 500 ), 1, 1, 0 )
 
 	-- Statusbar
 	statusbar1 = mgtk_statusbar()

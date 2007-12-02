@@ -6,7 +6,10 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071117 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - Removed invalid import/export plugin path.
+ - Fix for egg plugin. (1117)
+ - Vertical toolbar GUI design test.
+ - Export skelmesh keyframe as mesh.
+ - Removed invalid import/export plugin path. (1116)
  - Lua UI script fixes for handle box packing.
  - Much less debug spew -- less confusion for users.
  - Allowing for much longer print/log strings.

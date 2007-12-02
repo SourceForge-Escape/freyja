@@ -390,14 +390,5 @@ int freyja3d_load_shader(const char* filename);
  *
  ------------------------------------------------------*/
 
-void freyja3d_splashscreen_new(const char* msg);
-void freyja3d_splashscreen_close();
-void freyja3d_splashscreen_update_detail(const char* detail, float percentage);
-/*------------------------------------------------------
- * Pre  : 
- * Post : 
- *
- ------------------------------------------------------*/
-
 
 #endif // GUARD__FREYJA3D_FREYJA_EVENT_H

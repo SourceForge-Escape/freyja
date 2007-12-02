@@ -1254,6 +1254,13 @@ int mgtk_lua_rc_toolbar(lua_State* s)
 	gtk_object_set_data_full(GTK_OBJECT(box), "toolbar", toolbar, (GtkDestroyNotify)gtk_widget_unref);
 	gtk_widget_show(toolbar);
 
+	if ( lua_gettop(s) == 2 )
+	{
+		int horz = (int)lua_tonumber( s, 2 );
+		gtk_toolbar_set_orientation( GTK_TOOLBAR(toolbar), 
+									 horz ? GTK_ORIENTATION_HORIZONTAL : GTK_ORIENTATION_VERTICAL );
+	}
+
 	lua_pushlightuserdata(s, (void *)toolbar);
 
 	return 1;
