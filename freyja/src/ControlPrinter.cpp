@@ -87,3 +87,41 @@ void ControlPrinter::Log(const char *format, ...)
 		mLog.Flush();
 	}
 }
+
+
+void ControlPrinter::Print( const char* s )
+{
+	// Don't process empty strings.
+	if ( !s || !s[0] )
+		return;
+
+	// Text starting with '!' is sent to stderr was well.
+	if ( s[0] == '!' )
+	{
+		//s[0] = ' ';
+		fprintf( stderr, "%s\n", s );
+	}
+
+	// Print message to stdout and the status bar.
+	mgtk_event_notify_statusbar( s );
+
+	if (mLogging)
+	{
+		mLog.Print( "> %s\n", s );
+		mLog.Flush();
+	}
+}
+
+
+void ControlPrinter::Log( mstl::String& s )
+{
+	// Don't process empty strings.
+	if ( s.empty() )
+		return;
+
+	if (mLogging)
+	{
+		mLog.Print("> %s\n", s.c_str() );
+		mLog.Flush();
+	}
+}

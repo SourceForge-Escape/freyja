@@ -77,6 +77,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	static void Print( const char* s );
 	static void PrintArgs(const char *format, va_list *args);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -84,6 +85,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	static void Log( mstl::String& s);
 	static void Log(const char *format, ...);
 	/*------------------------------------------------------
 	 * Pre  : 

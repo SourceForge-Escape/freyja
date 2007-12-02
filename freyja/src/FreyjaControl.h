@@ -1221,6 +1221,16 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	void UpdateWindowTitle( const char* prefix, const char* filename );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Object picks factored out and reduced.
+	 *
+	 * TODO : Move these into their own Controls.
+	 *
+	 ------------------------------------------------------*/
+
+
 	freyja3d::Cursor mCursor;               /* Special mouse input handler */
 
 	freyja3d::MaterialControl mMaterial;    /* Material control */
@@ -1246,10 +1256,6 @@ private:
 	Texture mTexture;                       /* Collection of Texture utils */	
 
 	FreyjaRender *mRender;                  /* OpenGL renderer */
-
-	String mResourceFilename;	            /* Resource file for control */
-
-	String mUserPrefsFilename;	            /* Resource file for prefs */
 
 	String mCurrentlyOpenFilename;          /* What file is loaded now? */
 
@@ -1387,12 +1393,19 @@ bool FreyjaControl::LoadTexture(const char *filename, int &id)
 	return false;
 }
 
-inline
-void FreyjaControl::ModelOpened(const char *filename)
+
+inline 
+void FreyjaControl::UpdateWindowTitle( const char* prefix, const char* filename )
 {
+#ifdef WIN32
+	const char separator = '\\';
+#else
+	const char separator = '/';
+#endif
+
 	mstl::String path = filename;
 	mstl::String base = "";
-	int i = path.find_last_of( '/' );
+	int i = path.find_last_of( separator );
 	if ( i > 0 )
 	{
 		base = path.c_str()+i+1;
@@ -1400,8 +1413,16 @@ void FreyjaControl::ModelOpened(const char *filename)
 	}
 
 	mstl::String title;
-	title.Set( "%s (%s) - freyja", base.c_str(), path.c_str() );
-	freyja_set_main_window_title( title.c_str() );
+	title.Set( "%s%s (%s) - freyja", 
+			   prefix ? prefix : "", base.c_str(), path.c_str() );
+	freyja_set_main_window_title( title.c_str() );	
+}
+
+
+inline
+void FreyjaControl::ModelOpened(const char *filename)
+{
+	UpdateWindowTitle( NULL, filename );
 	//mCleared = false;
 }
 
@@ -1411,18 +1432,7 @@ void FreyjaControl::ModelAltered()
 {
 	if ( mCleared )
 	{
-		mstl::String path = mCurrentlyOpenFilename;
-		mstl::String base = "";
-		int i = path.find_last_of( '/' );
-		if ( i > 0 )
-		{
-			base = path.c_str()+i+1;
-			path[i] = '\0';
-		}
-
-		mstl::String title;
-		title.Set( "*%s (%s) - freyja", base.c_str(), path.c_str() );
-		freyja_set_main_window_title( title.c_str() );
+		UpdateWindowTitle( "*", mCurrentlyOpenFilename.c_str() );
 	}
 
 	mCleared = false;
@@ -1432,19 +1442,7 @@ void FreyjaControl::ModelAltered()
 inline
 void FreyjaControl::RecordSavedModel(const char *filename)
 {
-	mstl::String path = filename;
-	mstl::String base = "";
-	int i = path.find_last_of( '/' );
-	if ( i > 0 )
-	{
-		base = path.c_str()+i+1;
-		path[i] = '\0';
-	}
-
-	mstl::String title;
-	title.Set( "%s (%s) - freyja", base.c_str(), path.c_str() );
-	freyja_set_main_window_title( title.c_str() );
-
+	UpdateWindowTitle( NULL, filename );
 	mCleared = true;
 	mCurrentlyOpenFilename = filename;
 	mRecentModel.AddFilename(filename);

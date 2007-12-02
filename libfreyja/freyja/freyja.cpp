@@ -66,6 +66,7 @@ void *freyjaModuleImportFunction(void *handle, const char *name)
 	return SystemIO::ImportFunction(handle, name);
 }
 
+
 void *freyjaModuleLoad(const char *module)
 {
 	return SystemIO::ModuleLoad(module);

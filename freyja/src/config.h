@@ -19,21 +19,24 @@
 #ifndef GUARD__FREYJA_CONFIG_H_
 #define GUARD__FREYJA_CONFIG_H_
 
-// General /////////////////////////////////////
+
+/* General switches for major functionality. */
 
 #define ENABLE_FREYJA_ASSERTS 1
 
 #define LUA_UI 1
 
 
-// Hardcoded strings ///////////////////////////
+
+/* Hardcoded strings */
+
+#define FREYJA_UI_SCRIPT "freyja3d.lua"
+
+#define FREYJA_USER_PREF_FILE "freyja-dev_prefs.mlisp"
 
 #define FREYJA_LOG_FILE "freyja-dev.log"
 
 #define FREYJA_RECENT_FILES "recent_files-dev"
-
-
-// Hardcoded URLs so people won't add porn sites to user prefs  =/
 
 #define FREYJA_FORUMS_URL "http://boards.chatbear.com/freyja/"
 
@@ -44,7 +47,8 @@
 #define FREYJA_UPDATE_URL "http://icculus.org/freyja/files/update.xml"
 
 
-// Renderer ////////////////////////////////////
+
+/* Renderer options */
 
 #define WIN32_GL_EXT				1
 
@@ -61,7 +65,8 @@
 #define PLANE_NOTIFY_WITH_AXIS      1
 
 
-// UI //////////////////////////////////////////
+
+/* UI options */
 
 #define DEBUG_PICK_RAY				0
 

@@ -24,6 +24,7 @@
 #include <mstl/SystemIO.h>
 
 #include "freyja_events.h"
+#include "Control.h"
 
 class RecentFiles
 {
@@ -89,6 +90,14 @@ class RecentFiles
 	 *
 	 ------------------------------------------------------*/
 
+	bool LoadResourceDebug();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns true on load.
+	 *        Outputs debug spew in debug builds only.
+	 *
+	 ------------------------------------------------------*/
+
 	void SetPathByFilename(const char *filename);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -114,8 +123,30 @@ protected:
 inline
 bool RecentFiles::LoadResource()
 {
+	FREYJA3D_LOG( "Loading %s...", GetResourceFilename() );
 	SetPathByFilename( freyja_rc_map_string( "testpak" ).c_str() );
-	return LoadResource( freyja_rc_map_string( mFilename.c_str() ).c_str() );
+	if ( LoadResource( freyja_rc_map_string( mFilename.c_str() ).c_str() ) )
+	{
+		FREYJA3D_LOG("Successful load '%s'.", GetResourceFilename() );
+		return true;
+	}
+
+	FREYJA3D_LOG("Failed to load '%s'.", GetResourceFilename() );
+	return false;
 }
+
+
+inline
+bool RecentFiles::LoadResourceDebug()
+{
+	DEBUG_MSG("Loading %s...", GetResourceFilename() );
+	if ( !LoadResource() )
+	{
+		DEBUG_MSG("Failed to load '%s'.", GetResourceFilename() );
+		return false;
+	}
+	return true;
+}
+
 
 #endif // GUARD__FREYJA3D_RECENTFILES_H_

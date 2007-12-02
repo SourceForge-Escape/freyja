@@ -771,26 +771,51 @@ int freyja_event2i(int event, int cmd)
 
 void freyja_print(char *format, ...)
 {
-	va_list args;
+	if ( format && format[0] )
+	{
+		const unsigned int sz = 1024;
+		char buf[sz];
 
-	va_start(args, format);
-	ControlPrinter::PrintArgs(format, &args);
-	va_end(args);
+		va_list args;
+		va_start(args, format);
+		int truncated = vsnprintf(buf, sz, format, args);
+		buf[sz-1] = 0;
+		va_end(args);
+
+		/* More than 1k string was needed, so allocate one. */
+		if ( truncated >= (int)sz )
+		{
+			unsigned int len = truncated + 1; // Doesn't include '\0'
+			char* s = new char[ len ];
+
+			va_start( args, format );
+			vsnprintf( s, len, format, args );
+			s[len-1] = '\0';
+			va_end( args );
+
+			ControlPrinter::Print( s );
+			delete [] s;
+		}
+		else
+		{
+			ControlPrinter::Print( buf );
+		}
+	}
 }
 
 
 void freyja_event_shutdown()
 {
-	if (FreyjaControl::GetInstance())
+	if ( FreyjaControl::GetInstance() )
 	{
 		delete FreyjaControl::GetInstance();
 	}
 
-	freyja_print("!Thanks for using %s", PROGRAM_NAME);
-	freyja_print("!   Build date: %s @ %s", __DATE__, __TIME__);
-	freyja_print("!   Build host: %s", BUILD_HOST);
-	freyja_print("!   Email addr: %s", EMAIL_ADDRESS);
-	freyja_print("!   Web site  : %s", PROJECT_URL);
+	freyja_print("Thanks for using %s", PROGRAM_NAME);
+	freyja_print("   Build date: %s @ %s", __DATE__, __TIME__);
+	freyja_print("   Build host: %s", BUILD_HOST);
+	freyja_print("   Email addr: %s", EMAIL_ADDRESS);
+	freyja_print("   Web site  : %s", PROJECT_URL);
 
 	ControlPrinter::StopLogging();
 }

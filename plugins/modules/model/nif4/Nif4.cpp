@@ -70,55 +70,55 @@ bool Nif4::loadModel(const char *filename)
 		if (!strncmp(chunk.name, "NiNode", 6))
 		{
 			NiNode *ninode = new NiNode();			
-			ninodes.pushBack(ninode);
+			ninodes.push_back(ninode);
 			ninode->readChunk(r);
 		}
 		else if (!strncmp(chunk.name, "NiTextKeyExtraData", 18))
 		{
 			NiTextKeyExtraData *chunk = new NiTextKeyExtraData();			
-			//mNiTextKeyExtraData.pushBack(chunk);
+			//mNiTextKeyExtraData.push_back(chunk);
 			chunk->readChunk(r);
 		}
 		else if (!strncmp(chunk.name, "NiTriShapeData", 14))
 		{
 			NiTriShapeData *chunk = new NiTriShapeData();			
-			mNiTriShapeData.pushBack(chunk);
+			mNiTriShapeData.push_back(chunk);
 			chunk->readChunk(r);
 		}
 		else if (!strncmp(chunk.name, "NiTriShape", 10))
 		{
 			NiTriShape *nitrishape = new NiTriShape();			
-			//nitrishapes.pushBack(nitrishape);
+			//nitrishapes.push_back(nitrishape);
 			nitrishape->readChunk(r);
 		}
 		else if (!strncmp(chunk.name, "NiGeomMorpherController", 23))
 		{
 			 NiGeomMorpherController *chunk = new NiGeomMorpherController();			
-			//mNiTextKeyExtraData.pushBack(chunk);
+			//mNiTextKeyExtraData.push_back(chunk);
 			chunk->readChunk(r);
 		}
 		else if (!strncmp(chunk.name, "NiMorphData", 11))
 		{
 			 NiMorphData *chunk = new NiMorphData();			
-			//mNiTextKeyExtraData.pushBack(chunk);
+			//mNiTextKeyExtraData.push_back(chunk);
 			chunk->readChunk(r);
 		}
 		else if (!strncmp(chunk.name, "NiTexturingProperty", 19))
 		{
 			 NiTexturingProperty *chunk = new NiTexturingProperty();			
-			//mNiTextKeyExtraData.pushBack(chunk);
+			//mNiTextKeyExtraData.push_back(chunk);
 			chunk->readChunk(r);
 		}
 		else if (!strncmp(chunk.name, "NiSourceTexture", 15))
 		{
 			 NiSourceTexture *chunk = new NiSourceTexture();			
-			//mNiTextKeyExtraData.pushBack(chunk);
+			//mNiTextKeyExtraData.push_back(chunk);
 			chunk->readChunk(r);
 		}
 		else if (!strncmp(chunk.name, "NiMaterialProperty", 18))
 		{
 			 NiMaterialProperty *chunk = new NiMaterialProperty();			
-			//mNiTextKeyExtraData.pushBack(chunk);
+			//mNiTextKeyExtraData.push_back(chunk);
 			chunk->readChunk(r);
 		}
 		else
@@ -177,6 +177,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("nif4");
 	freyjaPluginDescription1s("NetImmerse 4 Model (*.nif)");
 	freyjaPluginAddExtention1s("*.nif");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
@@ -258,7 +259,7 @@ int freyja_model__nif4_import(char *filename)
 								 data->uv_set[0].textureinfo[j].v);
 			}
 
-			vertices.pushBack(idx);
+			vertices.push_back(idx);
 		}
 
 		freyjaEnd(); // FREYJA_VERTEX_GROUP

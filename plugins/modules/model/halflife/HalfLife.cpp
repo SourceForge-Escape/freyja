@@ -540,6 +540,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("halflife");
 	freyjaPluginDescription1s("Halflife model (*.mdl)");
 	freyjaPluginAddExtention1s("*.mdl");
 	freyjaPluginImport1i(FREYJA_PLUGIN_SKELETON);

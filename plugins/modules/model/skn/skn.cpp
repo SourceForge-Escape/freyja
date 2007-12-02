@@ -56,6 +56,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("skn");
 	freyjaPluginDescription1s("SIMS ASII Model (*.skn)");
 	freyjaPluginAddExtention1s("*.skn");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | 
@@ -585,14 +586,14 @@ int freyja_model__skn_import(char *filename)
 							 normals[i][2],
 							 normals[i][1]);
 
-		transV.pushBack(index);
+		transV.push_back(index);
 	}
 
 	freyjaEnd(); // FREYJA_GROUP
 
 	for (i = 0; i < texcoordCount; ++i)
 	{
-		transT.pushBack(freyjaTexCoordCreate2f(texcoords[i][0], texcoords[i][1]));
+		transT.push_back(freyjaTexCoordCreate2f(texcoords[i][0], texcoords[i][1]));
 	}
 
 	for (i = 0; i < trisCount; ++i)

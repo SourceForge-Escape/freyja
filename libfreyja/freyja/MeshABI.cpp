@@ -1440,7 +1440,7 @@ void freyjaGetMeshTexCoord2fv(index_t mesh, index_t texcoord, vec2_t uv)
 
 	if (m)
 	{
-		vec3_t uvw;
+		vec3_t uvw = {0,0,0};
 		m->GetTexCoord(texcoord, uvw);
 		uv[0] = uvw[0];
 		uv[1] = uvw[1];

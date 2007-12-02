@@ -133,8 +133,6 @@ FreyjaControl::FreyjaControl() :
 
 	mTexture(),
 	mRender(NULL),
-	mResourceFilename("freyja-dev.mlisp"),
-	mUserPrefsFilename("freyja-dev_prefs.mlisp"),
 	mCurrentlyOpenFilename(),
 	mControlScheme(eScheme_Model),
 	mEventMode(aNone),
@@ -178,11 +176,10 @@ FreyjaControl::FreyjaControl() :
 	freyjaMaterialShininess(mIndex, 0.0f);
 	freyjaMaterialSetFlag(mIndex, fFreyjaMaterial_Texture); // texture on!
 
-	// 0th camera
+	/* 0th camera */
 	mIndex = freyjaCameraCreate();
 	freyjaCameraPos3f(mIndex, 64.0f, 64.0f, 64.0f);
 	freyjaCameraTarget3f(mIndex, 0.0f, 32.0f, 0.0f);
-
 
 	/* Hook up the view */
 	mRender = FreyjaRender::GetInstance();
@@ -190,7 +187,7 @@ FreyjaControl::FreyjaControl() :
 
 	if (!mRender)
 	{
-		SystemIO::Print("See freyja-dev.log for possible errors.\n");
+		SystemIO::Print("See '%s' for possible errors.\n", FREYJA_LOG_FILE);
 		exit(-1);
 	}
 }
@@ -198,72 +195,38 @@ FreyjaControl::FreyjaControl() :
 
 void FreyjaControl::Init()
 {
-	/* Build the user interface from lisp, and load user preferences */
+	/* Build the user interface from script, and load user preferences. */
 	LoadResource();
 
-	/* Load up recent files list into file menu */
+	/* Restore recent files menus from disk. */
 	mMaterial.InitRecentFilesMenu();
+	mRecentModel.LoadResource();
+	mRecentMesh.LoadResource();
+	mRecentMetadata.LoadResource();
+	mRecentSkeleton.LoadResource();
+	mRecentLua.LoadResource();
+	mRecentPython.LoadResource();
 
-	Print("Loading %s...", mRecentModel.GetResourceFilename());
-	if ( !mRecentModel.LoadResource() )
-	{
-		Print("Failed to load '%s'.", mRecentModel.GetResourceFilename() );
-	}
-
-	Print("Loading %s...", mRecentMesh.GetResourceFilename());
-	if ( !mRecentMesh.LoadResource() )
-	{
-		Print("Failed to load '%s'.", mRecentMesh.GetResourceFilename() );
-	}
-
-	Print("Loading %s...", mRecentMetadata.GetResourceFilename());
-	if ( !mRecentMetadata.LoadResource() )
-	{
-		Print("Failed to load '%s'.", mRecentMetadata.GetResourceFilename() );
-	}
-
-	Print("Loading %s...", mRecentSkeleton.GetResourceFilename());
-	if ( !mRecentSkeleton.LoadResource() )
-	{
-		Print("Failed to load '%s'.", mRecentSkeleton.GetResourceFilename() );
-	}
-
-	Print("Loading %s...", mRecentLua.GetResourceFilename());
-	
-	if ( !mRecentLua.LoadResource() )
-	{
-		Print("Failed to load '%s'.", mRecentLua.GetResourceFilename() );
-	}
-
-	Print("Loading %s...", mRecentPython.GetResourceFilename());
-	
-	if ( !mRecentPython.LoadResource() )
-	{
-		Print("Failed to load '%s'.", mRecentPython.GetResourceFilename() );
-	}
-
-
-	/* Set query handler. */
+	/* Set libfreyja query handler. */
 	freyjaQuerySetCallback( freyjaQueryCallbackHandler );
 
-
-	/* Set some basic defaults */
-	SetControlScheme(eScheme_Model);
+	/* Set basic user interface defaults. */
+	SetControlScheme( eScheme_Model );
 	SetZoom(1.0f);
 	mEventMode = aNone;
 	mFullScreen = false;
 
-	/* Mongoose 2002.02.23, Tell renderer to start up with some defaults */
-	uint32 width = 1024; //800;//740;
-	uint32 height = 768; //600;//560;
+	/* Start the renderer with defaults. */
+	uint32 width = 1024;
+	uint32 height = 768;
 	mRender->InitContext(width, height, true);
 	mRender->ResizeContext(width, height);
 	InitTexture();
 	
-	// Init OpenGLPrinter, move along with mTexture to OpenGL facade
-	//const char *font = "/home/mongoose/.fonts/tahoma.ttf";
+	/* Load TTF font then setup OpenGLPrinter 
+	   FIXME -- Move this along with mTexture to OpenGL facade. */
 	char *font;
-	if (mResource.Lookup("FONT", &font))
+	if ( mResource.Lookup("FONT", &font) )
 	{
 		const unsigned int pt = 24, dpi = 100;
 		mstl::String s;
@@ -283,15 +246,18 @@ void FreyjaControl::Init()
 	}
 	else
 	{
-		FREYJA_ASSERTMSG(false, "No FONT symbol found in mlisp resource.");
+		FREYJA_ASSERTMSG(false, "No FONT symbol found in resource.");
 	}
 
-
-	// Handle loaded from system call
-	if (!freyjaGetBoneCount() && !freyjaGetMeshCount())
+	/* Handle model loaded state from command arguments. */
+	if ( !freyjaGetBoneCount() && !freyjaGetMeshCount() )
+	{
 		mCleared = true;
+	}
 	else
+	{
 		ModelAltered();
+	}
 }
 
 
@@ -323,7 +289,7 @@ void FreyjaControl::SetZoom(float zoom)
 {
 	FREYJA_ASSERTMSG(zoom > 0.0f, "Zoom values must be greater than 0.0f");
 	//freyja_event_notify_observer1f(eZoomId, zoom); // Update widgets watching
-	mRender->SetZoom(zoom);
+	mRender->SetZoom( zoom );
 	Print("Zoom set to %f", mRender->GetZoom());
 	RefreshContext();
 }
@@ -4710,7 +4676,7 @@ void FreyjaControl::LoadResource()
 {
 	// Setup the UI
 #if LUA_UI
-	String s = freyja_rc_map_string( "freyja3d.lua" );
+	String s = freyja_rc_map_string( FREYJA_UI_SCRIPT );
 	Lua* lua = (Lua*)&freyjaGetLuaVM();
 
 	if ( !lua->ExecuteFile( s.c_str() ) )
@@ -4719,17 +4685,13 @@ void FreyjaControl::LoadResource()
 		freyja_event_shutdown();
 	}
 #else
-	String s = freyja_rc_map_string( mResourceFilename.c_str() );
+	String s = freyja_rc_map_string( "freyja-dev.mlisp" );
 
 	if ( mResource.Load((char *)s.c_str()) )
 	{
 		FREYJA_ASSERTMSG(0, "ERROR: Couldn't find resource file '%s'\n", s.c_str() );
 		freyja_event_shutdown();
 	}
-#endif
-
-	/* GUI stuff */
-	LoadUserPreferences( );
 
 	int i, x, y;
 
@@ -4751,27 +4713,29 @@ void FreyjaControl::LoadResource()
 	{
 		mResource.Flush();
 	}
+#endif
+
+	/* GUI stuff */
+	LoadUserPreferences( );
 }
 
 
 bool FreyjaControl::LoadUserPreferences()
 {
-	String filename = freyja_rc_map_string(mUserPrefsFilename.c_str());
+	String filename = freyja_rc_map_string( FREYJA_USER_PREF_FILE );
 	MSTL_MSG("\tLoading '%s'...", filename.c_str());	
-
 	return mResource.Load((char *)filename.c_str());	
 }
 
 
 bool FreyjaControl::SaveUserPreferences()
 {
-	String filename = freyja_rc_map_string(mUserPrefsFilename.c_str());
+	String filename = freyja_rc_map_string( FREYJA_USER_PREF_FILE );
 	SystemIO::TextFileWriter w;
 	MSTL_MSG("\tSaving '%s'...", filename.c_str());	
 
 	if (!w.Open(filename.c_str()))
 		return false;
-
 
 	w.Print(";; Custom colors\n");
 
