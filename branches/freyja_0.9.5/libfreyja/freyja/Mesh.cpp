@@ -2447,6 +2447,7 @@ Mesh* Mesh::CopyWithBlendedVertices()
 	{
 		Mesh* mesh = new Mesh(*this);
 		mesh->mVertexPool = mBlendVertices;
+		mesh->UpdateBoundingVolume();
 		return mesh;
 	}
 
@@ -2467,6 +2468,28 @@ index_t Mesh::CreateVertexKeyframeFromBlended(index_t track, vec_t time)
 			k->ArrayResize( mBlendVertices.size() );
 			vec_t* array = k->GetVertexArray();
 			memcpy( array, mBlendVertices.get_array(), mBlendVertices.size()*4 );
+
+			return key;
+		}
+	}
+
+	return INDEX_INVALID;
+}
+
+
+index_t Mesh::CreateVertexKeyframeFromImport(index_t track, vec_t time, Vector<vec_t>& vertices)
+{
+	if ( vertices.size() )
+	{
+		VertexAnimTrack& t = GetVertexAnimTrack(track);
+		index_t key = t.NewKeyframe(time);
+		VertexAnimKeyFrame* k = t.GetKeyframe(key);
+
+		if (k)
+		{
+			k->ArrayResize( vertices.size() );
+			vec_t* array = k->GetVertexArray();
+			memcpy( array, vertices.get_array(), vertices.size()*4 );
 
 			return key;
 		}

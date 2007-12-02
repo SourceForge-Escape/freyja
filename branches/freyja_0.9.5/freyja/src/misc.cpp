@@ -60,6 +60,25 @@ void eNoImplementation(ResourceEvent *e)
 }
 
 
+void eExportKeyAsMesh()
+{
+	Mesh* mesh = freyjaGetMeshClass( FreyjaControl::GetInstance()->GetSelectedMesh() );
+
+	if ( mesh )
+	{	
+		Mesh* copy = mesh->CopyWithBlendedVertices();
+		copy->AddToPool();
+		freyja_print( "Converted keyframe to mesh." );
+	}
+}
+
+
+void eConvertSkelToMeshAnim()
+{
+	freyja_print("%s:%i: No longer implemented.", __FILE__, __LINE__);
+}
+
+
 void eMeshUnselectFaces()
 {
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
@@ -107,6 +126,7 @@ void eSelectedFacesGenerateNormals()
 		m->SelectedFacesGenerateVertexNormals();
 	}
 }
+
 
 void eSelectedFacesFlipNormals()
 {
@@ -979,6 +999,8 @@ void freyja3d_misc_events_attach()
 
 	ResourceEventCallback::add("eExtrude", &eExtrude);
 
+	ResourceEventCallback::add( "eExportKeyAsMesh", &eExportKeyAsMesh );
+	ResourceEventCallback::add( "eConvertSkelToMeshAnim", &eConvertSkelToMeshAnim );
 
 	// Not implemented or removed misc events
 	ResourceEventCallback2::add("eBezierPolygonPatch", &eNoImplementation);
@@ -1012,6 +1034,7 @@ void freyja3d_misc_events_attach()
 	ResourceEventCallback2::add("eTranslateUV", &eNoImplementation);
 	ResourceEventCallback2::add("eRotateUV", &eNoImplementation);
 	ResourceEventCallback2::add("eScaleUV", &eNoImplementation);
+
 }
 
 

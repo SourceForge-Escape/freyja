@@ -3232,6 +3232,10 @@ extern "C" {
 	int freyja_model__eggv9_import(char *filename);
 	int freyja_model__eggv9_export(char *filename);
 
+	int freyja_model__egg9_check(char *filename);
+	int freyja_model__egg9_import(char *filename);
+	//int freyja_model__egg9_export(char *filename);
+
 	int import_model(char *filename);
 	void freyja_init();
 }
@@ -3249,6 +3253,27 @@ void freyja_init()
 
 
 int import_model(char *filename)
+{
+	if (!freyja_model__eggv7_check(filename))
+		return freyja_model__eggv7_import(filename);
+
+	if (!freyja_model__eggv9_check(filename))
+		return freyja_model__eggv9_import(filename);
+
+	return -1;
+}
+
+
+int freyja_model__egg9_check(char *filename)
+{
+	if ( !freyja_model__eggv7_check(filename) || !freyja_model__eggv9_import(filename) )
+		return 0;
+
+	return -1;
+}
+
+
+int freyja_model__egg9_import(char *filename)
 {
 	if (!freyja_model__eggv7_check(filename))
 		return freyja_model__eggv7_import(filename);

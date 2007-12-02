@@ -682,6 +682,17 @@ public:
 	 *
 	 ------------------------------------------------------*/	
 
+	index_t CreateVertexKeyframeFromImport(index_t track, vec_t time, Vector<vec_t>& vertices);
+	/*------------------------------------------------------
+	 * Pre  : List must have the same number of vertices as mesh.
+	 *
+	 * Post : The imported vertices are converted to a 
+	 *        vertex morph keyframe.
+	 *
+	 *        Returns valid index on success. 
+	 *
+	 ------------------------------------------------------*/	
+
 	void SetVertexFlags(index_t vertex, uint32 flags);
 	/*------------------------------------------------------
 	 * Pre  : 

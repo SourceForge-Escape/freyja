@@ -946,7 +946,6 @@ int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line,
 int main(int argc, char *argv[])
 {
 	/* 'Link' up mgtk library stubs to these implementations */
-	mgtk_link_import("mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
 	mgtk_link_import("mgtk_handle_color", (void*)freyja_handle_color);
 	mgtk_link_import("mgtk_handle_application_window_close", (void*)freyja_handle_application_window_close);
 	mgtk_link_import("mgtk_handle_command", (void*)freyja_handle_command);
@@ -962,6 +961,7 @@ int main(int argc, char *argv[])
 	mgtk_link_import("mgtk_handle_text_array", (void*)freyja_handle_text_array);
 	mgtk_link_import("mgtk_handle_text", (void*)freyja_handle_text);
 	mgtk_link_import("mgtk_print", (void*)freyja_print);
+	mgtk_link_import("mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
 	mgtk_link_import("mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
 	mgtk_link_import("mgtk_rc_map", (void*)freyja_rc_map);
 	mgtk_link_import("mgtk_get_resource_path", (void*)freyja_get_resource_path_callback);

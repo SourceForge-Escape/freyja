@@ -130,7 +130,9 @@ int mgtk_lua_rc_toolbar(lua_State *s);
  * Post: 
  *
  * toolbar = 
- * mgtk_toolbar(box)
+ * mgtk_toolbar(box [, orientation ] )
+ *
+ * -- 0 = vertical, 1 = horizatal (default)
  * 
  ------------------------------------------------------*/
 

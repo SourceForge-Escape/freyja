@@ -749,7 +749,7 @@ extern "C" {
 void freyja_init()
 {
 	freyjaPluginName1s("md5");
-	freyjaPluginDescription1s("Doom3 Model (*.md5mesh)");
+	freyjaPluginDescription1s("Doom3/QuakeWars (*.md5mesh)");
 	freyjaPluginAddExtention1s("*.md5mesh");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
 	freyjaPluginExport1i(FREYJA_PLUGIN_MESH | FREYJA_PLUGIN_SKELETON);
