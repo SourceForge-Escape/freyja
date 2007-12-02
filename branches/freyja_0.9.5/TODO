@@ -7,12 +7,19 @@
  
  * Check TODO for cleared tasks.
 
+ * Splash screen to hide UI / Plugin load time and inform user to wait.
+
+ * Purge *recent* files lists for win32 packaging to speed up load times.
+
  * 'Hide' debug spew in logs to avoid user confusion.
 
  * mgtk_tree selection with event pairs per node.
 
  * Move the lua/mlisp UI init code back into libmgtk too.
 	- init / *load / start
+	- Reduce the mgtk callback system.
+		- Push the event system back into libmgtk. 
+		- Make the 'linker' handlers competely optional for mgtk applications.
 
  * Move all mlisp resource code into mgtk_mlisp.
 
@@ -32,20 +39,19 @@
 	- Macro editor: textarea, save, open, cancel, run for lua scripts
 	- Get Lua support for libfreyja ABI up to 100%.
 		- Requires C/C++ wrapper functions for some C type manipulation.
+	- Create mgtk_sourceview() to embedd gtksourceview widgets.
 	- Create mgtk_label_richtext() to accept pango rich text.
 	- Create mgtk_icon_view_dialog() -- for things like texture selection.
 	- Documentation for mgtk_lua API must be done before release.
 	- String table support for lua_mgtk. ( lingual translation support )
-	- Reduce the mgtk callback system.
-		- Push the event system back into libmgtk. 
-		- Make the 'linker' handlers competely optional for mgtk applications.
 	- Opengl_canvas widget
 		- Try to get WIN32 mgtk_create_glarea() using gdk_gl_config_new_by_mode(..)
-			- May require rewriting parts of the gdk/gtk canvas.
+			- May require rewriting parts of the gdk/gtk libraries for Windows.
 		- Allow setting display() callbacks on each opengl_canvas widget.
 		- Abstract and hook up the new animation timers.
 
  * New XML based freyja file format.
+	- COLLADA
 	- Plugin for importing the old freyja format.
 	- Remove old text / binary format support.
 	- Add Zip support. ( gzip only right now )
@@ -92,6 +98,10 @@
  -----------------------------------------------------------------------------
 
  * Single joint animation shishi odoshi tutorial demo.
+
+ * Blueprints as specialized metadata.
+
+ * Mouse control scheme design refactoring.  eg extrude control.
 
  * ThreadPool test integration.
 

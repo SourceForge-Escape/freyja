@@ -81,7 +81,7 @@ ResourceEvent::ResourceEvent(const char *name)
 		{
 			mUID = i;
 			mEvents.assign(mUID, this);
-			printf("= %u : '%s'\n", mUID, mName);
+			mgtk_print("= %u : '%s'", mUID, mName);
 			found = true;
 		}	
 	}
@@ -89,7 +89,7 @@ ResourceEvent::ResourceEvent(const char *name)
 	if (!found)
 	{
 		mEvents.push_back(this);
-		printf("+ %u : '%s'\n", mUID, mName);
+		mgtk_print("+ %u : '%s'", mUID, mName);
 	}
 
 	mResource->RegisterInt(mName, eBaseEvent + mUID);

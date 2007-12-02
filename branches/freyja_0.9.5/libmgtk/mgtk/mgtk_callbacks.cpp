@@ -125,7 +125,7 @@ void mgtk_event_subscribe_gtk_widget(int index, GtkWidget *widget)
 
 	widgets->push_back(widget);
 
-	mgtk_print("(mgtk_event_subscribe_gtk_widget %d %p)\n", 
+	mgtk_print("(mgtk_event_subscribe_gtk_widget %d %p)", 
 			   //gObserverGtkWigets.NumItems(), index, widget, widgets->size()
 			   index, widget);
 }
@@ -142,11 +142,11 @@ void mgtk_event_notify_observer1f(unsigned int id, float r)
 
 	if (!widgets)
 	{
-		mgtk_print("mgtk_event_notify_observer1f> ERROR, unknown id %d\n", id);
+		mgtk_print("mgtk_event_notify_observer1f> ERROR, unknown id %d", id);
 		return;
 	}
 
-	mgtk_print("(mgtk_event_notify_observer1f %d %f)\n", id, r);
+	mgtk_print("(mgtk_event_notify_observer1f %d %f)", id, r);
 
 	for (i = widgets->begin(); i < widgets->end(); ++i)
 	{
@@ -164,12 +164,12 @@ void mgtk_event_notify_observer1f(unsigned int id, float r)
 			if (adj)
 			{
 				gtk_adjustment_set_value(adj, r);
-				mgtk_print("(mgtk_event_notify_gtk_widget %d %p)\n", id, widget);
+				mgtk_print("(mgtk_event_notify_gtk_widget %d %p)", id, widget);
 			}
 		}
 		else
 		{
-			mgtk_print("mgtk_event_notify_observer1f> ERROR, unknown widget\n");
+			mgtk_print("mgtk_event_notify_observer1f> ERROR, unknown widget");
 			//	return;
 		}
 	}
@@ -205,7 +205,7 @@ void mgtk_event_dialog_visible_set(int dialog, int visible)
 		}
 		else
 		{
-			mgtk_print("mgtk_dialog_visible_set> %i:%d failed\n", dialog, i);
+			mgtk_print("mgtk_dialog_visible_set> %i:%d failed", dialog, i);
 		}
 	}
 }
@@ -228,7 +228,7 @@ void mgtk_option_menu_value_set( int event, int value )
 		}
 		else
 		{
-			mgtk_print( "mgtk_option_menu_value_set> %i:%d is not an optionmenu.\n", event, i );
+			mgtk_print( "mgtk_option_menu_value_set> %i:%d is not an optionmenu.", event, i );
 		}
 	}
 }
@@ -236,27 +236,35 @@ void mgtk_option_menu_value_set( int event, int value )
 
 void mgtk_textentry_value_set(int event, const char *s)
 {
-	Vector<GtkWidget*> *widgets;
-	GtkWidget *test;
-	unsigned int i;
+	Vector<GtkWidget*>* widgets = gWidgetMap[event];
 
-
-	widgets = gWidgetMap[event];
-
-	if (!widgets)
+	if ( !widgets )
 		return;
 
-	for (i = widgets->begin(); i < widgets->end(); ++i)
+	for (unsigned int i = widgets->begin(); i < widgets->end(); ++i)
 	{
-		test = (*widgets)[i];
+		GtkWidget* test = (*widgets)[i];
 
-		if ( test && GTK_IS_ENTRY(test) )
+		if ( !test )
+			continue;
+
+		if ( GTK_IS_ENTRY(test) )
 		{
-			gtk_entry_set_text(GTK_ENTRY(test), s);
+			gtk_entry_set_text( GTK_ENTRY(test), s );
+		}
+		else if ( GTK_IS_TEXT_VIEW(test) ) 
+		{
+			GtkTextBuffer* buffer = gtk_text_view_get_buffer( GTK_TEXT_VIEW(test) );
+
+			if ( s )
+			{
+				gtk_text_buffer_set_text(buffer, s, -1);	
+			}
 		}
 		else
 		{
-			mgtk_print("mgtk_textentry_value_set> %i:%d failed\n", event, i);
+			// Often this is just the product of 'late binding' the event id, so don't assert!
+			//MGTK_ASSERTMSG( 0, "%s> Invalid widget. %i:%i '%s'", __func__, event, i, s ); 
 		}
 	}
 }
@@ -299,7 +307,7 @@ void mgtk_togglebutton_value_set(int event, bool val)
 		}
 		else
 		{
-			mgtk_print("mgtk_togglebutton_value_set> %i:%d failed\n", event, i);
+			mgtk_print("mgtk_togglebutton_value_set> %i:%d failed", event, i);
 		}
 	}
 }
@@ -328,12 +336,12 @@ void mgtk_checkmenuitem_value_set(int event, bool val)
 			{
 				gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(test),  
 											   is_active);
-				mgtk_print("! mgtk_checkmenuitem_value_set> %i:%d\n", event, i);
+				mgtk_print("! mgtk_checkmenuitem_value_set> %i:%d", event, i);
 			}
 		}
 		else
 		{
-			mgtk_print("mgtk_checkmenuitem_value_set> %i:%d failed\n", event, i);
+			mgtk_print("mgtk_checkmenuitem_value_set> %i:%d failed", event, i);
 		}
 	}
 }
@@ -359,7 +367,7 @@ void mgtk_toggle_value_set(int event, int val)
 
 		if (!item)
 		{
-			mgtk_print("mgtk_toggle_value_set> %i:%d NULL widget\n", event, i);
+			mgtk_print("mgtk_toggle_value_set> %i:%d NULL widget", event, i);
 		}
 		else if (GTK_IS_CHECK_MENU_ITEM(item))
 		{
@@ -386,7 +394,7 @@ void mgtk_toggle_value_set(int event, int val)
 		}
 		else
 		{
-			mgtk_print("mgtk_toggle_value_set> %i:%d unknown widget type\n", event, i);
+			mgtk_print("mgtk_toggle_value_set> %i:%d unknown widget type", event, i);
 		}
 	}
 
@@ -418,7 +426,7 @@ void mgtk_spinbutton_value_set(int event, float val)
 		}
 		else
 		{
-			mgtk_print("mgtk_spinbutton_value_set> %i:%d failed\n", event, i);
+			mgtk_print("mgtk_spinbutton_value_set> %i:%d failed", event, i);
 		}
 	}
 }
@@ -449,7 +457,7 @@ float spinbutton_value_get_float(int event, bool *error)
 		}
 		else
 		{
-			mgtk_print("spinbutton_value_get_float> %i:%d failed\n", event, i);
+			mgtk_print("spinbutton_value_get_float> %i:%d failed", event, i);
 		}
 	}
 
@@ -490,7 +498,7 @@ int mgtk_remove_all_items_to_menu(int event)
 		}
 		else
 		{
-			mgtk_print("%s(%i): %d failed\n", __func__, event, i);
+			mgtk_print("%s(%i): %d failed", __func__, event, i);
 		}
 	}
 
@@ -527,7 +535,7 @@ int mgtk_append_item_to_menu(int event, const char *label, int item_event)
 		}
 		else
 		{
-			mgtk_print("%s(%i):%d failed\n", __func__, event, i);
+			mgtk_print("%s(%i):%d failed", __func__, event, i);
 		}
 	}
 
@@ -571,7 +579,7 @@ int mgtk_append_menu_to_menu(int event, const char *label, int item_event)
 		}
 		else
 		{
-			mgtk_print("%s(%i):%d failed\n", __func__, event, i);
+			mgtk_print("%s(%i):%d failed", __func__, event, i);
 		}
 	}
 
@@ -615,7 +623,7 @@ int mgtk_append_filechooser_item_to_menu(int event,
 		}
 		else
 		{
-			mgtk_print("%s(%i):%d failed\n", __func__, event, i);
+			mgtk_print("%s(%i):%d failed", __func__, event, i);
 		}
 	}
 
@@ -657,7 +665,7 @@ int mgtk_append_item_to_menu2i(int menuEvent, const char *label, short event, sh
 		}
 		else
 		{
-			mgtk_print("mgtk_append_item_to_menu> %i:%d failed\n", event, i);
+			mgtk_print("mgtk_append_item_to_menu> %i:%d failed", event, i);
 		}
 	}
 
@@ -689,7 +697,7 @@ int spinbutton_value_get_int(int event, bool *error)
 		}
 		else
 		{
-			mgtk_print("spinbutton_value_get_int> %i:%d failed\n", event, i);
+			mgtk_print("spinbutton_value_get_int> %i:%d failed", event, i);
 		}
 	}
 
@@ -739,7 +747,7 @@ int mgtk_event_set_range(int event, unsigned int value,
 #endif
 		else
 		{
-			mgtk_print("mgtk_event_set_range> %i:%d failed\n", event, i);
+			mgtk_print("mgtk_event_set_range> %i:%d failed", event, i);
 		}
 	}
 
@@ -756,7 +764,7 @@ void mgtk_event_shutdown()
 {
 	/* Mongoose 2004.10.29, 
 	 * FIXME clean up gWidgetMap here too! */
-	mgtk_print("@Gtk+ shuting down...\n");
+	mgtk_print("@Gtk+ shuting down...");
 	gtk_exit(0);
 }
 
@@ -1191,8 +1199,8 @@ int mgtk_init(int argc, char *argv[])
 
 	gtk_init(&argc, &argv);
 
-	mgtk_print("@GTK+ interface started...");	
-	mgtk_print("Email mgtk bug reports to %s", EMAIL_ADDRESS);
+	mgtk_print("@ GTK+ interface started...");	
+	//	mgtk_print("Email mgtk bug reports to %s", EMAIL_ADDRESS);
 
 	/* Mongoose 2002.02.23, 
 	 * Start event which builds the widgets from a script */

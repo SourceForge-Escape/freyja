@@ -524,14 +524,7 @@ void MaterialControl::SetFlag(options_t flag, bool b)
 inline
 bool MaterialControl::InitRecentFilesMenu()
 {
-	Print("Loading %s...", mRecent.GetResourceFilename());
-	if ( !mRecent.LoadResource() )
-	{
-		Print("Failed to load '%s'.", mRecent.GetResourceFilename() );
-		return false;
-	}
-
-	return true;
+	return mRecent.LoadResource();
 }
 
 

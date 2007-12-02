@@ -30,6 +30,8 @@
 #include "ControlPrinter.h"
 #include "freyja_events.h"
 
+#define FREYJA3D_LOG freyja3d::ControlPrinter::Log
+
 
 namespace freyja3d {
 

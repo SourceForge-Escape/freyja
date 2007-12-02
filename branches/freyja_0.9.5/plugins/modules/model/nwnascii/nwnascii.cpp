@@ -45,6 +45,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("nwnascii");
 	freyjaPluginDescription1s("Neverwinter ASCII Model (*.mdl)");
 	freyjaPluginAddExtention1s("*.mdl");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
@@ -185,7 +186,7 @@ int freyja_model__nwnascii_import(char *filename)
 						r.ParseFloat(); // w
 
 						//printf("vt %f %f\n", u, v);
-						transT.pushBack(freyjaTexCoordCreate2f(u, 1.0 - v));
+						transT.push_back(freyjaTexCoordCreate2f(u, 1.0 - v));
 					}
 				}
 				else if (!strncmp(symbol, "verts", 6))
@@ -205,7 +206,7 @@ int freyja_model__nwnascii_import(char *filename)
 						z = r.ParseFloat() + position[2];
 
 						//printf("v %f %f %f\n", x, z, y);
-						transV.pushBack(freyjaVertexCreate3f(x*scale,
+						transV.push_back(freyjaVertexCreate3f(x*scale,
 													   z*scale,
 													   y*scale));
 					}
@@ -229,12 +230,12 @@ int freyja_model__nwnascii_import(char *filename)
 
 						//printf("f %li/%li %li/%li %li/%li\n",  a, b, c, ta, tb, tc);
 
-						faces.pushBack(a);
-						faces.pushBack(b);
-						faces.pushBack(c);
-						faces.pushBack(ta);
-						faces.pushBack(tb);
-						faces.pushBack(tc);
+						faces.push_back(a);
+						faces.push_back(b);
+						faces.push_back(c);
+						faces.push_back(ta);
+						faces.push_back(tb);
+						faces.push_back(tc);
 					}
 				}
 			}

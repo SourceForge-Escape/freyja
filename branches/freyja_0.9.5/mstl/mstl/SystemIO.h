@@ -46,16 +46,16 @@
 
 // Define DISABLE_SYSTEMIO_DEBUG_MSG to disable this debug macro
 #if defined(DEBUG) && !defined(DISABLE_SYSTEMIO_DEBUG_MSG)
-#   define DEBUG_MSG SystemIO::Print("(%s:%i): %s() ", __FILE__, __LINE__, __func__); SystemIO::Print
+#   define DEBUG_MSG mstl::SystemIO::Print("(%s:%i): %s() ", __FILE__, __LINE__, __func__); mstl::SystemIO::Print
 #else
 #   define DEBUG_MSG(...)
 #endif
 
 // This is for warnings and spew that should always bulid
-#define MSTL_MSG SystemIO::Print("(%s:%i): %s() ", __FILE__, __LINE__, __func__); SystemIO::Print
+#define MSTL_MSG mstl::SystemIO::Print("(%s:%i): %s() ", __FILE__, __LINE__, __func__); mstl::SystemIO::Print
 
 // This is for assert messages that should always bulid
-#define MSTL_ASSERTMSG(expr, format, ...)  if (!(expr)) SystemIO::AssertMsgMarker(__FILE__, __LINE__, __func__, false, #expr, format, ##__VA_ARGS__)
+#define MSTL_ASSERTMSG(expr, format, ...)  if (!(expr)) mstl::SystemIO::AssertMsgMarker(__FILE__, __LINE__, __func__, false, #expr, format, ##__VA_ARGS__)
 
 
 //INFINITY IEEE
@@ -685,7 +685,7 @@ void *ImportFunction(void *handle, const char *name)
 
 	if (symbol == NULL)
 	{
-		PrintError("SystemIO failed to import %s: %s\n", name, loaderror);
+		PrintError("%s(): failed to import %s: %s\n", __func__, name, loaderror);
 	}
 
 	return symbol;

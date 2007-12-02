@@ -406,9 +406,12 @@ function freyja3d_ui_shelf_modify( shelf )
 
 	mgtk_toolbar_separator( toolbar )
 
-	mgtk_toolbar_button(toolbar, "SubDiv", "eMeshSubDivLoop", "gtk-add", "SubDiv Mesh" )
+	mgtk_toolbar_button(toolbar, "SubDiv", "eMeshSubDivLoop", "icons/24x24/subdiv.png", "SubDiv Mesh" )
 	--(toolbar_menu_button "icons/24x24/subdiv.png" "Subdiv"	"Subdivide mesh..." eEvent eMeshSubDivLoop
 	--mgtk_append_menu( submenu, mgtk_menu_item_check( "Flat", "eNone", 1 ) )
+
+	mgtk_toolbar_separator( toolbar )
+	mgtk_toolbar_button(toolbar, "Convert", -1, "gtk-convert", "Convert Skeletal to Mesh Animation" )
 end
 
 
@@ -487,7 +490,6 @@ function freyja3d_ui_sidebar_model( sidebar )
 	handlebox = mgtk_handlebox( 1 )
 	mgtk_box_pack( tab, handlebox )
 	expander = mgtk_expander( handlebox, "Groups Box", true )
-	mgtk_box_pack( handlebox, expander )
 
 	hbox = mgtk_hbox( 1, 0 )
 	mgtk_box_pack( expander, hbox )
@@ -536,7 +538,6 @@ function freyja3d_ui_sidebar_model( sidebar )
 	handlebox = mgtk_handlebox( 1 )
 	mgtk_box_pack( tab, handlebox, 1, 1, 0 )
 	expander = mgtk_expander( handlebox, "Scenegraph", true )
-	mgtk_box_pack( handlebox, expander, 1, 1, 0 )
 	mgtk_box_pack( expander, mgtk_tree( "Scenegraph", "eBoneIterator", "eSetBoneName" ), 1, 1, 1 )
 
 	-- Animation control
@@ -750,7 +751,7 @@ function freyja3d_ui_init()
 
 	-- Application Window	
 	window = 
-	mgtk_window( "*test.freyja (/tmp) - freyja", "icons/freyja-dev.png", 64, 64 )
+	mgtk_window( "freyja3d", "icons/freyja-dev.png", 64, 64 )
 	vbox = mgtk_vbox()
 	mgtk_box_pack( window, vbox )
 	-- FIXME Currently 'window' is actually a vbox embedded in the window.

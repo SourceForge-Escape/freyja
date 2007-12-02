@@ -234,8 +234,6 @@ int mgtk_lua_rc_window(lua_State* s)
 			gdk_pixbuf_unref(icon);
 		}
 	}
-
-	gtk_widget_show(window);
 	
 	// FIXME: This needs to hook into a 'refresh/display' callback separately now.
 	// Old mlisp hook-up for testing.
@@ -267,6 +265,9 @@ int mgtk_lua_rc_window(lua_State* s)
 #else
 	lua_pushlightuserdata(s, window);
 #endif
+
+	// Must show before opengl_canvas is created
+	gtk_widget_show(window);
 
 	return 1;
 }

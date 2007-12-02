@@ -48,6 +48,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginAddExtention1s("trmesh");
 	freyjaPluginDescription1s("OpenRaider Mesh (*.tr)");
 	freyjaPluginAddExtention1s("*.tr");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);

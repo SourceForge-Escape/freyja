@@ -55,7 +55,7 @@ void freyja3d_plugin_application_init(const char* dir)
 	const char *module_filename;
 	void *handle;
 
-	freyja_print("![Freyja application plugin system invoked]");
+	FREYJA3D_LOG("[Freyja application plugin system invoked]");
 
 	if (!reader.OpenDir(dir))
 	{
@@ -79,10 +79,10 @@ void freyja3d_plugin_application_init(const char* dir)
 		{
 			freyja3d_plugin_get_basename(module_filename, module_name, 128);
 			snprintf(module_symbol, 128, "freyja_%s_init", module_name);
-
-			freyja_print("!Module '%s' opened.", module_filename);
+			FREYJA3D_LOG("Module '%s' opened.", module_filename);
 
 			init = (void (*)(void (*)(const char*, void*)))freyjaModuleImportFunction(handle, module_symbol);
+			FREYJA3D_LOG("Module '%s' symbol '%s' %simported.", module_filename, module_symbol, init ? "" : "not ");
 
 			if (init == NULL)  
 			{
@@ -93,7 +93,7 @@ void freyja3d_plugin_application_init(const char* dir)
 			/* Call plugin's init function */
 	      	(*init)(freyja3d_plugin_binding);
 
-			freyja_print("!Module '%s' linked.", module_filename);
+			FREYJA3D_LOG("Module '%s' linked.", module_filename);
 
 			// Keep these plugins in memory...
 			//freyjaModuleUnload(handle);
@@ -102,10 +102,10 @@ void freyja3d_plugin_application_init(const char* dir)
 
 	reader.CloseDir();
 
-	freyja_print("![Freyja application plugin loader sleeps now]\n");
+	FREYJA3D_LOG("[Freyja application plugin loader sleeps now]\n");
 
 #else
-	freyja_print("FreyjaAppPlugin: This build was compiled w/o plugin support");
+	FREYJA3D_LOG("%s:%i -- This build was compiled w/o plugin support.", __FILE__, __LINE__);
 #endif
 
 	/* Hook plugins into the resource event subsystem. */
@@ -161,7 +161,7 @@ void freyja3d_plugin_init()
 {
 	/* Add extra paths for freyja plugins. */
 	String sPluginDir = freyja_rc_map_string("plugins/");
-	freyjaPluginAddDirectory( sPluginDir.c_str() );
+	//freyjaPluginAddDirectory( sPluginDir.c_str() );
 
 	/* Query for external plugins and rebuild the 'database'. */
 	freyjaPluginsInit();
@@ -194,7 +194,7 @@ void freyja3d_plugin_init()
 			if (plugin == NULL)
 				continue;
 
-			freyja_print("! %i/%i %i. [%s] %s, %s%s\n", i, count, 
+			FREYJA3D_LOG("%i/%i %i. [%s] %s, %s%s", i, count, 
 						 plugin->GetId(),
 						 plugin->mName.c_str(),
 						 plugin->mFilename.c_str(),

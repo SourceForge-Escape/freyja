@@ -437,20 +437,34 @@ void String::Set(const char *format, ...)
 	mString = NULL;
 	mLength = 0;
 
-	if (format && format[0])
+	if ( format && format[0] )
 	{
 		const unsigned int sz = 1024;
 		char buf[sz];
 
 		va_list args;
-
 		va_start(args, format);
-		vsnprintf(buf, sz, format, args);
+		int truncated = vsnprintf(buf, sz, format, args);
 		buf[sz-1] = 0;
 		va_end(args);
 
-		mLength = strlen(buf);
-		mString = String::Strdup(buf);
+		if ( truncated >= (int)sz )
+		{
+			unsigned int len = truncated + 1; // Doesn't include '\0'
+			mString = new char[ len ];
+
+			va_start( args, format );
+			vsnprintf( mString, len, format, args );
+			mString[len-1] = '\0';
+			va_end( args );
+			
+			mLength = strlen( mString );
+		}
+		else
+		{
+			mLength = strlen(buf);
+			mString = String::Strdup(buf);
+		}
 	}
 }
 

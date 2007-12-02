@@ -403,6 +403,7 @@ extern "C" {
 
 void freyja_init()
 {
+	freyjaPluginName1s("glm");
 	freyjaPluginDescription1s("GHOUL2 Mesh (*.glm)");
 	freyjaPluginAddExtention1s("*.glm");
 	freyjaPluginImport1i(FREYJA_PLUGIN_MESH);
@@ -482,7 +483,7 @@ int freyja_model__glm_import(char *filename)
 			freyjaVertexTexCoord2fv(index,
 									glm.mMDXMeshes[i].texcoords[j].texCoords);
 
-			vertices.pushBack(index);
+			vertices.push_back(index);
 		}
 		
 		freyjaEnd(); // FREYJA_GROUP

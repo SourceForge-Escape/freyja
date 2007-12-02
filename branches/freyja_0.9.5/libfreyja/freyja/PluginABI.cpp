@@ -222,7 +222,7 @@ void freyjaPluginsInit()
 				continue;
 			}
 
-			freyjaPrintMessage("Module '%s' invoked.", module_filename);
+			DEBUG_MSG("Module '%s' invoked.", module_filename);
 			handle = freyjaModuleLoad(module_filename);
 
 			if (handle)
