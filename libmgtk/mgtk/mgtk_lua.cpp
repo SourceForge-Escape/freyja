@@ -651,12 +651,12 @@ int mgtk_lua_rc_optionmenu(lua_State* s)
 	const char* label = NULL;
 	int id = -1;
 
-	if ( lua_isstring(s, 2) && lua_isnumber(s, 3) )
+	if ( lua_gettop(s) > 2 &&
+		 lua_isstring(s, 2) && lua_isnumber(s, 3) || lua_isstring(s, 3) )
 	{
 		label = lua_tostring(s, 2);
 		id = ( lua_isnumber(s, 3) ? (int)lua_tonumber(s, 3) :
 			   lua_isstring(s, 3) ? mgtk_lua_get_id( lua_tostring(s, 3) ): -1 );
-		//id = (int)lua_tonumber(s, 3);
 	}
 
 	GtkWidget* optionmenu = gtk_option_menu_new();

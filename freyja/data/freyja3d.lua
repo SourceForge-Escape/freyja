@@ -787,9 +787,9 @@ function freyja3d_ui_init()
 
 	-- Test for vertical toolbar
 	toolbar = mgtk_toolbar( hbox, 0 )	
-	mgtk_toolbar_togglebutton(toolbar, "SelectB", "eSelectionByBox", false, "icons/24x24/bbox-select.png",  "Select by bounding box, Ctrl+RMouse ends selection" )
-	mgtk_toolbar_togglebutton(toolbar, "Info", "eInfoObject", false, "gtk-info", "Info on selected object" )
 	mgtk_toolbar_togglebutton(toolbar, "Select", "eSelect", true, "icons/24x24/cursor-select.png", "Select object by cursor" )
+	mgtk_toolbar_togglebutton(toolbar, "Box Select", "eSelectionByBox", false, "icons/24x24/bbox-select.png",  "Select by bounding box, Ctrl+RMouse ends selection" )
+	mgtk_toolbar_togglebutton(toolbar, "Info", "eInfoObject", false, "gtk-info", "Info on selected object" )
 	mgtk_toolbar_togglebutton(toolbar, "Move", "eMoveObject", false, "icons/24x24/move.png", "Move object" )
 	mgtk_toolbar_togglebutton(toolbar, "Rotate", "eRotateObject", false, "icons/24x24/rotate.png", "Rotate object" )
 	mgtk_toolbar_togglebutton(toolbar, "Scale", "eScaleObject", false, "icons/24x24/scale.png", "Scale object" )
@@ -813,10 +813,7 @@ function freyja3d_ui_init()
 	canvas = mgtk_opengl_canvas( 1280 - 340, 720 )
 	mgtk_box_pack( hbox, canvas, 1, 1, 0 )
 
-	-- Sidebar
-	--hbox2 = mgtk_hbox()
-	--mgtk_box_pack( hbox, hbox2, 0, 0, 0 )
-	--mgtk_box_pack( hbox2, mgtk_button( ">", -1 ) )	
+	-- Sidebar	
 	expander = mgtk_expander( hbox, " ", true )
 	sidebar = mgtk_notebook( -1, 340, 720 )
 	mgtk_box_pack( expander, sidebar )
