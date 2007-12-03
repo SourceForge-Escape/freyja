@@ -378,7 +378,10 @@ int mgtk_lua_rc_expander(lua_State *s)
 		widget = gtk_expander_new(label);		
 		gtk_expander_set_expanded((GtkExpander*)widget, expand ? TRUE : FALSE);
 
-		gtk_container_add((GtkContainer *)box, widget);
+		if ( GTK_IS_BOX(box) )
+			 gtk_box_pack_start(GTK_BOX(box), widget, FALSE, FALSE, 0 );//TRUE, TRUE, 0);
+		else
+			gtk_container_add((GtkContainer *)box, widget);
 
 		GtkWidget *vbox = gtk_vbox_new(FALSE, 0);
 		gtk_container_add((GtkContainer *)widget, vbox);
