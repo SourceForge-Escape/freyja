@@ -814,7 +814,7 @@ function freyja3d_ui_init()
 	mgtk_box_pack( hbox, canvas, 1, 1, 0 )
 
 	-- Sidebar
-	hbox2 = mgtk_hbox()
+	--hbox2 = mgtk_hbox()
 	--mgtk_box_pack( hbox, hbox2, 0, 0, 0 )
 	--mgtk_box_pack( hbox2, mgtk_button( ">", -1 ) )	
 	expander = mgtk_expander( hbox, " ", true )
@@ -828,11 +828,11 @@ function freyja3d_ui_init()
 	--mgtk_expander( tab, "Community Plugins", true, "ThirdPartyPluginSlot" )
 
 	-- Animation scrubber
-	mgtk_box_pack( vbox, mgtk_hslider( "eAnimationSlider", 0, 500 ), 1, 1, 0 )
+	mgtk_box_pack( vbox, mgtk_hslider( "eAnimationSlider", 0, 500 ), 0, 0, 0 )
 
 	-- Statusbar
 	statusbar1 = mgtk_statusbar()
-	mgtk_box_pack( vbox, statusbar1 )
+	mgtk_box_pack( vbox, statusbar1, 0, 0, 1 )
 end
 
 
