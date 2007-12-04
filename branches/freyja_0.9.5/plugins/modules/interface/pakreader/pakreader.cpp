@@ -326,11 +326,11 @@ void PakReaderEventsAttach()
 
 	ResourceEventCallbackUInt::add("ePakReaderFiles",&ePakReaderTreeSelect);
 	gPakReaderFiles = ResourceEvent::GetResourceIdBySymbol("ePakReaderFiles");
-	MSTL_MSG("*** gPakReaderFiles = %i", gPakReaderFiles);
+	//MSTL_MSG("*** gPakReaderFiles = %i", gPakReaderFiles);
 
 	ResourceEventCallbackUInt::add("ePakReaderDirs", &ePakReaderTreeSelect);
 	gPakReaderDirs = ResourceEvent::GetResourceIdBySymbol("ePakReaderDirs");
-	MSTL_MSG("*** gPakReaderDirs = %i", gPakReaderDirs);
+	//MSTL_MSG("*** gPakReaderDirs = %i", gPakReaderDirs);
 
 	ResourceEventCallbackUInt::add("ePakReaderSelect", &ePakReaderSelect);
 	ResourceEventCallback::add("ePakReaderMenu", &ePakReaderMenu);

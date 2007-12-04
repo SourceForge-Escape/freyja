@@ -7,7 +7,7 @@
  * Email   : mongooseichiban@gmail.com
  * Object  : 
  * License : No use w/o permission (C) 2007 Mongoose
- * Comments: Confirmation Dialog class
+ * Comments: mgtk Lua language binding.
  *
  * 
  *
