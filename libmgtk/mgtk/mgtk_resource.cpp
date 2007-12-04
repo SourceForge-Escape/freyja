@@ -2,7 +2,7 @@
 /*===========================================================================
  * 
  * Project : libmgtk
- * Author  : Mongoose
+ * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
  * Object  : 
