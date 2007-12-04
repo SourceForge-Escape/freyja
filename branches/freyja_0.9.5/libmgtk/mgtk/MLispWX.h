@@ -2,7 +2,7 @@
 /*===========================================================================
  * 
  * Project : MLisp
- * Author  : #Author
+ * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://icculus.org/~mongoose/
  * Email   : mongoose@icculus.org
  * Object  : MLispWX

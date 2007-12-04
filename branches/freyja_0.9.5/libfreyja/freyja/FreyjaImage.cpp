@@ -2,7 +2,7 @@
 /*===========================================================================
  * 
  * Project : Freyja
- * Author  : Mongoose
+ * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.westga.edu/~stu7440/
  * Email   : stu7440@westga.edu
  * Object  : MtkImage

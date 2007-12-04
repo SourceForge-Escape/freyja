@@ -2,7 +2,7 @@
 /*===========================================================================
  * 
  * Project : Freyja
- * Author  : Mongoose
+ * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://icculus.org/freyja/
  * Email   : mongoose@icculus.org
  * Object  : Freyja3dCursor
