@@ -366,8 +366,8 @@ function freyja3d_ui_shelf_animation( shelf )
 end
 
 
-function freyja3d_ui_shelf_create( shelf )
-	tab = mgtk_tab(shelf, "Create", -1)
+function freyja3d_ui_shelf_polygon( shelf )
+	tab = mgtk_tab(shelf, "Polygon", -1)
 	toolbar = mgtk_toolbar( tab )
 	mgtk_toolbar_button(toolbar, " ", "eGeneratePlane", "icons/24x24/sheet.png", "Polygon plane" )
 	mgtk_toolbar_button(toolbar, " ", "eGenerateRing", "icons/24x24/ring.png", "Polygon ring" )
@@ -380,10 +380,20 @@ function freyja3d_ui_shelf_create( shelf )
 	mgtk_toolbar_button(toolbar, " ", "eBezierPolygonPatch", "icons/24x24/patch.png", "Patch" )
 	mgtk_toolbar_separator( toolbar )
 	mgtk_toolbar_button(toolbar, " ", "eExtrude", "icons/24x24/extrude.png", "Extrude face" )
+
+	--mgtk_toolbar_separator( toolbar )
+
+	mgtk_toolbar_button(toolbar, "SubDiv", "eMeshSubDivLoop", "icons/24x24/subdiv.png", "SubDiv Mesh" )
+	--(toolbar_menu_button "icons/24x24/subdiv.png" "Subdiv"	"Subdivide mesh..." eEvent eMeshSubDivLoop
+	--mgtk_append_menu( submenu, mgtk_menu_item_check( "Flat", "eNone", 1 ) )
+
 	mgtk_toolbar_separator( toolbar )
+
 	mgtk_toolbar_button(toolbar, "UVMap", "eMeshTexcoordPlaneProj", "icons/24x24/plane.png", "Planar UVMap selected faces"  )
 	mgtk_toolbar_button(toolbar, "UVMap", "eMeshTexcoordSpherical", "icons/24x24/texgen-sphere.png",  "Spherical UVMap selected faces"  )
 	mgtk_toolbar_button(toolbar, "UVMap", "eMeshTexcoordCylindrical", "icons/24x24/cylinder.png",  "Cylindrical UVMap selected faces" )
+
+
 end
 
 
@@ -442,11 +452,6 @@ function freyja3d_ui_shelf_modify( shelf )
 	mgtk_toolbar_button(toolbar, "Split", "eSplitObject", "icons/24x24/msplit.png", "Split object" )
 	mgtk_toolbar_button(toolbar, "Merge", "eMergeObject", "icons/24x24/mmerge.png", "Merge objects" )
 
-	mgtk_toolbar_separator( toolbar )
-
-	mgtk_toolbar_button(toolbar, "SubDiv", "eMeshSubDivLoop", "icons/24x24/subdiv.png", "SubDiv Mesh" )
-	--(toolbar_menu_button "icons/24x24/subdiv.png" "Subdiv"	"Subdivide mesh..." eEvent eMeshSubDivLoop
-	--mgtk_append_menu( submenu, mgtk_menu_item_check( "Flat", "eNone", 1 ) )
 
 
 end
@@ -775,9 +780,8 @@ function freyja3d_ui_init()
 	mgtk_box_pack( vbox, shelf )
 	freyja3d_ui_shelf_file( shelf )
 	freyja3d_ui_shelf_view( shelf )
-	freyja3d_ui_shelf_create( shelf )
+	freyja3d_ui_shelf_polygon( shelf )
 	freyja3d_ui_shelf_modify( shelf )
-	--freyja3d_ui_shelf_skinning( shelf )
 	freyja3d_ui_shelf_animation( shelf )
 	freyja3d_ui_shelf_material( shelf )
 
@@ -789,11 +793,13 @@ function freyja3d_ui_init()
 	toolbar = mgtk_toolbar( hbox, 0 )	
 	mgtk_toolbar_togglebutton(toolbar, "Select", "eSelect", true, "icons/24x24/cursor-select.png", "Select object by cursor" )
 	mgtk_toolbar_togglebutton(toolbar, "Box Select", "eSelectionByBox", false, "icons/24x24/bbox-select.png",  "Select by bounding box, Ctrl+RMouse ends selection" )
-	mgtk_toolbar_togglebutton(toolbar, "Info", "eInfoObject", false, "gtk-info", "Info on selected object" )
 	mgtk_toolbar_togglebutton(toolbar, "Move", "eMoveObject", false, "icons/24x24/move.png", "Move object" )
 	mgtk_toolbar_togglebutton(toolbar, "Rotate", "eRotateObject", false, "icons/24x24/rotate.png", "Rotate object" )
 	mgtk_toolbar_togglebutton(toolbar, "Scale", "eScaleObject", false, "icons/24x24/scale.png", "Scale object" )
+	mgtk_toolbar_separator( toolbar );
 	mgtk_toolbar_togglebutton(toolbar, "Paint", "ePaintObject", false, "icons/24x24/paint.png", "Paint object" )
+	mgtk_toolbar_separator( toolbar );
+	mgtk_toolbar_togglebutton(toolbar, "Info", "eInfoObject", false, "gtk-info", "Info on selected object" )
 	mgtk_toolbar_separator( toolbar );
 	mgtk_toolbar_button(toolbar, "Undo", "eUndo", "gtk-undo", "Undo" )
 	mgtk_toolbar_button(toolbar, "Redo", "eRedo", "gtk-redo", "Redo" )
