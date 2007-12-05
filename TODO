@@ -7,8 +7,24 @@
  
  * Check TODO for cleared tasks.
 
- * Improve and refine skeletal -> mesh animation.
-	- Make the GUI easier to use for conversion.
+ * Bundle object / objects... event modes using grouping contexts.
+
+ * Finish up new keyframing + bones ( UI + renderer ).
+	- Slerp for QuatKeyframe
+	- Animation Track / Keyframe snippets in UI once NEW keyframing is done.	
+	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
+ 	- Keyframes using list + vector ( TLB index:iterators for random access )
+		- No more NULL 'gaps' and only store 'true count'.
+		- Allows *Next() [list] and *ElementAt() [vector] ABI access.
+	- Bone undo support ( maybe store state from edit mode chord )
+ 	- (Un)Parenting for bones with dashed line UI.
+ 	- libfreyja AnimationControl instances for more... control options.
+		- UV / Skeletal / Motion / Vertex / etc now in UI, but not hooked up.
+	- Joint creation easier for first time users ( no default parenting ).
+	- Render 'static' joints in place during animation scrubs.
+	- Add back animation timer to enable Play/Stop events again.
+	- Add spinbutton keyframe id selection to scrubber toolbar.
+	- Add frametime setting to scrubber toolbar.
 
  * Just make skeletal animation -> vertex animation a mesh copy operation for now.
 	- Need a way to set mesh type before explict class system is finished.
@@ -19,28 +35,31 @@
 	- Merge the concepts of rest and poses for skeletal editing.
 
  * libmgtk
- 	- Splash screen for Plugin loading to inform user to wait.
-	- mgtk_tree selection with event pairs per node. ( or embedded menu )
-	- Move the lua/mlisp UI init code back into libmgtk too.
-		- init / *load / start
+ 	- Splash screen for Plugin for user feedback on slow systems.
 	- Reduce the mgtk callback system.
-		- Push the event system back into libmgtk. 
-		- Make the 'linker' handlers competely optional for mgtk applications.
-	- Move all mlisp resource code into mgtk_mlisp.
+ 		- Refactor freyja3d::FreyjaControl::LoadResource() and related functions.
+		- Push the event system callbacks / init / script load / start into libmgtk. 
+			- Make the 'linker' handlers competely optional for mgtk applications.
+				- Requires a C function binding system for C based mgtk applications.
+	- Move all mlisp resource code into separate mgtk_mlisp for deprecation.
+	- Replace mlisp backend with Lua to reduce maintance cost.
+		- Requires all modules to move to Lua.
+		- Requires user prefs to move to Lua.
+		- Requires Resource/ResourceEvent refactor to be based on Lua.
+			- Requires mgtk_lua symbol table to replace mlisp symbol table.
 
- * Bundle object / objects... event modes using grouping contexts.
+ * New XML based freyja file format refinement.
+	- COLLADA support codevelopment.
+	- Add Zip support. ( gzip only right now )
+	- Only store referenced materials. ( Fix up on append loads too. )
+		- Instance support for materials.
+	- Save IDs with objects if needed.
+	- Remove old text / binary format support.
+		- Requires external plugin(s) for older text based freyja/ja formats.
 
- * Audio support for syncing A/V via audio plugin module.
-
- * Mesh 'hide' render option from GUI.  
-	- Depends on new scenegraph widget mesh selection fix.
-
- * libfreyja AnimationControl instances for more... control options.
-	- UV / Skeletal / Motion / Vertex / etc
-
- * Refactor FreyjaControl::LoadResource() and related functions.
-
- * Lua / mgtk_lua
+ * UI Design
+	- Mesh 'hide' render option from scenegraph widget.  
+	- Face editing mode should prob set wireframe rendering.
 	- Macro editor: textarea, save, open, cancel, run for lua scripts
 	- Get Lua support for libfreyja ABI up to 100%.
 		- Requires C/C++ wrapper functions for some C type manipulation.
@@ -48,6 +67,7 @@
 	- Create mgtk_label_richtext() to accept pango rich text.
 	- Create mgtk_icon_view_dialog() -- for things like texture selection.
 	- Documentation for mgtk_lua API must be done before release.
+	- Enforce file extensions (via filters) with mgtk file dialog.
 	- String table support for mgtk_lua. ( lingual translation support )
 		- C based table support for 'hardcoded' strings like user dialog errors.
 	- Opengl_canvas widget
@@ -55,30 +75,7 @@
 			- May require rewriting parts of the gdk/gtk libraries for Windows.
 		- Allow setting display() callbacks on each opengl_canvas widget.
 		- Abstract and hook up the new animation timers.
-
- * New XML based freyja file format.
-	- COLLADA
-	- Plugin for importing the old freyja format.
-	- Remove old text / binary format support.
-	- Add Zip support. ( gzip only right now )
-	- Only store used materials. ( fix up on load too. )
-		- Instance support for materials.
-	- Save IDs with objects if needed.
-	- Native format should be very stable.
-	- Make external plugins for older text based freyja/ja formats.
-
- * Edit modes setting visual mode for things like skeletal 'bone' animation
-	- Allow for some dialog to allow 'debugging' toggles.
-	- Just have a toggle for 'bones' which will enable either the ref or pose.
-
- * Scenegraph 
-	- Perhaps add a new column to mgtk_tree for string(indexed|int) for type / metadata.
-		- Or just replace numeric column with string.
-		- Or per node func binding.
-	- Work out new graph layout.
-	- Widget needs to be able to select / edit name correctly per 'type'.
-	- Needs to update on every object 'type' creation / name change / removal.
-	- Maybe use backend libfreyja signals?
+	- Refine icon art to go with a tango spec.
 
  * Low-poly model creation by vertices features.
 	- Fix vertex deletion.
@@ -88,12 +85,17 @@
 		- Select 4 vertices = action for making quad.
 
 
+
+
  Freyja 0.9.5.18	TBD
  -----------------------------------------------------------------------------
 
  * Single joint animation shishi odoshi tutorial demo.
 
  * Blueprints as specialized metadata.
+
+ * Scenegraph needs to update on every object creation / name change / removal.
+	- Maybe use backend libfreyja signals?
 
  * Mouse control scheme design refactoring.  eg extrude control.
 
@@ -149,21 +151,14 @@
  * Improve Camera.
 	- Add more options such as perspective settings.
 	- Editor mode support for camera view.
- 	- Camera animation editor.
+ 	- Camera path animation editor.
+		- Depends on path animation module.
 
- * Finish up new keyframing + bones ( UI + renderer ).
-	- Slerp for QuatKeyframe
-	- Animation Track / Keyframe snippets in UI once NEW keyframing is done.	
-	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
- 	- Keyframes using list + vector ( TLB index:iterators for random access )
-		- No more NULL 'gaps' and only store 'true count'.
-		- Allows *Next() [list] and *ElementAt() [vector] ABI access.
-	- Bone undo support ( maybe store state from edit mode chord )
- 	- (Un)Parenting for bones with dashed line UI.
+ * Modules
+	- Path animation.
+	- Audio support for syncing A/V via audio plugin module.
+	- Import/Export plugins should pad materials where needed for imports.
 
- * Enforce file extensions (via filters) with mgtk file dialog.
-
- * Plugins should pad material import where needed for model imports.
 
 
  Freyja, Development branch 0.9.5 ( Current )
