@@ -35,7 +35,6 @@
 	- MorphMesh, SkelMesh, etc need to be distinct -- no more multimode meshes.
 		- Blended/overlay frames and subset rendering might be nice too.
 		- Need a way to set mesh type before explict class system is finished.
- 	- Just make skeletal animation -> vertex animation a mesh copy operation for now.
 	- Enable curve editor for more than debugging.
 	
  * libmgtk

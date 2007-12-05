@@ -2531,6 +2531,8 @@ void freyjaMeshTesselateTriangles(index_t mesh)
 				index_t a, b, c, d, ta, tb, tc, td;
 				index_t material = freyjaGetMeshPolygonMaterial(mesh, polygon);
 
+				ta = tb = tc = td = 0;
+
 				// FIXME: Might want to copy flags too!
 
 				/* 1. Get ABCD quad vertices */

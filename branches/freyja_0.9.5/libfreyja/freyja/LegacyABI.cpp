@@ -587,7 +587,7 @@ void freyjaGenerateSphereMesh(vec3_t origin, vec_t radius,
 							  int32 count, int32 segments)
 {
 	Vector<long> segVert, segTex, topTex, bottomTex;
-	int32 i, j, index, index2, top, bottom, bt, tt;
+	int32 i, j, index, index2, top = 0, bottom = 0, bt, tt;
 	vec_t x, z, y, u, v, nx, ny, nz, height, r;
 
 	(radius < 0) ? radius = -radius : 0;

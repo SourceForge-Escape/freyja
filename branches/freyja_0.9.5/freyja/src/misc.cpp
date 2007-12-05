@@ -73,61 +73,114 @@ void eExportKeyAsMesh()
 }
 
 
+int freyja3d_misc_vec_compare_func(const void* a, const void* b)
+{
+	vec_t aa = *(vec_t*)a;
+	vec_t bb = *(vec_t*)b;
+
+	return ( aa < bb ) ? -1 : ( aa == bb ) ? 0 : 1;
+}
+
+
 void eConvertSkelToMeshAnim()
 {
-#if 0
-	//void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
+	// FIXME: It might be good to allow an option to pad out times 
+	//        to a set interval instead of just unique frames.
 
-	//vec_t *freyjaGetMeshBlendVertices(index_t mesh)
-	//m->GetBlendVerticesArray();
+	uint32 track_id = FreyjaControl::GetInstance()->GetSelectedAnimation();
 
-	uint32 animation = FreyjaControl::GetInstance()->GetSelectedAnimation();
-	uint32 key = FreyjaControl::GetInstance()->GetSelectedKeyFrame();	
+	Vector<vec_t> times;
 
-	//uint32 GetRotKeyframeCount() { return mRot.GetKeyframeCount(); }
-	//uint32 GetLocKeyframeCount() { return mLoc.GetKeyframeCount(); }
+	for ( uint32 bone_id = 0, bone_count = freyjaGetBoneCount(); bone_id < bone_count; ++bone_id )
+	{
+		/* Gather up a list of keyframe times. */
+		Bone* bone = Bone::GetBone( bone_id );
+		BoneTrack& track = bone->GetTrack( track_id );
+		//vec_t rate_inverse = 1.0f / track.GetRate();
 
-	// mesh->CreateVertexKeyframeFromBlended(index_t track, vec_t time);
-
-	// mesh->CreateVertexKeyframeFromImport(index_t track, vec_t time, Vector<vec_t>& vertices);
-
-
-	// Mesh animation
-	TransformTrack &track = mesh->GetTransformTrack(a);
-	vec_t time = (vec_t)key / track.GetRate();
-	hel::Vec3 pos, rot, scale;
-	track.GetTransform(time, pos, rot, scale);
-
-		glTranslatef(pos.mVec[0], pos.mVec[1], pos.mVec[2]);	
-		glRotatef(rot.mVec[0], 1,0,0);
-		glRotatef(rot.mVec[1], 0,1,0);
-		glRotatef(rot.mVec[2], 0,0,1);
-		glScalef(scale.mVec[0], scale.mVec[1], scale.mVec[2]);
-
-		// FIXME: You'll have to store a cache for this array in anim/track
-		//        really.  You have to be dynamic in an editor  =)
-		VertexAnimTrack &vat = m->GetVertexAnimTrack(a);
-		VertexAnimKeyFrame *kv = vat.GetKeyframe(k);
-
-		if (kv && kv->GetVertexCount() == m->GetVertexCount())
+		for ( uint32 i = 0; i < track.GetRotKeyframeCount(); ++i )
 		{
-			array = kv->GetVertexArray();
+			vec_t time = track.GetRotKeyframeTime( i );
+			//vec3_t rot;
+			//track.GetRotKeyframe( i, rot );
+			//vec_t time = (vec_t)i * rateInverse;
+			times.push_back( time );
 		}
 
-		if (mRenderMode & fSkeletalVertexBlending)
+		for ( uint32 i = 0; i < track.GetLocKeyframeCount(); ++i )
 		{
-			freyjaMeshUpdateBlendVertices(mesh, animation, time);
-
-			vec_t* array = freyjaGetMeshBlendVertices(mesh);
-
-			if ( array )
-			{
-			}
+			vec_t time = track.GetLocKeyframeTime( i );
+			times.push_back( time );
 		}
 	}
-#else
-	freyja_print("%s:%i: No longer implemented.", __FILE__, __LINE__);
+
+	/* Remove repeated time markers in a not so efficent manner. */
+	{
+		Vector<vec_t> unique_times;
+
+		uint32 i, j;
+		foreach( times, i )
+		{
+			bool found = false;
+
+			foreach( unique_times, j )
+			{
+				if ( unique_times[ j ] + 0.001f > times[ i ] &&
+					 unique_times[ j ] - 0.001f < times[ i ] )
+					found = true;
+			}
+
+			if ( !found )
+			{
+				unique_times.push_back( times[ i ] );
+			}
+		}
+
+		freyja_print( "%s: Frame reduction %i -> %i", __func__, times.size(), unique_times.size() );
+		
+		/* Sort the frame times for the correct order. */
+		for (uint32 i = 0, n = unique_times.size(); i < n; ++i)
+		{
+			for (uint32 j = i, n = unique_times.size(); j < n; ++j)
+			{
+				if ( unique_times[i] > unique_times[j] )
+					unique_times.swap( i, j );
+			}
+		}
+
+#if 0 // Log the frames written for animator debugging use.
+		foreach( unique_times, i )
+		{
+			freyja_print( "%i. %f", i, unique_times[i] );
+		}	
 #endif
+
+		/* Generate blended geometry for times, and store them as vertex morph frames. */ 
+		index_t mesh_id = FreyjaControl::GetInstance()->GetSelectedMesh();
+
+		Mesh* mesh = Mesh::GetMesh( mesh_id );
+
+		if ( mesh )
+		{
+			Mesh* clone = new Mesh( *mesh );
+			index_t clone_id = clone->AddToPool();
+
+			foreach( unique_times, i )
+			{
+				freyjaMeshUpdateBlendVertices( clone_id, track_id, unique_times[i] );
+				uint32 k = clone->CreateVertexKeyframeFromBlended( 0, unique_times[i] );
+				freyja_print( "%i. %i", i, k );
+			}
+
+			for ( uint32 i = 0, n = clone->GetVertexCount(); i < n; ++i )
+			{
+				clone->RemoveWeight( i );
+			}
+
+			freyja_print( "%s: Converted frames %i -> %i", 
+						  __func__, unique_times.size(), clone->GetVertexAnimKeyframeCount(0) );
+		}
+	}
 }
 
 

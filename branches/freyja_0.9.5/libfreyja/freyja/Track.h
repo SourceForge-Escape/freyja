@@ -634,15 +634,13 @@ public:
 
 	virtual void GetKey(index_t idx, vec3_t v)
 	{
-		Vec3KeyFrame *key = GetKeyframe(idx);
-		hel::Vec3 u;
+		Vec3KeyFrame* key = GetKeyframe( idx );
 
-		if (key)
+		if ( key )
 		{
-			u = key->GetData();
+			hel::Vec3 u = key->GetData();
+			u.Get(v);
 		}
-
-		u.Get(v);
 	}
 
 

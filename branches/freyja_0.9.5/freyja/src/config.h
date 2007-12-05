@@ -34,7 +34,7 @@
 
 #define FREYJA_USER_PREF_FILE "freyja-dev_prefs.mlisp"
 
-#define FREYJA_LOG_FILE "freyja-dev.log"
+#define FREYJA_LOG_FILE "freyja3d.log"
 
 #define FREYJA_RECENT_FILES "recent_files-dev"
 
