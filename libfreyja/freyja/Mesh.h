@@ -1106,6 +1106,12 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	uint32 GetVertexAnimKeyframeCount(uint32 track) { return mVertexAnimTrack.GetKeyframeCount();}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
 	index_t NewVertexAnimTrack() {return 0;}
 	/*------------------------------------------------------
 	 * Pre  : 

@@ -725,7 +725,7 @@ bool Mesh::WeldTexCoords(index_t replace, index_t texcoord)
 		}
 	}
 
-	vec3_t st;
+	vec3_t st = {0,0,0};
 	GetTripleVec(mTexCoordPool, texcoord, st);
 	SetTripleVec(mTexCoordPool, replace, st);
 
@@ -795,6 +795,7 @@ bool Mesh::UnserializeBuffer(TiXmlElement *container,
 			child->QueryIntAttribute("id", &attr);
 			
 			float x, y, z;
+			x = y = z = 0.0f;
 			child->QueryFloatAttribute("x", &x);
 			child->QueryFloatAttribute("y", &y);
 			child->QueryFloatAttribute("z", &z);
@@ -2465,7 +2466,8 @@ index_t Mesh::CreateVertexKeyframeFromBlended(index_t track, vec_t time)
 
 		if (k)
 		{
-			k->ArrayResize( mBlendVertices.size() );
+			// Resize in vertex count, copy in float count.
+			k->ArrayResize( GetVertexCount() ); //mBlendVertices.size() );
 			vec_t* array = k->GetVertexArray();
 			memcpy( array, mBlendVertices.get_array(), mBlendVertices.size()*4 );
 
@@ -2487,7 +2489,8 @@ index_t Mesh::CreateVertexKeyframeFromImport(index_t track, vec_t time, Vector<v
 
 		if (k)
 		{
-			k->ArrayResize( vertices.size() );
+			// Resize in vertex count, copy in float count.
+			k->ArrayResize( GetVertexCount() ); //vertices.size() );
 			vec_t* array = k->GetVertexArray();
 			memcpy( array, vertices.get_array(), vertices.size()*4 );
 
