@@ -6,6 +6,8 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071117 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Roadmap update. (1121)
+ - Pakreader module updated for new mgtk_tree API.
  - freyja3d client support for per node event binding. (1120)
  - mgtk_tree now supports per node events binding w/ legacy event support.
  - Lights and cameras added to read-only scenegraph.
