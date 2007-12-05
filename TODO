@@ -5,12 +5,6 @@
  Freyja 0.9.5.17 (final)	20071209
  -----------------------------------------------------------------------------
  
- * Bundle object / objects... event modes using grouping contexts.
-	- Requires new selected vertices/etc cache system with parent callback as
-	  outlined in my notes.
- 
- * Break snippets out into its own source file(s)/class(es) for maintaince.
-
  * Finish up new AnimationControl, Track, Keyframe, Bone, and Mesh API.
 	- Animation Track / Keyframe snippets, AnimationControl, and generic editing.
 		- All Animation types must use KeyframeInterface for the generic system.
@@ -61,6 +55,10 @@
 		- Requires external plugin(s) for older text based freyja/ja formats.
 
  * UI Design
+	- Break snippets out into its own source file(s)/class(es) for maintaince.
+	- Bundle object / objects... event modes using grouping contexts.
+		- Requires new selected vertices/etc cache system with parent callback as
+		  outlined in my notes.
 	- Mesh 'hide' render option from scenegraph widget.  
 	- Face editing mode should prob set wireframe rendering.
 	- Macro editor: textarea, save, open, cancel, run for lua scripts
@@ -79,6 +77,10 @@
 		- Allow setting display() callbacks on each opengl_canvas widget.
 		- Abstract and hook up the new animation timers.
 	- Refine icon art to go with a tango spec.
+	- Mouse control scheme design refactoring.  
+		- eg extrude control should use a 'normal stick' interface.
+	- Scenegraph needs to update on every object creation / name change / removal.
+		- Maybe use backend libfreyja signals?
 
  * Low-poly model creation by vertices features.
 	- Fix vertex deletion.
@@ -95,21 +97,15 @@
 
  * Single joint animation shishi odoshi tutorial demo.
 
- * Blueprints as specialized metadata.
+ * Test integration.
+	- Blueprints as specialized metadata.
+	- ThreadPool per library/module.
+	- VBO based rendering.
 
- * Scenegraph needs to update on every object creation / name change / removal.
-	- Maybe use backend libfreyja signals?
-
- * Mouse control scheme design refactoring.  
-	- eg extrude control should use a 'normal stick' interface.
-
- * ThreadPool test integration.
-
- * VBO based rendering test integration.
-
- * Break up remaining monolithic source files into modules. (cont)
- 
- * Work up list of supported formats and their support levels / bugs. (cont)
+ * Refactoring
+	- Break up remaining monolithic source files into modules. (cont)
+	- Work up list of supported formats and their support levels / bugs. (cont)
+	- Break out undo system in UI and refine it.
 
  * libfreyja
 	- True scenegraphs in backend.
