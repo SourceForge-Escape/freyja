@@ -368,6 +368,13 @@ void freyja3d_update_scenegraph();
  *
  ------------------------------------------------------*/
 
+int freyja3d_get_event_id(const char* symbol);
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Returns symbol's numeric id or -1.
+ *
+ ------------------------------------------------------*/
+
 void freyja3d_record_saved_model(const char* filename);
 /*------------------------------------------------------
  * Pre  : 

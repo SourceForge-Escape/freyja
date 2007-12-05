@@ -739,11 +739,19 @@ class FreyjaControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	void EvTransformVertices() { SetObjectMode(tSelectedVertices); }
-
 	void EvTransformScene() { SetObjectMode(tScene); }
 
-	void EvTransformVertex() { SetObjectMode(tPoint); }
+	void EvTransformVertices() 
+	{
+		SetObjectMode(tSelectedVertices);  
+		mRender->eRenderVertex(1);
+	}
+
+	void EvTransformVertex() 
+	{ 
+		SetObjectMode(tPoint);
+		mRender->eRenderVertex(1);
+	}
 
 	void EvTransformFaces() { SetObjectMode(tSelectedFaces); }
 

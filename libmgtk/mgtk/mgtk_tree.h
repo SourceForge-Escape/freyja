@@ -26,13 +26,13 @@
 #ifndef GUARD__MGTK_TREE_H_
 #define GUARD__MGTK_TREE_H_
 
-
-#define mgtk_tree_label_size 64
+const unsigned int mgtk_tree_label_size = 64;
 
 typedef struct mgtk_tree_s 
 {
 	int id;
-	char label[mgtk_tree_label_size];
+	int event;
+	char label[ mgtk_tree_label_size ];
 	mgtk_tree_s* parent;
 	mgtk_tree_s* child;
 	mgtk_tree_s* sibling;
@@ -40,7 +40,16 @@ typedef struct mgtk_tree_s
 } mgtk_tree_t;
 
 
-mgtk_tree_t* mgtk_tree_new(const char* label, int id);
+typedef enum {
+   NAME_COLUMN = 0,
+   ID_COLUMN,
+   EVENT_COLUMN,
+   N_COLUMNS
+} mgtk_tree_columns_t;
+
+
+
+mgtk_tree_t* mgtk_tree_new(const char* label, int event, int id);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Allocates a new <tree> and initializes members
@@ -61,7 +70,7 @@ void mgtk_tree_add_child(mgtk_tree_t* parent, mgtk_tree_t* child);
  *
  ------------------------------------------------------*/
 
-mgtk_tree_t* mgtk_tree_add_new_child(mgtk_tree_t* parent, const char* label, int id);
+mgtk_tree_t* mgtk_tree_add_new_child(mgtk_tree_t* parent, const char* label, int event, int id);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Adds a new child tree to an existing tree

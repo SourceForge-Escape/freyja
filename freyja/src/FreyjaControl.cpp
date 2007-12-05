@@ -63,6 +63,7 @@
 //#include <lua/Lua.h>
 
 #include "Plugins.h"
+#include "freyja3d_scenegraph.h"
 #include "freyja_events.h"
 #include "FreyjaControl.h"
 
@@ -4067,7 +4068,6 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 							list2.push_back(m->GetVertexPosition(v->mVertexIndex));
 						}
 					}
-
 					
 					Action *a = new ActionVertexListTransformExt(GetSelectedMesh(), list, fTranslate, list2, mCursor.mPos);
 					ActionModelModified(a);
@@ -5858,6 +5858,7 @@ void FreyjaControl::EvUnserializeMetadata()
 	if ( metadata->Unserialize( filename ) )
 	{
 		FreyjaControl::GetInstance()->GetRecentMetadata().AddFilename( filename );
+		freyja3d_scenegraph_update_metadata();
 	}
 	else
 	{

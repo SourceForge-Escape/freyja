@@ -34,5 +34,11 @@ void freyja3d_scenegraph_update();
  *
  ------------------------------------------------------*/
 
+void freyja3d_scenegraph_update_metadata();
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Update the scenegraph widget(s) metadata subtree.
+ *
+ ------------------------------------------------------*/
 
 #endif // GUARD__FREYJA3D_SCENEGRAPH_H

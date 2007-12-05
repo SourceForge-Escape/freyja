@@ -34,6 +34,7 @@
 #include "mgtk_interface.h"
 #include "mgtk_filedialog.h"
 #include "mgtk_resource.h"
+#include "mgtk_tree.h"
 
 #include "mgtk_lua.h"
 
@@ -442,7 +443,7 @@ int mgtk_lua_rc_vbox(lua_State *s)
 	int spacing = 0;
 
 	/* Optional arguments */
-	if ( lua_gettop(s) == 2 && 
+	if ( lua_gettop(s) >= 2 && 
 		 lua_isboolean(s, 1) && lua_isnumber(s, 2) )
 	{
 		homogeneous = lua_toboolean(s, 1);
@@ -1555,6 +1556,14 @@ int mgtk_lua_rc_tree(lua_State* s)
 	g_object_set(renderer, "editable", TRUE, NULL);
 	g_signal_connect( renderer, "edited", (GCallback)mgtk_tree_cell_edited_callback, GINT_TO_POINTER(event2) );
 
+	/* Column "Event" */
+	col = gtk_tree_view_column_new();
+	gtk_tree_view_column_set_title(col, "Event");
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_column_pack_start(col, renderer, TRUE);
+	gtk_tree_view_column_add_attribute(col, renderer, "text", EVENT_COLUMN);
+
 	/* Column "Id" */
 	col = gtk_tree_view_column_new();
 	gtk_tree_view_column_set_title(col, "Id");
@@ -1566,6 +1575,7 @@ int mgtk_lua_rc_tree(lua_State* s)
 	/* Append dummy node(s) */
 	GtkTreeStore* store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
 											 G_TYPE_STRING,   /* Node name */
+											 G_TYPE_INT,      /* Node event */
 											 G_TYPE_INT);     /* Node id */
 	GtkTreeModel* model = GTK_TREE_MODEL(store);
 

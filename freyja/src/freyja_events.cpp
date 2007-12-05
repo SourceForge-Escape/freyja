@@ -57,6 +57,12 @@ void freyja3d_misc_events_attach();
 using namespace freyja3d;
 
 
+int freyja3d_get_event_id(const char* symbol)
+{
+	return Control::GetEventIdByName( symbol );
+}
+
+
 void freyja3d_record_saved_model(const char* filename)
 {
 	FreyjaControl::GetInstance()->RecordSavedModel(filename);

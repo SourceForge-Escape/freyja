@@ -42,12 +42,13 @@ Map<int, GtkTreeView *> gTreeWidgetMap;
 // mgtk event - tree model builder helper
 //////////////////////////////////////////////////////////////////////
 
-mgtk_tree_t* mgtk_tree_new(const char* label, int id)
+mgtk_tree_t* mgtk_tree_new(const char* label, int event, int id)
 {
 	mgtk_tree_t *tree = new mgtk_tree_t;
 
 	snprintf(tree->label, mgtk_tree_label_size, label);
 	tree->label[mgtk_tree_label_size-1] = '\0';
+	tree->event = event;
 	tree->id = id;
 
 	tree->parent = NULL;
@@ -110,9 +111,9 @@ void mgtk_tree_add_child(mgtk_tree_t* parent, mgtk_tree_t* child)
 }
 
 
-mgtk_tree_t* mgtk_tree_add_new_child(mgtk_tree_t* parent, const char* label, int id)
+mgtk_tree_t* mgtk_tree_add_new_child(mgtk_tree_t* parent, const char* label, int event, int id)
 {
-	mgtk_tree_t* child = mgtk_tree_new(label, id);
+	mgtk_tree_t* child = mgtk_tree_new(label, event, id);
 	mgtk_tree_add_child( parent, child );
 	return child;
 }
@@ -147,13 +148,16 @@ void mgtk_tree_update_widget_helper(const char* name, int event, mgtk_tree_t* tr
 		GtkTreeIter root;
 		GtkTreeStore *store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
 												 G_TYPE_STRING,   /* Node name */
+												 G_TYPE_INT,      /* Node event */
 												 G_TYPE_INT);     /* Node id */
 
 		gtk_tree_store_append(store, &root, NULL);
 		gtk_tree_store_set(store, &root,
 						   NAME_COLUMN, name,
+						   EVENT_COLUMN, -1,
 						   ID_COLUMN, -1,
 						   -1);
+
 		mgtk_resource_rebuild_treeview(event, GTK_TREE_MODEL(store));
 		return;
 	}	
@@ -184,11 +188,13 @@ void mgtk_tree_update_widget_helper(const char* name, int event, mgtk_tree_t* tr
 	{
 		store = gtk_tree_store_new(N_COLUMNS,       /* Total number of cols */
 								   G_TYPE_STRING,   /* Tree name */
+								   G_TYPE_INT,
     	                           G_TYPE_INT);     /* Tree node (root) id */
 
 		gtk_tree_store_append(store, &root, NULL);
 		gtk_tree_store_set(store, &root,
 						   NAME_COLUMN, tree->label,
+						   EVENT_COLUMN, tree->event,
 						   ID_COLUMN, tree->id,
 						   -1);
 
@@ -217,6 +223,7 @@ void mgtk_tree_update_widget_helper(const char* name, int event, mgtk_tree_t* tr
 		gtk_tree_store_append(store, &child, &root);
 		gtk_tree_store_set(store, &child,
 						   NAME_COLUMN, tree->label,
+						   EVENT_COLUMN, tree->event,
 						   ID_COLUMN, tree->id,
 						   -1);
 
@@ -293,35 +300,41 @@ void mgtk_resource_rebuild_treeview(int event, GtkTreeModel *model)
 }
 
 
-void mgtk_treeview_onRowActivated(GtkTreeView *treeview,
-								  GtkTreePath        *path,
-								  GtkTreeViewColumn  *col,
-								  gpointer            userdata)
+void mgtk_treeview_onRowActivated(GtkTreeView* treeview,
+								  GtkTreePath* path,
+								  GtkTreeViewColumn* col,
+								  gpointer userdata)
 {
-	GtkTreeModel *model;
-	GtkTreeIter   iter;
-
 	//MSTL_MSG("A row has been double-clicked!\n");
 	
-    model = gtk_tree_view_get_model(treeview);
+    GtkTreeModel* model = gtk_tree_view_get_model(treeview);
+	GtkTreeIter iter;
 
     if (gtk_tree_model_get_iter(model, &iter, path))
     {
 		gchar *name;
 		gint id;
+		gint event;
 
 		gtk_tree_model_get(model, &iter, 
-						   NAME_COLUMN, &name, 
+						   NAME_COLUMN, &name,
+						   EVENT_COLUMN, &event,
 						   ID_COLUMN, &id,
 						   -1);
 
-		mgtk_print("!Event %i: Selected row { %s, %i }\n", GPOINTER_TO_INT(userdata), name, id);
-
-		mgtk_handle_event1u(GPOINTER_TO_INT(userdata), id);
+		if ( event > 0 )
+		{
+			mgtk_handle_event1u( GPOINTER_TO_INT(event), id );
+		}
+		else
+		{
+			mgtk_print("No event for selected row { '%s', %i, %i }", name, event, id);
+		}
 
 		g_free(name);
 	}
 }
+
 
 arg_list_t *mgtk_rc_tree(arg_list_t* container)
 {
@@ -373,6 +386,14 @@ arg_list_t *mgtk_rc_tree(arg_list_t* container)
 	g_object_set(renderer, "editable", TRUE, NULL);
 	g_signal_connect(renderer, "edited", (GCallback)mgtk_tree_cell_edited_callback, GINT_TO_POINTER(get_int(event2)));
 
+	/* Column "Event" */
+	col = gtk_tree_view_column_new();
+	gtk_tree_view_column_set_title(col, "Event");
+	gtk_tree_view_append_column(GTK_TREE_VIEW(view), col);
+	renderer = gtk_cell_renderer_text_new();
+	gtk_tree_view_column_pack_start(col, renderer, TRUE);
+	gtk_tree_view_column_add_attribute(col, renderer, "text", EVENT_COLUMN);
+
 	/* Column "Id" */
 	col = gtk_tree_view_column_new();
 	gtk_tree_view_column_set_title(col, "Id");
@@ -384,6 +405,7 @@ arg_list_t *mgtk_rc_tree(arg_list_t* container)
 	/* Append dummy bone(s) */
 	GtkTreeStore* store = gtk_tree_store_new(N_COLUMNS, /* Total number of cols */
 											 G_TYPE_STRING,   /* Bone Name */
+											 G_TYPE_INT,
 											 G_TYPE_INT);     /* Bone Id */
 
 	GtkTreeModel* model = GTK_TREE_MODEL(store);

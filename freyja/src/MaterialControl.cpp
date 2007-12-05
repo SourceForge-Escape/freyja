@@ -517,7 +517,7 @@ void MaterialControl::AttachMethodListeners()
 
 	CreateListener1u("eRecentMaterial", &MaterialControl::EvRecentFile);
 
-	EvSelectId = CreateListener1u("eSetMaterial", &MaterialControl::EvSelect);
+	EvSelectId = CreateListener1u("eMaterialIterator", &MaterialControl::EvSelect);
 	EvAmbientId[0] = CreateListener1f("eMaterialAmbient0", &MaterialControl::EvAmbient0);
 	EvAmbientId[1] = CreateListener1f("eMaterialAmbient1", &MaterialControl::EvAmbient1);
 	EvAmbientId[2] = CreateListener1f("eMaterialAmbient2", &MaterialControl::EvAmbient2);

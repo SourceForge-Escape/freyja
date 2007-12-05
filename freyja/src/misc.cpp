@@ -75,7 +75,59 @@ void eExportKeyAsMesh()
 
 void eConvertSkelToMeshAnim()
 {
+#if 0
+	//void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
+
+	//vec_t *freyjaGetMeshBlendVertices(index_t mesh)
+	//m->GetBlendVerticesArray();
+
+	uint32 animation = FreyjaControl::GetInstance()->GetSelectedAnimation();
+	uint32 key = FreyjaControl::GetInstance()->GetSelectedKeyFrame();	
+
+	//uint32 GetRotKeyframeCount() { return mRot.GetKeyframeCount(); }
+	//uint32 GetLocKeyframeCount() { return mLoc.GetKeyframeCount(); }
+
+	// mesh->CreateVertexKeyframeFromBlended(index_t track, vec_t time);
+
+	// mesh->CreateVertexKeyframeFromImport(index_t track, vec_t time, Vector<vec_t>& vertices);
+
+
+	// Mesh animation
+	TransformTrack &track = mesh->GetTransformTrack(a);
+	vec_t time = (vec_t)key / track.GetRate();
+	hel::Vec3 pos, rot, scale;
+	track.GetTransform(time, pos, rot, scale);
+
+		glTranslatef(pos.mVec[0], pos.mVec[1], pos.mVec[2]);	
+		glRotatef(rot.mVec[0], 1,0,0);
+		glRotatef(rot.mVec[1], 0,1,0);
+		glRotatef(rot.mVec[2], 0,0,1);
+		glScalef(scale.mVec[0], scale.mVec[1], scale.mVec[2]);
+
+		// FIXME: You'll have to store a cache for this array in anim/track
+		//        really.  You have to be dynamic in an editor  =)
+		VertexAnimTrack &vat = m->GetVertexAnimTrack(a);
+		VertexAnimKeyFrame *kv = vat.GetKeyframe(k);
+
+		if (kv && kv->GetVertexCount() == m->GetVertexCount())
+		{
+			array = kv->GetVertexArray();
+		}
+
+		if (mRenderMode & fSkeletalVertexBlending)
+		{
+			freyjaMeshUpdateBlendVertices(mesh, animation, time);
+
+			vec_t* array = freyjaGetMeshBlendVertices(mesh);
+
+			if ( array )
+			{
+			}
+		}
+	}
+#else
 	freyja_print("%s:%i: No longer implemented.", __FILE__, __LINE__);
+#endif
 }
 
 
@@ -890,6 +942,63 @@ void eBoneKeyFrameMetadata()
 }
 
 
+#include <freyja/Metadata.h>
+void eMetadataIterator(unsigned int id)
+{
+	FreyjaControl::GetInstance()->SetSelectedMetadata( id );
+
+	// Test, Do we want to assume the user always wants to edit from this event?
+	Metadata* metadata = Metadata::GetObjectByUid( id );
+
+	if ( metadata )
+	{
+		const char* dialog = "MetadataPropertyDialog";
+		mgtk_set_query_dialog_string_default( dialog, "name", metadata->GetName() );
+		mgtk_set_query_dialog_string_default( dialog, "type", metadata->GetType() );
+		mgtk_set_query_dialog_string_default( dialog, "metadata", metadata->GetMetadata() );
+		mgtk_set_query_dialog_string_default( dialog, "model", metadata->GetModel() );
+		mgtk_set_query_dialog_string_default( dialog, "material", metadata->GetMaterial() );
+		
+		int update = mgtk_execute_query_dialog( dialog );
+		
+		if ( update )
+		{
+			const char* s = mgtk_get_query_dialog_string(dialog, "name");
+			if (s) metadata->SetName( s );
+			
+			s = mgtk_get_query_dialog_string(dialog, "type");
+			if (s) metadata->SetType( s );
+			
+			s = mgtk_get_query_dialog_string(dialog, "metadata");
+			if (s) metadata->SetMetadata( s );
+			
+			s = mgtk_get_query_dialog_string(dialog, "model");
+			if (s) metadata->SetModel( s );
+			
+			s = mgtk_get_query_dialog_string(dialog, "material");
+			if (s) metadata->SetMaterial( s );
+			
+			FreyjaControl::GetInstance()->Dirty();
+		}
+	}
+
+}
+
+
+void eCameraIterator(unsigned int id)
+{
+	FreyjaControl::GetInstance()->SetSelectedCamera( id );
+	freyja_print( "camera%i selected.", id );
+}
+
+
+void eLightIterator(unsigned int id)
+{
+	FreyjaControl::GetInstance()->SetSelectedLight( id );
+	freyja_print( "light%i selected.", id );
+}
+
+
 void eResetColorsToDefault()
 {
 	freyja_handle_color(eColorBackground, 0.5f, 0.5f, 0.5f, 1.0f);
@@ -918,6 +1027,11 @@ void freyja3d_misc_events_attach()
 	ResourceEventCallback::add("eTestAssertMsgBox", &eTestAssertMsgBox);
 	ResourceEventCallback::add("eTestTextView", &eTestTextView);
 	ResourceEventCallbackString::add("eTestTextViewText", &eTestTextViewText);
+
+	// Misc Iterators
+	ResourceEventCallbackUInt::add("eMetadataIterator", &eMetadataIterator);
+	ResourceEventCallbackUInt::add("eCameraIterator", &eCameraIterator);
+	ResourceEventCallbackUInt::add("eLightIterator", &eLightIterator);
 
 	// Misc events
 	ResourceEventCallback::add("eResetColorsToDefault", &eResetColorsToDefault);
