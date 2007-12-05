@@ -2,12 +2,12 @@
  TODO
  =============================================================================
 
- Freyja 0.9.5.17	TBD
+ Freyja 0.9.5.17 (final)	20071209
  -----------------------------------------------------------------------------
  
- * Check TODO for cleared tasks.
-
  * Bundle object / objects... event modes using grouping contexts.
+ 
+ * Break snippets out into its own source file(s)/classe(s) for maintaince.
 
  * Finish up new keyframing + bones ( UI + renderer ).
 	- Slerp for QuatKeyframe
@@ -23,6 +23,7 @@
 	- Joint creation easier for first time users ( no default parenting ).
 	- Render 'static' joints in place during animation scrubs.
 	- Add back animation timer to enable Play/Stop events again.
+		- Timer based refresh for animation playback widget or embedded in view.
 	- Add spinbutton keyframe id selection to scrubber toolbar.
 	- Add frametime setting to scrubber toolbar.
 
@@ -97,7 +98,8 @@
  * Scenegraph needs to update on every object creation / name change / removal.
 	- Maybe use backend libfreyja signals?
 
- * Mouse control scheme design refactoring.  eg extrude control.
+ * Mouse control scheme design refactoring.  
+	- eg extrude control should use a 'normal stick' interface.
 
  * ThreadPool test integration.
 
@@ -106,8 +108,6 @@
  * Break up remaining monolithic source files into modules. (cont)
  
  * Work up list of supported formats and their support levels / bugs. (cont)
-
- * Timer based refresh for animation playback widget a la blender.
 
  * libfreyja
 	- True scenegraphs in backend.
@@ -236,9 +236,9 @@
 	- Possibly support generic strip and package rules too.
 	- http://www.cmake.org/Wiki/CMake_Cross_Compiling
 
- * Swap file for crash recovery and very, very large undo.
+ * Swap file for crash recovery and very, very large undo stack.
 
- * The way the model graph works in 0.9.5 with all the extensions is 
+ * The way the model graph works in 0.9.5 with all the extensions are 
    going to have to be redesigned for 0.9.6 alpha.
 	- Edge based editing as a focus instead of vertex.
 	- Better reference graphs so you can tell how vertex/edge/facets are 
