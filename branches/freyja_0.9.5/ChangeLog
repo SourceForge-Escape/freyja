@@ -6,6 +6,7 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071209 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Improved a few icons in a tango style.
  - Skeletal -> Morph mesh coverter back. (1126)
  - Fixes for mesh vertex frame import methods.
  - New log filename: freyja3d.log

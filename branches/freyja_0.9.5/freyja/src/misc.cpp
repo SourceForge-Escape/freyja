@@ -114,8 +114,9 @@ void eConvertSkelToMeshAnim()
 		}
 	}
 
-	/* Remove repeated time markers in a not so efficent manner. */
+
 	{
+		/* Remove repeated time markers in a not so efficent manner. */
 		Vector<vec_t> unique_times;
 
 		uint32 i, j;
@@ -137,7 +138,7 @@ void eConvertSkelToMeshAnim()
 		}
 
 		freyja_print( "%s: Frame reduction %i -> %i", __func__, times.size(), unique_times.size() );
-		
+
 		/* Sort the frame times for the correct order. */
 		for (uint32 i = 0, n = unique_times.size(); i < n; ++i)
 		{

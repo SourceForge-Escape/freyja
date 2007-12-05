@@ -89,6 +89,7 @@
  * The OpenGL window is pitch black!
 	- This can be caused by an unstable filesystem. ( rare )
 	- This is caused by corrupted user preferences mlisp. ( rare )
+	- If you experience this just go to Preferences and click 'default colors'.
 
  * Modal dialogs fail to cancel.
 	- This is caused by build optimizations with Gtk+ wrapper callback.

@@ -2297,6 +2297,22 @@ void FreyjaRender::DrawCurveWindow()
 			glVertex2f(width, yT2+shift);
 			glEnd();
 		}
+
+		/* Display keyframes by time markers. */
+		glColor3fv( YELLOW );
+		glBegin(GL_LINES);
+
+		for (uint32 i = 0; i < track.GetRotKeyframeCount(); ++i)
+		{
+			vec_t time = track.GetRotKeyframeTime( i );
+			vec_t x = (float)i * end_v * width;
+			
+			//y = height - y * height;
+			glVertex2f( x, 0.0f );
+			glVertex2f( x, height );
+		}
+
+		glEnd();
 #endif
 	}
 #endif

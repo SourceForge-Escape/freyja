@@ -492,6 +492,10 @@ function freyja3d_animation_toolbar( box )
 	mgtk_toolbar_button( toolbar, "Stop", "eAnimationStop", "gtk-media-stop", "Stop" )
 	mgtk_toolbar_button( toolbar, "", -1, "gtk-media-forward", "" )
 	mgtk_toolbar_button( toolbar, "Next", "eAnimationNext", "gtk-media-next", "Next Track" )
+
+	mgtk_toolbar_separator( toolbar )
+
+	mgtk_toolbar_togglebutton(toolbar, "Blend", "eSkeletalDeform", false, "icons/24x24/deform.png", "Skeletal vertex blending" )
 end
 
 
