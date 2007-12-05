@@ -6,35 +6,38 @@
  -----------------------------------------------------------------------------
  
  * Bundle object / objects... event modes using grouping contexts.
+	- Requires new selected vertices/etc cache system with parent callback as
+	  outlined in my notes.
  
- * Break snippets out into its own source file(s)/classe(s) for maintaince.
+ * Break snippets out into its own source file(s)/class(es) for maintaince.
 
- * Finish up new keyframing + bones ( UI + renderer ).
-	- Slerp for QuatKeyframe
-	- Animation Track / Keyframe snippets in UI once NEW keyframing is done.	
+ * Finish up new AnimationControl, Track, Keyframe, Bone, and Mesh API.
+	- Animation Track / Keyframe snippets, AnimationControl, and generic editing.
+		- All Animation types must use KeyframeInterface for the generic system.
+		- All Animation types must use TrackInterface for generic system.
+		- UV / Skeletal / Motion / Vertex / etc mode selection for generic control.
+		- Ability to copy / paste / drag keyframe from one time marker to another.
+	- QuatKeyframe slerping algorithm selection for user.	
 	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
- 	- Keyframes using list + vector ( TLB index:iterators for random access )
+ 	- Keyframes using sorted list ( TLB index:iterators for random access )
 		- No more NULL 'gaps' and only store 'true count'.
 		- Allows *Next() [list] and *ElementAt() [vector] ABI access.
-	- Bone undo support ( maybe store state from edit mode chord )
- 	- (Un)Parenting for bones with dashed line UI.
- 	- libfreyja AnimationControl instances for more... control options.
-		- UV / Skeletal / Motion / Vertex / etc now in UI, but not hooked up.
-	- Joint creation easier for first time users ( no default parenting ).
+	- Joint creation/editing easier for first time users.
+		- Joint editing full undo support. 
+			- Might be able to store state from edit mode chord.
+		- Disable auto joint parenting.
+			- Requires (un)parenting UI for joints with dashed line and cursor.
 	- Render 'static' joints in place during animation scrubs.
 	- Add back animation timer to enable Play/Stop events again.
 		- Timer based refresh for animation playback widget or embedded in view.
 	- Add spinbutton keyframe id selection to scrubber toolbar.
 	- Add frametime setting to scrubber toolbar.
-
- * Just make skeletal animation -> vertex animation a mesh copy operation for now.
-	- Need a way to set mesh type before explict class system is finished.
 	- MorphMesh, SkelMesh, etc need to be distinct -- no more multimode meshes.
 		- Blended/overlay frames and subset rendering might be nice too.
-	- Ability to copy / paste keyframe from one mesh to another.
-	- Ability to toggle mesh / skeletal mode for mesh. ( perhaps hard covert )
-	- Merge the concepts of rest and poses for skeletal editing.
-
+		- Need a way to set mesh type before explict class system is finished.
+ 	- Just make skeletal animation -> vertex animation a mesh copy operation for now.
+	- Enable curve editor for more than debugging.
+	
  * libmgtk
  	- Splash screen for Plugin for user feedback on slow systems.
 	- Reduce the mgtk callback system.
