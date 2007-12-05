@@ -1904,7 +1904,7 @@ void FreyjaRender::RenderModel(index_t model)
 	}
 
 	/* Point type setting shows actual bind pose skeleton */
-	if (mRenderMode & fBones2)
+	if ( mRenderMode & fBones2 && !(mRenderMode & fKeyFrameAnimation) )
 	{
 		hel::Vec3 p, r;
 
@@ -1912,17 +1912,8 @@ void FreyjaRender::RenderModel(index_t model)
 		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
 		{
 			glPushMatrix();
-#if 0
-			freyjaGetBoneRotationEuler3fv(i, p.mVec);
-			glRotatef(p.mX, 1, 0, 0);
-			glRotatef(p.mY, 0, 1, 0);
-			glRotatef(p.mZ, 0, 0, 1);
-
-			freyjaGetBoneWorldPos3fv(i, p.mVec);
-			glTranslatef(p.mX, p.mY, p.mZ);
-#else
 			glMultMatrixf(freyjaGetBoneBindPose16fv(i));
-#endif
+
 			(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
 			glColor3fv(FreyjaRender::mColorJointHighlight) : 
 			glColor3fv(FreyjaRender::mColorJoint);
@@ -1959,8 +1950,10 @@ void FreyjaRender::RenderModel(index_t model)
 		//glPopAttrib();
 	}
 
+
 	/* Render transformed bones */
-	if (mRenderMode & fBones3)
+	if (mRenderMode & fBones2 && mRenderMode & fKeyFrameAnimation ||
+		mRenderMode & fBones3 )
 	{
 		hel::Vec3 p;
 		hel::Mat44 combined;
@@ -1980,9 +1973,15 @@ void FreyjaRender::RenderModel(index_t model)
 			freyjaGetBoneWorldPos3fv(i, p.mVec);
 			glTranslatef(p.mX, p.mY, p.mZ);
 
+#if 0
 			(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
 			glColor3fv(WHITE) : glColor3fv(DARK_RED);
 			mglDrawControlPoint();
+#else
+			(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
+			glColor3fv(FreyjaRender::mColorJointHighlight) : 
+			glColor3fv(FreyjaRender::mColorJoint);
+#endif
 
 			glPopMatrix();
 
@@ -1995,8 +1994,14 @@ void FreyjaRender::RenderModel(index_t model)
 				glPushMatrix();
 				glMultMatrixf( combined.mMatrix );
 
+#if 0
 				(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
 				glColor3fv(WHITE) : glColor3fv(DARK_GREEN);
+#else
+				(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
+				glColor3fv(FreyjaRender::mColorBoneHighlight) : 
+				glColor3fv(FreyjaRender::mColorBone);
+#endif
 
 				freyjaGetBoneTranslation3fv(i, p.mVec);
 
@@ -2171,161 +2176,61 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 
 void FreyjaRender::DrawCurveWindow()
 {
-	const vec_t s = 6.5f;
-	unsigned int width = GetWindowWidth();
-	unsigned int height = GetWindowHeight();
-	uint32 curKey = FreyjaControl::GetInstance()->GetSelectedKeyFrame();
-	vec_t x = 0.0f, y = 0.0f;
-	vec3_t yT = { 80.0f, 160.0f, 240.0f };
-
-	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
-
-	if (!m)
-		return;
-
-	vec2_t p;
+	const unsigned int width = GetWindowWidth();
+	const unsigned int height = GetWindowHeight();
+	const unsigned int end = 175;
+	const vec_t end_v = 1.0f / end;
+	const vec_t inc_v = 5;
 
 	glPushMatrix();
-	mgl2dProjection(width, height);
+
+	mgl2dProjection( width, height );
+
+	/* Background Quad */
+	{
+		const vec_t x = 0.0f;
+		const vec_t y = 0.0f;
+
+		glColor3fv( mColorBackground );
+		BindColorTexture();
+		glColor3fv( mColorBackground );
+
+		glBegin(GL_QUADS);
+		glVertex2f(x, y);
+		glVertex2f(x, y + height);
+		glVertex2f(x + width, y + height);
+		glVertex2f(x + width, y);
+		glEnd();
+	}
+
+
 	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_LIGHTING);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
-	glDisable(GL_LIGHTING);
 	glLineWidth(mDefaultLineWidth);
-	glPointSize(mDefaultPointSize);
-
-	// FIXME: This is temp test constant - replace with track switching later
-	const uint32 track = 0;
-
-	// FIXME: Need to handle DNE Tracks when sparse tracks are brought online.
-
-	if (curKey < m->GetTransformTrack(track).mKeyFrames.size())
-	{
-		p[0] = x + curKey*s;		
-		p[1] = 0.0f;
-		glColor3fv(PINK); // gSweepColor
-		glBegin(GL_LINES);
-		glVertex2fv(p);
-		p[1] = height;
-		glVertex2fv(p);
-		glEnd();
-	}
-
-	if (curKey < m->GetTransformTrack(track).mKeyFrames.size())
-	{
-		p[0] = x + curKey*s;		
-		p[1] = 0.0f;
-		glColor3fv(PINK); // gSweepColor
-		glBegin(GL_LINES);
-		glVertex2fv(p);
-		p[1] = height;
-		glVertex2fv(p);
-		glEnd();
-	}
-
-	for ( uint32 ii = 0; ii < 3; ++ii )
-	{
-		glColor3fv(YELLOW);
-		glBegin(GL_POINTS);
-		unsigned int idx = 0;
-		foreach (m->GetTransformTrack(track).mKeyFrames, idx)
-		{
-			Vec3x3KeyFrame *key = m->GetTransformTrack(track).GetKeyframe(idx);
-			
-			if (key)
-			{
-				p[0] = x + idx*s;
-				
-				p[1] = yT[ii] + key->mData[ii].mVec[0];
-				glVertex2fv(p);
-				
-				p[1] = yT[ii] + key->mData[ii].mVec[1];
-				glVertex2fv(p);
-				
-				p[1] = yT[ii] + key->mData[ii].mVec[2];
-				glVertex2fv(p);
-			}
-		}
-		glEnd();
-	}
-
-	// FIXME: Use cursor mode to determine which to 'modify and render here'
-	if (m && FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tMesh)
-	{
-		vec_t time;
-		hel::Vec3 v, pos, rot, scale;
-		vec_t rateInverse = 1.0f / m->GetTransformTrack(track).GetRate();
-		uint32 count = m->GetTransformTrack(track).GetKeyframeCount();
-
-		for (uint32 j = 0; j < 3; ++j)
-		{
-			switch (j)
-			{
-			case 0:
-				glColor3fv(RED);
-				break;
-
-			case 1:
-				glColor3fv(GREEN);
-				break;
-
-			default:
-				glColor3fv(BLUE);
-				break;
-			}
-
-			glBegin(GL_LINES);
-			glVertex2f(x, yT[2]);
-
-			for (uint32 i = 0; i < count; ++i)
-			{
-				time = (vec_t)i * rateInverse;
-				m->GetTransformTrack(track).GetTransform(time, pos, rot, scale);
-				v.mVec[0] = x + i*s;
-				v.mVec[1] = yT[2] + pos.mVec[j];
-				glVertex2fv(v.mVec);
-				glVertex2fv(v.mVec);
-			}
-
-			glVertex2f(width, yT[2]);
-			glEnd();
-
-			glBegin(GL_LINES);
-			glVertex2f(x, yT[2]+30.0f);
-
-			for (uint32 i = 0; i < count; ++i)
-			{
-				time = (vec_t)i * rateInverse;
-				m->GetTransformTrack(track).GetTransform(time, pos, rot, scale);
-				v.mVec[0] = x + i*s;
-				v.mVec[1] = yT[2]+30.0f + rot.mVec[j];
-				glVertex2fv(v.mVec);
-				glVertex2fv(v.mVec);
-			}
-
-			glVertex2f(width, yT[2]+30.0f);
-			glEnd();
-		}
-	}
+	glPointSize(mVertexPointSize);
 
 
+
+#if 0
+#else
 	/* Skeletal animation, if any... */
 	uint32 bone = FreyjaControl::GetInstance()->GetSelectedBone();
 	Bone *b = Bone::GetBone(bone);
 
 	// FIXME: Use cursor mode to determine which to 'modify and render here'
-	if (b && FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tBone)
+	if ( b )
 	{
-		const vec_t shift = 60.0f;
-		vec_t time;
+		const vec_t shift = 0.0f;
 		uint32 a = FreyjaControl::GetInstance()->GetSelectedAnimation();
 		BoneTrack &track = b->GetTrack(a);
 		vec_t rateInverse = 1.0f / track.GetRate();
-		hel::Vec3 v, p;
+		hel::Vec3 v;
 
-		yT[2] += 20.0f;
+		vec_t yT2 = 20.0f, x = 0.0f, s = 1.0f;
 
-		glLineWidth(1.5);
+		//glLineWidth(1.5);
 
 		for (uint32 j = 0; j < 3; ++j)
 		{
@@ -2345,20 +2250,20 @@ void FreyjaRender::DrawCurveWindow()
 			}
 
 			glBegin(GL_LINES);
-			glVertex2f(x, yT[2]);
+			glVertex2f(x, yT2);
 
 			for (uint32 i = 0; i < track.GetRotKeyframeCount(); ++i)
 			{
-				time = (vec_t)i * rateInverse;
-				p = track.GetRot(time) * 57.295779513082323f;
+				vec_t time = (vec_t)i * rateInverse;
+				hel::Vec3 p = track.GetRot(time) * 57.295779513082323f;
 				v.mVec[0] = x + i*s;
-				v.mVec[1] = yT[2] + p.mVec[j];
+				v.mVec[1] = yT2 + p.mVec[j];
 				glVertex2fv(v.mVec);
 				glVertex2fv(v.mVec);
 			}
 
 #if 1
-			glVertex2f(width, yT[2]);
+			glVertex2f(width, yT2);
 			glEnd();
 
 			switch (j)
@@ -2377,89 +2282,89 @@ void FreyjaRender::DrawCurveWindow()
 			}
 
 			glBegin(GL_LINES);
-			glVertex2f(x, yT[2]+shift);
+			glVertex2f(x, yT2+shift);
 
 			for (uint32 i = 0; i < track.GetRotKeyframeCount(); ++i)
 			{
-				time = (vec_t)i * rateInverse;
-				p = track.GetLoc(time) * 2.0f;;
+				vec_t time = (vec_t)i * rateInverse;
+				hel::Vec3 p = track.GetLoc(time) * 2.0f;;
 				v.mVec[0] = x + i*s;
-				v.mVec[1] = yT[2]+shift + p.mVec[j];
+				v.mVec[1] = yT2+shift + p.mVec[j];
 				glVertex2fv(v.mVec);
 				glVertex2fv(v.mVec);
 			}
 
-			glVertex2f(width, yT[2]+shift);
+			glVertex2f(width, yT2+shift);
 			glEnd();
 		}
 #endif
 	}
+#endif
 
+	/* Lines */
+	glColor3fv(mColorWireframe);
+	glBegin(GL_LINES);
 
-	if (mRenderMode & fGrid)
+	for (unsigned int i = 0; i < end; i+=inc_v)
 	{
-		const int szA = 20, szB = 80;
-		int xi = 0;
-		int yi = 0;
-		int offset_x = (int)xi;//(xi % size) - width;
-		int offset_y = (int)yi;//(yi % size) - height;
+		vec_t x = (float)i * end_v;
+		x *= width;
 
-		glLineWidth(1.0);
-		glColor3fv(mColorGridLine);
+		//y = height - y * height;
+		glVertex2f( x, 0.0f );
+		glVertex2f( x, height );
+	}
+
+	glEnd();
+
+
+	/* Time marker. */
+	{
+		glColor3fv(mColorWireframeHighlight);
 		glBegin(GL_LINES);
-		for (yi = offset_y; yi < (int)width; yi+=szA)
-		{
-			glVertex2i(-width, yi);
-			glVertex2i(width, yi);
-		}
+		vec_t x = FreyjaControl::GetInstance()->GetSelectedKeyFrame();
 
-		for (xi = offset_x; xi < (int)height; xi+=szA)
-		{
-			glVertex2i(xi, -height);
-			glVertex2i(xi, height);
-		}
-		glEnd();
+		// 'full coverage' but this is not used for events.
+		// x = (x/500)*width;
 
-		glLineWidth(1.75);
-		glColor3fv(mColorGridSeperator);
-		glBegin(GL_LINES);
-		for (yi = offset_y; yi < (int)width; yi+=szB)
-		{
-			glVertex2i(-width, yi);
-			glVertex2i(width, yi);
-		}
+		// 'matching' which ensures 1:1 mapping of the same value.
+		x = x * end_v * width;
 
-		for (xi = offset_x; xi < (int)height; xi+=szB)
-		{
-			glVertex2i(xi, -height);
-			glVertex2i(xi, height);
-		}
+		glVertex2f( x, 0.0f );
+		glVertex2f( x, height );
 		glEnd();
 	}
 
-	glColor3fv(mColorBackground);
-	glBegin(GL_QUADS);
-	glVertex2f(x, y);
-	glVertex2f(x, y+height);
-	glVertex2f(x+width, y+height);
-	glVertex2f(x+width, y);
-	glEnd();
-
 	glPopAttrib();
+
+
+	/* Text */
+	{
+		glPushAttrib(GL_ENABLE_BIT);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+		glEnable(GL_BLEND);
+		glEnable(GL_TEXTURE_2D);
+		glDisable(GL_LIGHTING);
+
+		glColor3fv(WHITE);
+
+		const float text_height = height - height * 0.5f;
+		String s;
+		vec_t x;
+
+		for (unsigned int i = inc_v; i < end; i+=inc_v)
+		{			
+			x = (float)i * end_v;
+			x *= width;	
+			s.Set("%i", i);
+			mPrinter.Print2d( x, text_height, 0.33f, s.c_str() );
+		}
+
+		glPopAttrib();
+	}
 
 	ResizeContext(width, height);
-
 	glPopMatrix();
-
-	// OpenGLPrinter test
-	glPushAttrib(GL_ENABLE_BIT);
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-	glEnable(GL_BLEND);
-	glDisable(GL_LIGHTING);
-	glColor3fv(WHITE);
-	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, "CURVE");
-	glPopAttrib();
-	// End OpenGLPrinter test
 }
 
 

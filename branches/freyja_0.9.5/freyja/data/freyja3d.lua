@@ -310,11 +310,15 @@ function freyja3d_ui_shelf_view( shelf )
 	mgtk_toolbar_togglebutton(toolbar, "Color", "eGroupColors", false, "icons/24x24/groupcolors.png", "Group color toggle" )
 	mgtk_toolbar_togglebutton(toolbar, "Light", "eRenderLighting", false, "icons/24x24/light.png", "Lighting toggle" )
 	mgtk_toolbar_togglebutton(toolbar, "BoundingBox", "eRenderBbox", false, "icons/24x24/bvol.png", "Render Bounding boxes" )
+
+	-- Render joints.
 	mgtk_toolbar_separator( toolbar )
-	mgtk_toolbar_togglebutton(toolbar, "Bones", "eRenderSkeleton", false, "icons/24x24/bone-tag.png", "Show legacy skeleton." )
-	mgtk_toolbar_togglebutton(toolbar, "Bones2", "eRenderSkeleton2", false, "icons/24x24/bone-tag.png", "Show bind pose skeleton." )
-	mgtk_toolbar_togglebutton(toolbar, "Bones3", "eRenderSkeleton3", false, "icons/24x24/bone-tag.png", "Show transformed skeleton." )
-	mgtk_toolbar_togglebutton(toolbar, "BoneName", "eRenderBoneName", false, "icons/24x24/bone-name.png", "Show bind pose bone names." )
+	mgtk_toolbar_togglebutton(toolbar, "Bones2", "eRenderSkeleton2", false, "icons/24x24/bone-tag.png", "Show joints." )
+	--mgtk_toolbar_togglebutton(toolbar, "Bones", "eRenderSkeleton", false, "icons/24x24/bone-tag.png", "(debug) Show legacy skeleton." )
+	--mgtk_toolbar_togglebutton(toolbar, "Bones2", "eRenderSkeleton2", false, "icons/24x24/bone-tag.png", "Show bind pose skeleton." )
+	--mgtk_toolbar_togglebutton(toolbar, "Bones3", "eRenderSkeleton3", false, "icons/24x24/bone-tag.png", "(debug) Show transformed skeleton." )
+	mgtk_toolbar_togglebutton(toolbar, "BoneName", "eRenderBoneName", false, "icons/24x24/bone-name.png", "Show joint names." )
+
 	mgtk_toolbar_separator( toolbar )
 	mgtk_toolbar_togglebutton(toolbar, "Shadow", "eShadowVolume", false, "icons/24x24/shadow.png", "Render shadows" )
 	--mgtk_toolbar_togglebutton(toolbar, "Blend", "eSkeletalDeform", false, "icons/24x24/deform.png", "Skeletal vertex blending" )
@@ -331,6 +335,19 @@ end
 function freyja3d_ui_shelf_animation( shelf )
 	tab = mgtk_tab(shelf, "Animation", -1)
 	toolbar = mgtk_toolbar( tab )
+
+	-- Animation sub mode.
+	box = mgtk_toolbar_box( toolbar )
+	optmenu = mgtk_optionmenu( box, "AnimationMode", "eAnimModeMenu" )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Object  ", "eAnimObject") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Joint   ", "eAnimJoint") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Morph   ", "eAnimMorph") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("UV      ", "eAnimUV") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Path    ", "eAnimPath") )
+	--mgtk_optionmenu_set_by_id( "eAnimModeMenu", 1 )
+
+
+	mgtk_toolbar_separator( toolbar )
 
 	-- FIXME currently this is a viewmode, but for .18 it'll be a mesh state/type.
 	mgtk_toolbar_togglebutton(toolbar, "Blend", "eSkeletalDeform", false, "icons/24x24/deform.png", "SkeletalMesh animation." )
@@ -401,21 +418,7 @@ function freyja3d_ui_shelf_modify( shelf )
 	tab = mgtk_tab(shelf, "Modify", -1)
 	toolbar = mgtk_toolbar( tab )	
 
-	-- Edit mode selection
-	box = mgtk_toolbar_box( toolbar )
-	optmenu = mgtk_optionmenu( box, "Edit Mode", "eTransformMenu" )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Model      ", "eTransformModel") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Mesh       ", "eTransformMesh") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Meshes...  ", "eTransformMeshes") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Face       ", "eTransformFace") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Faces...   ", "eTransformFaces") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Vertex     ", "eTransformVertex") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Vertices...", "eTransformVertices") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Skeleton   ", "eTransformSkeleton") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Bone       ", "eTransformBone") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Metadata   ", "eTransformMetadata") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Light      ", "eTransformLight") )
-	mgtk_append_menu( optmenu, mgtk_menu_item("Camera     ", "eTransformCamera") )
+
 
 	mgtk_toolbar_togglebutton(toolbar, "SelectB", "eSelectionByBox", false, "icons/24x24/bbox-select.png",  "Select by bounding box, Ctrl+RMouse ends selection" )
 	mgtk_toolbar_togglebutton(toolbar, "Info", "eInfoObject", false, "gtk-info", "Info on selected object" )
@@ -467,7 +470,7 @@ function freyja3d_ui_shelf_material( shelf )
 	mgtk_toolbar_separator( toolbar )
 	box = mgtk_toolbar_box( toolbar )
 	mgtk_box_pack( box, mgtk_label( "Material index: " ) )
-	spnbtn = mgtk_spinbutton_uint( "eSetMaterial", 0, 0, 128 )
+	spnbtn = mgtk_spinbutton_uint( "eMaterialIterator", 0, 0, 128 )
 	mgtk_box_pack( box, spnbtn )
 	--;(textbox eSetMaterialName)
 end
@@ -478,9 +481,28 @@ function freyja3d_ev_test( )
 end
 
 
+function freyja3d_animation_toolbar( box )
+	-- Animation control
+	toolbar = mgtk_toolbar( box )
+	mgtk_toolbar_togglebutton( toolbar, "Auto", "eModeAnim", false, "gtk-media-record", "Animation mode (Auto Keyframe)" ) 
+	mgtk_toolbar_button( toolbar, "Set", "eSetKeyFrame", "icons/24x24/key.png", "Set Keyframe" )
+	mgtk_toolbar_button( toolbar, "Prev", "eAnimationPrev", "gtk-media-previous", "Previous" )
+	mgtk_toolbar_button( toolbar, "", -1, "gtk-media-rewind", "" )
+	mgtk_toolbar_button( toolbar, "Play", "eAnimationPlay", "gtk-media-play", "Play" )
+	mgtk_toolbar_button( toolbar, "Stop", "eAnimationStop", "gtk-media-stop", "Stop" )
+	mgtk_toolbar_button( toolbar, "", -1, "gtk-media-forward", "" )
+	mgtk_toolbar_button( toolbar, "Next", "eAnimationNext", "gtk-media-next", "Next Track" )
+end
+
+
 function freyja3d_ui_sidebar_model( sidebar )
 
 	tab = mgtk_tab( sidebar, "Model", "eModeModel" )
+
+	-- Mode menu
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
+	freyja3d_mode_menu( hbox )
 
 	-- Transform box
 	handlebox = mgtk_handlebox( 1 )
@@ -559,16 +581,7 @@ function freyja3d_ui_sidebar_model( sidebar )
 	expander = mgtk_expander( handlebox, "Scenegraph", true )
 	mgtk_box_pack( expander, mgtk_tree( "Scenegraph", "eBoneIterator", "eSetBoneName" ), 1, 1, 1 )
 
-	-- Animation control
-	toolbar = mgtk_toolbar( tab )
-	mgtk_toolbar_togglebutton( toolbar, "Auto", "eModeAnim", false, "gtk-media-record", "Animation mode (Auto Keyframe)" ) 
-	mgtk_toolbar_button( toolbar, "Set", "eSetKeyFrame", "icons/24x24/key.png", "Set Keyframe" )
-	mgtk_toolbar_button( toolbar, "Prev", "eAnimationPrev", "gtk-media-previous", "Previous" )
-	mgtk_toolbar_button( toolbar, "", -1, "gtk-media-rewind", "" )
-	mgtk_toolbar_button( toolbar, "Play", "eAnimationPlay", "gtk-media-play", "Play" )
-	mgtk_toolbar_button( toolbar, "Stop", "eAnimationStop", "gtk-media-stop", "Stop" )
-	mgtk_toolbar_button( toolbar, "", -1, "gtk-media-forward", "" )
-	mgtk_toolbar_button( toolbar, "Next", "eAnimationNext", "gtk-media-next", "Next Track" )
+
 
 end
 
@@ -580,7 +593,7 @@ function freyja3d_ui_sidebar_uv( sidebar )
 	hbox = mgtk_hbox( )
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_label( "Material index: " ) )
-	spnbtn = mgtk_spinbutton_uint( "eSetMaterial", 0, 0, 128 )
+	spnbtn = mgtk_spinbutton_uint( "eMaterialIterator", 0, 0, 128 )
 	mgtk_box_pack( hbox, spnbtn )
 
 	-- FIXME (hsep)	
@@ -664,7 +677,7 @@ function freyja3d_ui_sidebar_material( sidebar )
 	mgtk_box_pack( hbox, mgtk_label( "Material Select: " ) )
 	hbox = mgtk_hbox( )
 	mgtk_box_pack( tab, hbox )
-	spnbtn = mgtk_spinbutton_uint( "eSetMaterial", 0, 0, 128 )
+	spnbtn = mgtk_spinbutton_uint( "eMaterialIterator", 0, 0, 128 )
 	mgtk_box_pack( hbox, spnbtn )
 	mgtk_box_pack( hbox, mgtk_textbox( "eSetMaterialName" ), 1, 1, 0 )
 
@@ -762,6 +775,24 @@ function freyja3d_ui_sidebar_material( sidebar )
 end
 
 
+function freyja3d_mode_menu( box )
+	-- Edit mode selection
+	optmenu = mgtk_optionmenu( box, "Edit Mode", "eTransformMenu" )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Model      ", "eTransformModel") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Mesh       ", "eTransformMesh") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Meshes...  ", "eTransformMeshes") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Face       ", "eTransformFace") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Faces...   ", "eTransformFaces") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Vertex     ", "eTransformVertex") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Vertices...", "eTransformVertices") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Skeleton   ", "eTransformSkeleton") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Bone       ", "eTransformBone") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Metadata   ", "eTransformMetadata") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Light      ", "eTransformLight") )
+	mgtk_append_menu( optmenu, mgtk_menu_item("Camera     ", "eTransformCamera") )
+end
+
+
 function freyja3d_ui_init()
 
 	-- Application Window	
@@ -830,8 +861,17 @@ function freyja3d_ui_init()
 	mgtk_expander( tab, "Plugin Dock", true, "FirstPartyPluginSlot" )
 	--mgtk_expander( tab, "Community Plugins", true, "ThirdPartyPluginSlot" )
 
+	-- Bottom bar
+	hbox = mgtk_hbox( 0, 0 )
+	mgtk_box_pack( vbox, hbox, 1, 1, 0 )
+
 	-- Animation scrubber
-	mgtk_box_pack( vbox, mgtk_hslider( "eAnimationSlider", 0, 500 ), 0, 0, 0 )
+	mgtk_box_pack( hbox, mgtk_hslider( "eAnimationSlider", 0, 500 ), 1, 1, 0 )
+
+	-- Animation toolbar
+	vbox2 = mgtk_vbox()
+	mgtk_box_pack( hbox, vbox2, 1, 1, 1 )
+	freyja3d_animation_toolbar( vbox2 )
 
 	-- Statusbar
 	statusbar1 = mgtk_statusbar()

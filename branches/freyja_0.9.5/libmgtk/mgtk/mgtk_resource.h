@@ -29,13 +29,6 @@
 using namespace mstl;
 
 
-typedef enum {
-   NAME_COLUMN = 0,
-   ID_COLUMN,
-   N_COLUMNS
-} mgtk_temp_tree_columns_t;
-
-
 typedef struct {
 	unsigned int count;
 	int *events;
