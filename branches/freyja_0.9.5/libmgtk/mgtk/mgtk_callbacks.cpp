@@ -394,7 +394,7 @@ void mgtk_toggle_value_set(int event, int val)
 		}
 		else
 		{
-			mgtk_print("mgtk_toggle_value_set> %i:%d unknown widget type", event, i);
+			DEBUG_MSG("%s> %i:%d unknown widget type", __func__, event, i);
 		}
 	}
 
@@ -1129,7 +1129,7 @@ void mgtk_event_notebook_switch_page(GtkNotebook *notebook,
 	emap = (mgtk_notebook_eventmap_t*)gtk_object_get_data(GTK_OBJECT(notebook), 
 														  "notebook_eventmap");
 
-	if (emap && emap->count)
+	if ( emap && emap->count && emap->events[page_num] > -1 )
 	{
 		mgtk_handle_command2i(GPOINTER_TO_INT(event), emap->events[page_num]);
 	}

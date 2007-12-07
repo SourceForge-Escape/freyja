@@ -2,97 +2,148 @@
  TODO
  =============================================================================
 
- Freyja 0.9.5.17 (final)	20071209
+ * Refining the Kagura roadmap, so expect some tasks to be out of order below.
+
+ * Library deallocator callbacks.
+
+ * Release 0.9.5.17 final before major backend changes.
+	- Material load texture id set broken with Lua?
+	- Finish Custom scrubber.
+
+
+ Freyja 0.9.5.18 	TBD
  -----------------------------------------------------------------------------
  
+ * Hot
+	- SceneGraph and SceneGraphIterator
+		· Merge / Select / Delete / Create SceneGraphs 
+	- New 2-way Reference index_t system.
+		· Parent / Children : delete / update signal methods
+	- Mutable mode ( readonly ) edit state support.
+
  * Finish up new AnimationControl, Track, Keyframe, Bone, and Mesh API.
 	- Animation Track / Keyframe snippets, AnimationControl, and generic editing.
-		- All Animation types must use KeyframeInterface for the generic system.
-		- All Animation types must use TrackInterface for generic system.
-		- UV / Skeletal / Motion / Vertex / etc mode selection for generic control.
-		- Ability to copy / paste / drag keyframe from one time marker to another.
+		· All Animation types must use KeyframeInterface for the generic system.
+		· All Animation types must use TrackInterface for generic system.
+		· UV / Skeletal / Motion / Vertex / etc mode selection for generic control.
+		· Ability to copy / paste / drag keyframe from one time marker to another.
 	- QuatKeyframe slerping algorithm selection for user.	
 	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
  	- Keyframes using sorted list ( TLB index:iterators for random access )
-		- No more NULL 'gaps' and only store 'true count'.
-		- Allows *Next() [list] and *ElementAt() [vector] ABI access.
+		· No more NULL 'gaps' and only store 'true count'.
+		· Allows *Next() [list] and *ElementAt() [vector] ABI access.
 	- Joint creation/editing easier for first time users.
-		- Joint editing full undo support. 
-			- Might be able to store state from edit mode chord.
-		- Disable auto joint parenting.
-			- Requires (un)parenting UI for joints with dashed line and cursor.
+		· Joint editing full undo support. 
+			· Might be able to store state from edit mode chord.
+		· Disable auto joint parenting.
+			· Requires (un)parenting UI for joints with dashed line and cursor.
 	- Render 'static' joints in place during animation scrubs.
 	- Add back animation timer to enable Play/Stop events again.
-		- Timer based refresh for animation playback widget or embedded in view.
+		· Timer based refresh for animation playback widget or embedded in view.
 	- Add spinbutton keyframe id selection to scrubber toolbar.
 	- Add frametime setting to scrubber toolbar.
 	- MorphMesh, SkelMesh, etc need to be distinct -- no more multimode meshes.
-		- Blended/overlay frames and subset rendering might be nice too.
-		- Need a way to set mesh type before explict class system is finished.
+		· Blended/overlay frames and subset rendering might be nice too.
+		· Need a way to set mesh type before explict class system is finished.
 	- Enable curve editor for more than debugging.
-	
+
  * libmgtk
  	- Splash screen for Plugin for user feedback on slow systems.
 	- Reduce the mgtk callback system.
- 		- Refactor freyja3d::FreyjaControl::LoadResource() and related functions.
-		- Push the event system callbacks / init / script load / start into libmgtk. 
-			- Make the 'linker' handlers competely optional for mgtk applications.
-				- Requires a C function binding system for C based mgtk applications.
+ 		· Refactor freyja3d::FreyjaControl::LoadResource() and related functions.
+		· Push the event system callbacks / init / script load / start into libmgtk. 
+			· Make the 'linker' handlers competely optional for mgtk applications.
+				· Requires a C function binding system for C based mgtk applications.
 	- Move all mlisp resource code into separate mgtk_mlisp for deprecation.
 	- Replace mlisp backend with Lua to reduce maintance cost.
-		- Requires all modules to move to Lua.
-		- Requires user prefs to move to Lua.
-		- Requires Resource/ResourceEvent refactor to be based on Lua.
-			- Requires mgtk_lua symbol table to replace mlisp symbol table.
+		· Requires all modules to move to Lua.
+		· Requires user prefs to move to Lua.
+		· Requires Resource/ResourceEvent refactor to be based on Lua.
+			· Requires mgtk_lua symbol table to replace mlisp symbol table.
 
  * New XML based freyja file format refinement.
 	- COLLADA support codevelopment.
 	- Add Zip support. ( gzip only right now )
 	- Only store referenced materials. ( Fix up on append loads too. )
-		- Instance support for materials.
+		· Instance support for materials.
 	- Save IDs with objects if needed.
 	- Remove old text / binary format support.
-		- Requires external plugin(s) for older text based freyja/ja formats.
+		· Requires external plugin(s) for older text based freyja/ja formats.
 
  * UI Design
+	- Enable vertex and texcoord selection radius in UI.
+	- /usr/share seeding age control to /home/ plugins via 'version' file.
+	- Revert to proper bitflags like in 0.9.3/4 for groups box ids.
+	- Selection mask import/export plugin support.
+	- Allow user to assign group colors.
 	- Break snippets out into its own source file(s)/class(es) for maintaince.
 	- Bundle object / objects... event modes using grouping contexts.
-		- Requires new selected vertices/etc cache system with parent callback as
+		· Requires new selected vertices/etc cache system with parent callback as
 		  outlined in my notes.
 	- Mesh 'hide' render option from scenegraph widget.  
 	- Face editing mode should prob set wireframe rendering.
 	- Macro editor: textarea, save, open, cancel, run for lua scripts
 	- Get Lua support for libfreyja ABI up to 100%.
-		- Requires C/C++ wrapper functions for some C type manipulation.
+		· Requires C/C++ wrapper functions for some C type manipulation.
 	- Create mgtk_sourceview() to embedd gtksourceview widgets.
 	- Create mgtk_label_richtext() to accept pango rich text.
 	- Create mgtk_icon_view_dialog() -- for things like texture selection.
 	- Documentation for mgtk_lua API must be done before release.
 	- Enforce file extensions (via filters) with mgtk file dialog.
 	- String table support for mgtk_lua. ( lingual translation support )
-		- C based table support for 'hardcoded' strings like user dialog errors.
+		· C based table support for 'hardcoded' strings like user dialog errors.
 	- Opengl_canvas widget
-		- Try to get WIN32 mgtk_create_glarea() using gdk_gl_config_new_by_mode(..)
+		· Try to get WIN32 mgtk_create_glarea() using gdk_gl_config_new_by_mode(..)
 			- May require rewriting parts of the gdk/gtk libraries for Windows.
-		- Allow setting display() callbacks on each opengl_canvas widget.
-		- Abstract and hook up the new animation timers.
+		· Allow setting display() callbacks on each opengl_canvas widget.
+		· Abstract and hook up the new animation timers.
 	- Refine icon art to go with a tango spec.
 	- Mouse control scheme design refactoring.  
-		- eg extrude control should use a 'normal stick' interface.
+		· eg extrude control should use a 'normal stick' interface.
 	- Scenegraph needs to update on every object creation / name change / removal.
-		- Maybe use backend libfreyja signals?
+		· Maybe use backend libfreyja signals?
 
  * Low-poly model creation by vertices features.
 	- Fix vertex deletion.
 	- Vertex / Knife based face splitting (edge midpoint/sliding edge points).
 	- Low-poly 'draw/stitching' face creation to fill in gaps in models by vertices.
-	 	- Select 3 vertices = action for making triangle.
-		- Select 4 vertices = action for making quad.
+	 	· Select 3 vertices = action for making triangle.
+		· Select 4 vertices = action for making quad.
+
+ * Modules
+	- PluginManager ( enable / disable plugins, descriptions, etc )
+	- Automatic online updates from the modeler itself.
+	- Light editor.
+	- Camera editor.
+	- Simulation (all new).
+	- DBUS 1.0 support.
+	- Physics.
+	- L-System.
+	- Cg.
+	- Emitters (all new).
+	- Projectors.
+	- Physics material paint.
+	- IK solver.
+		· Boxes for collision w/ centered control point.
+		· Walkmesh generation can be done in octree cooker?
+		· Walkmesh can be subbed by IK over rendered mesh.
+	- Subdiv knife.
+	- Hermite spline editor.
+	- Path animation.
+	- Audio support for syncing A/V via audio plugin module.
+	- Import/Export 
+		· Export selected.
+		· Export only by flagged types. ( eg Mesh only, Skeleton + Mesh, etc )
+		· More detailed error messages.
+		· Optional memory buffer interface instead of file.
+		· Plugins should pad materials where needed for imports.
+		· Threaded load into new Scene.
+			· User can then choose to merge into working scene or swap them out.
+ 	- Log window for more complete error / warning reporting.
+	- COLLADA 1.4 plugin with Import/Export.
 
 
-
-
- Freyja 0.9.5.18	TBD
+ Freyja 0.9.5.19	TBD
  -----------------------------------------------------------------------------
 
  * Single joint animation shishi odoshi tutorial demo.
@@ -101,11 +152,21 @@
 	- Blueprints as specialized metadata.
 	- ThreadPool per library/module.
 	- VBO based rendering.
+	- Swap file for crash recovery and larger undo stack.
 
  * Refactoring
+	- Use true singletons/other patterns where systems require.
 	- Break up remaining monolithic source files into modules. (cont)
 	- Work up list of supported formats and their support levels / bugs. (cont)
 	- Break out undo system in UI and refine it.
+	- Better reference graphs so you can tell how vertex/edge/facets are 
+	  connected and interact -- also to give speed boosts for common ops.
+	- Mesh should be broken up into subclasses eg 'weightmanager', 'utils'.
+
+ * Optimize
+	- Sorting algorithms.
+	- Cache algorithms.
+	- Octree for object pick, culling, and rendering.
 
  * libfreyja
 	- True scenegraphs in backend.
@@ -152,143 +213,10 @@
  	- Camera path animation editor.
 		- Depends on path animation module.
 
- * Modules
-	- Path animation.
-	- Audio support for syncing A/V via audio plugin module.
-	- Import/Export plugins should pad materials where needed for imports.
 
 
-
- Freyja, Development branch 0.9.5 ( Current )
+ Freyja, Dancer/Kagura 0.9.6.0 (Alpha, TBD)
  -----------------------------------------------------------------------------
-
- * New plugin subsystems.  ( Modular freyja )
-	- 'UI' plugins must self report to logging system.
-	- Break up heightmap into it's own plugin ( from midgard ).
-	- Get octree plugin using the new libhel octree.
-	- OpenGL scripting from lua will allow plugins to generate their own widgets
-	- No 2d projections allowed.
-	- (de)coupling routines for ogl func pointers.
-		- Textured sprites for 'icon' use.
-		- PluginDrawMaterial()
-		- PluginDrawArray( mesh | points | lines )
-		- PluginDrawEnable(bool)
-	- Emitters.
-	- Projectors.
-	- Physics material paint.
-	- Editing.
-		- String and Id based control point 'keys' for each plugin.
-		- Modify : Control Points || libfreyja ControlPoints
-		- Control point creation/deletion/control in plugins.
-		- Limit actions on control points via flags.
-			- Translate / Rotate / Scale / etc
-	- Separate OpenGL subsystem from freyja.
-	- IK solver.
-		- Boxes for collision w/ centered control point.
-		- Walkmesh generation can be done in octree cooker?
-		- Walkmesh can be subbed by IK over rendered mesh.
-
- * Midgard
-	- Full animation support for MD5 v11.
-	- Merge with freyja's model plugin support.
-
- * Lua
-	- New OpenGL wrapper with lua draw() callback as separate library?
-	- New mgtk wrapper as separate library?
-	- mgtk lua unit test using exe linking to mgtk
-	- Allow for calling lua functions instead of freyja events as well.
-		- Perhaps just hookup freyja events to lua functions?
-	- It's own thing or part of the Mlisp system?
-		- Let's give Lua it's own symbol table using a 'table'.
-	- Mlisp symbol table exposed in Lua for event system use.
-	- Expose things like control points via libfreyja backend.
- 	- Widgets: lua mgtk wrapper to allow full interface plugins.
- 	- Binary file I/O wrapper with endian support.
-
- * mstl
-	- Unit tests and optimization.
-	- Generic sort / search algorithms.
-	- LRU / MRU generics would make a lot of sense.
-
- * libfreyja
-	- New threaded ABI which isn't interdepent on gobal states.
-		- aka 'Model based' backend where data models are self contained.
-	- Threaded plugin import/export.
-
- * libmgtk
-	- Replace Resource completely with MLisp or Lua.
-	- QueryDialog dynamic text entry + filedialog button 'string type'. 
-	- Merge sort / Binary search | TLB w/ hash QueryDialogs, mlisp symbols, etc. 
-	- gtk source view widget for optional editing of xml/lua from inside freyja.
-
- * libhel
-	- Use new OBB test for freyja 'box' selection on rotation axis rings.
-	- vec_t* based operations.
-	- Change hel/math to hel/hel or the like to avoid confusion for new comers.
-	- AABB, Sphere, etc get proper Class implementations.
-		- Rework bounding volume system around the new 'types'.
-
- * Port cross compile build system to Cmake.
-	- Depends on the release of Cmake 2.6.0. ( Current release is 2.4. )
-	- Depends on proper Cmake support of cross compiler(s).
-	- Possibly support generic strip and package rules too.
-	- http://www.cmake.org/Wiki/CMake_Cross_Compiling
-
- * Swap file for crash recovery and very, very large undo stack.
-
- * The way the model graph works in 0.9.5 with all the extensions are 
-   going to have to be redesigned for 0.9.6 alpha.
-	- Edge based editing as a focus instead of vertex.
-	- Better reference graphs so you can tell how vertex/edge/facets are 
-	  connected and interact -- also to give speed boosts for common ops.
-	- Mesh should be broken up into subclasses eg 'weightmanager', 'utils'.
-
- * Verify math library, enforce automated testing at build.
-	- Make sure everything is using col hel::Mat44 correctly now.
-		- 'Raypick vs FK'
-	- Make sure everything is converting between types properly.
-	- Use this as a chance to rework types for 0.9.6.
-		- Rename hel/math.h hel/hel.h for 0.9.6.
-		- Quat to become XYZW order, so there will be world peace.
-
- * UV unwrap
-	- Projection across boundries ( axes ) aren't handled
-	- Fitting functionality
-	- Overlap 'fixup'
-
- * gconf support as dlopen linked module or DBUS for checking keys.
-	- http://developer.gnome.org/doc/API/gconf
-	- Use for getting prefered browser, etc
-	- /desktop/gnome/applications/browser/exec  "epiphany"
-
- * Subdiv knife.
-
- * Hermite spline editor support.
-
- * Continue to break up ye olde FreyjaControl (legacy UI) by editing mode.
-	- Move bone control in FreyjaControl to BoneEv class.
-	- Move out all specific the e/Ev methods.
-	- Move texcoord/object switch UI into their own controls.
-
- * Fix groups box ids -- go back to proper bitflags like in 0.9.3/4.
-
- * Refactor the file dialog code based on the new import/export test.
-	- Reduce the import/export test.
-	- Likely go with the popular 'guesser' for open and native for save.
-
- * Cursor
- 	- Quat based rotation cursor?
-	- Rotation modifier can 'lock' and may want bigger targets for general use.
-	- Rotation not reset before object creation/selection sometimes causing bug.
-	- Transform has a 'pop' or 'jump' in model mode.
-
- * UV unwrap improvements.
-	- Add unwrap to cyn uvmap ( no overlayed uv polygons, fill quad, etc )
-
- * Add the simple Bezier patch polygon mesh back.
-
- * Merge pak vfs into main UI.  Currently it's an awkward UI plugin.
-	- Change vfs file list to have mixed dir/files in one pane to follow HIG.
 
  * Skeletal animation refactor.
 	- IK solver and interface
@@ -321,9 +249,93 @@
 	- Constraints support
 	- Ref weights from vertex to fix blending issues
 
- * Automatic online updates from the modeler itself.
-	
- * Mesh parenting and grouping.
+ * New plugin subsystems.  ( Modular freyja )
+	- 'UI' plugins must self report to logging system.
+	- Break up heightmap into it's own plugin ( from midgard ).
+	- Get octree plugin using the new libhel octree.
+	- OpenGL scripting from lua will allow plugins to generate their own widgets
+	- No 2d projections allowed.
+	- (de)coupling routines for ogl func pointers.
+		- Textured sprites for 'icon' use.
+		- PluginDrawMaterial()
+		- PluginDrawArray( mesh | points | lines )
+		- PluginDrawEnable(bool)
+	- Editing.
+		- String and Id based control point 'keys' for each plugin.
+		- Modify : Control Points || libfreyja ControlPoints
+		- Control point creation/deletion/control in plugins.
+		- Limit actions on control points via flags.
+			- Translate / Rotate / Scale / etc
+	- Separate OpenGL subsystem from freyja.
+
+ * Lua
+	- mgtk 'Radio object list' to auto uncheck toggle event when others trigger.
+	- Lua to replace 'Resource based' mlisp domain language.
+	- LuaEvent to replace ResourceEvent.
+	- OpenGL wrapper with lua draw() callback.
+	- Expose things like control points via libfreyja backend.
+ 	- Binary file I/O wrapper with endian support.
+
+ * mstl
+	- Unit tests and optimization.
+	- Generic sort / search algorithms.
+	- LRU / MRU generics would make a lot of sense.
+
+ * libfreyja
+	- New threaded ABI which isn't interdepent on gobal states.
+		- aka 'Model based' backend where data models are self contained.
+	- Threaded plugin import/export.
+	- Add polymesh CSG back ( face intersection )
+	- Subdivision algorithm selection
+		- Catmull-clark, n-patches, etc
+		- Loop, Sabin/Doo surfaces
+	- Polymapped normal support? ( or UVMapped/smoothing group normals )
+	- Primitives: Cone / Disk / Cylinder ? ( Not polygonal interface )
+
+ * libhel
+	- Use new OBB test for freyja 'box' selection on rotation axis rings.
+	- vec_t* based operations.
+	- Change hel/math to hel/hel or the like to avoid confusion for new comers.
+	- AABB, Sphere, etc get proper Class implementations.
+		- Rework bounding volume system around the new 'types'.
+
+ * Port cross compile build system to Cmake.
+	- Depends on the release of Cmake 2.6.0. ( Current release is 2.4. )
+	- Depends on proper Cmake support of cross compiler(s).
+	- Generic strip and package rules for each build.
+	- http://www.cmake.org/Wiki/CMake_Cross_Compiling
+
+ * Verify math library, enforce automated testing at build.
+	- Make sure everything is using col hel::Mat44 correctly now.
+		- 'Raypick vs FK'
+	- Make sure everything is converting between types properly.
+	- Use this as a chance to rework types for 0.9.6.
+		- Rename hel/math.h hel/hel.h for 0.9.6.
+		- Quat to become XYZW order, so there will be world peace.
+
+ * UV unwrap
+	- Projection across boundries ( axes ) aren't handled
+	- Fitting functionality
+	- Overlap 'fixup'
+
+ * gconf support as dlopen linked module or DBUS for checking keys.
+	- http://developer.gnome.org/doc/API/gconf
+	- Use for getting prefered browser, etc
+	- /desktop/gnome/applications/browser/exec  "epiphany"
+
+ * Cursor
+ 	- Quat based rotation cursor?
+	- Rotation modifier can 'lock' and may want bigger targets for general use.
+	- Rotation not reset before object creation/selection sometimes causing bug.
+	- Transform has a 'pop' or 'jump' in model mode.
+
+ * UV unwrap improvements.
+	- Add unwrap to cyn uvmap ( no overlayed uv polygons, fill quad, etc )
+
+ * Add the simple Bezier patch polygon mesh back.
+
+ * Merge pak vfs into main UI.  Currently it's an awkward UI plugin.
+	- Change vfs file list to have mixed dir/files in one pane to follow HIG.
 
  * Finish up the UI icon set and '3d icons'.
 
@@ -372,40 +384,23 @@
  	- Options to rotate pixmaps? 
 	- diffuse, heightmap, normalmap, specular map, decal map, etc
 
- * Scenegraph: requires 'view' mode vs 'edit' mode
-
- * Plugins using cmake build system.
-
  * HID
 	- Grouping to reduce number of widgets.
  		. Light options with drop down menu button: dir/pos/spot?
  		. Grid view options with drop down menu button. eg: wire/solid
  		. Bone names option as drop down for bone visibily?
-
 	- Render Faces... has no transforms 'previews'.
 		. Use vertex blend buffer while editing and 'state write' with token.
-
-	- Moving out of 'this is for developers' to 'this is for users'.
-		. Time to start hiding debugging toggles instead of on front shelf.
-
 	- Two window view mode support.
-
 	- 'Size' cursor 'recenters' -- floor on Y value to avoid confusing people?
-
-	- Bones type visibility 'hard set' by edit mode.
-
-	- View mode toggles ( chords ) into edit modes ( radio type ).
-
 	- Shading for editing flat / face normal / etc
 
 
 
- Freyja, Dancer/Kagura 0.9.6 (Public Alpha-Beta, TBD)
+ Freyja, Dancer/Kagura 0.9.6.5 (Beta, TBD)
  -----------------------------------------------------------------------------
 
  * Formalized unit tests and reporting.
-
- * Review for possible offical packages with Ubuntu/Debian.
 
  * Seperate renderer and UI into their own libraries.
 
@@ -421,12 +416,10 @@
  * APIs / designs to be finalized
 	- Optmize Mesh to avoid wasting texCoords when unused by vertices
 	- Use status bar for mouse over tooltips also?
-	- Path animation?
 	- New resource event system with UIDs and event transparent buckets?
 	- Object proprieties dialog?
 		- Hidden property / Show object
 		- Visibility layers using flags
-	- Cg support plugin?
 	- Force Copy / Cut / Paste / Dupe / Split / Merge for every object type?
 	- Multi-object modes might need new UI design to avoid user confusion?
 	- Add material colors for 'editing while rendering'? ( seems bad idea )
@@ -450,26 +443,12 @@
  * Certain modes should enable certain rendering options by default, but allow
    user overrides too.  eg [Vertex] + [Select] enables point renderer.
 
- * Full Light editor.
-
- * Camera editor.
-
  * Async I/O test with special memory pool, etc ( killable I/O threads )
 
  * Texture buffer array per material for: diffuse/normal/gloss/data/dudv/etc
 	- Bring back old TextureManager to avoid wasting texture memory
 
  * Replace MaterialEv Load/Save material with libfreyja format+metadata.
-
- * /usr/share seeding age control to /home/ plugins via version.
-
- * freyjaPak ( VFS )
-	- Encryption support
-	- Direct set functions to import / export
-	- New vfs plugin UI
-	- Buffered/fileread/filewrite file plugin interface
-
- * COLLADA 1.4 plugin with Import/Export.
 
  * Add in simple collision ( eg Dropping lantern on chair scene )
 
@@ -481,51 +460,18 @@
 
  * Break up UVMaps by smoothing groups/materials per mesh via toggle option.
 
- * MOTD / autoupdate plugin.
-
  * Renable 'direct' vertex animation creation by request.
 	- Letting the user move selected points in vertex morph mode.
 
 
- Freyja, Dancer/Kagura 0.9.6 (Beta-Release, TBD)
+ Freyja, Dancer/Kagura 0.9.6.10 (Release, TBD)
  -----------------------------------------------------------------------------
 
  * GNOME MIME setup script
 
- * PluginManager ( enable / disable plugins, descriptions, etc )
-
- * Log window for more complete error / warning reporting.
-
- * Import/export plugin changes
-	- dropdown should change filename
-	- Threaded import/export?
-		- fLocked support
-		- fSelectedFIO support
-	- Detailed error messages ( Pass back a String to generate msgbox ) 
-	- FreyjaType flags usage ( eg mesh only, mesh+skeleton, etc )
-	- Freyja selection usage ( eg export selected )
-	- Optional memory buffer usage instead of file/url ( great for paks )
-	- These could be setup inside of per plugin preferences, so
-		  the ABI doesn't have to change ala states
-	- Open/Save buttons on filedialogs
-
- * Import/Export submenus like the Plugins.. submenu
-	- Selection mask support
-	- File dialogs should be able to auto append correct extensions.
-
- * Viewport view / control abstraction
-	- Reimplement and enable Camera system
-	- Add camera editing back
-
- * GLSL shaders
-	- FreyjaOpenGL should remap shaders to make sure two of the same
-		  shader aren't loaded at once ( just pass back the orig program id )
-	- Refraction demo shader ( turbulence with frag prob best )
-	- Depth of field demo shader
-
- * Octree for vertex/object pick culling and rendering optimization.
-
- * Projectors.
+ * GLSL shader demos.
+	- Refraction.
+	- Depth of field.
 
  * Phong Lighting.  ( Just add toggle for the GLSL shader? )
 
@@ -550,8 +496,6 @@
  Modeling
  -------------------------------------------------------------------------
 
- * Node editor for scene graph control
-
  * Box modeling
 	- Add back UI for vertex welding 
 	- Edge picking / editing / subdiv / extrude
@@ -563,7 +507,8 @@
 	- Improve extrude UI
 	- Bi-symmetry modeling support
 
- * UV editing
+ * UV editor
+	- Better UV unwrap ( write smart algorithms for projections )
 	- Add back UV/Texcoord transforms for unwrapping editing
 	- Texcoord split
 	- Texcoord transforms with selected faces as UVMap
@@ -571,109 +516,38 @@
 	- UVMaps replaces by selected faces
 	- UV color button for default bg color
 	- Selectable patterns like colorcube, checkerboard, gray as bg
+	- Generic transforms for texcoords, faces, and groups.
 
  * Sphere/ray brush ( aka paint interface )
 	- Paint with ray test
 	- DMAP geometery brush interface
-	- Weight painting			
-	- Paint on texture with GIMP interface hooks
+	- Improve Weight painting			
+	- Paint on texture / map
 	- Bbox/Sphere/Magnet brushes
 
- * Surfaces
-	- Patch ABI
-
- * libfreyja specific
-	- Refine 0.9.x ABI / API
-	- Merge 'Dancer' libfreyja 0.10 editor features and plugins
-	- Documentation
-	- State machine should only use C API for abstraction
-	- Fix Collapse edges, etc req vertex refs
-	- Add vertex/polygon list based texcoord mapping methods to ABI
-	- Add subdiv algorithms like catmull-clark, n-patches, etc
-	- Add polymesh CSG back ( face intersection )
-	- Subdivision Loop and Sabin/Doo surfaces
-	- Mesh/Vertex mirroring
-	- Polymapped normal support? ( or UVMapped/smoothing group normals )
-	- Primitives: Cone / Disk / Cylinder ? ( Not polygonal interface )
-	- API interfaces for 'Copy/cut/paste' and 'Rot/Pos/Scale/etc'?
-
- * Lasso and improved bounding box selections
-
- * Gobal mesh UIDs ala bones/joints to remove need for model+mesh reference
-
- * UI to toggle group color rendering and set color
-
- * Mesh / Vertex / Face transforms fully working in dev branch
+ * Lasso selection.
 
  * Billboard/sprite support outside edit data for user diagrams and icons
 
- * Polygon winding control ccw/cw/etc, and render culling options
-
- * Interactive Tristrip creation tool to replace the old point and connect
-   	  polgon creation some people seem to love
-
- * Selected mesh shader / color option
-
- * Make Mesh enforce only 1 kind of Face type in the sense of:
-	- PolyMapping UV / Normal / etc
-
- * Better UV unwrap ( write smart algorithms for projections )
-
- * Allow user to set radius of vertex and texcoord picks ( hook up )
-
- * Add back transforms for selected faces/groups in UV editor
-
- * Seperate smoothing groups and face 'clusters' 
+ * Separate smoothing groups and face 'clusters' 
 	- Just have to separate smoothing action from group assignment
-
- * Refine Point / edge / face / mesh editing tools
 
  * Normal editor / Extrude guide / Control point view
 
  * Extrude multiple adj faces
 
- * Merge adj faces
+ * Merge adjacent faces.
 
  * Selection masks saving as layers?
-
- * Guided UV unwrap ( face pick )
-
-
- Animation
- --------------------------------------------------------------------------
-
- * Curves support for keyframe editor
-
- * Bone H-matrix / inverted H-matrix
-
- * Bones with transforms in/outside of hierarchy
-
-
- Rendering
- -------------------------------------------------------------------------
-
- * Material tree/node editor
-
- * Animated texcoords
-
- * glColorMaterial optional use
-
- * Shadow maps and volumes
-
- * Different skyboxes/floors w/ water reflection for animation view
 
 
  Event system / Interface
  -------------------------------------------------------------------------
 
- * libmgtk specific
-	- 'Radio object' to auto uncheck toggle event when others trigger
-	- Mlisp to replace aging Resource based mlisp domain language
-	- MlispEvent to replace ResourceEvent
-	- Mlisp doesn't lookup symbols for like "true" if just setq
-		- This is by design, but maybe it should change now.
-
  * Interface
+	- Event system refinement { Undo, Redo, Macro, Playback }
+	- Enforce usage of Observer and Command patterns for events
+	- Generic control points refinement
 	- Two window layout for curve / viewport usage
 	- Make viewport 'windows' abstract with seperate controls
 		- Support for dynamic resizing and 2/3/4 layouts
@@ -681,16 +555,7 @@
 		- FreyjaControl -> Freyja3d, *ViewportControl
 		- Combine controls and view into a seperate class/pkg
 			  This will make it easier to scale and fix UI issues
-	- Camera render mode for viewport
-		- OpenGL depth / culling / etc control?
-	- Remove state value from all mlisp toggle widgets ( use the set func )
-	- Have a widget numeric set function like toggle widgets have for bool 
-	- VFS UI needs to provide metadata like XOR keys, size, offset, etc		- Extra viewmode to toggle groups colors on/off
-	- Two-way python function/script UI, reporting ala C plugins
-		  or offically endorse pygtk, etc
-
-   * Scene tree view for all objects in scene
-	- Parenting interface
+	- VFS UI needs to provide metadata like XOR keys, size, offset, etc		
 
  * Cursor system
 	- Consistency across cursor usage
@@ -702,56 +567,10 @@
 	- Rotation cursor with radius sweeps to cursor pos following an arc
 		- Also replace the old RotateObject() code to just use cursor
 		  on select mode switch as per new design to prevent feedback loops
-	- Ray/Vector based orbital view cursor guides ( 'go where I want' )
 	- Rotation cursor needs final, real implementation added now
 		- Circle around projected center or do something equally clever
 			  for more tactical control
-	- Vertex ops undo (all)
-	- Render changes and constantly update
-	- Enforce rule when confirmed by click actually modify
-	- Opposite mouse click 'undo' by not modifying
-	- Don't scale cursor
-	- Cursor rotation pivot setting for vertices
-
- * Event system refinement { Undo, Redo, Macro, Playback }
-
- * Enforce usage of Observer and Command patterns for all events
-
- * Generic control points refinement
-
- * Multiple select ops vs single select
-
-
- Misc
- --------------------------------------------------------------------------
-
- * Refactor to use true singletons/other patterns where systems require
-
- * Simulation package revival
-
- * DBUS support now that it's hit stable ABI at 1.0?
-
- * Physics
-
- * L-System
-
-
- Style Guidelines Codification
- --------------------------------------------------------------------------
-
- * Attributes start with "m" prefix to avoid issues with "_" in some compilers.  
-
- * Camel case method names starting with capital letter.
-
- * Keep sections as needed in larger classes and methods alphanumeric sorted.
-
- * Stop prototyping in header files -- make a new object before you start.
-
- * Use comment blocks for method description.  No per method histories!
-
- * Place inline methods over 1 line go outside class defn at the bottom of the header.
-
-
+	- Enforce rule when confirmed by click actually modify.
 
 
 

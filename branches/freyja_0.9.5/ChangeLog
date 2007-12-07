@@ -4,8 +4,20 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
- Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
- 20071209 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ Kagura prealpha, 0.9.5.10 () -- "Kagura prealpha"
+ TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - New scene based system.
+
+
+ Kagura prealpha, 0.9.5.17 (1126) -- "Crack'n bones"
+ 20071206 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - New custom scrubber widget mostly done. (1127)
+ - Fix opengl_canvas mouse events now use exposure requests.
+ - Fix for crash loading generated perlin noise bitmaps due to obsolete code use.
+ - FreyjaImage converts 'indexed' images w/o palettes to greyscales now.
+ - Debug spew fix for mgtk tabs and toggle events.
+ - Cmake rule fixes, and new apt.sh script.
+ - freyja 0.9.6 roadmap cont.
  - Improved a few icons in a tango style.
  - Skeletal -> Morph mesh coverter back. (1126)
  - Fixes for mesh vertex frame import methods.

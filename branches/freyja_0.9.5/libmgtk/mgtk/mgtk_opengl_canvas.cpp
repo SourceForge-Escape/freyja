@@ -617,7 +617,10 @@ void mgtk_event_button_press(GtkWidget *widget, GdkEventButton *event)
 #endif
 
 	mgtk_handle_mouse(button, btn_state, mod, x, y);
-	mgtk_opengl_canvas_refresh(widget); // Seems a little much
+
+	/* Request expose events instead of forcing. */
+	gtk_widget_queue_draw( widget );
+	//mgtk_opengl_canvas_refresh(widget);
 }
 
 
@@ -643,7 +646,10 @@ void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
 	gl_state->mouse_x = x;
 	gl_state->mouse_y = y;
 	mgtk_handle_motion(x, y);
-	mgtk_opengl_canvas_refresh(widget);
+
+	/* Request expose events instead of forcing. */
+	gtk_widget_queue_draw( widget );
+	//mgtk_opengl_canvas_refresh(widget);
 }
 
 

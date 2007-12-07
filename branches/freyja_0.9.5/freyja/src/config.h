@@ -46,6 +46,7 @@
 
 #define FREYJA_UPDATE_URL "http://icculus.org/freyja/files/update.xml"
 
+#define FREYJA_WATERMARK VERSION
 
 
 /* Renderer options */

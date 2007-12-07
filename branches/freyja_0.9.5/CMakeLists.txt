@@ -20,25 +20,6 @@ SUBDIRS( lua tinyxml libhel libfreyja libmgtk freyja plugins )
 #   COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${NEW_LIB_NAME}
 #)
 
-
-#add_custom_target( deb 
-#	COMMAND 
-#	cd tinyxml; cmake .; fakeroot dpkg-buildpackage 
-#	cd ..
-#	cd lua; cmake .; fakeroot dpkg-buildpackage 
-#	cd ..
-#	cd libhel; cmake .; fakeroot dpkg-buildpackage 
-#	cd ..
-#	cd libmgtk; cmake .; fakeroot dpkg-buildpackage 
-#	cd ..
-#	cd libfreyja; cmake .; fakeroot dpkg-buildpackage 
-#	cd ..
-#	cd plugins; cmake .; fakeroot dpkg-buildpackage 
-#	cd ..
-#	cd freyja; cmake .; fakeroot dpkg-buildpackage 
-#	cd .. )
-
-
 #apt:
 #	@-mkdir -p $(APT_DIR)
 #	@-for i in *.deb; do mv $${i%_*.deb}.tar.gz $(APT_DIR)/; done
@@ -62,44 +43,6 @@ SUBDIRS( lua tinyxml libhel libfreyja libmgtk freyja plugins )
 
 #################################################################
 
-#info:
-#	@-printf "\n"
-#	@-printf " To do an auto build choose either:\n"
-#	@-printf "\tmake native\n"
-#	@-printf "\tmake win32\n"
-#	@-printf "\tmake osx\n"
-#	@-printf "\n"
-#	@-printf " Packaging options:\n"
-#	@-printf "\tmake debian\n"
-#	@-printf "\tmake ubuntu\n"
-#	@-printf "\tmake snapshot\n"
-#	@-printf "\tmake redhat\n"
-#	@-printf "\tmake apt\n"
-#	@-printf "\n"
-
-
-#native-old:
-#	@-printf "Building libhel\n"
-#	@-cd libhel && ./autogen.sh && make
-
-#	@-printf "Building libfreyja\n"
-#	@-cd libfreyja && ./autogen.sh && make
-
-#	@-printf "Building libmgtk\n"
-#	@-cd libmgtk && ./autogen.sh && make
-
-#	@-printf "Building freyja\n"
-#	@-cd freyja && ./autogen.sh && make
-
-#	@-printf "Building freyja plugins\n"
-#	@-cd plugins && make
-
-#	@-printf "\n\n o If your build failed:\n"
-#	@-printf "       * Make sure you have a complete glext.h header\n"
-#	@-printf "       * Look in freyja/Makefile for options to disable\n"
-#	@-printf "\n\n o Now 'make user-install' as a user\n\n"
-
-
 #osx:
 #	@-printf "Building libhel\n"
 #	@-cd libhel && ./autogen.sh && make osx
@@ -121,22 +64,6 @@ SUBDIRS( lua tinyxml libhel libfreyja libmgtk freyja plugins )
 #	@-printf "       * Look in freyja/Makefile for options to disable\n"
 #	@-printf "\n\n o Now 'make user-install' as a user\n\n"
 
-#.PHONY : win32
 
-#win32:
-#	@-printf "Building libtinyxml\n" 
-#	cd tinyxml && rm -f depend.win32 && make -f Makefile.Win32 
-
-#	@-printf "Building libluawrapper\n" 
-#	cd lua && rm -f depend.win32 && make -f Makefile.Win32 
-
-#	@-printf "Building libhel\n" 
-#	cd libhel && rm -f depend.win32 && make -f Makefile.Win32
-
-#	@-printf "Building libfreyja\n" 
-#	cd libfreyja && rm -f depend.win32 && make -f Makefile.Win32 
-	
-#	@-printf "Building libmgtk\n" 
-#	cd libmgtk && rm -f depend.win32 && make -f Makefile.Win32 
 
 

@@ -414,19 +414,9 @@ function freyja3d_ui_shelf_polygon( shelf )
 end
 
 
-function freyja3d_ui_shelf_modify( shelf )
-	tab = mgtk_tab(shelf, "Modify", -1)
+function freyja3d_ui_shelf_paint( shelf )
+	tab = mgtk_tab( shelf, "Paint", -1 )
 	toolbar = mgtk_toolbar( tab )	
-
-
-
-	mgtk_toolbar_togglebutton(toolbar, "SelectB", "eSelectionByBox", false, "icons/24x24/bbox-select.png",  "Select by bounding box, Ctrl+RMouse ends selection" )
-	mgtk_toolbar_togglebutton(toolbar, "Info", "eInfoObject", false, "gtk-info", "Info on selected object" )
-	mgtk_toolbar_togglebutton(toolbar, "Select", "eSelect", true, "icons/24x24/cursor-select.png", "Select object by cursor" )
-	mgtk_toolbar_togglebutton(toolbar, "Move", "eMoveObject", false, "icons/24x24/move.png", "Move object" )
-	mgtk_toolbar_togglebutton(toolbar, "Rotate", "eRotateObject", false, "icons/24x24/rotate.png", "Rotate object" )
-	mgtk_toolbar_togglebutton(toolbar, "Scale", "eScaleObject", false, "icons/24x24/scale.png", "Scale object" )
-	mgtk_toolbar_togglebutton(toolbar, "Paint", "ePaintObject", false, "icons/24x24/paint.png", "Paint object" )
 
 	-- Paint mode selection
 	box = mgtk_toolbar_box( toolbar )
@@ -440,23 +430,6 @@ function freyja3d_ui_shelf_modify( shelf )
 	mgtk_append_menu( optmenu, mgtk_menu_item( "Dmap", "ePaintDmap" ) )
 
 	mgtk_toolbar_separator( toolbar )
-
-	mgtk_toolbar_button(toolbar, "Undo", "eUndo", "gtk-undo", "Undo" )
-	mgtk_toolbar_button(toolbar, "Redo", "eRedo", "gtk-redo", "Redo" )
-	mgtk_toolbar_separator( toolbar )
-	mgtk_toolbar_button(toolbar, "Cut", "eCut", "gtk-cut", "Cut object" )
-	mgtk_toolbar_button(toolbar, "Copy", "eCopy", "gtk-copy", "Copy object" )
-	mgtk_toolbar_button(toolbar, "Paste", "ePaste", "gtk-paste", "Paste object" )
-	mgtk_toolbar_separator( toolbar )
-	mgtk_toolbar_button(toolbar, "Create", "eCreate", "gtk-new", "Create new object" )
-	mgtk_toolbar_button(toolbar, "Delete", "eDelete", "gtk-delete", "Delete selected object" )
-	mgtk_toolbar_separator( toolbar )
-	mgtk_toolbar_button(toolbar, "Duplicate", "eDupeObject", "icons/24x24/mdupe.png", "Duplicate object" )
-	mgtk_toolbar_button(toolbar, "Split", "eSplitObject", "icons/24x24/msplit.png", "Split object" )
-	mgtk_toolbar_button(toolbar, "Merge", "eMergeObject", "icons/24x24/mmerge.png", "Merge objects" )
-
-
-
 end
 
 
@@ -503,10 +476,12 @@ function freyja3d_ui_sidebar_model( sidebar )
 
 	tab = mgtk_tab( sidebar, "Model", "eModeModel" )
 
+	-- toolbar
+	toolbar = mgtk_toolbar( tab )
+
 	-- Mode menu
-	hbox = mgtk_hbox()
-	mgtk_box_pack( tab, hbox )
-	freyja3d_mode_menu( hbox )
+	box = mgtk_toolbar_box( toolbar )
+	freyja3d_mode_menu( box )
 
 	-- Transform box
 	handlebox = mgtk_handlebox( 1 )
@@ -647,9 +622,11 @@ end
 function freyja3d_ui_sidebar_material_color( box, name )
 	hbox = mgtk_hbox()
 	mgtk_box_pack( box, hbox )
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMaterial" .. name ) )
 	mgtk_box_pack( hbox, mgtk_label( name ) )
+
 	hbox = mgtk_hbox()
-	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( box, hbox )
 	spnbtn = 
 	mgtk_spinbutton_float( "eMaterial" .. name .. "0", 0.0, 0.0, 1.0, 3, 0.001, 0.1, 0.1 )
 	mgtk_box_pack( hbox, spnbtn )
@@ -662,7 +639,7 @@ function freyja3d_ui_sidebar_material_color( box, name )
 	spnbtn = 
 	mgtk_spinbutton_float( "eMaterial" .. name .. "3", 0.0, 0.0, 1.0, 3, 0.001, 0.1, 0.1 )
 	mgtk_box_pack( hbox, spnbtn )
-	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMaterial" .. name ) )
+	--mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMaterial" .. name ) )
 end
 
 function freyja3d_ui_sidebar_material( sidebar )
@@ -723,6 +700,7 @@ function freyja3d_ui_sidebar_material( sidebar )
 	
 
 	-- FIXME (hbox 1 0 0 1 0 (hsep))
+	mgtk_box_pack( tab, mgtk_label( "" ) )
 
 	-- Material colors
 	freyja3d_ui_sidebar_material_color( tab, "Ambient" )
@@ -737,9 +715,14 @@ function freyja3d_ui_sidebar_material( sidebar )
 	mgtk_spinbutton_float( "eMaterialShine", 1.0, 0.0, 100.0, 3, 0.01, 0.1, 0.1 )
 	mgtk_box_pack( hbox, spnbtn )
 
+	-- FIXME (hbox 1 0 0 1 0 (hsep))
+	mgtk_box_pack( tab, mgtk_label( "" ) )
+
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_label( "Blend Source" ) )
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
 	submenu = mgtk_optionmenu( hbox, "Blend Source", "eBlendSrcMenu" )
 	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ZERO", "eBlendSrc", 0 ) )
 	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE", "eBlendSrc", 1 ) )
@@ -760,6 +743,8 @@ function freyja3d_ui_sidebar_material( sidebar )
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_label( "Blend Dest  " ) )
+	hbox = mgtk_hbox()
+	mgtk_box_pack( tab, hbox )
 	submenu = mgtk_optionmenu( hbox, "Blend Dest", "eBlendDestMenu" )
 	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ZERO", "eBlendDest", 0 ) )
 	mgtk_append_menu( submenu, mgtk_menu_item( "GL__ONE", "eBlendDest", 1 ) )
@@ -816,7 +801,7 @@ function freyja3d_ui_init()
 	freyja3d_ui_shelf_file( shelf )
 	freyja3d_ui_shelf_view( shelf )
 	freyja3d_ui_shelf_polygon( shelf )
-	freyja3d_ui_shelf_modify( shelf )
+	freyja3d_ui_shelf_paint( shelf )
 	freyja3d_ui_shelf_animation( shelf )
 	freyja3d_ui_shelf_material( shelf )
 
@@ -869,13 +854,19 @@ function freyja3d_ui_init()
 	hbox = mgtk_hbox( 0, 0 )
 	mgtk_box_pack( vbox, hbox, 1, 1, 0 )
 
+	-- Test Custom animation scrubber
+	scrubber = mgtk_animation_scrubber( "eAnimationSlider", 975, 32 )
+	mgtk_box_pack( hbox, scrubber )
+
 	-- Animation scrubber
-	mgtk_box_pack( hbox, mgtk_hslider( "eAnimationSlider", 0, 500 ), 1, 1, 0 )
+	--mgtk_box_pack( hbox, mgtk_hslider( "eAnimationSlider", 0, 500 ), 1, 1, 0 )
 
 	-- Animation toolbar
 	vbox2 = mgtk_vbox()
 	mgtk_box_pack( hbox, vbox2, 1, 1, 1 )
 	freyja3d_animation_toolbar( vbox2 )
+
+
 
 	-- Statusbar
 	statusbar1 = mgtk_statusbar()

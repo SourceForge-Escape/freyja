@@ -60,7 +60,9 @@ void mgtk_lua_register_functions(const Lua &lua)
 
 	lua.RegisterFunction("mgtk_icon", mgtk_lua_rc_icon);
 
+	/* Custom widgets */
 	lua.RegisterFunction("mgtk_opengl_canvas", mgtk_lua_rc_opengl_canvas);
+	lua.RegisterFunction( "mgtk_animation_scrubber", mgtk_lua_rc_animation_scrubber );
 
 	lua.RegisterFunction("mgtk_menu_item", mgtk_lua_rc_menu_item);
 	lua.RegisterFunction("mgtk_menu_item_check", mgtk_lua_rc_menu_item_check);
@@ -1728,6 +1730,295 @@ int mgtk_lua_query_dialog(lua_State *s)
 
 	//lua_pushlightuserdata(s, NULL);
 	return 0;
+}
+
+
+typedef struct {
+
+	int event;
+	unsigned int max;
+	int current_key;
+	int current_marker;
+	int marker_count;
+	int markers[512]; // FIXME: Use mstl map here when this is out of prototype.
+
+} mgtk_animation_scrubber_state_t;
+
+gboolean animation_scrubber_expose_handler(GtkWidget *widget, GdkEventExpose *event, gpointer data)
+{
+	GdkGC* gc = widget->style->fg_gc[GTK_WIDGET_STATE(widget)];
+
+	/* Scrubber bar */
+#if 0
+	gdk_draw_rectangle( widget->window, // drawable
+						gc, // gc
+						FALSE, // gboolean filled
+						0, // gint x
+						(widget->allocation.height >> 1) - 4, // gint y
+						widget->allocation.width, // gint width
+						8 ); //gint height
+#endif
+
+	const unsigned int width = widget->allocation.width;
+	const unsigned int height = widget->allocation.height;
+
+
+#if 0
+	bool sensitive = true; 
+	GdkRectangle area; // used only for clipping -- NULL below
+	gtk_paint_box(widget->style,
+				  widget->window,
+				  sensitive ? GTK_STATE_ACTIVE : GTK_STATE_INSENSITIVE,
+				  GTK_SHADOW_IN,
+				  NULL, GTK_WIDGET(widget->window), "trough",
+				  0, (widget->allocation.height >> 1) - 10,
+				  width, 20 );
+#endif
+
+	const unsigned int channel_height = 18;
+	const unsigned int channel_y = widget->allocation.height >> 1;
+
+	gtk_paint_slider( widget->style,
+					  widget->window,
+					  GTK_STATE_ACTIVE,
+					  GTK_SHADOW_IN,
+                      NULL,
+					  widget,
+                      NULL, // const gchar *detail,
+					  0, channel_y - (channel_height >> 1) - 4,
+					  width, channel_height,
+					  GTK_ORIENTATION_HORIZONTAL);
+
+
+	// Test states.
+	mgtk_animation_scrubber_state_t* state =
+	(mgtk_animation_scrubber_state_t*)gtk_object_get_data(GTK_OBJECT(widget), "mgtk_animation_scrubber_state");
+
+	if ( state )
+	{
+		/* Tick lines. */
+		const float end = state->max; //500.0f;
+		const float inc_v = 10.0f;
+		const float end_v = 1.0f / end;
+		for (unsigned int i = 0; i < end; i+=inc_v)
+		{
+			vec_t x = (float)i * end_v;
+			x *= width;
+			gdk_draw_line( widget->window, gc, x, channel_y, x, channel_y - (channel_height >> 1) );
+			
+			char s[16];
+			snprintf( s, 16, "%i", i );
+			gtk_paint_string( widget->style,
+							  widget->window,
+							  GTK_STATE_ACTIVE,
+							  NULL,
+							  widget,
+							  NULL, //const gchar *detail,
+							  x,
+							  channel_y<<1,
+							  s);
+		}
+
+
+		/* Markers */
+		for ( unsigned int i = 0; i < state->marker_count; ++i)
+		{
+			const unsigned int key = state->markers[i];
+			const unsigned int x = key * end_v * width;
+			gdk_draw_line( widget->window, gc, 
+						   x, channel_y + (channel_height >> 1), x, channel_y - (channel_height >> 1) );
+		}
+
+		/* Currently selected marker. */
+		// FIXME: COLORS instead of lenght once colormaps are nailed down!!!!
+		if ( state->current_marker > -1 )
+		{
+			const unsigned int key = state->markers[ state->current_marker ];
+			const unsigned int x = key * end_v * width;
+			gdk_draw_line( widget->window, gc, 
+						   x, channel_y + (channel_height >> 1) + 4, x, channel_y - (channel_height >> 1) - 4 );
+		}
+
+		int x = state->current_key * end_v * width;
+		gtk_paint_box( widget->style,
+					   widget->window,
+					   true ? GTK_STATE_ACTIVE : GTK_STATE_INSENSITIVE,
+					   GTK_SHADOW_OUT,
+					   NULL, GTK_WIDGET(widget), 
+					   "buttondefault",
+					   //"stepper",
+					   x, channel_y - (channel_height >> 1) - 6, 10, 26 );
+
+		//mgtk_print("%i", key);
+	}
+
+	return TRUE;
+}
+
+
+void mgtk_animation_scrubber_motion_handler(GtkWidget* widget, GdkEventMotion* event)
+{
+	int x, y;
+	GdkModifierType state;
+
+	if ( event->is_hint )
+	{
+		gdk_window_get_pointer( event->window, &x, &y, &state );
+	} 
+	else 
+	{
+		x = (int)event->x;
+		y = (int)event->y;
+		state = (GdkModifierType)event->state;
+	}
+
+	mgtk_animation_scrubber_state_t* scrubber_state =
+	(mgtk_animation_scrubber_state_t*)gtk_object_get_data(GTK_OBJECT(widget), "mgtk_animation_scrubber_state");
+
+	if ( scrubber_state )
+	{
+		const float width = widget->allocation.width;
+		int key = (x / width) * scrubber_state->max;// 500.0f;
+		int max = scrubber_state->max - 5;
+		if (key > max) key = max;
+		if (key < 0) key = 0;
+
+		if ( state & GDK_BUTTON1_MASK )
+		{
+			scrubber_state->current_key = key;
+			//mgtk_print("%i %i -> %i", x, y, key);
+			mgtk_handle_event1u(GPOINTER_TO_INT( scrubber_state->event ), key );
+		}
+		else if ( state & GDK_BUTTON3_MASK )
+		{
+			/* Drag event */
+			if ( scrubber_state->current_marker > -1 )
+			{
+				// mgtk_marker_drag_event( scrubber_state->event, scrubber_state->marker[ scrubber_state->current_marker ], key );
+				scrubber_state->markers[ scrubber_state->current_marker ] = key;
+			}
+		}
+
+		/* Request expose events. */
+		gtk_widget_queue_draw( widget );
+	}
+}
+
+
+void mgtk_animation_scrubber_button_press_handler(GtkWidget* widget, GdkEventButton* event)
+{
+	/* Beginning of drag, reset mouse position */
+	GdkModifierType state;
+	int x, y;
+	gdk_window_get_pointer(event->window, &x, &y, &state);
+
+	mgtk_animation_scrubber_state_t* scrubber_state =
+	(mgtk_animation_scrubber_state_t*)gtk_object_get_data(GTK_OBJECT(widget), "mgtk_animation_scrubber_state");
+
+	if ( scrubber_state )
+	{
+		const float width = widget->allocation.width;
+		int key = (x / width) * scrubber_state->max;//500.0f;
+		int max = scrubber_state->max - 5;
+		if (key > max) key = max;
+		if (key < 0) key = 0;
+
+		if ( state & GDK_BUTTON1_MASK )
+		{
+			/* Create new marker. */
+			if ( event->state & GDK_CONTROL_MASK )
+			{
+				scrubber_state->markers[scrubber_state->marker_count] = key;
+				scrubber_state->marker_count++;
+				// mgtk_marker_create_event( scrubber_state->event, key );
+			}
+			/* Select existing marker. */ 
+			else if ( event->state & GDK_SHIFT_MASK )
+			{
+				for ( unsigned int i = 0; i < scrubber_state->marker_count; ++i)
+				{
+					if ( key == scrubber_state->markers[i] )
+					{
+						scrubber_state->current_marker = i;
+						// mgtk_marker_selection_event( scrubber_state->event, key );
+						break;
+					}
+				}
+			}
+		}
+		else if ( state & GDK_BUTTON3_MASK )
+		{
+			
+		}
+
+		/* Request expose events. */
+		gtk_widget_queue_draw( widget );
+	}
+}
+
+
+mgtk_animation_scrubber_state_t* mgtk_animation_scrubber_state_new( int event )
+{
+	mgtk_animation_scrubber_state_t* state = new mgtk_animation_scrubber_state_t;
+	state->event = event;
+	state->max = 405;
+	state->current_key = 0;
+	state->marker_count = 0;
+	state->current_marker = -1;
+
+	return state;
+}
+
+
+int mgtk_lua_rc_animation_scrubber(lua_State* s)
+{
+	GtkWidget* drawing_area = gtk_drawing_area_new();
+	gtk_widget_show( drawing_area );
+
+	if ( lua_gettop(s) > 0 )
+	{
+		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
+					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
+
+		if ( lua_gettop(s) > 2 )
+		{
+			int width = (int)lua_tonumber(s, 2);
+			int height = (int)lua_tonumber(s, 3);
+
+			gtk_widget_set_size_request( drawing_area, width, height );
+		}
+
+		// FIXME: Doesn't use event signal.
+		gtk_widget_add_events( drawing_area,
+							   GDK_EXPOSURE_MASK |
+							   //GDK_KEY_PRESS_MASK |
+							   //GDK_KEY_RELEASE_MASK |
+							   //GDK_POINTER_MOTION_MASK |
+							   //GDK_POINTER_MOTION_HINT_MASK |
+							   //GDK_MOTION_NOTIFY |
+							   GDK_BUTTON_MOTION_MASK | 
+							   //GDK_BUTTON1_MOTION_MASK | 
+							   //GDK_BUTTON2_MOTION_MASK |							   
+							   //GDK_VISIBILITY_NOTIFY_MASK |
+							   GDK_BUTTON_PRESS_MASK |
+							   GDK_BUTTON_RELEASE_MASK );
+
+		g_signal_connect( G_OBJECT( drawing_area ), "expose_event",  
+						  G_CALLBACK(animation_scrubber_expose_handler), NULL );
+
+		g_signal_connect( G_OBJECT( drawing_area ), "motion_notify_event",
+						  G_CALLBACK(mgtk_animation_scrubber_motion_handler), NULL ); 
+
+		g_signal_connect( G_OBJECT( drawing_area ), "button_press_event",
+						  G_CALLBACK(mgtk_animation_scrubber_button_press_handler), NULL );
+
+		mgtk_animation_scrubber_state_t* state = mgtk_animation_scrubber_state_new( event );
+		gtk_object_set_data( GTK_OBJECT( drawing_area ), "mgtk_animation_scrubber_state", state );
+	}
+
+	lua_pushlightuserdata(s, drawing_area);
+
+	return 1;
 }
 
 

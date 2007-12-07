@@ -61,9 +61,6 @@ class FreyjaImage
 	 * Post : MtkImage object is constructed
 	 --------------------------------------------*/
 
-
-
-
 	virtual ~FreyjaImage();
 	/*--------------------------------------------
 	 * Created  : 2000-10-05 by Mongoose
