@@ -346,20 +346,19 @@ void freyja_handle_text(int event, char *text)
 
 
 void freyja_callback_get_image_data_rgb24(const char *filename, 
-										unsigned char **image, 
-										int *width, int *height)
+										  unsigned char **image, 
+										  int *width, int *height)
 {
-	FreyjaImage img;
-
 	*image = NULL;
 	*width = 0;
 	*height = 0;
 
-	if (!img.loadImage(filename))
-	{
-		unsigned char *swap = NULL;
+	FreyjaImage img;
 
-		img.setColorMode(FreyjaImage::RGB_24);
+	if ( !img.loadImage( filename ) )
+	{
+		unsigned char* swap = NULL;
+		img.setColorMode( FreyjaImage::RGB_24 );
 		img.scaleImage(256, 256);
 		img.getImage(&swap);
 		*image = swap;

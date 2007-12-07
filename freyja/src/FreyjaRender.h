@@ -820,6 +820,8 @@ private:
 	vec_t mFovY;
 	vec_t mNearHeight;
 
+	vec2_t mUpperLeftText;
+
 	bool mScrollingUV_X;
 };
 

@@ -35,6 +35,10 @@
 
 #include "FreyjaImage.h"
 
+
+#define FREYJAIMAGE_COLOR_WEIGHT_GREYSCALE 0
+
+
 using namespace mstl;
 
 extern Vector<mstl::String> gImagePluginDirectories;
@@ -130,36 +134,67 @@ int FreyjaImage::getOriginalHeight()
 
 void FreyjaImage::setColorMode(colormode_t mode)
 {
-	unsigned char *image;
-	unsigned int i, size;
-
-
 	if (!_image || _width < 1 || _height < 1)
 		return;
 
-	if (mode == RGB_24)
+	if ( mode == RGB_24 )
 	{
-		if (_color_mode == RGB_24)
+		switch ( _color_mode )
 		{
-			return;
-		}
-		else if (_color_mode == RGBA_32)
-		{
-			size = _width * _height;
-			image = new unsigned char[size*3];
-			
-			for (i = 0; i < size; ++i)
+		case INDEXED_8: // If this is called to covert 'indexed_8' it's really greyscale.
 			{
-				image[i*3] = _image[i*4];
-				image[i*3+1] = _image[i*4+1];
-				image[i*3+2] = _image[i*4+2];
-				// alpha not used
-			}
+				unsigned char* pixmap = new unsigned char[ _width * _height * 3 ];
+		
+				for ( unsigned int i = 0, n = _width * _height; i < n; ++i )
+				{
+					const unsigned int idx = i * 3;
+#if FREYJAIMAGE_COLOR_WEIGHT_GREYSCALE
+					/* Convert greyscale using 'obsolete' color weights.
+					 * I forgot why this filter was ever used, so it's disabled by default. */ 
+					const unsigned char pixel = _image[i];
+					pixmap[idx  ] = ( pixel >> 2 ); // ~ pixel * 0.30f;
+					pixmap[idx+1] = ( pixel >> 1 ); // ~ pixel * 0.59f;
+					pixmap[idx+2] = ( pixel >> 3 ); // ~ pixel * 0.11f;
+#else
+					pixmap[idx] = pixmap[idx+1] = pixmap[idx+2] = _image[i];
+#endif
+				}
 
-			_image = image;
-			_color_mode = RGB_24;
+				delete [] _image;
+				_image = pixmap;
+				_color_mode = RGB_24;
+			}
+			break;
+
+		case RGB_24:
+			break;
+
+		case RGBA_32:
+			{
+				unsigned char* image = new unsigned char[_width * _height * 3];
+			
+				for (unsigned int i = 0, size = _width * _height; i < size; ++i)
+				{
+					const unsigned int idx = i*3;
+					const unsigned int idx2 = i*4;
+					image[idx  ] = _image[idx2  ];
+					image[idx+1] = _image[idx2+1];
+					image[idx+2] = _image[idx2+2];
+					// Alpha componet not used in RGB_24.
+				}
+
+				delete [] _image;
+				_image = image;
+				_color_mode = RGB_24;
+			}
+			break;
+		
+		default:
+			;
+
 		}
 	}
+
 }
 
 

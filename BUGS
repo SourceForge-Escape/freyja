@@ -20,18 +20,9 @@
  A - Serious bugs
  ----------------------------
 
- * Crash caused by loading a non-power of two texture via plugin system.
-	- A flat file material import can generate an invalid texture 
-	  using the perlin noise flat file extension.
+ * [NEEDS INFO] Fix UV generation causes crash with some OBJ imported meshes.
 
- * Fix UV generation causes crash with some OBJ imported meshes.
-	- Needs more information.
-
- * [UNCONFIRMED] Repacking might break aging Undo system for some operations.
-	- This is bug is only a theory based on how undo works for objects.
-
- * Crash in win32 OpenGL on md5 model import in VMWare.
-	- Needs more information.
+ * [NEEDS INFO] Crash in win32 OpenGL on md5 model import in VMWare.
 
  * File corruption with .freyja format with certain animations.
 	- This should be 'fixed' when the old keyframe system is replaced.
@@ -43,6 +34,7 @@
 	- Canceling attempts to open dialog's selected extension.
 
  * UV viewmode in Model tab editor doesn't work the same as UV tab editor.
+	- This is a design bug.
 	- Clicking in the viewport must reset edit mode for this to work.
 	- This depends on the viewport UI redesign.
 

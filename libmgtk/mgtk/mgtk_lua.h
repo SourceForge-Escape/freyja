@@ -74,6 +74,9 @@ int mgtk_lua_rc_notebook(lua_State *s);
 int mgtk_lua_rc_tab(lua_State *s);
 // mgtk_tab(notebook, label, eventId)
 
+int mgtk_lua_rc_animation_scrubber(lua_State *s);
+// scrubber = mgtk_animation_scrubber( eventId [, width, height] )
+
 int mgtk_lua_rc_textbox(lua_State *s);
 int mgtk_lua_rc_hsep(lua_State *s);
 int mgtk_lua_rc_vsep(lua_State *s);

@@ -8,7 +8,9 @@ set(Email mongooseichiban@gmail.com)
 set(Website http://icculus.org/freyja)
 set(BuildHost `uname -n -m -s`)
 set(Version ${Major}.${Minor}.${Micro}.${Revision})
-set(BuildId 1)
+
+#set(BuildId 1)
+EXEC_PROGRAM( date ARGS +%Y%m%d OUTPUT_VARIABLE BuildId )
 
 #enable_testing()
 
@@ -121,8 +123,9 @@ FILE( APPEND debian/changelog "" )
 
 
 INSTALL( TARGETS ${Name} RUNTIME DESTINATION /usr/bin )
-INSTALL( FILES data/freyja-dev.mlisp data/vera.ttf DESTINATION /usr/share/freyja )
-INSTALL( DIRECTORY data/icons data/shaders DESTINATION /usr/share/freyja )
+INSTALL( FILES data/freyja3d.lua data/vera.ttf DESTINATION /usr/share/freyja )
+INSTALL( DIRECTORY data/icons data/shaders DESTINATION /usr/share/freyja
+	PATTERN ".svn" EXCLUDE )
 
 
 add_custom_target( win32 

@@ -278,24 +278,20 @@ bool MaterialControl::LoadMaterial(const char *filename)
 	r.Close();
 
 	// Convert this to Material metadata
-	if (perlinLoaded)
+	if ( perlinLoaded )
 	{
 		PerlinNoise perlin;
-		byte *image = perlin.generateBuffer(width, height, seed);
+		byte* bitmap = perlin.generateBuffer( width, height, seed );
+		byte* pixmap = new byte[ width * height * 3 ];
 		
-		if (image)
+		if ( bitmap && pixmap )
 		{	
 			if (clamp)
-				perlin.clampBufferIntensity(image, width, height, iA, iB, d);
-			
-			/* Modulate by a color and add a base half intensity */
-			FreyjaImage img;
-			byte *rgb;
+			{
+				perlin.clampBufferIntensity(bitmap, width, height, iA, iB, d);
+			}
 
-			img.loadPixmap(image, width, height, FreyjaImage::INDEXED_8);
-			img.getImage(&rgb);
-
-			for (uint32 i = 0, n = width * height * 3; i < n; ++i)
+			for (uint32 i = 0, n = width * height; i < n; ++i)
 			{
 				/* NOTE: No clamping or scaling of colors, however there is a 
 				   weakened 50 / 50 add in the sense that ADD can only contrib
@@ -304,22 +300,27 @@ bool MaterialControl::LoadMaterial(const char *filename)
 				   The reason for this is to allow bleeding for plasma, etc.
 				*/
 
-				// Modulate and adjust intensity per pixel
-				rgb[i] = (byte)(rgb[i] * modcolor[0]) +	(byte)(128 * addcolor[0]);
-				++i;
-				rgb[i] = (byte)(rgb[i] * modcolor[1]) +	(byte)(128 * addcolor[1]);
-				++i;
-				rgb[i] = (byte)(rgb[i] * modcolor[2]) +	(byte)(128 * addcolor[2]);
+			
+				/* Modulate by a color and add a base half intensity */ 
+				const unsigned int idx = i * 3;
+				pixmap[idx  ] = (byte)(bitmap[i] * modcolor[0]) + (byte)(128 * addcolor[0]);
+				pixmap[idx+1] = (byte)(bitmap[i] * modcolor[1]) + (byte)(128 * addcolor[1]);
+				pixmap[idx+2] = (byte)(bitmap[i] * modcolor[2]) + (byte)(128 * addcolor[2]);
 			}
 
-			LoadTextureBuffer(rgb, width, height, 24, 3);
+			LoadTextureBuffer( pixmap, width, height, 24, 3 );
 			freyjaMaterialTexture(matIndex, mTextureId-1);
 			freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
+
+			delete [] bitmap; // FIXME: Should have library deallocator handle this.
 		}
 	}
 
-	RefreshInterface();
 
+	/* Set selected material to this, and refresh user interface. */
+	//if ( matIndex != INDEX_INVALID )
+	//	SetSelected( matIndex );
+	RefreshInterface();
 	mRecent.AddFilename( filename );
 
 	return true;

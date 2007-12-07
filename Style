@@ -1,0 +1,17 @@
+
+ Style Guidelines Codification
+ --------------------------------------------------------------------------
+
+ * Attributes start with "m" prefix to avoid issues with "_" in some compilers.  
+
+ * Camel case method names starting with capital letter.
+
+ * Keep sections as needed in larger classes and methods alphanumeric sorted.
+
+ * Stop prototyping in header files -- make a new object before you start.
+
+ * Use comment blocks for method description.  No per method histories in header!
+
+ * Place inline methods over 1 line outside class defn at the bottom of the header.
+
+

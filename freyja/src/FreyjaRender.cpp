@@ -116,6 +116,9 @@ FreyjaRender::FreyjaRender() :
 	mAngles[1] = 42.0f;
 	mAngles[2] = 0.0f;
 
+	mUpperLeftText[0] = -mScaleEnv - 8;
+	mUpperLeftText[1] = mScaleEnv - 1.5f;
+
 	for (long i = 0; i < 3; ++i)
 	{
 		mColorAxisX[i] = RED[i] * 0.75f;
@@ -516,7 +519,7 @@ void FreyjaRender::DrawFreeWindow()
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);
-	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, "ORBIT");
+	mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Orbit");
 	glPopAttrib();
 }
 
@@ -1068,7 +1071,7 @@ void FreyjaRender::Display()
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glColor3fv(GREEN);
-	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, "Freyja 0.9.6 prealpha.");
+	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, FREYJA_WATERMARK );
 	glPopAttrib();
 
 	//CHECK_OPENGL_ERROR( glFlush() );
@@ -2767,31 +2770,31 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	switch (plane)
 	{
 	case PLANE_FRONT:
-		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "FRONT");
+		mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Front");
 		break;
 
 	case PLANE_BACK:
-		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "BACK");
+		mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Back");
 		break;
 
 	case PLANE_TOP:
-		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "TOP");
+		mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Top");
 		break;
 
 	case PLANE_BOTTOM:
-		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "BOTTOM");
+		mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Bottom");
 		break;
 
 	case PLANE_LEFT:
-		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "LEFT");
+		mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Left");
 		break;
 
 	case PLANE_RIGHT:
-		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "RIGHT");
+		mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Right");
 		break;
 
 	default:
-		mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.05f, "????");
+		mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Unknown");
 	}
 
 	glPopAttrib();
@@ -2832,12 +2835,12 @@ void FreyjaRender::DrawMaterialEditWindow()
 #if USE_TORUS_TEST
 	mglDrawTorus(3.0, 10.0);
 #else
-	mglDrawSphere(128, 128, 10.0);
+	mglDrawSphere(128, 128, 13.0f);
 #endif
 
 	glPopMatrix();
 
-	const float x = 12.0f, y = -8.0f, z = 0.0f, w = 16.0f, h = 16.0f, s = 1.001f;
+	const float x = 21.0f, y = -8.0f, z = 0.0f, w = 16.0f, h = 16.0f, s = 1.001f;
 
 	glPushMatrix();
 	glDisable(GL_LIGHTING);
@@ -2848,6 +2851,11 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glVertex3f(x*s, (y+h)*s, z);
 	glVertex3f((x+w)*s, (y+h)*s, z);
 	glVertex3f((x+w)*s, y*s, z);
+	glEnd();
+
+	glBegin(GL_LINES);
+	glVertex3f(x*s, y*s+h/2, z);
+	glVertex3f(8, y*s+h/2, z);
 	glEnd();
 
 
@@ -2887,7 +2895,8 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	glEnable(GL_BLEND);
 	glColor3fv(WHITE);
-	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, "MATERIAL");
+	mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Material");
+	mPrinter.Print2d(x*s-8, y*s+h+1, 0.04f, "Texture");
 	glPopAttrib();
 	// End OpenGLPrinter test
 }
