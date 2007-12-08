@@ -854,19 +854,14 @@ function freyja3d_ui_init()
 	hbox = mgtk_hbox( 0, 0 )
 	mgtk_box_pack( vbox, hbox, 1, 1, 0 )
 
-	-- Test Custom animation scrubber
-	scrubber = mgtk_animation_scrubber( "eAnimationSlider", 975, 32 )
-	mgtk_box_pack( hbox, scrubber )
-
-	-- Animation scrubber
-	--mgtk_box_pack( hbox, mgtk_hslider( "eAnimationSlider", 0, 500 ), 1, 1, 0 )
+	-- Custom animation time slider
+	slider = mgtk_time_slider( "eAnimationSlider", 975, 32 )
+	mgtk_box_pack( hbox, slider )
 
 	-- Animation toolbar
 	vbox2 = mgtk_vbox()
 	mgtk_box_pack( hbox, vbox2, 1, 1, 1 )
 	freyja3d_animation_toolbar( vbox2 )
-
-
 
 	-- Statusbar
 	statusbar1 = mgtk_statusbar()

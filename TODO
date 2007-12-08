@@ -8,7 +8,11 @@
 
  * Release 0.9.5.17 final before major backend changes.
 	- Material load texture id set broken with Lua?
-	- Finish Custom scrubber.
+	- Finish Custom TimeSlider.
+		- Send client events for creation / moving / deleting keys.
+	- Finish Custom RangeSlider.
+		- Check in gtk+ widget.
+		- Event system.
 
 
  Freyja 0.9.5.18 	TBD
@@ -17,6 +21,8 @@
  * Hot
 	- SceneGraph and SceneGraphIterator
 		· Merge / Select / Delete / Create SceneGraphs 
+	- New Keyframe system.
+		· Keyframes are toplevel containers with aggregates of typed keys.
 	- New 2-way Reference index_t system.
 		· Parent / Children : delete / update signal methods
 	- Mutable mode ( readonly ) edit state support.

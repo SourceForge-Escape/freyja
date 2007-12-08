@@ -312,6 +312,18 @@ mgtk/mgtk_resource.s:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.s
 
 # target to build an object file
+mgtk/mgtk_timeslider.o:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_timeslider.o
+
+# target to preprocess a source file
+mgtk/mgtk_timeslider.i:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_timeslider.i
+
+# target to generate assembly for a file
+mgtk/mgtk_timeslider.s:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_timeslider.s
+
+# target to build an object file
 mgtk/mgtk_tree.o:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_tree.o
 
@@ -377,6 +389,9 @@ help::
 	@echo "... mgtk/mgtk_resource.o"
 	@echo "... mgtk/mgtk_resource.i"
 	@echo "... mgtk/mgtk_resource.s"
+	@echo "... mgtk/mgtk_timeslider.o"
+	@echo "... mgtk/mgtk_timeslider.i"
+	@echo "... mgtk/mgtk_timeslider.s"
 	@echo "... mgtk/mgtk_tree.o"
 	@echo "... mgtk/mgtk_tree.i"
 	@echo "... mgtk/mgtk_tree.s"
