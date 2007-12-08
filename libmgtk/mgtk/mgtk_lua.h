@@ -77,6 +77,9 @@ int mgtk_lua_rc_tab(lua_State *s);
 int mgtk_lua_rc_time_slider(lua_State *s);
 // slider = mgtk_time_slider( eventId [, width, height] )
 
+int mgtk_lua_rc_range_slider(lua_State *s);
+// slider = mgtk_range_slider( eventId [, width, height] )
+
 int mgtk_lua_rc_textbox(lua_State *s);
 int mgtk_lua_rc_hsep(lua_State *s);
 int mgtk_lua_rc_vsep(lua_State *s);

@@ -863,6 +863,10 @@ function freyja3d_ui_init()
 	mgtk_box_pack( hbox, vbox2, 1, 1, 1 )
 	freyja3d_animation_toolbar( vbox2 )
 
+	-- Custom animation range slider
+	slider = mgtk_range_slider( "eAnimationSlider", 975, 20 )
+	mgtk_box_pack( vbox, slider )
+
 	-- Statusbar
 	statusbar1 = mgtk_statusbar()
 	mgtk_box_pack( vbox, statusbar1, 0, 0, 1 )

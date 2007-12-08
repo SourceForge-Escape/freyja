@@ -11,6 +11,7 @@
 	- Finish Custom TimeSlider.
 		- Send client events for creation / moving / deleting keys.
 	- Finish Custom RangeSlider.
+		- Menu option to hide this element.
 		- Check in gtk+ widget.
 		- Event system.
 
