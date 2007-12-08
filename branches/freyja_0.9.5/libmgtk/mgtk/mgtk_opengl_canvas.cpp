@@ -399,8 +399,8 @@ GtkWidget* mgtk_opengl_canvas_new(unsigned int width, unsigned int height)
 
 	g_signal_connect_swapped(G_OBJECT(canvas), "key_press_event",
 							 G_CALLBACK(mgtk_event_key_press), NULL);
-	g_signal_connect(GTK_OBJECT(canvas), "key_release_event",
-					 GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
+	g_signal_connect(G_OBJECT(canvas), "key_release_event",
+					 G_CALLBACK(mgtk_event_key_release), NULL);
 
 	/* Setup GL window state */
 	mgtk_opengl_canvas_state_t *state = new mgtk_opengl_canvas_state_t;
@@ -418,12 +418,12 @@ GtkWidget* mgtk_opengl_canvas_new(unsigned int width, unsigned int height)
 	gtk_widget_show(canvas);
 
 	/* Shared code pushed here from mgtk_resource / mgtk_lua. */
-	gtk_signal_connect(GTK_OBJECT(canvas), "key_press_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_key_press), NULL);
-	gtk_signal_connect(GTK_OBJECT(canvas), "key_release_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_key_release), NULL);
-	gtk_signal_connect(GTK_OBJECT(canvas), "destroy",
-					   GTK_SIGNAL_FUNC(mgtk_destroy_window), NULL);
+	g_signal_connect( G_OBJECT(canvas), "key_press_event",
+					  G_CALLBACK(mgtk_event_key_press), NULL );
+	g_signal_connect( G_OBJECT(canvas), "key_release_event",
+					  G_CALLBACK(mgtk_event_key_release), NULL );
+	g_signal_connect( G_OBJECT(canvas), "destroy",
+					  G_CALLBACK(mgtk_destroy_window), NULL );
 
 #elif HAVE_GTKGLAREA
 	if ( gdk_gl_query() == FALSE )
@@ -452,22 +452,27 @@ GtkWidget* mgtk_opengl_canvas_new(unsigned int width, unsigned int height)
 						  GDK_MOTION_NOTIFY);
 
 	/* Mouse */
-	gtk_signal_connect(GTK_OBJECT(canvas), "motion_notify_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_mouse_motion), NULL);
-	gtk_signal_connect(GTK_OBJECT(canvas), "button_press_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_button_press), NULL);
-	gtk_signal_connect(GTK_OBJECT(canvas), "button_release_event",
-					   GTK_SIGNAL_FUNC(mgtk_event_button_release), NULL);
+	g_signal_connect(G_OBJECT(canvas), "motion_notify_event",
+					 G_CALLBACK(mgtk_event_mouse_motion), NULL);
+
+	g_signal_connect(G_OBJECT(canvas), "button_press_event",
+					 G_CALLBACK(mgtk_event_button_press), NULL);
+
+	g_signal_connect(G_OBJECT(canvas), "button_release_event",
+					 G_CALLBACK(mgtk_event_button_release), NULL);
 
 	/* Misc */
-	gtk_signal_connect(GTK_OBJECT(canvas), "expose_event",
-					   GTK_SIGNAL_FUNC(mgtk_expose_glarea), NULL);
-	gtk_signal_connect(GTK_OBJECT(canvas), "configure_event",
-					   GTK_SIGNAL_FUNC(mgtk_resize_glarea), NULL);
-	gtk_signal_connect(GTK_OBJECT(canvas), "realize",
-					   GTK_SIGNAL_FUNC(mgtk_init_glarea), NULL);
-	gtk_signal_connect(GTK_OBJECT(canvas), "destroy",
-					   GTK_SIGNAL_FUNC(mgtk_destroy_glarea), NULL);
+	g_signal_connect(G_OBJECT(canvas), "expose_event",
+					 G_CALLBACK(mgtk_expose_glarea), NULL);
+
+	g_signal_connect(G_OBJECT(canvas), "configure_event",
+					 G_CALLBACK(mgtk_resize_glarea), NULL);
+
+	g_signal_connect(G_OBJECT(canvas), "realize",
+					 G_CALLBACK(mgtk_init_glarea), NULL);
+
+	g_signal_connect(G_OBJECT(canvas), "destroy",
+					 G_CALLBACK(mgtk_destroy_glarea), NULL);
 
 	/* Setup GL window state */
 	mgtk_opengl_canvas_state_t* state = new mgtk_opengl_canvas_state_t;
@@ -480,7 +485,7 @@ GtkWidget* mgtk_opengl_canvas_new(unsigned int width, unsigned int height)
 	state->animate = 0;
 	state->timeout_interval = 10;
 	state->timeout_id = 0;
-	gtk_object_set_data(GTK_OBJECT(canvas), "gl_window_state", state);
+	gtk_object_set_data( GTK_OBJECT(canvas), "gl_window_state", state );
 #else
 #  warning "WARNING No gtkglarea widget support in this build"
 #endif

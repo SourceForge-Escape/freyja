@@ -4,13 +4,16 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
- Kagura prealpha, 0.9.5.10 () -- "Kagura prealpha"
+ Kagura prealpha, 0.9.5.18 () -- "Kagura prealpha"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  - New scene based system.
 
 
- Kagura prealpha, 0.9.5.17 (1126) -- "Crack'n bones"
+ Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071206 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - New timeslider has more high level events and proper range support.
+ - Removed deprecated Gtk+ signal hookup use in opengl_canvas.
+ - Renamed 'scrubber' to time_slider, which makes more sense to external projects. 
  - New custom scrubber widget mostly done. (1127)
  - Fix opengl_canvas mouse events now use exposure requests.
  - Fix for crash loading generated perlin noise bitmaps due to obsolete code use.

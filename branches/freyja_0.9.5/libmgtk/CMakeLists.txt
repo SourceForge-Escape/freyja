@@ -114,10 +114,7 @@ include_directories( ${GTKGLEXT_INCLUDE_DIR} )
 #SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,--enable-runtime-pseudo-reloc -Wl,--export-all-symbols" CACHE STRING "" FORCE)
 #gtkglext-1.0
 
-
-
 include_directories( ../mstl .  )
-
 
 set(Objs
 	mgtk/ConfirmationDialog
@@ -132,6 +129,7 @@ set(Objs
 	mgtk/mgtk_lua
 	mgtk/mgtk_resource
 	mgtk/mgtk_opengl_canvas
+	mgtk/mgtk_timeslider
 	mgtk/mgtk_tree
 )
 

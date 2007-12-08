@@ -28,8 +28,9 @@
 #include <freyja/MeshABI.h>
 #include <freyja/Metadata.h>
 
-#include <mgtk/mgtk_tree.h>
 #include <mgtk/mgtk_lua.h>
+#include <mgtk/mgtk_timeslider.h>
+#include <mgtk/mgtk_tree.h>
 
 #include "freyja_events.h"
 
@@ -174,6 +175,55 @@ void freyja3d_scenegraph_update()
 
 	/* Free tree model. */
 	mgtk_tree_delete( scene );
+
+	
+	/* FIXME: Hack to update custom time slider after import for testing. */
+	{
+		int event = freyja3d_get_event_id( "eAnimationSlider" );
+		uint32 track_id = 0;//FreyjaControl::GetInstance()->GetSelectedAnimation();
+
+		mgtk_time_slider_reset_markers( event );
+
+		unsigned int end = 150;
+
+		for ( uint32 bone_id = 0, bone_count = freyjaGetBoneCount(); bone_id < bone_count; ++bone_id )
+		{
+			/* Gather up a list of keyframe times. */
+			Bone* bone = Bone::GetBone( bone_id );
+			BoneTrack& track = bone->GetTrack( track_id );
+
+			if ( track.GetRotKeyframeCount() > end )
+				end = track.GetRotKeyframeCount();
+
+			if ( track.GetLocKeyframeCount() > end )
+				end = track.GetLocKeyframeCount();
+		}
+
+		mgtk_time_slider_set_range( event, 0, end );
+		//mgtk_time_slider_set_range( event, 100, 200 );
+
+		for ( uint32 bone_id = 0, bone_count = freyjaGetBoneCount(); bone_id < bone_count; ++bone_id )
+		{
+			/* Gather up a list of keyframe times. */
+			Bone* bone = Bone::GetBone( bone_id );
+			BoneTrack& track = bone->GetTrack( track_id );
+			vec_t rate_inverse = 1.0f / track.GetRate();
+
+			for ( uint32 i = 0; i < track.GetRotKeyframeCount(); ++i )
+			{
+				//vec_t time = track.GetRotKeyframeTime( i );
+				//vec_t time = (vec_t)i * rate_inverse;
+				mgtk_time_slider_add_marker( event, i );
+			}
+
+			for ( uint32 i = 0; i < track.GetLocKeyframeCount(); ++i )
+			{
+				//vec_t time = track.GetLocKeyframeTime( i );
+				//vec_t time = (vec_t)i * rate_inverse;
+				mgtk_time_slider_add_marker( event, i );
+			}
+		}
+	}
 }
 
 
