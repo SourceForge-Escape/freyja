@@ -3,24 +3,16 @@
  * 
  * Project : libmgtk
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.icculus.org/~mongoose/
- * Email   : mongoose@icculus.org
+ * Website : http://www.icculus.org/freyja/
+ * Email   : mongooseichiban@gmail.com
  * Object  : 
- * License : No use w/o permission (c) 2000-2004 Mongoose
- * Comments: This is the generic mlisp bridge to the mgtk widget system.
- *
- *           It provides a 2-way event system w/o requiring direct bindings.
- *           ( eg You can make this a dlopen'able interface facade. )
- *
- *           This file was generated using Mongoose's C++ 
- *           template generator script.  <mongoose@icculus.org>
+ * License : No use w/o permission (c) 2000-2007 Mongoose
+ * Comments: This is the time slider widget implementation.
  * 
  *-- History ------------------------------------------------- 
  *
- * 2004.10.27:
- * Mongoose - Major API clean up, documentation update
- *
- *            Created, from old mlisp and mgtk source headers
+ * 2007.12.07:
+ * Mongoose - Created, from mgtk prototype.
  ==========================================================================*/
 
 #ifndef GUARD__MGTK_TIMESLIDER_H_

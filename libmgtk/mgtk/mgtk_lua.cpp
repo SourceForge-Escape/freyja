@@ -36,6 +36,7 @@
 #include "mgtk_interface.h"
 #include "mgtk_filedialog.h"
 #include "mgtk_resource.h"
+#include "mgtk_rangeslider.h"
 #include "mgtk_timeslider.h"
 #include "mgtk_tree.h"
 
@@ -1780,123 +1781,6 @@ int mgtk_lua_rc_time_slider(lua_State* s)
 }
 
 
-typedef struct {
-
-	int event;
-
-	unsigned int min;
-	unsigned int max;
-
-	unsigned int start;
-	unsigned int end;
-
-} mgtk_range_slider_state_t;
-
-
-mgtk_range_slider_state_t* mgtk_range_slider_state_new( int event, 
-														unsigned int min, unsigned int max, 
-														unsigned int start, unsigned int end )
-{
-	mgtk_range_slider_state_t* state = new mgtk_range_slider_state_t;
-	state->event = event;
-	state->min = min;
-	state->max = max;
-	state->start = start;
-	state->end = end;
-
-	return state;
-}
-
-
-gboolean mgtk_range_slider_expose_handler(GtkWidget *widget, GdkEventExpose *event, gpointer data)
-{
-	GdkGC* gc = widget->style->fg_gc[GTK_WIDGET_STATE(widget)];
-	const unsigned int width = widget->allocation.width;
-	const unsigned int height = widget->allocation.height;
-
-	/* Slider background trough. */
-	gtk_paint_slider( widget->style,
-					  widget->window,
-					  GTK_STATE_ACTIVE,
-					  GTK_SHADOW_IN,
-                      NULL,
-					  widget,
-                      NULL, // const gchar *detail,
-					  0, (height>>2)+(height>>3),
-					  width, height>>2,
-					  GTK_ORIENTATION_HORIZONTAL);
-
-
-	/* Range slider's state based widget componets. */
-	mgtk_range_slider_state_t* state =
-	(mgtk_range_slider_state_t*)gtk_object_get_data(GTK_OBJECT(widget), "mgtk_range_slider_state");
-
-	if ( state )
-	{
-		//state->width = width;
-		const float end_v = 1.0f / ( state->max - state->min );
-
-		/* Render a slider with a handle grip at current_key. */
-		int x = ( state->start - state->min ) * end_v * width;
-		int x2 = ( state->end - state->min ) * end_v * width;
-		gtk_paint_box( widget->style,
-					   widget->window,
-					   true ? GTK_STATE_ACTIVE : GTK_STATE_INSENSITIVE,
-					   GTK_SHADOW_OUT,
-					   NULL, GTK_WIDGET(widget), 
-					   "buttondefault",
-					   x, 2, x2 - x, height - 4 );
-
-		gtk_paint_handle( widget->style,
-						  widget->window,
-						  GTK_STATE_ACTIVE,
-						  GTK_SHADOW_OUT,
-						  NULL,
-						  widget,
-                          "stepper",
-						  x+1, 3,
-						  8, height - 6,
-						  GTK_ORIENTATION_HORIZONTAL );
-
-		gtk_paint_handle( widget->style,
-						  widget->window,
-						  GTK_STATE_ACTIVE,
-						  GTK_SHADOW_OUT,
-						  NULL,
-						  widget,
-                          "stepper",
-						  x2-9, 3,
-						  8, height - 6,
-						  GTK_ORIENTATION_HORIZONTAL );
-		//mgtk_print("%i", key);
-
-		/* Ranged slider handle. */
-		char s[16];
-		snprintf( s, 16, "%i", state->start );
-		gtk_paint_string( widget->style,
-						  widget->window,
-						  GTK_STATE_ACTIVE,
-						  NULL,
-						  widget,
-						  NULL, //const gchar *detail,
-						  x+10, (height>>1)+(height>>2),
-						  s);
-
-		snprintf( s, 16, "%i", state->end );
-		gtk_paint_string( widget->style,
-						  widget->window,
-						  GTK_STATE_ACTIVE,
-						  NULL,
-						  widget,
-						  NULL, //const gchar *detail,
-						  x2-26, (height>>1)+(height>>2),
-						  s);
-	}
-
-	return TRUE;
-}
-
-
 int mgtk_lua_rc_range_slider(lua_State* s)
 {
 	GtkWidget* drawing_area = gtk_drawing_area_new();
@@ -1924,8 +1808,8 @@ int mgtk_lua_rc_range_slider(lua_State* s)
 		g_signal_connect( G_OBJECT( drawing_area ), "expose_event",  
 						  G_CALLBACK(mgtk_range_slider_expose_handler), NULL );
 
-		//g_signal_connect( G_OBJECT( drawing_area ), "motion_notify_event",
-		//				  G_CALLBACK(mgtk_time_slider_motion_handler), NULL ); 
+		g_signal_connect( G_OBJECT( drawing_area ), "motion_notify_event",
+						  G_CALLBACK(mgtk_range_slider_motion_handler), NULL ); 
 
 		//g_signal_connect( G_OBJECT( drawing_area ), "button_press_event",
 		//				  G_CALLBACK(mgtk_time_slider_button_press_handler), NULL );

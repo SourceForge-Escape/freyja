@@ -3,16 +3,16 @@
  * 
  * Project : libmgtk
  * Author  : Terry 'Mongoose' Hendrix II
- * Website : http://www.icculus.org/freyja
+ * Website : http://www.icculus.org/freyja/
  * Email   : mongooseichiban@gmail.com
  * Object  : 
- * License : No use w/o permission (c) 2000-2006 Mongoose
- * Comments: 
+ * License : No use w/o permission (c) 2000-2007 Mongoose
+ * Comments: This is the time slider widget implementation.
  * 
  *-- History ------------------------------------------------- 
  *
- * 2006.10.30:
- * Mongoose - Clean up of old mgtk ( Resource, gtk+ Type ) tree / list code
+ * 2007.12.07:
+ * Mongoose - Created, from mgtk prototype.
  ==========================================================================*/
 
 #include <string.h>
@@ -205,17 +205,6 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 				color.green = 65535;
 				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &color );
 
-#if 0
-				gtk_paint_vline( widget->style,
-								 widget->window,
-								 GTK_STATE_INSENSITIVE,
-								 NULL, // area
-								 widget,
-								 NULL, // detail
-								 channel_y + (channel_height >> 1) + 4,
-								 channel_y - (channel_height >> 1) - 4,
-								 x );
-#else
 				gtk_paint_box( widget->style,
 							   widget->window,
 							   GTK_STATE_INSENSITIVE,
@@ -223,7 +212,7 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 							   NULL, GTK_WIDGET(widget), 
 							   NULL,
 							   x, channel_y - (channel_height >> 1) - 4, 3, 24 );		
-#endif
+
 				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, NULL );
 			}
 		}
@@ -232,7 +221,7 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 		int x = ( state->current_key - state->start ) * end_v * width;
 		gtk_paint_box( widget->style,
 					   widget->window,
-					   true ? GTK_STATE_ACTIVE : GTK_STATE_INSENSITIVE,
+					   GTK_STATE_ACTIVE,
 					   GTK_SHADOW_OUT,
 					   NULL, GTK_WIDGET(widget), 
 					   "buttondefault",

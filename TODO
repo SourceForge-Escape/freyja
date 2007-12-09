@@ -7,7 +7,8 @@
  * Library deallocator callbacks.
 
  * Release 0.9.5.17 final before major backend changes.
-	- Material load texture id set broken with Lua?
+	- Material load texture id set broken with Lua?	
+	- File open dialog broken.
 	- Finish Custom TimeSlider.
 		- Send client events for creation / moving / deleting keys.
 	- Finish Custom RangeSlider.
