@@ -42,9 +42,6 @@ mgtk_range_slider_state_t* mgtk_range_slider_state_new( int event,
 }
 
 
-
-
-
 gboolean mgtk_range_slider_expose_handler(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
 	GdkGC* gc = widget->style->fg_gc[GTK_WIDGET_STATE(widget)];

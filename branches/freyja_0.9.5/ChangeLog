@@ -11,7 +11,7 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071206 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - 
+ - Disabled colored markers in timeslider -- it triggered a gtk filedialog bug.  
  - Range slider with simple motion event design.
  - New rangeslider prototype checked in early due to hardware trouble.
  - New timeslider has more high level events and proper range support.

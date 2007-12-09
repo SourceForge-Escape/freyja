@@ -45,14 +45,14 @@ mgtk_range_slider_state_new( int event,
 gboolean mgtk_range_slider_expose_handler(GtkWidget *widget, GdkEventExpose *event, gpointer data);
 /*------------------------------------------------------
  * Pre  : 
- * Post : 
+ * Post : Handles time slider redraw event.
  *
  ------------------------------------------------------*/
 
 void mgtk_range_slider_motion_handler(GtkWidget* widget, GdkEventMotion* event);
 /*------------------------------------------------------
  * Pre  : 
- * Post : 
+ * Post : Handles time slider mouse motion event.
  *
  ------------------------------------------------------*/
 
