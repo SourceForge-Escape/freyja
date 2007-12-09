@@ -4,15 +4,8 @@
 
  * Refining the Kagura roadmap, so expect some tasks to be out of order below.
 
- * Library deallocator callbacks.
-
  * Release 0.9.5.17 final before major backend changes.
 	- Material load texture id set broken with Lua?	
-	- Finish Custom TimeSlider.
-		- Send client events for creation / moving / deleting keys.
-	- Finish Custom RangeSlider.
-		- Menu option to hide this element.
-		- Ability to drag the start/end sections of the range slider.
 
 
  Freyja 0.9.5.18 	TBD
@@ -26,6 +19,16 @@
 	- New 2-way Reference index_t system.
 		· Parent / Children : delete / update signal methods
 	- Mutable mode ( readonly ) edit state support.
+
+ * Library deallocator callbacks.
+
+ * UI
+	- Finish Custom TimeSlider.
+		· Send client events for creation / moving / deleting keys.
+	- Finish Custom RangeSlider.
+		· Menu option to hide this element.
+		· Ability to drag the start/end sections of the range slider.
+	
 
  * Finish up new AnimationControl, Track, Keyframe, Bone, and Mesh API.
 	- Animation Track / Keyframe snippets, AnimationControl, and generic editing.

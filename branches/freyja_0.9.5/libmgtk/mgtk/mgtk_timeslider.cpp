@@ -32,7 +32,8 @@
 
 using namespace mstl;
 
-#define MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS 1
+#define MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS     1
+#define MGTK_TIMESLIDER_COLOR_ALL_MARKERS         1
 
 // Store a list of all mgtk_time_slider_state_t states allocated.
 Map<int, mgtk_time_slider_state_t*> gTimeSliderMap;
@@ -88,6 +89,9 @@ void mgtk_time_slider_add_marker( int event, unsigned int marker )
 		state->markers[ state->marker_count ] = key;
 		state->current_marker = state->marker_count;
 		state->marker_count++;
+
+		/* Request expose events. */
+		gtk_widget_queue_draw( GTK_WIDGET( state->widget ) );
 	}
 }
 
@@ -100,12 +104,22 @@ void mgtk_time_slider_set_range( int event, unsigned int start, unsigned int end
 	{
 		state->start = start;
 		state->end = end;
+
+		/* Request expose events. */
+		gtk_widget_queue_draw( GTK_WIDGET( state->widget ) );
 	}
 }
 
 
-void mgtk_widget_set_color( GtkWidget* widget, float r, float g, float b )
+void mgtk_time_slider_set_marker_color( int event, float r, float g, float b )
 {
+	
+}
+
+
+void mgtk_time_slider_set_active_marker_color( int event, float r, float g, float b )
+{
+	
 }
 
 
@@ -139,11 +153,15 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 		const float end_v = 1.0f / ( end - state->start );
 		GdkGC* gc = widget->style->fg_gc[GTK_WIDGET_STATE(widget)];
 
+		const unsigned int line_y = channel_y + (channel_height >> 1);
+		const unsigned int line_h = channel_y - (channel_height >> 1);
+
 		/* Tick lines. */
 		for (unsigned int i = 0; i < state->end; i+=inc_v)
 		{
-			float x = (float)i * end_v * width;
-			gdk_draw_line( widget->window, gc, (int)x, channel_y, (int)x, channel_y - (channel_height >> 1) );
+			int x = (int)(i * end_v * width);
+			//gdk_draw_line( widget->window, gc, (int)x, channel_y, (int)x, channel_y - (channel_height >> 1) );
+			gdk_draw_line( widget->window, gc, x, line_y, x, line_h );
 			
 			char s[16];
 			snprintf( s, 16, "%i", i + state->start );
@@ -159,8 +177,25 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 		}
 
 
+
+
 		/* Markers */
-		{
+		{ 
+#if MGTK_TIMESLIDER_COLOR_ALL_MARKERS
+			//GtkStyle* style_default = gtk_widget_get_default_style();
+			//GdkColor color = { 0, 65535, 0, 65535 };
+			//gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &color );
+
+			/* Work around for gtk_widget_modify bug.  */ 
+			GdkGCValues mygcvalues;
+			gdk_gc_get_values( gc, &mygcvalues );
+			GdkColor old_color = mygcvalues.foreground;
+			GdkColormap* mycolormap = gtk_widget_get_colormap( widget );
+			GdkColor mycolor = { 0, 65535>>1, 65535>>1, 65535>>3 };
+			gdk_colormap_alloc_color( mycolormap, &mycolor, TRUE, TRUE );
+			//gdk_gc_set_foreground( gc, &mycolor );
+#endif
+
 			for ( unsigned int i = 0; i < state->marker_count; ++i)
 			{
 				const unsigned int key = state->markers[i];
@@ -171,15 +206,14 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 				const unsigned int x = (key - state->start) * end_v * width;
 
 #if MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS
-				gdk_draw_line( widget->window, gc, 
-							   x, channel_y + (channel_height >> 1), x, channel_y - (channel_height >> 1) );
-				gdk_draw_line( widget->window, gc, 
-							   x+1, channel_y + (channel_height >> 1), x+1, channel_y - (channel_height >> 1) );
-#else
-				GtkStyle* style_default = gtk_widget_get_default_style();
-				GdkColor color = { 0, 65535, 0, 65535 };
-				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &color );
+				//gdk_draw_line( widget->window, gc, x-1, line_y, x-1, line_h );
+				gdk_draw_line( widget->window, gc, x, line_y, x, line_h );
+				gdk_draw_line( widget->window, gc, x+1, line_y, x+1, line_h );
 
+				gdk_gc_set_foreground( gc, &mycolor );
+				gdk_draw_line( widget->window, gc, x, line_y - 1, x, line_h - 1 );
+				gdk_gc_set_foreground( gc, &old_color );
+#else
 				gtk_paint_box( widget->style,
 							   widget->window,
 							   GTK_STATE_INSENSITIVE,
@@ -187,10 +221,16 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 							   NULL, GTK_WIDGET(widget), 
 							   NULL,
 							   x, channel_y - (channel_height >> 1) - 4, 3, 24 );
-				//gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, NULL );
-				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &style_default->bg[GTK_STATE_INSENSITIVE] );
 #endif
 			}
+
+#if MGTK_TIMESLIDER_COLOR_ALL_MARKERS
+			//gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, NULL );
+			//gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &style_default->bg[GTK_STATE_INSENSITIVE] );
+
+			/* Work around for gtk_widget_modify bug.  */ 
+			gdk_gc_set_foreground( gc, &old_color );
+#endif
 		}
 
 		/* Currently selected marker. */
@@ -202,10 +242,29 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 			{
 				const unsigned int x = (key - state->start) * end_v * width;
 #if MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS
+				/* Work around for gtk_widget_modify bug.  */ 
+				GdkGCValues mygcvalues;
+				gdk_gc_get_values( gc, &mygcvalues );
+				GdkColor old_color = mygcvalues.foreground;
+				GdkColormap* mycolormap = gtk_widget_get_colormap( widget );
+				GdkColor mycolor = { 0, 65535, 0, 65535 };
+				gdk_colormap_alloc_color( mycolormap, &mycolor, TRUE, TRUE );
+
+				gdk_draw_line( widget->window, gc, 
+							   x-1, channel_y + (channel_height >> 1) + 4, x-1, channel_y - (channel_height >> 1) - 4 );
 				gdk_draw_line( widget->window, gc, 
 							   x, channel_y + (channel_height >> 1) + 4, x, channel_y - (channel_height >> 1) - 4 );
 				gdk_draw_line( widget->window, gc, 
 							   x+1, channel_y + (channel_height >> 1) + 4, x+1, channel_y - (channel_height >> 1) - 4 );
+
+				gdk_gc_set_foreground( gc, &mycolor );
+
+				gdk_draw_line( widget->window, gc, 
+							   x, channel_y + (channel_height >> 1) + 3, x, channel_y - (channel_height >> 1) - 3 );
+
+				/* Work around for gtk_widget_modify bug.  */ 
+				gdk_gc_set_foreground( gc, &old_color );
+
 #else
 				// Green for selected marker.
 				GdkColor color = {0,0,0,0};
@@ -248,6 +307,7 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 
 		/* Store widget width for event system use. */
 		state->width = width;
+		state->widget = widget;
 	}
 
 	return TRUE;

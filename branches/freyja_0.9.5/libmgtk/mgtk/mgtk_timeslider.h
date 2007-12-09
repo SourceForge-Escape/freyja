@@ -28,6 +28,7 @@ typedef struct {
 	unsigned int inc;
 
 	unsigned int width;
+	void* widget;
 
 	int current_key;
 	int current_marker;
