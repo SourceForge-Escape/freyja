@@ -32,6 +32,7 @@
 
 using namespace mstl;
 
+#define MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS 1
 
 // Store a list of all mgtk_time_slider_state_t states allocated.
 Map<int, mgtk_time_slider_state_t*> gTimeSliderMap;
@@ -39,6 +40,10 @@ Map<int, mgtk_time_slider_state_t*> gTimeSliderMap;
 
 mgtk_time_slider_state_t* mgtk_time_slider_state_new( int event, unsigned int start, unsigned int end )
 {
+	/* FIXME: Reuse for now. */
+	if ( mgtk_time_slider_get_state_by_event( event ) )
+		return mgtk_time_slider_get_state_by_event( event );
+
 	mgtk_time_slider_state_t* state = new mgtk_time_slider_state_t;
 	state->event = event;
 	state->start = start;
@@ -99,9 +104,13 @@ void mgtk_time_slider_set_range( int event, unsigned int start, unsigned int end
 }
 
 
+void mgtk_widget_set_color( GtkWidget* widget, float r, float g, float b )
+{
+}
+
+
 gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *event, gpointer data)
 {
-	GdkGC* gc = widget->style->fg_gc[GTK_WIDGET_STATE(widget)];
 	const unsigned int width = widget->allocation.width;
 	const unsigned int height = widget->allocation.height;
 	const unsigned int channel_height = 18;
@@ -119,24 +128,21 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 					  width, channel_height,
 					  GTK_ORIENTATION_HORIZONTAL);
 
-
 	/* Time slider's state based widget componets. */
 	mgtk_time_slider_state_t* state =
 	(mgtk_time_slider_state_t*)gtk_object_get_data(GTK_OBJECT(widget), "mgtk_time_slider_state");
 
 	if ( state )
 	{
-		state->width = width;
-
-		/* Tick lines. */
 		const float end = state->end;
 		const float inc_v = state->inc;
 		const float end_v = 1.0f / ( end - state->start );
+		GdkGC* gc = widget->style->fg_gc[GTK_WIDGET_STATE(widget)];
 
+		/* Tick lines. */
 		for (unsigned int i = 0; i < state->end; i+=inc_v)
 		{
-			float x = (float)i * end_v;
-			x *= width;
+			float x = (float)i * end_v * width;
 			gdk_draw_line( widget->window, gc, (int)x, channel_y, (int)x, channel_y - (channel_height >> 1) );
 			
 			char s[16];
@@ -155,12 +161,6 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 
 		/* Markers */
 		{
-			GdkColor color;
-			color.red = 65535;
-			color.blue = 0;
-			color.green = 65535;
-			gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &color );
-
 			for ( unsigned int i = 0; i < state->marker_count; ++i)
 			{
 				const unsigned int key = state->markers[i];
@@ -170,10 +170,16 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 
 				const unsigned int x = (key - state->start) * end_v * width;
 
-#if 0
+#if MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS
 				gdk_draw_line( widget->window, gc, 
 							   x, channel_y + (channel_height >> 1), x, channel_y - (channel_height >> 1) );
+				gdk_draw_line( widget->window, gc, 
+							   x+1, channel_y + (channel_height >> 1), x+1, channel_y - (channel_height >> 1) );
 #else
+				GtkStyle* style_default = gtk_widget_get_default_style();
+				GdkColor color = { 0, 65535, 0, 65535 };
+				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &color );
+
 				gtk_paint_box( widget->style,
 							   widget->window,
 							   GTK_STATE_INSENSITIVE,
@@ -181,10 +187,10 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 							   NULL, GTK_WIDGET(widget), 
 							   NULL,
 							   x, channel_y - (channel_height >> 1) - 4, 3, 24 );
+				//gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, NULL );
+				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &style_default->bg[GTK_STATE_INSENSITIVE] );
 #endif
 			}
-
-			gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, NULL );
 		}
 
 		/* Currently selected marker. */
@@ -195,13 +201,14 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 			if ( key >= state->start && key <= state->end )
 			{
 				const unsigned int x = (key - state->start) * end_v * width;
-				//gdk_draw_line( widget->window, gc, 
-				//			   x, channel_y + (channel_height >> 1) + 4, x, channel_y - (channel_height >> 1) - 4 );
-				
+#if MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS
+				gdk_draw_line( widget->window, gc, 
+							   x, channel_y + (channel_height >> 1) + 4, x, channel_y - (channel_height >> 1) - 4 );
+				gdk_draw_line( widget->window, gc, 
+							   x+1, channel_y + (channel_height >> 1) + 4, x+1, channel_y - (channel_height >> 1) - 4 );
+#else
 				// Green for selected marker.
-				GdkColor color;
-				color.red = 0;
-				color.blue = 0;
+				GdkColor color = {0,0,0,0};
 				color.green = 65535;
 				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &color );
 
@@ -214,6 +221,7 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 							   x, channel_y - (channel_height >> 1) - 4, 3, 24 );		
 
 				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, NULL );
+#endif
 			}
 		}
 
@@ -238,7 +246,8 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 						  10, 26,
 						  GTK_ORIENTATION_HORIZONTAL );
 
-		//mgtk_print("%i", key);
+		/* Store widget width for event system use. */
+		state->width = width;
 	}
 
 	return TRUE;
@@ -267,10 +276,13 @@ void mgtk_time_slider_motion_handler(GtkWidget* widget, GdkEventMotion* event)
 	if ( slider_state )
 	{
 		const float width = widget->allocation.width;
+		if ( x < 0 ) x = 0;
+		if ( x > width ) x = width;
+
 		unsigned int key = slider_state->start + (x / width) * ( slider_state->end - slider_state->start );
-		unsigned int max = slider_state->end;// - 5;// always 'trim' 5 to keep slider on screen.
-		if (key > max) key = max;
-		if (key < slider_state->start) key = slider_state->start;
+		unsigned int max = slider_state->end - 1; // 'Trim' 1 key to keep slider on screen.
+		if ( key > max ) key = max;
+		if ( key < slider_state->start ) key = slider_state->start;
 
 		if ( state & GDK_BUTTON1_MASK )
 		{
@@ -308,7 +320,7 @@ void mgtk_time_slider_button_press_handler(GtkWidget* widget, GdkEventButton* ev
 	{
 		const float width = widget->allocation.width;
 		unsigned int key = slider_state->start + (x / width) * ( slider_state->end - slider_state->start );
-		unsigned int max = slider_state->end;// - 5; // always 'trim' 5 to keep slider on screen.
+		unsigned int max = slider_state->end;
 		if (key > max) key = max;
 		if (key < slider_state->start) key = slider_state->start;
 

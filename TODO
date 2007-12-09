@@ -8,13 +8,11 @@
 
  * Release 0.9.5.17 final before major backend changes.
 	- Material load texture id set broken with Lua?	
-	- File open dialog broken.
 	- Finish Custom TimeSlider.
 		- Send client events for creation / moving / deleting keys.
 	- Finish Custom RangeSlider.
 		- Menu option to hide this element.
-		- Check in gtk+ widget.
-		- Event system.
+		- Ability to drag the start/end sections of the range slider.
 
 
  Freyja 0.9.5.18 	TBD
