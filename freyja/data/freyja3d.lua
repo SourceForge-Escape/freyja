@@ -876,6 +876,12 @@ end
 function freyja3d_ui_dialogs()
 
 	-- Confirmation dialogs
+	mgtk_confirmation_dialog( "OverwriteDataDialog",
+		"gtk-dialog-question",
+		"An updated freyja data pak was found.",
+		"Would you like to overwrite your old data?",
+		"gtk-cancel",	"_Cancel",	"gtk-ok",	"_Overwrite")
+
 	mgtk_confirmation_dialog( "CloseNewFileDialog",
 		"gtk-dialog-question",
 		"Creating a new model will close the current model.",

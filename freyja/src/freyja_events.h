@@ -278,11 +278,11 @@ void freyja_install_user();
  *
  ------------------------------------------------------*/
 
-char freyja_is_user_installed();
+char freyja_is_user_installed_data_old();
 /*------------------------------------------------------
  * Pre  : 
  * Post : Returns non zero if it can find a user resource
- *        directory.
+ *        directory or data is out of date.
  *
  ------------------------------------------------------*/
 

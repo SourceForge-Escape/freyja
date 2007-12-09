@@ -176,8 +176,7 @@ void freyja3d_scenegraph_update()
 	/* Free tree model. */
 	mgtk_tree_delete( scene );
 
-	
-	/* FIXME: Hack to update custom time slider after import for testing. */
+	/* Update custom time slider after import for testing... current animation backend sucks. */
 	{
 		int event = freyja3d_get_event_id( "eAnimationSlider" );
 		uint32 track_id = 0;//FreyjaControl::GetInstance()->GetSelectedAnimation();

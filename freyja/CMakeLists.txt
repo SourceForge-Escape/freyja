@@ -123,7 +123,7 @@ FILE( APPEND debian/changelog "" )
 
 
 INSTALL( TARGETS ${Name} RUNTIME DESTINATION /usr/bin )
-INSTALL( FILES data/freyja3d.lua data/vera.ttf DESTINATION /usr/share/freyja )
+INSTALL( FILES data/freyja3d.lua data/version data/vera.ttf DESTINATION /usr/share/freyja )
 INSTALL( DIRECTORY data/icons data/shaders DESTINATION /usr/share/freyja
 	PATTERN ".svn" EXCLUDE )
 
