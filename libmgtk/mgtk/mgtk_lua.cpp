@@ -1772,7 +1772,10 @@ int mgtk_lua_rc_time_slider(lua_State* s)
 						  G_CALLBACK(mgtk_time_slider_button_press_handler), NULL );
 
 		mgtk_time_slider_state_t* state = mgtk_time_slider_state_new( event, 0, 105 );
-		gtk_object_set_data( GTK_OBJECT( drawing_area ), "mgtk_time_slider_state", state );
+		gtk_object_set_data( GTK_OBJECT( drawing_area ), "mgtk_time_slider_state", state );	
+
+		/* For requesting expose events from callbacks. */
+		state->widget = drawing_area;
 	}
 
 	lua_pushlightuserdata(s, drawing_area);
