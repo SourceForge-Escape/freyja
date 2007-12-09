@@ -11,6 +11,8 @@
 
  Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
  20071206 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - 
+ - Range slider with simple motion event design.
  - New rangeslider prototype checked in early due to hardware trouble.
  - New timeslider has more high level events and proper range support.
  - Removed deprecated Gtk+ signal hookup use in opengl_canvas.

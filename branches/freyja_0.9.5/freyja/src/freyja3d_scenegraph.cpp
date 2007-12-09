@@ -184,24 +184,6 @@ void freyja3d_scenegraph_update()
 
 		mgtk_time_slider_reset_markers( event );
 
-		unsigned int end = 150;
-
-		for ( uint32 bone_id = 0, bone_count = freyjaGetBoneCount(); bone_id < bone_count; ++bone_id )
-		{
-			/* Gather up a list of keyframe times. */
-			Bone* bone = Bone::GetBone( bone_id );
-			BoneTrack& track = bone->GetTrack( track_id );
-
-			if ( track.GetRotKeyframeCount() > end )
-				end = track.GetRotKeyframeCount();
-
-			if ( track.GetLocKeyframeCount() > end )
-				end = track.GetLocKeyframeCount();
-		}
-
-		mgtk_time_slider_set_range( event, 0, end );
-		//mgtk_time_slider_set_range( event, 100, 200 );
-
 		for ( uint32 bone_id = 0, bone_count = freyjaGetBoneCount(); bone_id < bone_count; ++bone_id )
 		{
 			/* Gather up a list of keyframe times. */

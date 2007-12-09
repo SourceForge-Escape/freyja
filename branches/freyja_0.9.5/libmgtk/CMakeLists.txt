@@ -129,6 +129,7 @@ set(Objs
 	mgtk/mgtk_lua
 	mgtk/mgtk_resource
 	mgtk/mgtk_opengl_canvas
+	mgtk/mgtk_rangeslider
 	mgtk/mgtk_timeslider
 	mgtk/mgtk_tree
 )

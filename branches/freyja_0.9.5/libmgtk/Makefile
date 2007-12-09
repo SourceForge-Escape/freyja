@@ -300,6 +300,18 @@ mgtk/mgtk_opengl_canvas.s:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_opengl_canvas.s
 
 # target to build an object file
+mgtk/mgtk_rangeslider.o:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_rangeslider.o
+
+# target to preprocess a source file
+mgtk/mgtk_rangeslider.i:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_rangeslider.i
+
+# target to generate assembly for a file
+mgtk/mgtk_rangeslider.s:
+	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_rangeslider.s
+
+# target to build an object file
 mgtk/mgtk_resource.o:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f libmgtk/CMakeFiles/mgtk-0.1.1.dir/build.make libmgtk/CMakeFiles/mgtk-0.1.1.dir/mgtk/mgtk_resource.o
 
@@ -386,6 +398,9 @@ help::
 	@echo "... mgtk/mgtk_opengl_canvas.o"
 	@echo "... mgtk/mgtk_opengl_canvas.i"
 	@echo "... mgtk/mgtk_opengl_canvas.s"
+	@echo "... mgtk/mgtk_rangeslider.o"
+	@echo "... mgtk/mgtk_rangeslider.i"
+	@echo "... mgtk/mgtk_rangeslider.s"
 	@echo "... mgtk/mgtk_resource.o"
 	@echo "... mgtk/mgtk_resource.i"
 	@echo "... mgtk/mgtk_resource.s"
