@@ -462,10 +462,6 @@ void freyja_handle_resource_start()
 
 	freyja_handle_resource_init(FreyjaControl::GetInstance()->GetResource());
 
-	/* User install of icons, samples, configs, etc */
-	if ( !freyja_is_user_installed() )
-		freyja_install_user();
-
 	/* Build the user interface from scripts and load user preferences. */
 	FreyjaControl::GetInstance()->Init();
 	freyja3d_plugin_init();
@@ -529,7 +525,7 @@ void freyja_get_rc_path(char *s, long sz)
 		return;
 	}
 
-	long len = strlen(env) + strlen("/.freyja/");
+	long len = strlen(env) + strlen("/.freyja/") + 1;
 
 	if (sz < len)
 		return;
@@ -619,18 +615,36 @@ void freyja_get_share_filename(char *s, const char *filename, long sz)
 }
 
 
-char freyja_is_user_installed()
+char freyja_is_user_installed_data_old()
 {
-#ifdef WIN32
-	return 1;
-#else
+#ifndef WIN32
+	/*
 	SystemIO::FileReader r;
 	char path[128];
-
 	freyja_get_rc_path(path, 128);
-
 	return (r.DoesFileExist(path));
+	*/
+
+	String s = freyja_rc_map_string( "version" );
+	mstl::SystemIO::BufferedTextFileReader r;
+
+	if ( !r.DoesFileExist( s.c_str() ) )
+		return 0;
+
+	r.Open( s.c_str() );
+	unsigned int version = r.ParseInteger();
+	r.Close();
+
+	r.Open( "/usr/share/freyja/version" );
+	unsigned int version2 = r.ParseInteger();
+	r.Close();
+
+	freyja_print( "Data version %i, %i", version, version2 );
+
+	return ( version < version2 ) ? 0 : 1;
 #endif
+
+	return 1;
 }
 
 
@@ -639,13 +653,34 @@ void freyja_install_user()
 	SystemIO::FileReader r;
 	SystemIO::FileWriter w;
 	char rc[512];
-	char share[512];
 	const char *filename;
 
 
-	/* Copy top level rc files */
+	/* Backup scripts. */
+	{
+		char backup[512];
+		freyja_get_rc_path( rc, 512 );
+		freyja_get_rc_filename( backup, "backup", 512 );
+
+		if ( r.OpenDir(rc) )
+		{
+			while ( (filename = r.GetNextDirectoryListing()) )
+			{
+				if ( r.IsDirectory(filename) )
+					continue;
+				
+				freyja_print( "cp '%s' '%s'", filename, backup );
+				SystemIO::CopyFileToPath( filename, backup );
+			}
+		}	
+	}
+
+	char share[512];
+
+	/* Copy script files, logs, prefs, etc. */
 	freyja_get_rc_path(rc, 512);
 	freyja_get_share_path(share, 512);
+
 	SystemIO::File::CreateDir(rc);
 
 	if (r.OpenDir(share))
@@ -655,10 +690,10 @@ void freyja_install_user()
 			if (r.IsDirectory(filename))
 				continue;
 
+			freyja_print( "cp '%s' '%s'", filename, rc );
 			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
-
 
 	/* Copy icon files */
 	freyja_get_rc_filename(rc, "icons/", 512);
@@ -672,6 +707,7 @@ void freyja_install_user()
 			if (r.IsDirectory(filename))
 				continue;
 
+			freyja_print( "cp '%s' '%s'", filename, rc );
 			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
@@ -706,6 +742,7 @@ void freyja_install_user()
 			if (r.IsDirectory(filename))
 				continue;
 
+			freyja_print( "cp '%s' '%s'", filename, rc );
 			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
@@ -733,10 +770,20 @@ void freyja_install_user()
 	{
 		while ((filename = r.GetNextDirectoryListing()))
 		{
-			if (r.IsDirectory(filename))
-				continue; // Might want to recurse copy plugins later.
-
-			SystemIO::CopyFileToPath(filename, rc);
+			if ( r.IsDirectory(filename) )
+			{
+				// Recurse one level and copy as well.
+				while ( (filename = r.GetNextDirectoryListing()) )
+				{
+					freyja_print( "cp '%s' '%s'", filename, rc );
+					SystemIO::CopyFileToPath(filename, rc);					
+				}
+			}
+			else
+			{
+				freyja_print( "cp '%s' '%s'", filename, rc );
+				SystemIO::CopyFileToPath(filename, rc);
+			}
 		}
 	}
 }
@@ -980,6 +1027,10 @@ int main(int argc, char *argv[])
 	ControlPrinter::Log("@ libfreyja: %s", libfreyjaVersion() );
 	ControlPrinter::Log("@ libhel: %s", helVersionInfo() );
 	ControlPrinter::Log("@ libmgtk: %s", mgtk_version() );
+
+	/* User install of scripts, icons, samples, configs, etc */
+	if ( !freyja_is_user_installed_data_old() )
+		freyja_install_user();
 
 	/* Hookup assert handlers, note freyja assert is also used by this layer */
 	freyjaAssertHandler(FreyjaAssertCallbackHandler);
