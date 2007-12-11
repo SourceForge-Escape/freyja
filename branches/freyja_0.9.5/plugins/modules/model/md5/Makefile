@@ -169,7 +169,7 @@ depend:
 
 targets: $(TARGETS)
 
-PROG_OBJS=$(BUILDDIR)/Md5.o
+PROG_OBJS=$(BUILDDIR)/Md5.o $(BUILDDIR)/freyja_md5mesh.o
 
 $(BUILDDIR)/$(MODULE) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(PROG_OBJS)
