@@ -670,7 +670,7 @@ int freyja_model__nod_import(char *filename)
 			freyjaMeshVertexTexCoord3fv(mesh, vertex, p.mVec);
 #endif
 
-			vertices.pushBack(vertex);
+			vertices.push_back(vertex);
 		}
 
 		for (j = 0; j < nod.mesh_groups[i].NumFaces; j++)
