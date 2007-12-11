@@ -1108,7 +1108,7 @@ int freyja_model__md3_import(char *filename)
 										 md3_mesh[m].vertex[v].norm[1], 
 										 md3_mesh[m].vertex[v].norm[2], 
 										 md3_mesh[m].vertex[v].norm[0]);
-					transV.pushBack(vertex);
+					transV.push_back(vertex);
 				}
 				else
 				{
@@ -1238,7 +1238,7 @@ int freyja_model__md3_export(char *filename)
 
 	for (k = 0; k < num_meshes; k++)
 	{
-		transM.pushBack(freyjaIterator(FREYJA_MESH, FREYJA_CURRENT));
+		transM.push_back(freyjaIterator(FREYJA_MESH, FREYJA_CURRENT));
 		freyjaIterator(FREYJA_MESH, FREYJA_NEXT);
 
 		// Don't write edges > 3, tesselate to triangles
@@ -1311,7 +1311,7 @@ int freyja_model__md3_export(char *filename)
 					mesh[k].texel[v].st[1] = uv[1];
 				}
 
-				transV.pushBack(vertex); // transV[v] -> vertex
+				transV.push_back(vertex); // transV[v] -> vertex
 				mesh[k].tris[i].triangle[j] = v;
 			}
 		}
@@ -1374,7 +1374,7 @@ int freyja_model__md3_export(char *filename)
 						mesh[k].texel[v].st[1] = uv[1];
 					}
 
-					transV.pushBack(vertex); // transV[v] -> vertex
+					transV.push_back(vertex); // transV[v] -> vertex
 				}
 			}		
 		}
