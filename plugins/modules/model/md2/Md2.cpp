@@ -556,7 +556,7 @@ int freyja_model__md2_import(char *filename)
 		vertex = freyjaVertexCreate3f(md2_vertex[v].x*scale, 
 										md2_vertex[v].z*scale + transY,
 										md2_vertex[v].y*scale);
-		transV.pushBack(vertex);
+		transV.push_back(vertex);
 	}
 		
 	freyjaEnd(); // FREYJA_VERTEX_GROUP
