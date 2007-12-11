@@ -32,8 +32,10 @@
 
 using namespace mstl;
 
-#define MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS     1
-#define MGTK_TIMESLIDER_COLOR_ALL_MARKERS         1
+#define MGTK_TIMESLIDER_BG_FILL                   0
+
+#define MGTK_TIMESLIDER_USE_HANDLE_FOR_SLIDER     0
+
 
 // Store a list of all mgtk_time_slider_state_t states allocated.
 Map<int, mgtk_time_slider_state_t*> gTimeSliderMap;
@@ -127,9 +129,15 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 {
 	const unsigned int width = widget->allocation.width;
 	const unsigned int height = widget->allocation.height;
-	const unsigned int channel_height = 18;
-	const unsigned int channel_y = height >> 1;
 
+	const unsigned int text_y = height;
+	const unsigned int bar_y = 2; // 2px padding
+	const unsigned int bar_w = 3; // 3px width
+	const unsigned int bar_h = (height >> 1) + (height >> 2) - 2; // 2px padding
+	const unsigned int marker_h = (height >> 1) + (height >> 2) - 6; // 6px padding
+
+
+#if MGTK_TIMESLIDER_BG_FILL
 	/* Slider background trough. */
 	gtk_paint_slider( widget->style,
 					  widget->window,
@@ -138,9 +146,10 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
                       NULL,
 					  widget,
                       NULL, // const gchar *detail,
-					  0, channel_y - (channel_height >> 1) - 4,
+					  0, 2, //channel_y - (channel_height >> 1) - 4,
 					  width, channel_height,
 					  GTK_ORIENTATION_HORIZONTAL);
+#endif
 
 	/* Time slider's state based widget componets. */
 	mgtk_time_slider_state_t* state =
@@ -153,48 +162,35 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 		const float end_v = 1.0f / ( end - state->start );
 		GdkGC* gc = widget->style->fg_gc[GTK_WIDGET_STATE(widget)];
 
-		const unsigned int line_y = channel_y + (channel_height >> 1);
-		const unsigned int line_h = channel_y - (channel_height >> 1);
+		/* Frame. */
+		//gdk_draw_rectangle( widget->window, gc, FALSE, 0, 0, width-1, height-1 );
 
 		/* Tick lines. */
 		for (unsigned int i = 0; i < state->end; i+=inc_v)
 		{
 			int x = (int)(i * end_v * width);
-			//gdk_draw_line( widget->window, gc, (int)x, channel_y, (int)x, channel_y - (channel_height >> 1) );
-			gdk_draw_line( widget->window, gc, x, line_y, x, line_h );
-			
+			gdk_draw_rectangle( widget->window, gc, TRUE, x, bar_y, bar_w, bar_h );
+
 			char s[16];
 			snprintf( s, 16, "%i", i + state->start );
-			gtk_paint_string( widget->style,
-							  widget->window,
+			gtk_paint_string( widget->style, widget->window,
 							  GTK_STATE_ACTIVE,
 							  NULL,
 							  widget,
 							  NULL, //const gchar *detail,
-							  (int)x,
-							  channel_y<<1,
-							  s);
+							  x, text_y, 
+							  s );
 		}
-
-
-
 
 		/* Markers */
 		{ 
-#if MGTK_TIMESLIDER_COLOR_ALL_MARKERS
-			//GtkStyle* style_default = gtk_widget_get_default_style();
-			//GdkColor color = { 0, 65535, 0, 65535 };
-			//gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &color );
-
 			/* Work around for gtk_widget_modify bug.  */ 
 			GdkGCValues mygcvalues;
 			gdk_gc_get_values( gc, &mygcvalues );
 			GdkColor old_color = mygcvalues.foreground;
 			GdkColormap* mycolormap = gtk_widget_get_colormap( widget );
-			GdkColor mycolor = { 0, 65535>>1, 65535>>1, 65535>>3 };
+			GdkColor mycolor = { 0, 65535, 65535, 0 };
 			gdk_colormap_alloc_color( mycolormap, &mycolor, TRUE, TRUE );
-			//gdk_gc_set_foreground( gc, &mycolor );
-#endif
 
 			for ( unsigned int i = 0; i < state->marker_count; ++i)
 			{
@@ -205,32 +201,11 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 
 				const unsigned int x = (key - state->start) * end_v * width;
 
-#if MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS
-				//gdk_draw_line( widget->window, gc, x-1, line_y, x-1, line_h );
-				gdk_draw_line( widget->window, gc, x, line_y, x, line_h );
-				gdk_draw_line( widget->window, gc, x+1, line_y, x+1, line_h );
-
 				gdk_gc_set_foreground( gc, &mycolor );
-				gdk_draw_line( widget->window, gc, x, line_y - 1, x, line_h - 1 );
-				gdk_gc_set_foreground( gc, &old_color );
-#else
-				gtk_paint_box( widget->style,
-							   widget->window,
-							   GTK_STATE_INSENSITIVE,
-							   GTK_SHADOW_OUT,
-							   NULL, GTK_WIDGET(widget), 
-							   NULL,
-							   x, channel_y - (channel_height >> 1) - 4, 3, 24 );
-#endif
+				gdk_draw_rectangle( widget->window, gc, TRUE, x, bar_y, bar_w, marker_h );
+				gdk_gc_set_foreground( gc, &old_color );	
+				gdk_draw_rectangle( widget->window, gc, FALSE, x, bar_y, bar_w-1, marker_h-1 );
 			}
-
-#if MGTK_TIMESLIDER_COLOR_ALL_MARKERS
-			//gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, NULL );
-			//gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &style_default->bg[GTK_STATE_INSENSITIVE] );
-
-			/* Work around for gtk_widget_modify bug.  */ 
-			gdk_gc_set_foreground( gc, &old_color );
-#endif
 		}
 
 		/* Currently selected marker. */
@@ -241,7 +216,7 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 			if ( key >= state->start && key <= state->end )
 			{
 				const unsigned int x = (key - state->start) * end_v * width;
-#if MGTK_TIMESLIDER_USE_LINES_FOR_MARKERS
+
 				/* Work around for gtk_widget_modify bug.  */ 
 				GdkGCValues mygcvalues;
 				gdk_gc_get_values( gc, &mygcvalues );
@@ -250,60 +225,51 @@ gboolean mgtk_time_slider_expose_handler(GtkWidget *widget, GdkEventExpose *even
 				GdkColor mycolor = { 0, 65535, 0, 65535 };
 				gdk_colormap_alloc_color( mycolormap, &mycolor, TRUE, TRUE );
 
-				gdk_draw_line( widget->window, gc, 
-							   x-1, channel_y + (channel_height >> 1) + 4, x-1, channel_y - (channel_height >> 1) - 4 );
-				gdk_draw_line( widget->window, gc, 
-							   x, channel_y + (channel_height >> 1) + 4, x, channel_y - (channel_height >> 1) - 4 );
-				gdk_draw_line( widget->window, gc, 
-							   x+1, channel_y + (channel_height >> 1) + 4, x+1, channel_y - (channel_height >> 1) - 4 );
-
 				gdk_gc_set_foreground( gc, &mycolor );
-
-				gdk_draw_line( widget->window, gc, 
-							   x, channel_y + (channel_height >> 1) + 3, x, channel_y - (channel_height >> 1) - 3 );
-
-				/* Work around for gtk_widget_modify bug.  */ 
-				gdk_gc_set_foreground( gc, &old_color );
-
-#else
-				// Green for selected marker.
-				GdkColor color = {0,0,0,0};
-				color.green = 65535;
-				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, &color );
-
-				gtk_paint_box( widget->style,
-							   widget->window,
-							   GTK_STATE_INSENSITIVE,
-							   GTK_SHADOW_OUT,
-							   NULL, GTK_WIDGET(widget), 
-							   NULL,
-							   x, channel_y - (channel_height >> 1) - 4, 3, 24 );		
-
-				gtk_widget_modify_bg( widget, GTK_STATE_INSENSITIVE, NULL );
-#endif
+				gdk_draw_rectangle( widget->window, gc, TRUE, x, bar_y, bar_w, marker_h );
+				gdk_gc_set_foreground( gc, &old_color );	
+				gdk_draw_rectangle( widget->window, gc, FALSE, x, bar_y, bar_w-1, marker_h-1 );
 			}
 		}
 
-		/* Render a slider with a handle grip at current_key. */
-		int x = ( state->current_key - state->start ) * end_v * width;
-		gtk_paint_box( widget->style,
-					   widget->window,
-					   GTK_STATE_ACTIVE,
-					   GTK_SHADOW_OUT,
-					   NULL, GTK_WIDGET(widget), 
-					   "buttondefault",
-					   x, channel_y - (channel_height >> 1) - 6, 10, 26 );
 
-		gtk_paint_handle( widget->style,
-						  widget->window,
-						  GTK_STATE_ACTIVE,
-						  GTK_SHADOW_OUT,
-						  NULL,
-						  widget,
-                          "stepper",
-						  x, channel_y - (channel_height >> 1) - 6,
-						  10, 26,
-						  GTK_ORIENTATION_HORIZONTAL );
+		/* Render a slider with a handle grip at current_key. */
+		{
+			int x = ( state->current_key - state->start ) * end_v * width;
+#if MGTK_TIMESLIDER_USE_HANDLE_FOR_SLIDER
+			gtk_paint_box( widget->style,
+						   widget->window,
+						   GTK_STATE_ACTIVE,
+						   GTK_SHADOW_OUT,
+						   NULL, GTK_WIDGET(widget), 
+						   "buttondefault",
+						   x, channel_y - (channel_height >> 1) - 6, 10, 26 );
+			
+			gtk_paint_handle( widget->style,
+							  widget->window,
+							  GTK_STATE_ACTIVE,
+							  GTK_SHADOW_OUT,
+							  NULL,
+							  widget,
+							  "stepper",
+							  x, channel_y - (channel_height >> 1) - 6,
+							  10, 26,
+							  GTK_ORIENTATION_HORIZONTAL );
+#else
+			/* Work around for gtk_widget_modify bug using gdk API.  */ 
+			GdkGCValues mygcvalues;
+			gdk_gc_get_values( gc, &mygcvalues );
+			GdkColor old_color = mygcvalues.foreground;
+			GdkColormap* mycolormap = gtk_widget_get_colormap( widget );
+			GdkColor mycolor = { 0, 0, 65535, 0 };
+			gdk_colormap_alloc_color( mycolormap, &mycolor, TRUE, TRUE );
+
+			gdk_gc_set_foreground( gc, &mycolor );
+			gdk_draw_rectangle( widget->window, gc, TRUE, x, bar_y, bar_w, marker_h );
+			gdk_gc_set_foreground( gc, &old_color );	
+			gdk_draw_rectangle( widget->window, gc, FALSE, x, bar_y, bar_w-1, marker_h-1 );
+#endif
+		}
 
 		/* Store widget width for event system use. */
 		state->width = width;

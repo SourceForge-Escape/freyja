@@ -325,7 +325,7 @@ int mgtk_lua_boolean_set(lua_State *s);
 // mgtk_boolean_set( "boolean_symbol", boolean_value )
 
 int mgtk_lua_color_set(lua_State *s);
-// mgtk_color_set( "color_symbole", redf, greenf, bulef, alphaf ) 
+// mgtk_color_set( "color_symbol", redf, greenf, bulef, alphaf ) 
 
 int mgtk_lua_float_set(lua_State *s);
 // mgtk_float_set( "float_symbol", float_value )

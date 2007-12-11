@@ -1817,7 +1817,7 @@ int mgtk_lua_rc_range_slider(lua_State* s)
 		//g_signal_connect( G_OBJECT( drawing_area ), "button_press_event",
 		//				  G_CALLBACK(mgtk_time_slider_button_press_handler), NULL );
 
-		mgtk_range_slider_state_t* state = mgtk_range_slider_state_new( event, 0, 500, 0, 150 );
+		mgtk_range_slider_state_t* state = mgtk_range_slider_state_new( event, 0, 500, 0, 105 );
 		gtk_object_set_data( GTK_OBJECT( drawing_area ), "mgtk_range_slider_state", state );
 	}
 
@@ -1852,11 +1852,11 @@ int mgtk_lua_color_set(lua_State *s)
 		int event = ( lua_isnumber(s, 1) ? (int)lua_tonumber(s, 1) :
 					  lua_isstring(s, 1) ? mgtk_lua_get_id( lua_tostring(s, 1) ): -1 );
 
-		mgtk_event_set_color( event, 
-							  (float)lua_tonumber(s, 2), 
-							  (float)lua_tonumber(s, 3), 
-							  (float)lua_tonumber(s, 4), 
-							  (float)lua_tonumber(s, 5) );
+		mgtk_handle_color( event, 
+						   (float)lua_tonumber(s, 2), 
+						   (float)lua_tonumber(s, 3), 
+						   (float)lua_tonumber(s, 4), 
+						   (float)lua_tonumber(s, 5) );
 	}
 
 	return 0;

@@ -69,6 +69,8 @@ OBJS = \
 	$(BUILDDIR)/mgtk_lua.o \
 	$(BUILDDIR)/mgtk_resource.o \
 	$(BUILDDIR)/mgtk_opengl_canvas.o \
+	$(BUILDDIR)/mgtk_timeslider.o	\
+	$(BUILDDIR)/mgtk_rangeslider.o	\
 	$(BUILDDIR)/mgtk_tree.o	
 
 

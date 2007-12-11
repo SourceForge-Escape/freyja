@@ -4722,9 +4722,22 @@ void FreyjaControl::LoadResource()
 
 bool FreyjaControl::LoadUserPreferences()
 {
+#if LUA_UI
+	String s = freyja_rc_map_string( FREYJA_USER_PREF_FILE );
+	Lua* lua = (Lua*)&freyjaGetLuaVM();
+
+	if ( !lua->ExecuteFile( s.c_str() ) )
+	{
+		// Who cares if this file is missing...
+
+		//FREYJA_ASSERTMSG(0, "ERROR: Resource file '%s':\n%s\n", s.c_str(), lua->GetLastError() );
+		//freyja_event_shutdown();
+	}
+#else
 	String filename = freyja_rc_map_string( FREYJA_USER_PREF_FILE );
 	MSTL_MSG("\tLoading '%s'...", filename.c_str());	
 	return mResource.Load((char *)filename.c_str());	
+#endif
 }
 
 
@@ -4737,7 +4750,7 @@ bool FreyjaControl::SaveUserPreferences()
 	if (!w.Open(filename.c_str()))
 		return false;
 
-	w.Print(";; Custom colors\n");
+	w.Print("-- Custom colors\n");
 
 	for (uint32 i = 0; i < 13; ++i)
 	{
@@ -4817,51 +4830,53 @@ bool FreyjaControl::SaveUserPreferences()
 		}
 
 		freyja_event_get_color(id, &r, &g, &b, &a);
-		w.Print("(color\t%s\t%f %f %f %f)\n", s.c_str(), r, g, b, a);
+		w.Print("mgtk_color_set( \"%s\", %f, %f, %f, %f )\n", s.c_str(), r, g, b, a);
 	}
 
 	w.Print("\n");
 
 	{
-		w.Print("; Custom 'toggles'n");
+		w.Print("-- Custom boolean values\n");
+
+		const char* format = "mgtk_boolean_set( \"%s\", %i )\n";
 		int n = (mRender->GetFlags() & FreyjaRender::fGrid) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderGrid %i)\n", n);
+		w.Print(format, "eRenderGrid",n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fFace) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderFace %i)\n", n);
+		w.Print(format, "eRenderFace", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fBoundingVolumes) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderBbox %i)\n", n);
+		w.Print(format, "eRenderBbox", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fPoints) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderVertex %i)\n", n);
+		w.Print(format, "eRenderVertex", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fWireframe) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderWireframe %i)\n", n);
+		w.Print(format, "eRenderWireframe", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fLighting) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderLighting %i)\n", n);
+		w.Print(format, "eRenderLighting", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fMaterial) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderMaterial %i)\n", n);
+		w.Print(format, "eRenderMaterial", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fDrawPickRay) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderPickRay %i)\n", n);
+		w.Print(format, "eRenderPickRay", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fBones) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderSkeleton %i)\n", n);
+		w.Print(format, "eRenderSkeleton", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fBones2) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderSkeleton2 %i)\n", n);
+		w.Print(format, "eRenderSkeleton2", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fBones3) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderSkeleton3 %i)\n", n);
+		w.Print(format, "eRenderSkeleton3", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fBoneName) ? 1 : 0;
-		w.Print("(func_set_toggle eRenderBoneName %i)\n", n);
+		w.Print(format, "eRenderBoneName", n);
 
 		n = (mRender->GetFlags() & FreyjaRender::fSkeletalVertexBlending) ? 1 : 0;
-		w.Print("(func_set_toggle eSkeletalDeform %i)\n", n);
+		w.Print(format, "eSkeletalDeform", n);
 	}
 
 	return true;
