@@ -152,8 +152,8 @@ add_custom_target( model-plugin-nad ALL
 add_custom_target( model-plugin-nif4 ALL
 	COMMAND cd ${PLUGIN_DIR}modules/model/nif4 && make )
 
-add_custom_target( model-plugin-nif5 ALL
-	COMMAND cd ${PLUGIN_DIR}modules/model/nif5 && make )
+#add_custom_target( model-plugin-nif5 ALL
+#	COMMAND cd ${PLUGIN_DIR}modules/model/nif5 && make )
 
 add_custom_target( model-plugin-nod ALL
 	COMMAND cd ${PLUGIN_DIR}modules/model/nod && make )
