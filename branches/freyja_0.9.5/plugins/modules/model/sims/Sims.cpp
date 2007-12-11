@@ -177,7 +177,7 @@ bool IFFPak::loadChunk(SystemIO::FileReader &r)
 			r.ReadLong(); // Always 0
 
 			r.ReadBuffer(784, rgbPal);
-			mPalettes.pushBack(rgbPal);
+			mPalettes.push_back(rgbPal);
 		}
 		r.SetOffset(off);
 		return true;
