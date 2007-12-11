@@ -662,7 +662,9 @@ void freyja_install_user()
 		freyja_get_rc_path( rc, 512 );
 		freyja_get_rc_filename( backup, "backup", 512 );
 
-		if ( r.OpenDir(rc) )
+		SystemIO::File::CreateDir( backup );
+
+		if ( r.OpenDir( rc) )
 		{
 			while ( (filename = r.GetNextDirectoryListing()) )
 			{

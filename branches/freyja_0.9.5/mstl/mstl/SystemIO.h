@@ -370,9 +370,6 @@ void Assert(bool expr)
 static inline
 void Basename(const char *filename, char *basename, long size)
 {
-	long len_f, len, i;
-
-
 	/* Check for null or blank input strings */
 	if (!filename || !filename[0] || !basename)
 	{
@@ -381,24 +378,25 @@ void Basename(const char *filename, char *basename, long size)
 
 	basename[0] = 0;
 
-	len = len_f = strlen(filename);
+	unsigned int len_f = strlen(filename);
+	unsigned int len = len_f;
 
-	while (len_f-1)
+	while ( len_f )
 	{
 		--len_f;
 
 		if (filename[len_f] == '/' || filename[len_f] == '\\')
 		{
-			--len_f;
+			++len_f;
 			break;
 		}
 	}
 
 	len = len - len_f;
 
-	if (size > len)
+	if ( size > len )
 	{
-		for (i = 0; i < len; ++i)
+		for (unsigned int i = 0; i < len; ++i)
 		{
 			basename[i] = filename[len_f+i];
 			basename[i+1] = 0;
@@ -410,30 +408,31 @@ void Basename(const char *filename, char *basename, long size)
 static bool inline
 CopyFileToPath(const char *filename, const char *path)
 {
-	FILE *src, *dest;
-	char copy[1024];
-	char buffer[1024];
-	long size, sz = 1024;
-	long len;
-
-	src = fopen(filename, "rb");
+	FILE* src = fopen(filename, "rb");
 
 	if (!src)
+	{
+		perror( filename );
 		return false;
+	}
 
 	fseek(src, 0L, SEEK_END);
-	size = ftell(src);
+	long size = ftell(src);
 	fseek(src, 0L, SEEK_SET);
 
-	Basename(filename, buffer, 1024);
-	len = strlen(path) + 2 + strlen(buffer);
+	const long sz = 1024;
+	char buffer[sz];
+	char copy[sz];
+
+	Basename(filename, buffer, sz);
+	long len = strlen(path) + 2 + strlen(buffer);
 	snprintf(copy, len, "%s/%s", path, buffer);
 	
-	//printf("copy := '%s'\n", copy);
-	dest = fopen(copy, "wb");
+	FILE* dest = fopen(copy, "wb");
 
 	if (!dest)
 	{
+		perror( copy );
 		fclose(src);
 		return false;
 	}

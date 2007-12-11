@@ -6,12 +6,19 @@
 
  Kagura prealpha, 0.9.5.18 () -- "Kagura prealpha"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - New scene based system.
+ - Fix for mgtk_color_set().
+ - Lua based user prefs script.
+ - New scene based system design.
 
 
- Kagura prealpha, 0.9.5.17 () -- "Crack'n bones"
- 20071206 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- - Work around for colored markers until gtk+ bug is resolved.
+ Kagura prealpha, 0.9.5.17 (1135) -- "Crack'n bones"
+ 20071209 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Win32 build fix. (1135)
+ - Upgrading data pak will now backup your scripts.
+ - Fix for SystemIO::Basename and related file copy.
+ - New file data pak copy with versioning. 
+ - Little more UI refinement for the new sliders: ditched fill bg and handle slider.
+ - Using gdk to replace gtk+ for colored markers due to bugs in gtk+.
  - Disabled colored markers in timeslider -- it triggered a gtk filedialog bug.  
  - Range slider with simple motion event design.
  - New rangeslider prototype checked in early due to hardware trouble.

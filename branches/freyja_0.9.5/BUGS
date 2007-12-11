@@ -2,20 +2,15 @@
  BUGS
 
  Freyja 0.9.5 ( Development branch )
- =====================================================================
+ =======================================================================
 
   Sending Bug reports:
 
-   Send your Freyja-dev.log with the bug report, since it contains 
-   a lot of useful information including your GPU info and event log.
- =====================================================================
+	https://bugs.launchpad.net/freyja3d/
 
- Fix queue.
- ----------------------------
- 
- * FIX Lineage II import directly from pak vfs.
-
-
+	Send your freyja3d.log with the bug report, since it contains 
+	a lot of useful information including your GPU info and event log.
+ =======================================================================
  
  A - Serious bugs
  ----------------------------
@@ -23,6 +18,8 @@
  * [NEEDS INFO] Fix UV generation causes crash with some OBJ imported meshes.
 
  * [NEEDS INFO] Crash in win32 OpenGL on md5 model import in VMWare.
+
+ * [NEEDS INFO] Lua will loop if icons / rc data aren't found.
 
  * File corruption with .freyja format with certain animations.
 	- This should be 'fixed' when the old keyframe system is replaced.
@@ -42,6 +39,8 @@
  B - Moderate bugs
  ----------------------------
 
+ * [NEEDS INFO] Material load texture id set broken with Lua UI.
+
  * Extruding faces can cause invalid mesh pieces for open mesh topologies.
 
  * Model mode transforms with cursor have 'jump'.
@@ -54,6 +53,8 @@
 
  C - Annoying bugs
  ----------------------------
+
+ * FIX Lineage II import directly from pak vfs.
 
  * Models loading w/o complete materials often are alpha masked.
 	- This is a plugin bug caused by plugins not requesting enough material ids.

@@ -14,4 +14,5 @@
 
  * Place inline methods over 1 line outside class defn at the bottom of the header.
 
+ * Keep freyja interface into it's own source file for import/export modules.
 

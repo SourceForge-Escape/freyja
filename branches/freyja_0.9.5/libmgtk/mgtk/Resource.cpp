@@ -1112,7 +1112,7 @@ void Resource::Comment()
 int Resource::Load(const char *filename)
 {
 #ifdef MULTI_EVAL
-	printf("Resource::Load> '%s'\n", filename);
+	mgtk_print("Resource::Load> '%s'\n", filename);
 #endif
 
 	strncpy(mFilename, filename, 95);

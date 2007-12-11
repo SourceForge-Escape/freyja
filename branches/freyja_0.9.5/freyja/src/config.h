@@ -32,7 +32,7 @@
 
 #define FREYJA_UI_SCRIPT "freyja3d.lua"
 
-#define FREYJA_USER_PREF_FILE "freyja-dev_prefs.mlisp"
+#define FREYJA_USER_PREF_FILE "freyja3d_prefs.lua"
 
 #define FREYJA_LOG_FILE "freyja3d.log"
 
