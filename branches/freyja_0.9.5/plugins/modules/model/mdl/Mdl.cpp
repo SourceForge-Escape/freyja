@@ -1372,7 +1372,7 @@ int freyja_model__mdl_import(char *filename)
 				vertex = freyjaVertexCreate3f(x, z, y); // freyja coordinates
 
 				// Generates id translator list
-				transV.pushBack(vertex);
+				transV.push_back(vertex);
 			}
 			//else
 			//{
