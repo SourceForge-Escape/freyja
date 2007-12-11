@@ -158,7 +158,7 @@ public:
 		SystemIO::Print("Loading '%s'...\n", filename);
 
 		// Start with a single empty mesh
-		mMeshes.pushBack(ObjMesh());
+		mMeshes.push_back(ObjMesh());
 
 		while ((symbol = r.ParseSymbol()) && !r.IsEndOfFile())
 		{
@@ -217,7 +217,7 @@ public:
 				v = r.ParseFloat();
 
 				mMeshes[mesh].mHasTexCoords = true;
-				mMeshes[mesh].mTexCoords.pushBack(Vec3(u, v, 0.0f));
+				mMeshes[mesh].mTexCoords.push_back(Vec3(u, v, 0.0f));
 			}
 			else if (!strcmp(symbol, "vn"))
 			{
@@ -226,7 +226,7 @@ public:
 				z = r.ParseFloat();
 
 				mMeshes[mesh].mHasNormals = true;
-				mMeshes[mesh].mNormals.pushBack(Vec3(x, y, z));
+				mMeshes[mesh].mNormals.push_back(Vec3(x, y, z));
 			}
 			else if (!strcmp(symbol, "v"))
 			{
@@ -234,7 +234,7 @@ public:
 				y = r.ParseFloat();
 				z = r.ParseFloat();
 
-				mMeshes[mesh].mVertices.pushBack(Vec3(x, y, z));
+				mMeshes[mesh].mVertices.push_back(Vec3(x, y, z));
 				Vec3 v(mMeshes[mesh].mVertices[mMeshes[mesh].mVertices.size()-1]); 
 				//SystemIO::Print("v %f %f %f\n", v.mVec[0], v.mVec[1], v.mVec[2]);
 			}
@@ -269,7 +269,7 @@ public:
 					// vertices
 					uint32 idx = r.ParseInteger() - 1;
 					//SystemIO::Print("** %i\n", idx);
-					f.mVertexRefs.pushBack(idx);
+					f.mVertexRefs.push_back(idx);
 
 					f.mSmoothingGroup = smoothinggroup;
 					f.mTexture = texture;
@@ -280,7 +280,7 @@ public:
 						//r.FindNextChar('/');
 						r.NextChar(); // '/' no whitespace
 						idx = r.ParseInteger() - 1;
-						f.mTexCoordRefs.pushBack(idx);
+						f.mTexCoordRefs.push_back(idx);
 					}
 					else
 					{
@@ -293,7 +293,7 @@ public:
 						//r.FindNextChar('/');
 						r.NextChar(); // '/' no whitespace
 						idx = r.ParseInteger();
-						f.mNormalRefs.pushBack(idx);
+						f.mNormalRefs.push_back(idx);
 					}
 
 					// Handle quad faces and polygons ( loop invariant trick )
@@ -312,7 +312,7 @@ public:
 					);
 				*/
 
-				mMeshes[mesh].mFaces.pushBack(f);
+				mMeshes[mesh].mFaces.push_back(f);
 				//mMeshes[mesh].mFaces[face].mMaterialIndex = 0;
 				++face;
 			}
