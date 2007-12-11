@@ -319,7 +319,7 @@ int freyja_model__mdm_import(char *filename)
 			index = freyjaVertexCreate3f(xx, yy, zz);
 			freyjaVertexTexCoord2fv(index, mdm.mSurfaces[i].vertices[j].uv);
 			freyjaVertexNormal3fv(index, mdm.mSurfaces[i].vertices[j].normal);
-			transV.pushBack(index);
+			transV.push_back(index);
 		}
 
 		freyjaEnd(); // FREYJA_GROUP
