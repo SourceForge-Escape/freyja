@@ -1,0 +1,61 @@
+################################################################
+# libhel Core Makefile
+#
+# -- History ---------------------------------------------------
+#
+# 2007.05.11:
+# Mongoose - Created from old unified Makefile. 
+################################################################
+
+################################################################
+# Target name and Version
+################################################################
+
+NAME=hel
+MAJOR_VERSION=0
+MINOR_VERSION=0
+MICRO_VERSION=2
+REVSION=3
+BUILD_DATE=`date +%Y%m%d`
+BUILD_ID=$(BUILD_DATE)
+VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(REVSION)
+ARCHIVE_NAME=lib$(NAME)-$(VERSION)-$(BUILD_ID)
+API=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
+
+################################################################
+# Common directories
+################################################################
+
+TREE_DIR=libhel
+SRC_DIR=hel
+BUILD_ROOT_DIR=../bin/libhel
+
+################################################################
+# Common precompiler defines
+################################################################
+
+COMMON_INCLUDES=-I. -I../libhel/ -I../mstl/
+COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
+		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
+		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\"
+
+COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES)
+
+################################################################
+# Object targets
+################################################################
+
+OBJS = \
+	$(BUILDDIR)/math.o \
+	$(BUILDDIR)/BoundingVolume.o \
+	$(BUILDDIR)/CollisionObject.o \
+	$(BUILDDIR)/Mass.o \
+	$(BUILDDIR)/Mat44.o \
+	$(BUILDDIR)/Quat.o \
+	$(BUILDDIR)/Ray.o \
+	$(BUILDDIR)/Simulation.o \
+	$(BUILDDIR)/Spring.o \
+	$(BUILDDIR)/ViewVolume.o 
+
+
+
