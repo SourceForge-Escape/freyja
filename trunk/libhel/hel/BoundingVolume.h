@@ -110,13 +110,13 @@ public:
 	BoundingSphere(vec3_t center, vec_t radius) :
 		mRadius(radius)
 	{
-		helCopyVec3(center, mCenter);
+		helCopyVec3(center, mCenter.mVec);
 	}
 
 
 	bool IsPointInside(vec3_t point)
 	{
-		if (helDist3v(mCenter, point) <= mRadius)
+		if (helDist3v(mCenter.mVec, point) <= mRadius)
 			return true;
 
 		return false;
@@ -149,7 +149,7 @@ public:
 
 	void Translate(vec3_t xyz)
 	{
-		helCopyVec3(xyz, mCenter);
+		helCopyVec3(xyz, mCenter.mVec);
 	}
 
 
@@ -160,14 +160,14 @@ public:
 
 	void UpdateBounds(vec3_t point)
 	{
-		vec_t radius = helDist3v(mCenter, point);
+		vec_t radius = helDist3v(mCenter.mVec, point);
 
 		if (radius > mRadius)
 			mRadius = radius;
 	}
 
 
-	vec3_t mCenter;            /* Center of bounding sphere */
+	hel::Vec3 mCenter;            /* Center of bounding sphere */
 
 	vec_t mRadius;             /* Raduis of bounding sphere */	
 };
@@ -208,8 +208,8 @@ public:
 	bool IsInsideFrustum(vec_t frustum[6][4])
 	{
 		unsigned int p;
-		vec_t *min = mMin;
-		vec_t *max = mMax;
+		vec_t *min = mMin.mVec;
+		vec_t *max = mMax.mVec;
 
 		for (p = 0; p < 6; ++p)
 		{
@@ -287,8 +287,8 @@ public:
 	{
 		hel::Mat44 m;
 		m.Rotate(xyz);
-		m.Multiply3fv(mMin);
-		m.Multiply3fv(mMax);
+		m.Multiply3fv(mMin.mVec);
+		m.Multiply3fv(mMax.mVec);
 	}
 
 	void Scale(vec3_t xyz)
@@ -318,9 +318,9 @@ public:
 		}
 	}
 
-	vec3_t mMin;           /* Bounding box MIN point */
+	hel::Vec3 mMin;           /* Bounding box MIN point */
 
-	vec3_t mMax;           /* Bounding box MAX point */
+	hel::Vec3 mMax;           /* Bounding box MAX point */
 };
 
 
@@ -380,8 +380,8 @@ public:
 
 	void GetBoundingBox(vec3_t min, vec3_t max)
 	{
-		helCopyVec3(mBox.mMin, min);
-		helCopyVec3(mBox.mMax, max);
+		helCopyVec3(mBox.mMin.mVec, min);
+		helCopyVec3(mBox.mMax.mVec, max);
 	}
 
 	BoundingSphere mSphere;    /* Bounding sphere of this volume */

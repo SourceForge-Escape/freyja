@@ -23,102 +23,74 @@
  * Mongoose - Created
  ==========================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJATEXTURE_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJATEXTURE_H_
+#ifndef GUARD__FREYJA_TEXTURE_H_
+#define GUARD__FREYJA_TEXTURE_H_
 
 #include <hel/math.h>
-#include <mstl/SystemIO.h>
+#include <mstl/String.h>
 
 #include "freyja.h"
 
-using namespace mstl;
 
-class FreyjaTexture
+namespace freyja {
+
+class Texture
 {
  public:
 
 	enum PixelFormat {
-
 		Indexed8,
 		RGB24,
 		RGBA32
 	};
 
-
-	////////////////////////////////////////////////////////////
-	// Constructors
-	////////////////////////////////////////////////////////////
-
-	FreyjaTexture();
+	Texture();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of FreyjaTexture
+	 * Post : Constructor.
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.05.14: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	virtual ~FreyjaTexture();
-	/*------------------------------------------------------
-	 * Pre  : FreyjaTexture object is allocated
-	 * Post : Deconstructs an object of FreyjaTexture
-	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2005.05.14: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-
-	////////////////////////////////////////////////////////////
-	// Public Accessors
-	////////////////////////////////////////////////////////////
-
-	uint32 getSerializeSize();
+	virtual ~Texture();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Deconstructor.
+	 *
 	 ------------------------------------------------------*/
 
-	virtual bool serialize(SystemIO::FileWriter &w);
+	const char* GetFilename() 
+	{ return mFilename.c_str(); }
 	/*------------------------------------------------------
-	 * Pre  : Writes this material out to disk
-	 * Post : Returns true on success
+	 * Pre  : 
+	 * Post : Returns filename attribute or NULL.
 	 ------------------------------------------------------*/
 
-
-	////////////////////////////////////////////////////////////
-	// Public Mutators
-	////////////////////////////////////////////////////////////
-
-	virtual bool serialize(SystemIO::FileReader &r);
+	void SetFilename( const char* filename )
+	{ mFilename = filename; }
 	/*------------------------------------------------------
-	 * Pre  : Reads the material data from disk
-	 * Post : Returns true on success
+	 * Pre  : Name is valid string.
+	 * Post : Sets Texture filename attribute.
+	 *
 	 ------------------------------------------------------*/
 
-	void setFilename(const char *filename);
+	const char* GetName() 
+	{ return mName.c_str(); }
 	/*------------------------------------------------------
-	 * Pre  : Name is valid string
-	 * Post : Sets Texture's name
+	 * Pre  : 
+	 * Post : Returns name attribute or NULL.
 	 ------------------------------------------------------*/
 
-	void setName(const char *name);
+	void SetName( const char* name )
+	{ mName = name; }
 	/*------------------------------------------------------
-	 * Pre  : Name is valid string
-	 * Post : Sets Texture's name
+	 * Pre  : Name is valid string.
+	 * Post : Sets Texture name attribute.
+	 *
 	 ------------------------------------------------------*/
 
-	char *mName;                /* Texture name */
-	
-	char *mFilename;            /* Filename of image */
+	byte* mImage;
 
-	byte *mImage;
-
-	byte *mPalette;
+	byte* mPalette;
 
 	uint32 mBitDepth;
 
@@ -128,24 +100,18 @@ class FreyjaTexture
 
 	uint32 mHeight;
 
-	index_t mUID;              /* Used by Gobal Pool */
 
- private:
+ protected:
 
-	FreyjaTexture(const FreyjaTexture &ft);
+	Texture(const Texture& texture);
 
-	FreyjaTexture &operator=(const FreyjaTexture &ft);
+	Texture &operator=(const Texture& texture);
 
-
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
-
-
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
-
+	mstl::String mName;                /* Texture name */
+	
+	mstl::String mFilename;            /* Filename of image */
 };
 
-#endif
+} // namespace freyja
+
+#endif // GUARD__FREYJA_TEXTURE_H_

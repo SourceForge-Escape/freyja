@@ -25,18 +25,12 @@
 #include "FreyjaTexture.h"
 
 using namespace mstl;
-
-Vector<FreyjaTexture *> gFreyjaTextures;
-uint32 gFreyjaTextureCount = 0;
+using namespace freyja;
 
 
-////////////////////////////////////////////////////////////
-// Constructors
-////////////////////////////////////////////////////////////
-
-FreyjaTexture::FreyjaTexture() :
-	mName(NULL),                /* Texture name */
-	mFilename(NULL),            /* Filename of image */
+Texture::Texture() :
+	mName(),                /* Texture name */
+	mFilename(),            /* Filename of image */
 	mImage(NULL),
 	mPalette(NULL),
 	mBitDepth(0),
@@ -50,72 +44,12 @@ FreyjaTexture::FreyjaTexture() :
 
 FreyjaTexture::~FreyjaTexture()
 {
-	if (mName)
-		delete [] mName;
-
-	if (mFilename)
-		delete [] mFilename;
-
 	if (mImage)
 		delete [] mImage;
 
 	if (mPalette)
 		delete [] mPalette;
 }
-
-
-////////////////////////////////////////////////////////////
-// Public Accessors
-////////////////////////////////////////////////////////////
-
-uint32 FreyjaTexture::getSerializeSize()
-{
-	// FIXME
-	return 0;
-}
-
-
-bool FreyjaTexture::serialize(SystemIO::FileWriter &w)
-{
-#ifdef FIXME
-	uint32 length;
-
-	if (name)
-	{
-		length = strlen(name);
-		w.WriteInt32U(length);
-		w.WriteCharString(length, name);
-	}
-	else
-	{
-		w.WriteInt32U(0);
-	}
-#endif
-
-	return false;
-}
-
-
-
-////////////////////////////////////////////////////////////
-// Public Mutators
-////////////////////////////////////////////////////////////
-
-bool FreyjaTexture::serialize(SystemIO::FileReader &r)
-{
-	// FIXME
-	return false;
-}
-
-
-////////////////////////////////////////////////////////////
-// Private Accessors
-////////////////////////////////////////////////////////////
-
-
-////////////////////////////////////////////////////////////
-// Private Mutators
-////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////
