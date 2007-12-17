@@ -1,0 +1,1502 @@
+;; -*- Mode: Lisp; tab-width: 4; indent-tabs-mode: t -*-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Project: Freyja
+; Author : Terry 'Mongoose' Hendrix II
+; Website: http://gooseegg.sourceforge.net
+; Email  : mongoose@users.sourceforge.net
+; Comment: This is a sample resource Freyja file
+;
+;;;History;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; 2001.10.31
+; Mongoose - New implementation uses this as the
+;            main resource file
+;
+; ????.??.??
+; Mongoose - Created as metadata for gtk-menu
+;            script prototype
+;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Misc defines and varabiles
+(setq true 1)
+(setq false 0)
+
+;; Program defaults
+(setq WINDOW_X 32)             ; Offset of the window on load
+(setq WINDOW_Y 32)
+
+(setq WIDTH  663);700)         ; Set GL window width and height
+(setq HEIGHT 640)
+
+(setq NOTEBOOK_WIDTH 340)      ; Set sidebar notebook width and height
+(setq NOTEBOOK_HEIGHT HEIGHT)
+
+(setq DUMP_SYMTAB false)       ; Toggle symbol table dumping
+(setq FAST_CARD true)          ; Toggle OpenGL accel features
+(setq PATH "~/.freyja")        ; Set initial data path
+(setq INIT "init-dev.mlisp")   ; Init resource filename
+(setq FONT "vera.ttf")         ; Set renderer font using rc_map OR
+;(setq FONT "/fullpath/a.ttf") ; Set renderer font using full path
+(setq ASSERT_BREAKPOINT 1)
+
+;; Application Window
+(window "Freyja" "freyja.png"
+
+	;; Window container
+	(vbox 0 0 0 1 0
+
+	;; Menubar
+	(handlebox 1
+	(menubar
+		(submenu "_File"
+			(menu_item "_New"	eNewFile	"C-n"	"gtk-new")
+			(filechoosermenu_item "_Open Model..."	"Open Model..."	"C-o"	eOpenModel	"mode=open"	"gtk-open")
+			(menu_item "Ap_pend Model..."	eAppendFile	"gtk-paste")
+
+			(menu_seperator)
+
+			(submenu eRecentFiles "R_ecent Models..." "recent_models_bind")			
+			(menu_seperator)
+
+			(menu_item "_Save Model"	eSaveFileModel	"C-s"	"gtk-save")
+		
+			;(filechoosermenu_item "Save Model _As..."       "Save Model..." "S-C-s" eSaveModel      "mode=save"     "gtk-save-as") ;confirm-overwrite=true,
+			(menu_item "Save Model _As..."	eSaveModel	"S-C-s"	"gtk-save-as")
+			(menu_item "_Revert Model"		eRevertFile	"gtk-revert-to-saved")
+			(menu_seperator)
+
+			(menu_item "Proper_ties"		eInfo		"gtk-properties")
+
+			(menu_seperator)
+
+			(submenu	eImportFile	"_Import Model...")
+			(submenu	eExportFile	"_Export Model...")
+
+			(menu_seperator)
+
+			(menu_item "_Close"	eCloseFile	"C-w"	"gtk-close")
+			(menu_item "_Quit"	eShutdown	"C-q"	"gtk-quit"))
+
+
+
+		(submenu "_Edit"
+			(menu_item "Take _Screenshot"		eScreenShot	"gtk-screenshot")
+			(menu_seperator)
+			(menu_item "_Undo"	eUndo			"C-z"		"gtk-undo")
+			(menu_item "_Redo"	eRedo			"S-C-z"		"gtk-redo")
+			(menu_seperator)
+			(menu_item "Cu_t"	eCut     		"C-x"		"gtk-cut")
+			(menu_item "_Copy"	eCopy 	    "C-c"		"gtk-copy")
+			(menu_item "_Paste"	ePaste     	"C-v"		"gtk-paste")
+			(menu_item "_Delete"	eDelete    	"S-Delete"		"gtk-delete")
+			(menu_seperator)
+			(menu_item "Select _All"	eSelectAll	"C-a"	"gtk-select-table")
+			(menu_item "Unselect A_ll"	eUnSelectAll	"S-C-a"	"gtk-select-table")
+			(menu_seperator)
+			(menu_item "D_uplicate"	eDupeObject    	"C-d"	"gtk-convert")
+			(menu_seperator)
+			(menu_item "Pr_eferences"    ePreferencesDialog	"gtk-preferences"))
+
+
+		(submenu "_View"
+			(menu_seperator)
+			;(menu_item "_Fullscreen"	eFullscreen	"M-E"	"gtk-fullscreen")
+			(menu_item "_Fullscreen"	eFullscreen	"F11"	"gtk-fullscreen")
+			(toggle_menu_item	"_Viewports"	eViewports	0)
+			(menu_seperator)
+			(toggle_menu_item	"_Grid"			eRenderGrid	1)
+			;(toggle_menu_item	"_Grid ZBuffer"	eRenderGridZClear	0)
+
+			(submenu "_Mesh"
+				(toggle_menu_item	"_Points"		eRenderVertex	0)
+				(toggle_menu_item	"_Wireframe"	eRenderWireframe	0)
+				(toggle_menu_item	"_Normals"		eRenderNormals	0)
+				(toggle_menu_item	"_Faces"		eRenderFace		1)
+				(toggle_menu_item	"_Lighting"		eRenderLighting	1)
+				(toggle_menu_item	"_Material"		eRenderMaterial	1)
+				(toggle_menu_item	"_Bounding Volume"	eRenderBbox 1)
+			) ; End submenu "_Mesh"
+
+			(toggle_menu_item	"_Skeleton"	eRenderSkeleton	1)
+
+			(toggle_menu_item	"_Pick Ray"	eRenderPickRay	1)
+
+			(submenu "_Joint"
+				(toggle_menu_item	"_Point"	ePointJoint		1)
+				(toggle_menu_item	"_Sphere"	eSphereJoint	0)
+				(toggle_menu_item	"_Axes"		eAxisJoint		0))
+
+			(submenu "_Bone"
+				(toggle_menu_item "_ZBuffer"	eRenderBoneZClear	0)
+				(toggle_menu_item "_Line"		eLineBone		0)
+				(toggle_menu_item "_PolyMesh" 	ePolyMeshBone	1))
+		) ; End submenu "_View"
+
+		(submenu "_Create" 
+				(submenu "_Componets"
+						(menu_item "_Vertex"		  eVertexNew)
+						(menu_item "_Face"			  ePolygonNew)
+						(menu_item "_Mesh"				eMeshNew)
+						(menu_seperator)
+						(menu_item	"_Bone"	eBoneNew	"C-B"	"gtk-bone")
+				)
+
+				(submenu "P_olygon Primatives"
+					(menu_item "_Cube"		eGenerateCube		"gtk-cube")
+					(menu_item "_Plane"	eGeneratePlane		"gtk-plane")
+					(menu_item "_Tube"		eGenerateTube		"gtk-tube")
+					(menu_item "C_ircle"	eGenerateCircle		"gtk-circle")
+					(menu_item "C_one"		eGenerateCone		"gtk-cone")
+					(menu_item "C_ylinder"	eGenerateCylinder	"gtk-cylinder")
+					(menu_item "_Sphere"	eGenerateSphere		"gtk-sphere")
+				)
+		) ;; End submenu Create
+
+
+
+		(submenu "_Modify"
+
+			;; Transforms
+			(submenu "_Transforms"
+				(menu_item "Move"		eMoveObject		"F5"	"gtk-move")
+				(menu_item "Rotate"		eRotateObject	"F6"	"gtk-rotate")
+				(menu_item "Scale"		eScaleObject	"F7"	"gtk-scale")
+				(menu_item "Select"		eSelect			"F8"	"gtk-select")
+				(menu_item "Unselect"	eUnselect		"F9"	"gtk-unselect")
+			)
+
+			(submenu "_UV Mapping"
+				(menu_item "_Planar"		eMeshTexcoordPlaneProj	"gtk-uv")
+				(menu_item "_Cylindrical"	eMeshTexcoordCylindrical	"gtk-uv")
+				(menu_item "_Spherical"	eMeshTexcoordSpherical	"gtk-uv"))
+
+			(menu_seperator)
+
+			(submenu "_Vertex"
+				;(menu_item "_New"		  eVertexNew)
+				(menu_item "_Delete"	  eVertexDelete)
+				(menu_item "_Combine"	  eVertexCombine)
+				;(menu_item "_Extrude"	  eVertexExtrude)
+			)
+
+			(submenu "V_ertices..."
+				(menu_item "_Unselect" 	eMeshUnselectVertices)
+				(menu_seperator)
+				(menu_item "_Clear weights"	eNone)
+				(menu_item "_View weights"	eNone)
+				(menu_seperator)
+				(menu_item "_Delete"		eNone);eSelectedVertsDelete)
+				(menu_seperator)
+				(menu_item "Mirror _X"		eMirrorMeshX)
+				(menu_item "Mirror _Y"		eMirrorMeshY)
+				(menu_item "Mirror _Z"		eMirrorMeshZ))
+
+			(submenu "_Face"
+				;(menu_item "_New"			ePolygonNew)
+				(menu_item "_Select"		ePolygonSelect)
+				(menu_item "_Delete"		ePolygonDelete)
+				(menu_item "_Split"		ePolygonSplit)
+				(menu_item "_Collapse"		eCollapseFace)
+				(menu_item "_Extrude"	eExtrude	"F4"	"gtk-polygon"))
+
+			(submenu "F_aces..."
+				(menu_item "_Unselect faces"		eMeshUnselectFaces)
+				(menu_seperator)
+				(menu_item "_Groups"		eSmoothingGroupsDialog)
+				(menu_item "_Smooth"		eSelectedFacesGenerateNormals)
+				(menu_seperator)
+				(menu_item "Clear alpha"	eClearSelectedFacesAlpha)
+				(menu_item "Set alpha"		eSetSelectedFacesAlpha)
+				(menu_seperator)
+				(menu_item "Select _vertices"	eSelectVerticesByFaces)
+				(menu_seperator)
+				(menu_item "Mirror _X"		eMirrorFacesX)
+				(menu_item "Mirror _Y"		eMirrorFacesY)
+				(menu_item "Mirror _Z"		eMirrorFacesZ)
+				(menu_seperator)
+				(menu_item "_Delete"		eSelectedFacesDelete))
+
+			(submenu "_Mesh"
+
+				(menu_item "_Select"		eMeshSelect)
+				(menu_item "_Delete"		eMeshDelete)
+				(menu_item "_Tesselate"		eMeshTesselate)
+				(menu_item "_Generate Normals"		eMeshGenerateNormals)
+				(menu_item "_Flip Normals"		eMeshFlipNormals)
+				(menu_item "Mirror _X"		eMirrorMeshX)
+				(menu_item "Mirror _Y"		eMirrorMeshY)
+				(menu_item "Mirror _Z"		eMirrorMeshZ)
+				(menu_item "Snap-_Weld vertices"	eSnapWeldVerts)
+				(menu_item "Cleanup vertices" eCleanupVertices)
+				(menu_item "Repack" eMeshRepack)
+				(menu_item "Keyframe to mesh" eMeshKeyframeCopy)
+
+			) ; submenu _Mesh
+
+			(submenu "_Bone"
+				(menu_item "_New"			eBoneNew)
+				(menu_item "_Delete"		eBoneDelete)
+				(menu_item "_Select"		eBoneSelect)
+				(menu_item "_Parent"		eBoneLinkChild)
+				(menu_item "_Unparent"		eBoneUnLinkChild)
+				(menu_item "_Metadata"		eBoneMetaData)
+				(menu_item	"_Update"		eBoneRefreshBindPose)
+
+				(menu_item "_Key Metadata"		eBoneKeyFrameMetaData)
+				;old (menu_item "L_ink mesh"		eBoneLinkMesh)
+				;old (menu_item "U_nlink mesh"		eBoneUnLinkMesh)
+				;(menu_item "_Move"				eBoneMoveJoint)
+			)
+
+		) ; submenu "_Modify"
+
+		(submenu ePluginMenu "_Plugins..."
+				(submenu eRecentLua "_Lua" "recent_lua_bind" )
+				(submenu eRecentPython "_Python" "recent_python_bind" )
+				(submenu eRecentMaterial "Material" "recent_material_bind")
+				(submenu "_Test"
+					(menu_item "_Assert MsgBox"		eTestAssertMsgBox)
+					(menu_item "_Textview"			eTestTextView)))
+
+		(submenu "_Snippets"
+			(submenu	eNone	"Import..."
+			)
+			(submenu	eNone	"Export..."
+				(menu_item	"Export Model..." eNone "gtk-save-as")
+				(menu_seperator)
+				(menu_item	"Export Weights..." eNone "gtk-save-as")
+				(menu_seperator)
+				(menu_item	"Export Track..." eNone "gtk-save-as")
+				(menu_seperator)
+			)
+			(menu_seperator)
+			(submenu eRecentMeshXML "Recent _Mesh...")
+			(menu_item	"Import Mesh..." eXMLToMesh "gtk-open")
+			(menu_item	"Export Mesh..." eMeshToXML  "gtk-save-as")
+
+			(menu_seperator)
+			(submenu eRecentMetadataXML "Recent Meta_data...")
+			(menu_item	"Import Metadata..." eXMLToMeta "gtk-open")
+			(menu_item	"Export Metadata..." eMetaToXML  "gtk-save-as")
+
+			(menu_seperator)
+			(submenu eRecentSkeletonXML "Recent _Skeleton...")
+			(menu_item	"Import Skeleton..." eXMLToBones "gtk-open")
+			(menu_item	"Export Skeleton..." eBonesToXML "gtk-save-as")
+
+			(menu_seperator)
+			(submenu eRecentKeyframe "Recent _Keyframe...")
+			(menu_item	"Import Keyframe..." eNone "gtk-open")
+			(menu_item	"Export Keyframe..." eNone "gtk-save-as")
+		)
+
+		(menu_seperator)
+
+		(submenu "_Help"
+			(menu_item "_Contents"	eHelpDialog	"F1"	"gtk-help")
+			(menu_seperator)
+			(menu_item	"Get help online..." eLaunchOnlineHelp "gtk-network")
+			(menu_item	"Report bugs..." eLaunchBugTracker "gtk-edit")
+			(menu_item	"Check for updates..." eLaunchUpdate "gtk-refresh")
+			(menu_seperator)
+			(menu_item "_About"  	eAboutDialog "gtk-about"))))
+
+
+		;; Toolbars
+		(vbox 0 1 0 1 0
+		(hbox 0 0 0 0 0
+		(notebook 0 0 eNop
+
+		(tab "File" eNone			
+			(hbox 0 1 0 1 0	
+				;(hbox 1 1 0 1 1  ; This causes a 'dropdown' toolbar
+				(toolbar 
+					(toolbar_button "gtk-new" "New"	
+						"New Model"		eEvent eNewFile)
+
+					;(filechoosertoolbar_button 
+					;	"gtk-open"	"Open"	"Open Model..."	"Open Model..." 
+					;	eOpenModel "mode=open")
+
+					(toolbar_menu_button "gtk-open" "Open"	
+						"Open..."	eEvent	eOpenFile 
+						"recent_models_bind")
+
+					(toolbar_button  "gtk-save" "Save Model" 
+						"Save Model"	eEvent eSaveFileModel)
+
+					;(filechoosertoolbar_button 
+					;	"gtk-save-as" "Save as..." 
+					;	"Save Model As..."	"Save Model As..."
+					;	eSaveModel "mode=save")
+					(toolbar_button  "gtk-save-as" "Save Model As..." 
+						"Save Model As..."	eEvent eSaveModel)
+
+					(toolbar_separator)
+
+					(toolbar_menu_button "24x24/lua.png" "Script"
+						"Open Lua Script..." eEvent eLoadLuaScript
+						"recent_lua_bind")
+
+					(toolbar_menu_button "24x24/python.png" "Script"
+						"Open Python Script..." eEvent eLoadPythonScript
+						"recent_python_bind")
+
+				) ; toolbar
+				;) ; hbox
+			) ; hbox
+		) ; tab "File"
+
+		(tab "View" eNone			
+			(hbox 0 1 0 1 0	
+
+				(hbox 0 1 0 1 1
+					;; Plane selector ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+					(hbox 0 0 0 1 0
+						;(label "Select viewport: "  0.0 0.5)
+						;(spinbutton 0 0 3 eSetSelectedViewport)
+						(optionmenu	eEvent	eViewportModeMenu
+							(menu_item	"Orbit   "	eViewportOrbit)
+							(menu_item	"Front   "	eViewportFront)
+							(menu_item	"Back    "	eViewportBack)
+				  			(menu_item	"Right   "	eViewportRight)
+				  			(menu_item	"Left    "	eViewportLeft)
+				  			(menu_item	"Top     "	eViewportTop)
+				  			(menu_item	"Bottom  "  eViewportBottom)
+				  			(menu_item	"Material"  eViewportMaterial)
+				  			(menu_item	"UV      "	eViewportUV)
+				  			(menu_item	"Curve   "	eViewportCurve)
+				  			(menu_item	"Camera  "	eViewportCamera)
+						) ; optionmenu
+					) ; hbox
+				) ; hbox
+
+			(toolbar
+
+				(toolbar_togglebutton false "24x24/fourwin.png" "Four Window"
+					"Four window view"	eEvent	eViewports)
+
+				(toolbar_togglebutton false "24x24/grid.png" "Grid"
+					"Plane grid rendering"	eEvent eRenderGrid)
+
+				(toolbar_togglebutton false "24x24/grid.png" "Ground"
+					"Plane solid rendering"	eEvent eRenderSolidGround)
+
+				(toolbar_togglebutton false "24x24/pickray.png" "Pick Ray"
+					"Pick ray rendering"	eEvent eRenderPickRay)
+
+				(toolbar_separator)
+
+				(toolbar_togglebutton false "24x24/point.png" "Points" 
+					"Point render mode"		eEvent	eRenderVertex)
+
+				(toolbar_togglebutton false "24x24/normals.png" "Normals" 
+					"Normals render mode"		eEvent	eRenderNormals)
+
+				(toolbar_togglebutton false "24x24/wireframe.png" "Wireframe" 
+					"Wireframe render mode"		eEvent	eRenderWireframe)
+
+				(toolbar_togglebutton false "24x24/solid.png" "Faces"
+					"Solid face render mode"		eEvent	eRenderFace)
+
+				(toolbar_togglebutton false "24x24/texture.png" "Material" 
+					"Material toggle"	eEvent	eRenderMaterial)
+
+				(toolbar_togglebutton false "24x24/groupcolors.png" "Color" 
+					"Group color toggle"		eEvent	eGroupColors)
+
+				(toolbar_togglebutton false "24x24/light.png" "Light" 
+					"Lighting toggle"		eEvent	eRenderLighting)
+
+				(toolbar_togglebutton false "24x24/bvol.png" "BoundingBox"
+					"Render Bounding boxes"	eEvent	eRenderBbox)
+
+				(toolbar_separator)
+
+				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones"
+					"Show legacy skeleton."		eEvent	eRenderSkeleton)
+
+				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones2"
+					"Show bind pose skeleton."	eEvent	eRenderSkeleton2)
+
+				(toolbar_togglebutton false "24x24/bone-tag.png" "Bones3"
+					"Show transformed skeleton."	eEvent	eRenderSkeleton3)
+
+				(toolbar_togglebutton false "24x24/bone-name.png" "BoneName"
+					"Show bind pose bone names."	eEvent	eRenderBoneName)
+
+				(toolbar_separator)
+
+				(toolbar_togglebutton false "24x24/shadow.png" "Shadow"
+					"Render shadows"		eEvent	eShadowVolume)
+
+				(toolbar_togglebutton false "24x24/deform.png" "Blend"
+					"Skeletal vertex blending"	eEvent	eSkeletalDeform)
+
+			) ; toolbar
+
+				(hbox 0 1 0 1 1
+					;(label " View Height "  0.0 0.4) 
+					;(spinbutton2 1.0 1.0 10.0 1.0 1.0 1.0 1 eSetZoomLevel)
+					(label " Zoom "  0.0 0.4) 
+					(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom)
+				) ; hbox
+
+			) ; hbox
+		) ; tab
+
+		(tab "Create" eNone		
+			(hbox 0 1 0 1 1	
+			(toolbar
+				(toolbar_button "24x24/sheet.png"	" "
+					"Polygon plane"	eEvent	eGeneratePlane)
+
+				(toolbar_button "24x24/ring.png"	" "
+					"Polygon ring" eEvent	eGenerateRing)
+
+				(toolbar_button "24x24/circle.png"	" "
+					"Polygon circle" eEvent	eGenerateCircle)
+
+				(toolbar_button "24x24/cube.png"	" "	
+					"Polygon cube"	eEvent	eGenerateCube)
+
+				(toolbar_button "24x24/tube.png"	" "
+					"Polygon tube"	eEvent	eGenerateTube)
+
+				(toolbar_button "24x24/cone.png"	" "
+					"Polygon cone" eEvent	eGenerateCone)
+
+				(toolbar_button "24x24/cylinder.png" " "	
+					"Polygon cylinder" eEvent eGenerateCylinder)
+
+				(toolbar_button "24x24/sphere.png"	" "	
+					"Polygon sphere"	eEvent	eGenerateSphere)
+
+				;(toolbar_button "24x24/patch.png"	" "
+				;	"Patch"	eEvent	eBezierPolygonPatch)
+
+				(toolbar_separator)
+
+				(toolbar_button "24x24/extrude.png"	" "
+					"Extrude face"	eEvent eExtrude)
+
+				(toolbar_separator)
+
+				(toolbar_button "24x24/plane.png" "UVMap" 
+					"UVMap selected faces, Planar"	eEvent eMeshTexcoordPlaneProj)
+
+				(toolbar_button "24x24/texgen-sphere.png" "UVMap" 
+					"UVMap selected faces, Spherical"	eEvent eMeshTexcoordSpherical)
+
+				(toolbar_button "24x24/cylinder.png" "UVMap" 
+					"UVMap selected faces, Cylindrical"	eEvent eMeshTexcoordCylindrical)
+			) ; toolbar
+			) ; hbox
+		) ; tab
+
+		(tab "Modify" eNone		
+			(hbox 0 1 0 0 1	
+
+				; Object mode selection
+				(hbox 0 1 0 1 1
+					(optionmenu	eEvent	eTransformMenu
+						(menu_item	"Model      "	eTransformModel)
+						(menu_item	"Mesh       "	eTransformMesh)
+						(menu_item	"Meshes...  "	eTransformMeshes)
+						(menu_item	"Face       "	eTransformFace)
+						(menu_item	"Faces...   "	eTransformFaces)
+						(menu_item	"Vertex     "	eTransformVertex)
+						(menu_item	"Vertices..."	eTransformVertices)
+						(menu_item	"Skeleton   "	eTransformSkeleton)
+						(menu_item	"Bone       "	eTransformBone)
+						(menu_item	"Metadata   "	eTransformMetadata)
+						(menu_item	"Light      "	eTransformLight)
+						(menu_item	"Camera     "	eTransformCamera)
+					) ; optionmenu
+				) ; hbox
+
+			; Need to group toggles like radio buttons
+			(toolbar
+				(toolbar_togglebutton false	"24x24/bbox-select.png" "SelectB"
+					"Select by bounding box, Ctrl+RMouse ends selection" eEvent eSelectionByBox)
+
+				(toolbar_togglebutton false	"gtk-info" "Info"
+					"Info on selected object" eEvent eInfoObject)
+
+				(toolbar_togglebutton true "24x24/cursor-select.png" "Select" 
+					"Select object by cursor" eEvent	eSelect)
+
+				(toolbar_togglebutton false "24x24/move.png" "Move" 
+					"Move object" eEvent	eMoveObject)
+
+				(toolbar_togglebutton false "24x24/rotate.png" "Rotate" 
+					"Rotate object" eEvent	eRotateObject)
+
+				(toolbar_togglebutton false "24x24/scale.png" "Scale" 
+					"Scale object" eEvent	eScaleObject)
+
+				(toolbar_togglebutton false "24x24/paint.png" "Paint" 
+					"Paint object" eEvent	ePaintObject)
+
+				; Paint mode selection
+				(toolbar_item
+					(optionmenu	eEvent	eNone
+						(menu_item	"Weight"	ePaintWeight)
+						(menu_item	"Unweight"	ePaintUnweight)
+						(menu_item	"Select"	ePaintSelect)
+						(menu_item	"Unselect"	ePaintUnselect)
+						(menu_item	"Material"	ePaintMaterial)
+						(menu_item	"Height"	ePaintHeight)
+						(menu_item	"Dmap"		ePaintDmap)
+					) ; optionmenu
+				) ; toolbar_item
+
+				(toolbar_separator)
+
+				(toolbar_button	"gtk-undo" "Undo"
+					"Undo" eEvent eUndo)
+				(toolbar_button	"gtk-redo" "Redo"
+					"Redo" eEvent eRedo)
+
+				(toolbar_separator)
+
+				(toolbar_button	"gtk-cut" "Cut"
+					"Cut object" eEvent eCut)
+				(toolbar_button	"gtk-copy" "Copy"
+					"Copy object" eEvent eCopy)
+				(toolbar_button	"gtk-paste" "Paste"
+					"Paste object" eEvent ePaste)
+
+				(toolbar_separator)
+
+				(toolbar_button	"gtk-new" "Create"
+					"Create new object" eEvent eCreate)
+
+				(toolbar_button	"gtk-delete" "Delete"
+					"Delete selected object" eEvent eDelete)
+
+				(toolbar_separator)
+
+				(toolbar_button	"24x24/mdupe.png"
+					"Duplicate" "Duplicate object" eEvent eDupeObject)
+
+				(toolbar_button	"24x24/msplit.png"
+					"Split" "Split object" eEvent eSplitObject)
+
+				(toolbar_button	"24x24/mmerge.png"
+					"Merge" "Merge objects" eEvent eMergeObject)
+
+				(toolbar_separator)
+
+				;(toolbar_button	"gtk-add"
+				;	"SubDiv" "SubDiv Mesh" eEvent eMeshSubDivLoop)
+
+				(toolbar_menu_button "24x24/subdiv.png" "Subdiv"
+					"Subdivide mesh..." eEvent eMeshSubDivLoop
+						(toggle_menu_item	"Flat"	eNone	1)
+						;(toggle_menu_item	"Catmull-Clark"	eNone	0)
+					)
+
+			) ; toolbar
+			) ; hbox
+		) ; tab
+
+		(tab "Skinning" eNone
+			(hbox 0 1 0 1 1		
+
+				(toolbar
+					(toolbar_button "gtk-add"	" "
+						"Assign vertices to joint  "	eEvent eAssignWeight)
+					(toolbar_button "gtk-remove"	" "
+						"Remove vertices weighting "	eEvent eClearWeight))
+
+				(hbox 0 0 0 1 0
+					(hbox 1 0 0 1 0
+						(label "Bone: " 0.0 0.5))
+					(spinbutton 0 0 100 eBoneIterator)
+					(textbox eSetBoneName))
+
+				(hbox 0 1 0 1 1
+					(hbox 1 0 0 1 0
+						(label "Weight: " 0.0 0.5))
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 2 eWeight))
+
+			) ; hbox
+		) ; Skinning tab
+	
+		(tab "Material" eNone
+			(hbox 0 1 0 1 1				
+				(toolbar
+
+					;(toolbar_separator)
+
+					(toolbar_button "gtk-add" " "
+						"Set Mesh Material"	eEvent	eSetMeshTexture)
+
+					(toolbar_button "gtk-add" " "
+						"Set Selected Faces Material" eEvent eSetFacesMaterial)
+
+				) ; toolbar
+
+
+				(hbox 1 0 0 1 0 
+					(label "Material index: " 0.0 0.5) 
+					(spinbutton 0 0 100 eSetMaterial))
+
+				;; Material selector / name editor
+				(hbox 0 1 0 1 1
+					;(colorbutton 1 eColorMaterialAmbient)
+					;(label "Current" 0.0 0.5)
+					;(spinbutton 0 0 1024 eSelectMaterial)
+					;(textbox eSetMaterialName)
+				)
+
+			) ; hbox
+		) ; tab
+
+
+		) ; notebook
+	) ; hbox
+
+
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;; Main window body ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	(hbox 0 1 1 1 1
+
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;; GL window
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;(vbox 0 1 1 1 1
+			(gl_widget WIDTH HEIGHT)
+		;)
+
+
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		;; Sidebar notebook in non-expanding container
+		;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+		(hbox 0 0 0 0 0 ;1 1 1 1
+		;(handlebox 1 
+		(expander_hbox " " 1
+		(notebook NOTEBOOK_WIDTH NOTEBOOK_HEIGHT eEvent
+
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+			;; Model tab
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+			(tab "Model" eModeModel
+				;(hbox 1 1 0 1 1
+				;	(toolbar 
+				;		(toolbar_button "gtk-new" "New"	
+				;			"New model"		eEvent eNewFile)
+				;
+				;		(filechoosertoolbar_button 
+				;			"gtk-open" "Open" "Open model file" 
+				;			"Open Model..." eOpenModel "mode=open")
+				;
+				;		(toolbar_button  "gtk-save" "Save" 
+				;			"Save Model"	eEvent eSaveFileModel)
+				;
+				;		(filechoosertoolbar_button 
+				;			"gtk-save-as" "Save as..." "Saves model file" 
+				;			"Save Model..." eSaveModel "mode=save")
+				;
+				;	))
+
+				;; Seperator
+				(hbox 1 0 0 1 0 (hsep))
+
+				;; Generic Transform box
+				(handlebox 1
+				(vbox 1 1 0 1 1
+				(expander "Transform Box" 1
+					(hbox 1 1 0 1 1
+						(button "Move" eEvent eMove)
+						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_X)
+						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_Y)
+						(spinbutton2 0.0 -10000.0 10000.0 0.1 0.1 0.1 1 eMove_Z))
+
+					(hbox 1 1 0 1 1
+						(button "Rotate" eEvent eRotate)
+						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_X)
+						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_Y)
+						(spinbutton2 0.0 -180.0 180.0 0.01 0.1 0.1 2 eRotate_Z))
+
+					(hbox 1 1 0 1 1
+						(button "Scale" eEvent eScale)
+						(spinbutton2 1.0 -1.0 20.0 0.01 0.1 0.1 2 eScale_X)
+						(spinbutton2 1.0 -1.0 20.0 0.01 0.1 0.1 2 eScale_Y)
+						(spinbutton2 1.0 -1.0 20.0 0.01 0.1 0.1 2 eScale_Z))
+
+					) ; expander
+				))
+
+
+	(handlebox 1
+	(vbox 1 1 0 1 1
+	(expander "Groups Box" 1
+		(hbox 1 0 0 1 0
+			(togglebutton " 1" eSmooth 0)
+			(togglebutton " 2" eSmooth 1)
+			(togglebutton " 3" eSmooth 2)
+			(togglebutton " 4" eSmooth 3)
+			(togglebutton " 5" eSmooth 4)
+			(togglebutton " 6" eSmooth 5)
+			(togglebutton " 7" eSmooth 6)
+			(togglebutton " 8" eSmooth 7)
+		) ; hbox
+		(hbox 1 0 0 1 0
+			(togglebutton " 9"  eSmooth 8)
+			(togglebutton " 10" eSmooth 9)
+			(togglebutton " 11" eSmooth 10)
+			(togglebutton " 12" eSmooth 11)
+			(togglebutton " 13" eSmooth 12)
+			(togglebutton " 14" eSmooth 13)
+			(togglebutton " 15" eSmooth 14)
+			(togglebutton " 16" eSmooth 15)
+		) ; hbox
+		(hbox 1 0 0 1 0
+			(togglebutton " 17" eSmooth 16)
+			(togglebutton " 18" eSmooth 17)
+			(togglebutton " 19" eSmooth 18)
+			(togglebutton " 20" eSmooth 19)
+			(togglebutton " 21" eSmooth 20)
+			(togglebutton " 22" eSmooth 21)
+			(togglebutton " 23" eSmooth 22)
+			(togglebutton " 24" eSmooth 23)
+		) ; hbox
+
+		; Assign/Clear group assoications with selected faces
+		(hbox 1 0 0 1 0
+			(button "Assign"	eEvent	eGroupAssign)
+			(button "Clear "	eEvent	eGroupClear))
+		(hbox 1 0 0 1 0
+			(button "Smooth"	eEvent eSelectedFacesGenerateNormals)
+			(button "Flip  "	eEvent eSelectedFacesFlipNormals))
+
+	) ; expander
+	))
+					;; Skeleton ;;;;;;;;;;;;;;;
+					;(hbox 1 0 0 1 0 (hsep))
+
+					; Make a UID string for trees later so to be fully generic
+
+				(handlebox 1
+				(vbox 1 1 0 1 1
+					(expander "Scenegraph" 1
+						;(textbox eSkeletonName)
+
+						(hbox 1 1 1 1 1
+							(tree eBoneIterator eSetBoneName) )
+							
+					) ; expander
+				))
+
+			)  ;; end tab Model
+
+
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+			;; UV editor tab
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+			(tab "UV" eModeUV
+	
+				(hbox 1 0 0 1 0 
+					(label "Material index: " 0.0 0.5) 
+					(spinbutton 0 0 1024 eSetMaterial))
+
+				(hbox 1 1 0 1 1	(label "Set material for..." 0.0 0.5))
+				(hbox 1 1 0 1 1	(hsep))
+				(hbox 1 0 0 1 0
+				(vbox 0 1 0 1 0						
+					(hbox 0 0 0 1 0
+						(vbox 0 0 0 1 0
+							(button "Mesh Index" eEvent eSetMeshTexture)
+							(button "Face Index" eEvent eSetPolygonTexture)
+							(button "Selected Faces..." eEvent eSetFacesMaterial))
+						(vbox 0 0 0 1 0
+							(spinbutton 0 0 100000 eMeshIterator)
+							(spinbutton 0 0 100000 ePolygonIterator)
+							(label2 " ") ))
+
+				)) ; vbox, hbox
+				
+				;; Per face editing
+				(hbox 1 1 0 1 1	(label2 " "))
+				(hbox 1 1 0 1 1	(label "Texcoord operations" 0.0 0.5))
+				(hbox 1 1 0 1 1	(hsep))
+				(hbox 1 0 0 1 0
+					(vbox 1 0 0 1 0 
+						(togglebutton "Texcoord weld mode" eTexcoordCombine)
+						(button "Generate UVMap" eEvent eUVMapCreate)
+						(button "Clear UVMap" eEvent eUVMapDelete)
+						(button "PolyMap"	eEvent	ePolyMapTexturePolygon)
+						(button "Mirror X" eEvent eMirrorUV_X)
+						(button "Mirror Y" eEvent eMirrorUV_Y)
+						(button "Flag alpha" eEvent eSetSelectedFacesAlpha)
+						(button "Unflag alpha" eEvent eClearSelectedFacesAlpha))))
+
+
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+			;; Material tab 
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+			(tab "Material" eModeMaterial
+
+				(hbox 1 1 0 1 1
+					(toolbar
+
+					(toolbar_button "gtk-new" "New"
+						"New material"	eEvent	eNewMaterial)
+
+					;(filechoosertoolbar_button	"gtk-open" "Open"
+					;	"Loads material from disk" 
+					;	"Open Material..." eOpenMaterial "mode=open")
+
+					;(toolbar_button "gtk-open" "Open"
+					;	"Open Material..."	eEvent	eOpenMaterial)
+
+					(toolbar_menu_button "gtk-open" "Material"
+						"Open Material..." eEvent eOpenMaterial
+						"recent_material_bind")
+					
+					(toolbar_togglebutton false "gtk-apply" "Lock"
+						"Overwrite material on load" eEvent eMaterialSlotLoad)
+
+					;(filechoosertoolbar_button	"gtk-save-as" "Save as..." 
+					;	"Saves material to disk" 
+					;	"Save Material..." eSaveMaterial "mode=save,confirm-overwrite=true,")
+					(toolbar_button "gtk-save-as" "Save as..." 
+						"Save Material..." eEvent eSaveMaterial)
+					
+
+
+				)) ; End toobar / hbox
+
+				;; Material selector / name editor
+				(hbox 0 1 0 1 1
+					(label "Material Select" 0.0 0.5))
+				(hbox 0 1 0 1 1
+					(spinbutton 0 0 1024 eSetMaterial)
+					(textbox eSetMaterialName))
+
+				(hbox 0 1 0 1 1
+				(toolbar
+					(toolbar_togglebutton false "gtk-add" "Texture"
+						"Enable texture mapping" eEvent eEnableMaterialTexture)
+
+					(toolbar_togglebutton false "gtk-add" "Blend"
+						"Enable blending" eEvent eEnableMaterialBlending)
+
+					(toolbar_togglebutton false "gtk-add" "Fragment"
+						"Enable fragment" eEvent eEnableMaterialFragment)
+
+					(toolbar_separator)
+
+					(toolbar_togglebutton false "gtk-add" "GLSL Fragment"
+						"GLSL fragment mode" eEvent eGLSLFragmentMode)
+					(toolbar_togglebutton false "gtk-add" "ARB Fragment"
+						"ARB fragment mode" eEvent eARBFragmentMode)
+
+					(toolbar_separator)
+
+					(toolbar_togglebutton false "gtk-add" "Detail"
+						"Enable detail texture" eEvent eEnableDetailTexture)
+
+					(toolbar_togglebutton false "gtk-add" "Normalize"
+						"Enable normalization for render scaling lighting" eEvent eEnableNormalize)
+
+				)) ; End toolbar / hbox
+
+				;; Texture loader interface
+				(hbox 1 0 0 1 0 (hsep))
+				(hbox 0 1 0 1 1
+					(label "Texture" 0.0 0.5))
+				(hbox 0 1 0 1 1
+					(spinbutton 0 0 128 eSetMaterialTexture)
+					(textbox eSetTextureNameA)
+					(togglebutton "Slot" eTextureSlotLoad)
+					(filechooserbutton "..." "Open Texture..." eOpenTexture "texture_pattern")
+				)
+				(hbox 0 1 0 1 1
+					(label "Fragment" 0.0 0.5))
+				(hbox 0 1 0 1 1
+					(spinbutton 0 0 128 eSetMaterialShader)
+					(textbox eSetMaterialShaderFilename)
+					(togglebutton "Slot" eShaderSlotLoad)
+					(filechooserbutton "..." "Open Fragment program..." eOpenShader "texture_pattern")
+				)
+
+				(hbox 1 0 0 1 0 (hsep))
+			
+				;;;;;;;;;;;;;;;	
+				;(handlebox 1
+				;(vbox 1 1 0 1 1
+				;(expander "Material Properties" 1
+				(hbox 1 1 0 1 1
+					(label "Ambient" 0.0 0.5))
+
+				(hbox 1 1 0 1 1
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialAmbient0)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialAmbient1)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialAmbient2)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialAmbient3)
+					(colorbutton 1 eColorMaterialAmbient))
+
+				(hbox 1 1 0 1 1
+					(label "Diffuse" 0.0 0.5))
+ 
+				(hbox 1 1 0 1 1
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialDiffuse0)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialDiffuse1)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialDiffuse2)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialDiffuse3)
+					(colorbutton 1 eColorMaterialDiffuse))
+
+				(hbox 1 1 0 1 1
+					(label "Specular" 0.0 0.5))
+
+				(hbox 1 1 0 1 1
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialSpecular0)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialSpecular1)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialSpecular2)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialSpecular3)
+					(colorbutton 1 eColorMaterialSpecular))
+
+				(hbox 1 1 0 1 1
+					(label "Emissive" 0.0 0.5))
+
+				(hbox 1 1 0 1 1
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialEmissive0)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialEmissive1)
+					(spinbutton2 0.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialEmissive2)
+					(spinbutton2 1.0 0.0 1.0 0.01 0.1 0.1 3 eMaterialEmissive3)
+					(colorbutton 1 eColorMaterialEmissive))
+
+				(hbox 1 1 0 1 1
+					(label "Shininess" 0.0 0.5)
+					(spinbutton2 1.0 0.0 100.0 0.01 0.1 0.1 3 eMaterialShine))
+
+				;))) ; expander "Material Properties"
+
+
+				(hbox 1 0 0 1 0
+					(label "Blend Source" 0.0 0.5))
+				(hbox 1 0 0 1 0
+					(optionmenu eEvent eBlendSrcMenu
+						(menu_item "GL__ZERO"					eBlendSrc 0)
+						(menu_item "GL__ONE"					eBlendSrc 1)
+						(menu_item "GL__SRC__COLOR"			eBlendSrc 2)
+						(menu_item "GL__ONE__MINUS__SRC__COLOR" eBlendSrc 3)
+						(menu_item "GL__DST__COLOR"	 		eBlendSrc 4)
+						(menu_item "GL__ONE__MINUS__DST__COLOR" eBlendSrc 5)
+						(menu_item "GL__SRC__ALPHA"			eBlendSrc 6)
+						(menu_item "GL__ONE__MINUS__SRC__ALPHA" eBlendSrc 7)
+						(menu_item "GL__DST__ALPHA"			eBlendSrc 8)
+						(menu_item "GL__ONE__MINUS__DST__ALPHA" eBlendSrc 9)
+						(menu_item "GL__SRC__ALPHA__SATURATE"	eBlendSrc 10)
+						(menu_item "GL__CONSTANT__COLOR"		eBlendSrc 11)
+						(menu_item "GL__ONE__MINUS__CONSTANT__COLOR" eBlendSrc  12)
+						(menu_item "GL__CONSTANT__ALPHA"  		eBlendSrc 13)
+						(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" eBlendSrc  14)))
+
+				(hbox 1 0 0 1 0
+					(label "Blend Dest" 0.0 0.5))
+				(hbox 1 0 0 1 0
+					(optionmenu eEvent eBlendDestMenu
+						(menu_item "GL__ZERO"					eBlendDest 0)
+						(menu_item "GL__ONE"					eBlendDest 1)
+						(menu_item "GL__SRC__COLOR"			eBlendDest 2)
+						(menu_item "GL__ONE__MINUS__SRC__COLOR" eBlendDest 3)
+						(menu_item "GL__DST__COLOR"			eBlendDest 4)
+						(menu_item "GL__ONE__MINUS__DST__COLOR" eBlendDest 5)
+						(menu_item "GL__SRC__ALPHA"			eBlendDest 6)
+						(menu_item "GL__ONE__MINUS__SRC__ALPHA" eBlendDest 7)
+						(menu_item "GL__DST__ALPHA"			eBlendDest 8)
+						(menu_item "GL__ONE__MINUS__DST__ALPHA" eBlendDest 9)
+						(menu_item "GL__SRC__ALPHA__SATURATE"	eBlendDest 10)
+						(menu_item "GL__CONSTANT__COLOR"		eBlendDest 11)
+						(menu_item "GL__ONE__MINUS__CONSTANT__COLOR" eBlendDest 12)
+						(menu_item "GL__CONSTANT__ALPHA" 		eBlendDest 13)
+						(menu_item "GL__ONE__MINUS__CONSTANT__ALPHA" eBlendDest 14)))
+
+			) ; End tab
+
+
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+			;; Plugins tab 
+			;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+			(tab "Plugins" eNone
+				(expander "Freyja Plugins   "	1	"FirstPartyPluginSlot")
+				;(hbox 1 0 0 1 0 (hsep))
+				;(expander "Community Plugins"	1	"ThirdPartyPluginSlot")
+			) ; tab Plugins
+
+	) ; notebook
+
+) ;hbox
+
+;) ; handlebox
+
+	;; Animation bar was here at end of edit tab
+
+
+
+)
+)
+
+	;; A box here would be under the tabs and the main window
+	(hbox 1 0 0 1 0
+	
+	;; Animation bar
+ 	;(handlebox 1 
+		(vbox 1 1 1 1 1	
+			(hbox 1 1 1 1 1
+	
+				(hslider eAnimationSlider 0 500)
+
+				(toolbar
+					(toolbar_togglebutton false "gtk-media-record"
+						"Auto" "Animation mode (Auto Keyframe)"  
+						eEvent eModeAnim)
+					(toolbar_button "24x24/key.png"
+						"Set" "Set Keyframe" eEvent eSetKeyFrame)
+					(toolbar_button  "gtk-media-previous" ;"gtk-goto-first" 
+						"Prev" "Previous" eEvent eAnimationPrev)
+					(toolbar_button "gtk-media-rewind"
+						"?" "?" eEvent eNone)
+					(toolbar_button "gtk-media-play" ;"gtk-go-forward" 	
+						"Play" "Play" eEvent eAnimationPlay)
+					(toolbar_button "gtk-media-stop" ;"gtk-stop" 	
+						"Stop" "Stop" eEvent eAnimationStop)
+					(toolbar_button "gtk-media-forward"
+						"?" "?" eEvent eNone)
+					(toolbar_button "gtk-media-next" ;"gtk-goto-last" 	
+						"Next" "Next" eEvent eAnimationNext) 
+				) ; toolbar 
+			) ; hbox
+		) ;; vbox
+	;) ;; End Animation handlebox
+
+	) ;; End hbox
+
+	; Output all kinds of messages and errors for user's delight
+	(statusbar)
+
+	) ;; vbox
+)  ;; Window
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Dialogs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Confirmation dialogs
+
+(confirmation_dialog	"CloseNewFileDialog"
+	"gtk-dialog-question"
+	"Creating a new model will close the current model."
+	"Would you like to close the model and possibly lose unsaved changes?"
+	"gtk-cancel"	"_Cancel"	"gtk-close"	"C_lose")
+
+(confirmation_dialog	"CloseToOpenFileDialog"
+	"gtk-dialog-question"
+	"You must close the current model to open a new one."
+	"Open the new model and lose unsaved changes?"
+	"gtk-cancel"	"_Cancel"	"gtk-open"	"_Open")
+
+(confirmation_dialog	"RevertFileDialog"
+	"gtk-dialog-question"
+	"You will lose all changes you made by reverting."
+	"Would you like to revert the model and lose unsaved changes?"
+	"gtk-cancel"	"_Cancel"	"gtk-revert"	"_Revert")
+
+(confirmation_dialog	"OverwriteFileDialog"
+	"gtk-dialog-question"
+	"You are about to overwrite a file."
+	"Are you sure you want to overwrite the file?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Overwrite")
+
+(confirmation_dialog	"PolyMapDialog"
+	"gtk-dialog-question"
+	"You just generated a UV map using vertex UVs." 
+; "Some model formats perfer polygon-mapped UVs, and may not export without being polymapped."
+	"Would you like to promote it to ploymapped texcoords instead?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Promote")
+
+(confirmation_dialog	"DupeMeshDialog"
+	"gtk-dialog-question"
+	"You are about to duplicate the selected mesh."
+	"Would you like to continue?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Duplicate")
+
+(confirmation_dialog	"DupeObjectDialog"
+	"gtk-dialog-question"
+	"You are about to duplicate the selected object."
+	"Would you like to continue?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Duplicate")
+
+(confirmation_dialog	"SplitMeshDialog"
+	"gtk-dialog-question"
+	"You are about to split the selected faces \n from the currently selected mesh into a new mesh.\n"
+	"Would you like to continue?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Split")
+
+(confirmation_dialog	"MergeObjDialog"
+	"gtk-dialog-question"
+	"You are about to merge two objects.\n"
+	"Would you like to continue the merge?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Merge")
+
+(confirmation_dialog	"MergeDelObjDialog"
+	"gtk-dialog-question"
+	"You have the option to delete the mesh being merged.\n"
+	"Would you like to delete or keep the merged mesh?"
+	"gtk-cancel"	"_Keep"	"gtk-ok"	"_Delete")
+
+(confirmation_dialog	"SplitMeshCullDialog"
+	"gtk-dialog-question"
+	"You have the option to cull or duplicate the selected faces\n from the current mesh.\n"
+	"Would you like to duplicate or cull the selected faces?"
+	"gtk-cancel"	"_Cull"	"gtk-ok"	"_Duplicate")
+
+(confirmation_dialog	"DelVertDialog"
+	"gtk-dialog-question"
+	"You are about to delete the selected vertices."
+	"Are you sure you want to delete these vertices?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Delete")
+
+(confirmation_dialog	"DelBoneDialog"
+	"gtk-dialog-question"
+	"You are about to delete the selected joint/bone."
+	"Are you sure you want to delete this bone?"
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Delete")
+
+(confirmation_dialog	"CloseNewFileDialog"
+	"gtk-dialog-question"
+	"Creating a new model will close the current model."
+	"Would you like to close the model and possibly lose unsaved changes?"
+	"gtk-cancel"	"_Cancel"	"gtk-close"	"C_lose")
+
+(confirmation_dialog	"ExitWarningDialog"
+	"gtk-dialog-question"
+	"If you exit you will lose any unsaved data."
+	"Would you still like to exit?"
+	"gtk-cancel"	"_Cancel"	"gtk-quit"	"_Exit")
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Query Dialogs 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(query_dialog	"MetadataPropertyDialog"
+	"gtk-dialog-question"
+	"Metadata property editor."
+	"textentry"	"name"		"Name    "		"  "
+	"textentry"	"type"		"Type    "		"  "
+	"textarea"	"metadata"	"Metadata"	" "
+	"textentry"	"model"		"Model   "		"  "
+	"textentry"	"material"	"Material"	"  "
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Update")
+
+(query_dialog	"GenerateSheetDialog"
+	"gtk-dialog-question"
+	"Sheet mesh generation."
+	"int"	"rows"	"How many rows?   "	1 1 64  ; default min max
+	"int"	"cols"	"How many columns?"	1 1 64  ; default min max
+	"float"	"size"	"How large?       "	8 1 128 ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"GenerateCubeDialog"
+	"gtk-dialog-question"
+	"Cube mesh generation."
+	"int"	"rows"	"How many rows?   "	1 1 64  ; default min max
+	"int"	"cols"	"How many columns?"	1 1 64  ; default min max
+	"float"	"size"	"How large?       "	8 1 64  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"GenerateRingDialog"
+	"gtk-dialog-question"
+	"Ring mesh generation."
+	"int"	"rings"	"How many rings?   "	1 1 64  ; default min max
+	"int"	"count"	"How many sections?"	16 4 64  ; default min max
+	"float"	"radius"	"Radius?"	8 1 64  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"GenerateCircleDialog"
+	"gtk-dialog-question"
+	"Circle mesh generation."
+	"int"	"count"	"How many sections?"	16 4 64  ; default min max
+	"float"	"radius"	"Radius?"	8 0.5 64  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"GenerateTubeDialog"
+	"gtk-dialog-question"
+	"Tube mesh generation."
+	"int"	"segments"	"How many segments?"	4 1 64  ; default min max
+	"int"	"count"	"Vertex count per ring?"	16 4 64  ; default min max
+	"float"	"radius"	"Radius?"	8 0.1 128  ; default min max
+	"float"	"height"	"Height?"	16 0.1 128  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"GenerateSphereDialog"
+	"gtk-dialog-question"
+	"Sphere mesh generation."
+	"int"	"count"	"Vertex count per ring?"	16 4 64  ; default min max
+	"float"	"radius"	"Radius?"	8 0.1 128  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Create")
+
+(query_dialog	"DuplicateBoneDialog"
+	"gtk-dialog-question"
+	"Would you like to duplicate the selected bone?"
+	"int"	"recurse"	"Recursively duplicate children?"	0 0 1  ; default min max
+	"gtk-cancel"	"_Cancel"	"gtk-ok"	"_Duplicate")
+
+
+;; Old event id based dialogs
+
+(dialog "Freyja :: Help" eHelpDialog 0
+(vbox 0 0 0 0 0
+	(hbox 1 0 0 1 0 
+		(label2 "
+ If you'd like to work on documentation email me.  
+
+ Help, bug reports, and feature requests:
+
+	· http://icculus.org/freyja
+
+	· http://icculus.org/freyja/forum.html
+
+	· irc://irc.freenode.net/#freyja
+
+	· mongooseichiban@gmail.com
+
+")
+
+		(label2 "		<u>Common keys</u>
+
+ · F4 - Extrude 
+ · F5 - Move 		· Ctrl  (held) - tSelect 
+ · F6 - Rotate 		· Shift (held) - tUnSelect
+ · F7 - Scale
+
+"))
+
+		(hbox 1 0 0 1 0 
+			(label2 "The last viewport you click in becomes your main window")) 
+
+	) ; vbox
+) ; dialog
+
+
+(dialog "Freyja :: About" eAboutDialog 0
+	(vbox 0 0 0 0 0
+		(hbox 1 0 0 1 0
+			(icon "freyja.png" IconSize_Dialog))
+		(hbox 1 0 0 1 0 
+			(label2 " <big>Freyja 0.9.5 Development Branch</big>
+ Freyja is an Open Source 3d modeling system.
+ This build is from the development branch.
+
+ 	· mongooseichiban@gmail.com ·
+
+ <small>Freyja Copyright © 2002-2006 by Terry 'Mongoose' Hendrix II </small>"))
+
+	) ; vbox
+) ; dialog
+
+
+
+;(dialog "Freyja :: 趣味" ePreferencesDialog 0
+(dialog "Freyja :: Preferences" ePreferencesDialog 0
+
+	(vbox 0 0 0 0 0
+
+	(notebook 0 0 eNop
+		(tab "General" eNone
+
+		;(hbox 1 0 0 1 0
+		;	(icon "freyja.png" IconSize_Dialog))
+
+		;;(hbox 1 0 0 1 0
+		;;	(label "Near Height "  0.0 0.5) 
+		;;	(spinbutton2 20.0 20.0 60.0 20.0 20.0 20.0 3 eSetNearHeight))
+
+		(hbox 1 0 0 1 0
+			(label "Render scaling"  0.0 0.5) 
+			(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eZoom))
+
+		(hbox 1 0 0 1 0
+			(label "Polygon # of sides "  0.0 0.5) 
+			(spinbutton 0 3 6 ePolygonSize))
+
+		(hbox 1 0 0 1 0
+			(label "UV texcoord pick radius"  0.0 0.5) 
+			(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eUVPickRadius))
+
+		(hbox 1 0 0 1 0
+			(label "Vertex pick radius"  0.0 0.5) 
+			(spinbutton2 0.1 0.0001 1000.0 0.0001 0.001 0.001 4 eVertexPickRadius))
+
+		(hbox 1 0 0 1 0
+			(label "Vertex snap-weld dist"  0.0 0.5) 
+			(spinbutton2 0.1 0.001 1000.0 0.0001 0.001 0.001 4 eSnapWeldVertsDist))
+
+		) ; End (tab "General"
+
+		(tab "Colors" eNone
+
+		(hbox 1 0 0 1 2 
+;			(label "遠景の呈色" 0.0 0.5)
+			(label "Background color " 0.0 0.5)
+			(colorbutton 1 eColorBackground))
+
+		(hbox 1 0 0 1 2 
+;			(label "基底の呈色" 0.0 0.5)
+			(label "Grid color " 0.0 0.5)
+			(colorbutton 1 eColorGrid))
+
+		(hbox 1 0 0 1 2 
+;				(label "天頂の呈色" 0.0 0.5)
+			(label "Vertex color " 0.0 0.5)
+			(colorbutton 1 eColorVertex))
+
+		(hbox 1 0 0 1 2 
+;				(label "現行天頂の呈色" 0.0 0.5)
+			(label "Vertex highlight " 0.0 0.5)
+			(colorbutton 1 eColorVertexHighlight))
+
+		(hbox 1 0 0 1 2 
+;				(label "Meshの呈色" 0.0 0.5)
+			(label "Wireframe color " 0.0 0.5)
+			(colorbutton 1 eColorMesh))
+
+		(hbox 1 0 0 1 2 
+; About time to start using string tables instead of this...
+;			(label (if (eq locale "jp") 
+;				"現行Meshの呈色" "Mesh highlight ") 0.0 0.5)
+			(label "Wireframe highlight " 0.0 0.5)
+			(colorbutton 1 eColorMeshHighlight))
+
+		(hbox 1 0 0 1 2 
+			(label "Bone color " 0.0 0.5)
+			(colorbutton 1 eColorBone))
+
+		(hbox 1 0 0 1 2 
+			(label "Bone highlight " 0.0 0.5)
+			(colorbutton 1 eColorBoneHighlight))
+
+		(hbox 1 0 0 1 2 
+			(label "Joint color " 0.0 0.5)
+			(colorbutton 1 eColorJoint))
+
+		(hbox 1 0 0 1 2 
+			(label "Joint highlight " 0.0 0.5)
+			(colorbutton 1 eColorJointHighlight))
+
+		(hbox 1 0 0 1 2
+			(button "Reset to defaults" eNone eResetColorsToDefault))
+
+		) ; End (tab "Colors"
+		
+		(tab "Lights" eNone
+			(hbox 1 1 0 1 1
+				(label "Light" 0.0 0.5)
+				(label "Ambient" 0.0 0.5)
+				(label "Diffuse" 0.0 0.5)
+				(label "Specular" 0.0 0.5))
+			(hbox 1 1 0 1 1
+				;(spinbutton 0 0 100 eSelectLight)
+				(colorbutton 1 eColorLightAmbient)
+				(colorbutton 1 eColorLightDiffuse)
+				(colorbutton 1 eColorLightSpecular))
+			(hbox 1 1 0 1 1
+				(spinbutton 0.0 -10000.0 10000.0 eLightPosX)
+				(spinbutton 0.0 -10000.0 10000.0 eLightPosY)
+				(spinbutton 0.0 -10000.0 10000.0 eLightPosZ)))
+
+		
+		(tab "Cameras" eNone
+				
+			)
+
+) ; End Notebook
+))) ;; End Preferences dialog
+
+
+;; All these could be factored into init.mlisp
+
+;; Custom colors -- After widgets so widgets can be updated to match 
+;  all widgets with this properity
+(color	eColorBackground		0.5	0.5	0.5	1.0) 
+(color	eColorGrid				0.4	0.4	0.4	0.9)
+(color	eColorMesh				0.0	0.0	0.0	1.0)
+(color	eColorMeshHighlight		0.2	0.2	1.0	1.0)
+(color	eColorVertex			0.2	1.0	1.0	1.0)
+(color	eColorVertexHighlight	1.0	0.0	0.86 1.0)
+(color	eColorBone				0.882352941 0.654901961 0.219607843 1.0)
+(color	eColorBoneHighlight		0.956862745 0.415686275 0.2 1.0)
+(color	eColorJoint				1.0 1.0 0.0 1.0)
+(color	eColorJointHighlight	1.0 0.75 0.75 1.0)
+(color	eColorLightAmbient		0.8 0.8 0.8 1.0)
+(color	eColorLightDiffuse		0.8 0.8 0.8 1.0)
+(color	eColorLightSpecular		0.8 0.8 0.8 1.0)
+
+; Custom 'toggles'
+(func_set_toggle	eSelect	1)
+(func_set_toggle	eRenderBoneZClear	1)
+(func_set_toggle	eRenderGrid	1)
+(func_set_toggle	eRenderFace	1)
+(func_set_toggle	eRenderMaterial	1)
+(func_set_toggle	eRenderLighting	1)
+(func_set_toggle	eRenderMaterial	1)
+(func_set_toggle	eRenderBbox	1)
+(func_set_toggle	eRenderSkeleton	1)
+(func_set_toggle	eRenderPickRay	0)
+(func_set_toggle	ePointJoint	1)
+(func_set_toggle	ePolyMeshBone	1)
+(func_set_toggle	eGLSLFragmentMode	1)
+(func_set_toggle	eGroupColors	1)
+(func_set_toggle	eFPSCap	1)
+
+
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;; mgtk widgets
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;
+; menu_item:
+;  (menu_item	"Label"		eEvent)
+;  (menu_item	"Label"		eEvent		number-or-subevent)
+;  (menu_item	"Label"		eEvent		"gtk-icon")
+;  (menu_item	"Label"		eEvent		"accel"			"gtk-icon")
+;
+; togglebutton:
+;  (togglebutton	"Label"		eEvent)
+;  (togglebutton	"Label"		eEvent		eSubEvent)
+;
+; expander:
+;  (expander "Label" boolean-opened ...)
+;  (expander "Label" boolean-opened "MLispSymbolBindName" ...)
+;
+;  (summonbox "MLispSymbolBindName" ...)
+;
+;  (scrollarea ...)
+;
+; (textbox "text" EVENT COMMAND)
+; (option_menu (menu_item ...))
+; (button "label" EVENT COMMAND)
+; (vbox homogenous spacing expand fill pading ...)
+; (hbox homogenous spacing expand fill pading ...)
+; (hslider EVENT min max)
+; (icon filename/iconname IconSize_*)
+	; IconSize_Menu
+	; IconSize_ToolbarSmall
+	; IconSize_Toolbar
+	; IconSize_Button
+	; IconSize_Dialog
+;(filechoosermenu_item "label" "dialog title" ["key"] eEvent "special" "icon")
+	;; Special file chooser options
+	; mode=create-folder|select-folder|(open)|save  
+    ; confirm-overwrite=true|(false)
+

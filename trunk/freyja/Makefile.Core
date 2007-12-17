@@ -1,0 +1,82 @@
+################################################################
+# freyja Core Makefile
+#
+# -- History ---------------------------------------------------
+#
+# 2007.05.11:
+# Mongoose - Created from old unified Makefile. 
+################################################################
+
+################################################################
+# Target name and Version
+################################################################
+
+NAME=freyja
+MAJOR_VERSION=0
+MINOR_VERSION=9
+MICRO_VERSION=5
+REVSION=10
+BUILD_DATE=`date +%Y%m%d`
+BUILD_ID=$(BUILD_DATE)
+VERSION=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION).$(REVSION)
+ARCHIVE_NAME=$(NAME)-$(VERSION)-$(BUILD_ID)
+API=$(MAJOR_VERSION).$(MINOR_VERSION).$(MICRO_VERSION)
+WEBSITE="http://icculus.org/freyja"
+EMAIL="mongooseichiban@gmail.com"
+LICENSE=LGPL
+
+################################################################
+# Common directories
+################################################################
+
+TREE_DIR=freyja
+SRC_DIR=src
+BUILD_ROOT_DIR=../bin/freyja
+
+################################################################
+# Common precompiler defines
+################################################################
+
+COMMON_INCLUDES=-Isrc -I../libmgtk/ -I../libfreyja/ -I../libhel/ -I../mstl/ \
+	-I../lua/
+COMMON_DEFS=-DVERSION=\"\\\"$(VERSION)\\\"\" \
+		-DBUILD_ID=\"\\\"$(BUILD_ID)\\\"\" \
+		-DBUILD_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
+		-DBUILD_HOST=\"\\\"$(BUILD_HOST)\\\"\" \
+		-DPROGRAM_NAME=\"\\\"$(NAME)-$(VERSION)-$(BUILD_ID)\\\"\" \
+		-DPROJECT_URL=\"\\\"$(WEBSITE)\\\"\" \
+		-DEMAIL_ADDRESS=\"\\\"$(EMAIL)\\\"\" \
+		-DHAVE_FREYJA_IMAGE -DHAVE_OPENGL -DHAVE_GTKGL -DHAVE_HEL \
+		-DPLANE_NOTIFY_WITH_AXIS -DUSING_OPENGL_EXT \
+		-DHAVE_FREETYPE2 $(shell freetype-config --cflags) \
+		-DLUAWRAPPER_FOUND -DLUA_FOUND -DLUA_WRAPPER_FOUND
+
+COMMON_CFLAGS=$(COMMON_DEFS) $(COMMON_INCLUDES)
+
+COMMON_LD_FLAGS=-lhel-0.0.2 -lfreyja-0.9.5 -lmgtk-0.2.10 \
+		-lluawrapper -llua51 -ltinyxml -lluawrapper \
+		-lGL -lGLU \
+		$(shell freetype-config --libs)
+
+################################################################
+# Object targets
+################################################################
+
+OBJS = \
+	$(BUILD_DIR)/freyja_events.o \
+	$(BUILD_DIR)/freyja3d_scenegraph.o \
+	$(BUILD_DIR)/misc.o \
+	$(BUILD_DIR)/Control.o \
+	$(BUILD_DIR)/ControlPrinter.o \
+	$(BUILD_DIR)/Cursor.o \
+	$(BUILD_DIR)/FreyjaRender.o \
+	$(BUILD_DIR)/FreyjaControl.o \
+	$(BUILD_DIR)/FreyjaOpenGL.o \
+	$(BUILD_DIR)/MaterialControl.o \
+	$(BUILD_DIR)/OpenGLPrinter.o \
+	$(BUILD_DIR)/Plugins.o \
+	$(BUILD_DIR)/RecentFiles.o \
+	$(BUILD_DIR)/Texture.o
+
+
+
