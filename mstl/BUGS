@@ -1,7 +1,0 @@
-
-  File    : BUGS ( 2004.11.01 )
-  Project : mstl
- --------------------------------------------------------
-
-  Tree ( 20041101 )
-	o Tree STL broken, root self pointer issue on balance
