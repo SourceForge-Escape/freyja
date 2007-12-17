@@ -1,0 +1,881 @@
+
+ ChangeLog 
+
+ Freyja 0.9.5, Kagura prealpha ( Development branch )
+ =====================================================================
+
+ Kagura prealpha, 0.9.5.18 () -- "Kagura prealpha"
+ TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fix for mgtk_color_set().
+ - Lua based user prefs script.
+ - New scene based system design.
+
+
+ Kagura prealpha, 0.9.5.17 (1135) -- "Crack'n bones"
+ 20071209 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Win32 build fix. (1135)
+ - Upgrading data pak will now backup your scripts.
+ - Fix for SystemIO::Basename and related file copy.
+ - New file data pak copy with versioning. 
+ - Little more UI refinement for the new sliders: ditched fill bg and handle slider.
+ - Using gdk to replace gtk+ for colored markers due to bugs in gtk+.
+ - Disabled colored markers in timeslider -- it triggered a gtk filedialog bug.  
+ - Range slider with simple motion event design.
+ - New rangeslider prototype checked in early due to hardware trouble.
+ - New timeslider has more high level events and proper range support.
+ - Removed deprecated Gtk+ signal hookup use in opengl_canvas.
+ - Renamed 'scrubber' to time_slider, which makes more sense to external projects. 
+ - New custom scrubber widget mostly done. (1127)
+ - Fix opengl_canvas mouse events now use exposure requests.
+ - Fix for crash loading generated perlin noise bitmaps due to obsolete code use.
+ - FreyjaImage converts 'indexed' images w/o palettes to greyscales now.
+ - Debug spew fix for mgtk tabs and toggle events.
+ - Cmake rule fixes, and new apt.sh script.
+ - freyja 0.9.6 roadmap cont.
+ - Improved a few icons in a tango style.
+ - Skeletal -> Morph mesh coverter back. (1126)
+ - Fixes for mesh vertex frame import methods.
+ - New log filename: freyja3d.log
+ - Roadmap update. (1125)
+ - Pakreader module updated for new mgtk_tree API.
+ - freyja3d client support for per node event binding. (1120)
+ - mgtk_tree now supports per node events binding w/ legacy event support.
+ - Lights and cameras added to read-only scenegraph.
+ - Skeleton rendermode determined by editing super mode.
+ - More UI design changes.
+ - Setting vertex editing mode enables vertex rendering automatically. 
+ - Fix mgtk_lua wasn't registering optionmenu id correctly. (1119)
+ - Proper collapse with expanders. (1118)
+ - Fix for egg plugin. (1117)
+ - Vertical toolbar GUI design test.
+ - Export skelmesh keyframe as mesh.
+ - Removed invalid import/export plugin path. (1116)
+ - Lua UI script fixes for handle box packing.
+ - Much less debug spew -- less confusion for users.
+ - Allowing for much longer print/log strings.
+ - Minor clean up in freyja.
+ - Fix for win32 window title update -- correct dir separator used.
+ - CMake based 'make win32' cross compiler wrapper. (1114)
+ - CMake based 'make deb' rules.
+ - Fixes for freyja.sh pathing. (1113)
+ - Fixes for Lua build issues on fedora. (1112)
+ - Fixes for freyja3d.lua -- querydialogs, misc issues, etc. (1104)
+ - Fixes for interface plugins. (1103)
+ - Legacy egg plugin fix. (1102)
+ - Plugins integrated with new CMake toplevel.
+ - Old toplevel GNU Makefiles are back as Makefile.old in ./ and ./plugins/
+ - Fixes for Lua optional/required builds by making wrapper the dependency. (1101)
+ - Showing Lua errors in assert dialog.
+ - Finished UI rollover to mgtk_lua / freyja3d.lua script.
+ - New opengl_canvas API to replace glarea/glext mess.
+ - Window title reflects save state.
+ - mgtk_lua cont: more widgets, signal fixes, etc
+ - mgtk icon support improvements.
+ - Bugfixes and minor clean up in Resource.
+ - Mgtk Lua support and clean up cont.
+ - New unit test for libmgtk.
+ - Pak VFS plugin ported to new mgtk_tree API.
+ - A little more mgtk_tree clean up to make it easier to maintain.
+ - *_rc_color mlisp implementation pushed down into libmgtk.
+ - Enforing GTK_IS_ENTRY again for mgtk_textentry_value_set().
+ - Skeleton tree widget is now a scenegraph control. (1071)
+ - mgtk_tree refactored to be more flexible and clean.
+ - Misc events moved out to its own file to start refactoring.
+ - Import/export plugin refactoring in client.
+ - Changed the order of the filedialog / plugin option dialog for import/export.
+ - Sorted import / export filters and menus.
+ - LLM basic import plugin.
+ - BVH basic import plugin.  
+ - Crash fix for certain TTFs used for texture generation.
+ - FIX Obsolete mstl use was removed.
+ - Copy mesh using blended vertices support and UI.
+ - Copy skeletal mesh keyframe to vertex morph keyframe support.
+ - Compressed file format test with gzip compression.
+ - Clean up in Mesh and Vector.
+ - FIX for Win32 lua GUI scripting support build issues.
+ - Win32 cross compile build system support for libluawrapper.
+ - FIX for toplevel make deb not calling cmake.
+
+
+ Kagura prealpha, 0.9.5.16 (1065) -- "On the roadmap again"
+ 20070916 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - New roadmap released.
+ - New design change for top level Save As... (1064)
+   You must now use Export menu/dialog to save to a plugin based format.
+ - FIX for Save As.. dialog triggers twice with text entry event.
+ - Various minor clean up for MaterialControl. (1063)
+ - New material recently used files menu button with support.
+ - FIX for material 'double save' caused by obsolete filedialog use.
+ - FIX for mstl list.
+ - MetadataRenderable renamed to Renderable to reflect there is no dependency.
+ - FIX UV selection not broken -- depends on material:mesh Id. (1062)
+ - FIX Face group assign set/clear now uses 2^n (bitmap) selector again.
+ - FIX for typesetting in OpenGLPrinter by offsetting drawlist.
+ - Fix for rotation axis selection. (1060)
+ - New full snippets menu for Metdata with serializer.
+ - MetadataRenderables working w/o shading or materials. (1059)
+ - Minor clean up in libfreyja.
+ - Stubs in place for MetadataRenderable. (1058)
+ - New 'Reset to defaults' color preferences button fixes 'black window bug'.
+ - New QueryDialog support for strings via entry and area widgets.
+ - New Metadata design with renderable icons.
+ - Fixes for octree mesh partitioning.
+ - mstl::String minor clean up and removal of legacy methods.
+ - Octree2 pushed into libhel.
+ - New libhel optional XML support via tinyxml ( first non-clib dep ).
+ - QuakeWars model support checked in.
+ - Various fixes in libhel thanks to new tests.  ^^
+ - New cmake based unit tests for libhel.
+ - Disabled debug output from GLFont texture generator. 
+ - New octree plugin. (1054)
+ - New freyja updated to bind new lua mgtk exports.
+ - New freyja and mgtk OpenGL draw functions for interface plugin use.
+ - New libluawrapper debian package.
+ - New libmgtk and libfreyja updated to use new lua wrapper library.
+ - New libluawrapper library.
+ - FIX for freyja.env lib/include paths on DARWIN. (1053)
+ - Roadmap changes as discussed, See TODO.
+ - FIX plugins are now built as bundles on OS X. (1052)
+ - New setup script installs so/dylib plugins for the user. (1050)
+ - FIX for powerpc arch (1045)
+ - FIX for big endian machine builds (1045) 
+ - FIX for win32 build of utpackage.exe ( It was making ELF binaries! )
+ - FIX Tools build.
+
+
+ Kagura prealpha, 0.9.5.15 (1042) -- "Bugfix quickfix"
+ 20070709 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - TODO updated.
+ - mstl file I/O warnings clean up.
+ - OS X OpenGL extensions enabled then disabled again.  Apple GLSL too buggy. 
+ - Documentation overload on website for how to build this project.
+ - FIX for win32 cross compiling meta make.
+ - FIX for pre Gtk+ 2.8 builds for file chooser overwrite. 
+ - Thanks to dtm for testing OS X builds, and acting as my compiler.  ;)
+ - FIX for OSX build. ( No cmake build based plugins yet. )
+ - FIX for CMakeLists.txt for explict libhel linking.
+ - BUGS updated.
+ - Downloads page build instructions updated -- thanks dtm for the report.
+ - Library versions recorded in log file to aid bug reporting.
+ - FIX for lua (Win32) plugin crash. lua's freyjaPrintMessage was passing nil.
+ - FIX for bone name rendering trashing 'icon' colors.
+ - FIX for perlinoise crash.
+
+
+ Kagura prealpha, 0.9.5.14 -- "Little things are nice too"
+ 20070702 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX Top level make can autogenerate debian packages with deb rule again.
+ - FIX for cmake/debian package generation for entire project.
+ - Removed pythonplug UI plugin, obsoleted by File shelf python macros.
+ - Made a Lua51.dll for win32 users.
+ - Win32 tinyxml build fix.
+ - Basis for camera editing mode, icons render based on mode.
+ - Reworked project planning document, so please read.
+ - Camera support in UI deferered to next release ( power outage due to storm )
+ - freyja_tombraider using freyjaCamera
+ - freyja_tombraider.cpp replaced arcachic 'List.h' use.
+ - CameraABI with animation support in backend only.
+ - New Keyframe API slowly being merged in parallel to old keyframe system.
+ - LuaABI: freyjaPrintMessage support, QueryABI support, minor fixes
+ - Minor icon clean-up.
+ - MeshABI using methods with info warnings -- better than stubs for mesh gen.
+ - LegacyABI removal from UI.
+ - Tombraider map loading as plugin option.
+ - Tombraider map plugin import no longer using legacy ABI. 
+ - New list stl, replaces random access list+tree used by old EGG codebase. 
+ - Links to forums / bugs / news. ( Auto network update next release. )
+ - Support for opening urls in browsers for windows and linux.
+ - Reworked various notes, bugs, and todo lists back into project.
+ - Python script fix in UI.
+
+
+ Kagura prealpha, 0.9.5.13
+ 20070625 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Version number bump.
+ - Keyframe metadata editor hooked up in UI.
+ - Python script integration such as Lua in UI.
+ - Select All/Unselect All hooked back up for vertices and faces.
+ - Shift+Delete new keystroke for delete object to avoid 'accidents'.
+ - Refreshed lua binding -- no query support yet.
+ - New libfreyja QueryABI for python/lua scripting limited UI queries.
+ - FIX for mesh bounding box intersect test.
+ - Mesh util method for edge and generic bbox selection
+ - SelectedVertices mode now allowed to scale with tool.
+ - SelectedVertices mode now allowed to select.
+ - FIX Huge bug in Repack() vertex face references using bad index.
+ - Minor style cleanup in Mesh header. ( Should break up the class sooner. )
+ - Lame full mesh subdiv support added with haste.
+ - Various minor Mesh API updates.
+ - Faces... mode can now do face selection.  ( great for paint tool use )
+ - Extruded faces autogen face normal now.
+ - Face extrude using face normals by default in UI again.  pick was confusing.
+ - Keyframe metadata methods for BoneABI.
+ - Vertex animator fixed.
+ - Update for mstl SystemIO: broke up classes, fixed namespace, C99 types.
+ - New QuatKeyFrame, replacing Euler linear interpolation stand-in.
+ - XML serialization for keyframes.
+ - Minor clean up of keyframe API, minor reduction/refactor.
+ - Decprecated Ja serialization in libfreyja.  ( Now in LegacyABI. )
+ - Midgard UI plugin checked into svn. ( aka trashcan plugin, full of test junk )
+ - Lua script integration in UI.
+ - Cmake update to automatically build support for python and lua if found.
+ - Metaprogramming fun - Lua binding for libfreyja.
+ - Skeleton rotation purge as a fix for garbage from some import plugins.
+ - Image based Heightmap importer for map making.
+ - FreyjaImage no longer alters greyscale images bpp or value default. 
+ - Forcing unit quats in bone ABI mutators. 
+ - 'Swiss army knife' file dialogs 'hidden' on menu ( use export/import )
+ - New mgtk_toolbar_menu_button, which can embedd bound submenus.
+ - New mgtk submenus can be bound to gobal symbols.
+ - File toolbar in shelf to save some more veritcal space.
+ - Simple heightmap and mesh geometry displacement editing.
+ - FIX UV faces render as wireframe w/o points if the mesh selected, and
+   material Id is different again.  This is correct behavior by design.
+ - Md5Model experimental export with guard to avoid model overwrites.
+
+
+ Kagura prealpha, 0.9.5.12
+ 20070617 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Win32 binary release plugins built early -- python support disabled.
+ - Win32 binary release built early -- plugins will be separate.
+ - Win32 makefiles reworked to build into the environment directly.
+ - Backed out release builds for freyja/libmgtk due to gtk+ modal bugs.
+ - Setup release builds for freyja, libfreyja, libmgtk, and libhel
+ - Asserts bulid even in release mode now.
+ - Style guidelines applied to FreyjaControl... it needs to be broken up.
+ - Minor reduction pass in FreyjaControl.
+ - Snippets tracer has improved path persistance via recentfiles abstraction.
+ - Disabled hardcoded auto pose/edit skeletal rendering. 
+ - Disabled 'default' directional light.
+ - Skeleton transform now updates bind pose itself.
+ - Skeleton transform controlled by model as well -- for now.
+ - FIX Md5Model mesh import.
+ - Selected faces won't take more weight painting to help unsteady hands.  =)
+ - Cheesy XML skeleton/mesh import path persistance.
+ - Ja export disabled in libfreyja as it is now obsolete for next release.
+ - Default to skip material 0 in XML meshes to avoid confusing users.
+ - RecentFiles abstraction, and some XML menu usage.
+ - Changes to skeleton transform for scaling.
+ - Added back Transform mode for skeleton via transforms box.
+ - Md5Model plugin updated to use the 0.9.5 ABI.  ( Upgraded from 0.9.1 legacy )
+ - MSTL String find_last_of().
+ - MSTL change ParseStringLiteral() caller no longer needs to deallocate string.
+ - Paint tool using toolbar weight variable.
+ - Paint tool toobar item use.
+ - New mtk_toolbar_item which acts as a box to embed widgets in toolbars.
+ - Quick hand drawn paint icon.
+ - Paint feature gets its own shelf and modes -- bonus material paint.
+ - FIX freyjautil Makefile
+ - Weight paint test -- Mesh mode paints 1.0f / Meshes... clears all weights.
+ - Directional light on by default if no point light is disabled.
+ - 3D Icon rendering changes.  ( Trying out shading to see how it goes. )
+ - Reduction of state changes/calls for skeletal/control point rendering.
+ - Skeleton colors using controllable UI colors once more.
+ - Skeleton color control for joints with UI and user prefs.  
+ - Paint object modifier tool.  ( selection, weak weight painting )
+ - Modifer event helper method.
+ - FIX: Forced clear of cursor rotate state for mesh. ( also fixes undo )
+ - Minor FreyjaRender clean-up pass while looking at a bug. 
+ - Removed IMM rendering flag and code.
+ - New config.h finally used for this project. ( you're welcome )
+ - Default material changes, including enabling texture by default.
+ - XML serializer for Material
+ - UI 'icon' renderers calling 1000% less trig functions for large models.  =p
+ - New control point 'icon' as list to avoid generating geometry over and over.
+ - New bone 'icon' as promised -- shaded to be pretty as well.
+ - Made minizip into library for use with the project.
+ - Mesh outline, I think everyone was annoyed with old visual feedback method.
+
+
+ Kagura prealpha, 0.9.5.11
+ 20070610 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Win32 debug build release held for testing after MAJOR changes to env.
+ - Ported gtkglext-1.2.0 to win32 build env.
+ - Had to aquire and build new gtkglext for Win32 bulid.
+ - FIX Win32 Gtk+ 2.10 environment. ( aka cross compiler build system )
+ - Released to public svn.
+ - Reactivated Mesh::TexcoordWeld, so look out for related per plugin bugs.
+ - Mesh, Weight, Face, Vertex XML serializers
+ - Mesh::Repack(), packs sparse object lists and buffers.
+ - New Plane checked in.
+ - Mesh allows welding NULL vertex objects
+ - FIX for weight/edge updates on welding vertex objects.
+ - FIX XML skeleton load updates tree view.
+ - FIX joint animation in correct units.
+ - Checking in 'partial' XML serializers. (skeleton/track/mesh/weightmap/etc)
+ - Lua + XML backend backed out for now.
+ - Various cmake fixes.
+ - Dropped the 'rich' GNU Makefiles, all projects use cmake for 'native'.
+ - Removed old C# prototype from svn
+ - FIX UV editor renderer was using incorrect texcoord array!
+ - SMD plugin: handles invalid uvs, keyframing, materials, etc
+ - New tinyxml checked into svn.
+ - Finishing up cmake for svn commit.
+ - Finished up separate GNU Makefiles per platform for svn commit.
+ - WIN32 defined used instead of looking for unix || darwin || etc.
+ - Build system using 'name versioned' libraries across platforms.
+ - Plane and Edge support in Mesh.
+ - FIX naming scheme of test ui control corrected for svn merge. 
+ - Separate Gtk+ 2.10 env / modeler packages made for win32 users.
+ - Clean up of shadow volume and connectivity support test.
+ - Fixes for stencil buffer support in context from mgtk on up 
+ - Shadow volume patch, since shadow maps where removed a while back.
+ - New build system cont.
+ - FIX OBJ plugin reverts to "C" locale for LC_NUMERIC now to avoid 'german bug'.
+ - FIX proper gtk version macros for 'homemade' overwrite dialog. 
+ - New Win32 cross compile environment with Gtk+ 2.10
+ - Build system update cont.
+
+
+ Kagura prealpha, 0.9.5.9
+ 20070507-20070513 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Windows build and release -- disabled autologging for asserts, etc for XP
+ - Custom file overwrite dialog for Win32 build for mgtk_filechooser_blocking().
+ - Disabled all the old 'FREYJA_MODE' save file dialogs.
+ - 'Aninmation' file mode is now the same as 'Model' file mode.
+ - Pakread plugin files/dir vertical now to aid browsing.
+ - Disabled cute icon/label for pakreader plugin to save vertical GUI space.
+ - Enabled XOR decryption behind vfs facade for UTPackage vfs use.
+ - UTPackage plugin fixes for VFS use.  Now works with VFS and L2E ui plugins.
+ - If there are no options for import plugin don't show the querydialog.
+ - FIX crash in VFS support getting garbage virtual files from plugins.
+ - Pak VFS support enabled with expilict plugin flags via import only. 
+ - ASSERT for OpenGL context creation failure.
+ - FIX generated file dialog crash on certain cancel operations.
+ - Pak VFS support disabled in FreyjaControl.
+ - Bone metadata editor saves values to bone now.
+ - Lineage II plugin now uses Plugins.. menu instead of UI panel.
+ - Dynamic filechooser menuitem.  ( you have to be uber strict with eids )
+ - Dynamic mgtk main/submenus for C/C++. ( mlisp is still prefered )
+ - Skeleton UI clears now.
+ - FIX skeleton tree widget was leaking trees data structures.
+ - FIX bone pool wasn't flushing allocated joints.
+ - Removed/refactored more obsolete code from FreyjaControl.
+ - Bone and Vertex pick tolerance set to be 'tight' now.  
+ - Bone iterator event hooked into pick selection/name/id.
+ - Selected Vertices transform box support added back.
+ - Simple pose / bind auto toggle on mode change.  Also names swap now.
+ - Pick UI minor refactor, including select/unselect object combined.
+ - Skeletal UI updated on plugin import.
+ - New cmake build system in private branch ( with new math tests ).
+ - FIX for vertex unselect
+ - FIX crash in OpenGLPrinter
+ - Removed garbage code in bone selection by pick ray.
+ - Bone duplication, scaling|mirror, etc to aid bisymmetry skeleton creation.
+ - SMD plugin update to support skinning on export.
+ - MeshABI fix for C export, new weighting support functions. 
+ - FIX Import/export filter default selection.
+ - SMD export update -- legacy API use removal.
+ - Dynamic Import menu using file modules directly.
+ - freyja direct module based import function like the old exporter.
+ - Dynamic Export menu using file modules directly.
+ - New blocking file dialog, which doesn't touch either event system.
+ - More auto reparenting -- parent->children list updates directly from ~child.
+ - Import/export settings per plugin are maintained per session.
+ - Import/export menus hooked up to dialogs generated from plugin 'args'.
+ - More event clean up in FreyjaControl -- removed last of old handlers.
+ - Minor pick ray cast clean up.
+ - New plugin Makefiles.
+ - FIX proper C export in mgtk library, and documentation update.
+ - Minor clean up in FreyjaRender.
+ - Animation mode file New disabled.
+
+
+ Kagura prealpha, 0.9.5.8
+ 20070429-20070506 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Character FK test passed, but UI could use much work and a tutorial.
+ - Removed false assert in old tube generator.
+ - FIX bone serialization using to ensure file portability. ( UINT_MAX->signed )
+ - FIX backend skeletal system enforces basis world pose updates.
+ - FIX bone selection pick and render improvements for world pose.
+ - FIX cursor ALL pick fix via distance check.
+ - FIX Notify orientation axis render.
+ - FIX Deleted bone clean up now handles bind pose correctly.
+ - Delete bone confirmation dialog.
+ - UV face intersection support is back with selection UI. ( Use Face mode. )
+ - Colorcube texture generator as part of perlinnoise plugin.
+ - Checkerboard texture generator as part of perlinnoise plugin.
+ - Gradiant texture generator as part of perlinnoise plugin.
+ - Old event2i event wrapper moved outside FreyjaControl
+ - Stopgap fix for reverse cursor bug ( does not close bug )
+ - Fix smaller hit boxes, slight rot improvement for rotation Cursor.
+ - Debug visualization for cursor rotation hit boxes.
+ - Cursor class cleaned up a little.
+ - Fix for save dialog triggering twice on 'clicked'.
+ - Fix for the most annoying modal logic bug ever.
+ - Minor refactor of the file save as... event path to reduce gtk+ 'echo'. 
+ - New mgtk event for arrays of strings. 
+ - Replaced mgtk slider event with 1u and 1f events.
+ - Fix for OpenGL print2d use for view titles.
+ - Project style enforcement to help code generator / parser
+ - Import/export menus changed to dynamic menus. ( Still just a wrapper. )
+ - Refactored iterator events.
+ - Removed legacy event codepaths, kept old menu event fallback
+ - Reworked the interface a little, and weighting is in the toolbar now.
+ - Sidebar hide test
+ - FIX bind pose update for children on cursor transforms ( New API )
+ - FIX New model refreshes context again
+ - LineageII UI plugin update - open raws in modeler directly, ui changes
+ - Bone transforms box fix
+ - Skeleton / Bone ABI changes
+ - Bone selection/cursor placement tweak
+ - BinePose update API cleanup
+ - FIX SMD plugin updated for new API
+ - FIX relative FK skinning / transforms with API changes 99% done.
+ - API change for Bone::UpdateBindPose(..) is now root->child.
+ - Skeleton3 state event and user preferences for skeleton view states.
+ - Information dialog made cleaner.
+ - ADD all stable API dialogs should have generated icon buttons now. 
+ - FIX for bone selection by pick ray ( It was broken by API correction. )
+ - FIX Updated PSK plugin using modern API ( It was still using legacy )
+
+
+ Kagura prealpha, 0.9.5.7
+ 20070429- Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Some more misc skeletal fixes / features
+ - Object info mode
+ - New version numbering to sync packages better and better book-keeping
+ 
+
+ Kagura prealpha, 0.9.5.6
+ 20070415-20070428 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Bind pose blending for skinned meshes fixed.. still doing major changes
+ - Tinkering on the skeletal system ( oh man, it needs it )
+ - Fix 3ds plugin unknown material attr handled better
+ - Updated ResourcePlugin to fix possible link / build issues on some compilers
+ - Optional memcpy via a 'non-class' flag in mstl::Vector
+ - mstl::Vector fix for operator =
+ - QueryDialog for improved locale support and UI sanity
+ - MLISP detailed assert polish -- helps debugging mlisp 
+ - New icons for ring, circle, cube, sheet, tube
+ - New 'ring' mesh generator
+ - New 'pinwheel' circle mesh generator ( legacy removal dep )
+ - Fix for bad mesh creation from 'sheet'
+ - Crash fix for OBJ plugin export
+ - Model Open/Save changed to method delegates
+ - Removed header install from install rules ( for -dev package separation )
+ - Got a bug tracking system for free ( yay )
+ - Bone name rendering toggle.
+ - Packaging fix for package hel include dir getting removed.
+ - DOF plugin done really quickly ( import only for now ).
+ - Logging fix, asserts hooked up to logging directly
+ - OpenGLPrinter caption, 3d ( skeleton ) test patch checked in
+ - UI Plugins no longer attach to Plugins... menu if they don't have menuitems.
+ - Fix for perlinnoise ui plugin texture upload event path.
+ - OpenGLPrinter hooked up with FONT symbol in resource.
+
+
+ Kagura prealpha, 0.9.5.5
+ 20070408-20070415 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Debian package fixes, Debian plugin auto packaging in make system
+ - Various win32/public build fixes, missing dlls, changes
+ - Assert MsgBox for libmgtk asserts
+ - Buffer msg for assert and make it 'pretty'
+ - Assert MsgBox for libfreyja / freyja asserts
+ - OpenGLPrinter using TTF via freetype2, old SDL_ttf code removed
+ - Very minor fix for FreyjaImage::saveImage ( ye olde sw renderer era class )
+ - Pruned more unused/obsoleted code in UI
+ - Removed last of non-enum numeric events ( verified dead code even )
+ - TODO update to make more sense!
+ - Interface plugins moved from freyja to toplevel plugins
+ - Win32 build fixes
+ - Win32 pthreads support ( only used by trival libhel join test for now )
+ - Win32 pthreads for freyja-win32-env build environment
+ - Fix for obj plugin ( seems it wasn't updated with hel refactor )
+ - Added name handles to several plugins, more details on plugin init
+ - Some tweaks to libfreyja Printer and mgtk
+ - New Control class, cont to move away from legacy framework
+ - New MaterialEv - first refactored control class
+ - Mgtk textview widget, textview query dialog
+ - Mgtk statusbar widget decoupled from gl widget ( break from legacy )
+ - Mlisp fix for animation scrubber
+ - Plugin updates to match new math lib
+ - Tweaking final usage / ordering of some math types
+ - libhel partial update: namespacing, new classes, single math, cont
+ - Shuffling UI events around, breaking up into classes
+
+
+ Kagura prealpha, 0.9.5.4
+ 20070109-20070407 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Major changes in the event system usage ( mostly delegate based now )
+ - Minor changes to match style guidelines for improved readability
+ - Reworking/Removing very, very old code and refactoring FreyjaControl 
+ - No more warning/error about models w/o skeletons ( confused users )
+ - Linux no longer using lazy linking, now uses callbacks just like other OS
+ - More fun with MethodDelegate, starting to unify C++ callbacks
+ - Removed old confirm dialog callbacks use
+ - Support for method delegates in mgtk events starts...
+ - Confirm dialogs in mlisp for more strings table support
+ - Fix for ModelOpen event
+ - New matrix class used in dependent systems
+ - New mstl::Delegate, mstl::DelegateThread, minor mstl fixes
+ - New mstl::StopWatch, Timer fixes, etc
+ - libhel update: Mat44, unit tests, and parallel algorithm testing 
+ - Dialog plugin selection affects module explictly now
+ - Plugin API updates, fixes -- mostly to control explict usage
+ - SMD using plugin args -- needs polish before commit
+ - Fixes for Windows issues in 0.9.5.1py -> 0.9.5.2py
+ - Improved OpenGLPrinter codebase
+ - Direct TTF support via FreeType, removed SDL_ttf dep
+ - Nod plugin update: removed legacy mesh, fixes mats/weights/groups/etc
+ - Mark face alpha in UV / selected faces ( For depth sorting list )
+ - niflib ported to gcc
+ - New libfreyja win32 and win32-python build rules
+ - mgtk resource path callback fix for win32
+ - Python script UI plugin for freyja
+ - Python support for win32
+ - Fix for libhel using obsolete VectorIterator instead of foreach()
+ - FPSCap toggle in mlisp
+ - Obj export back w/ smoothing group and material support
+ - UV fixes
+ - Tune up of BoneABI and related ABI
+ - SystemIO updates to handle direct memory and chunk loading in BFR
+ - Milkshape export minor fixes
+ - New fGroupColors option, so you can disable it for unlit texture renders
+ - lineageIIraw2obj updated with new automatic extractor ( spec updated too ) 
+ - lineageIIraw2obj updated with new pattern matching system, etc
+ - Obj plugin no longer using legacy ABI ( fix for UV import issue too )
+ - Few more tools build fixes
+ - Win32 plugins should load path relative plugins as expected now
+ - tools build update
+ - libfreyja Plugin updated
+ - Fix for freyjautil.exe build
+ - Fix for freyjautil
+
+
+ Kagura prealpha, 0.9.5.3
+ 20061213-20061231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fix for FPS Cap across all supported platforms
+ - Fix for mstl Timer
+ - Fix for latest Gtk+ 'shrinking' the animation slider and toolbar
+ - Fix for bad base index into vertex array in some vertex transforms
+ - Reworking how Faces... is transformed and undo is built
+ - Lots of nice new Mesh transform methods
+ - Fix for quad ray picking
+ - Legacy replacement for mesh tesselation
+ - Fix for crash on moving deleted face!
+ - C based float query dialogs ( very nice )
+ - Got a couple of mesh generation legacy replacements in today
+ - Removed some dead source in mgtk and update MLisp API
+ - mgtk toolbar_box widget removed
+ - Fix for mgtk toolbars not showing tooltips after deprecated API removal
+ - Gtk+ toolbar deprecated API use removed ( No more spewing Gtk+ warnings )
+ - Win32 FPS cap off
+ - Fix for Win32 png and jpeg image plugin Makefiles
+ - Win32 build GLSL support handles OpenGL 1.1+
+ - Win32 build fixes
+ - Touch up for the trusty String class
+ - Fix for double save due to odd Gtk+ event using static guard in UI
+ - Removed compile time support for old fileselection dialog 
+ - Partitioned off file dialog in mgtk
+ - Debian package for freyja includes user data again ( oops )
+ - Hooked up faces... delete to generic delete
+ - Fixed mesh copy/cut/paste ( single meshes only for now )
+ - Merge selection fix, bounding vol update on merge, center update on vol delta
+ - Fix Multimesh selection boxes 
+ - Snap-weld distance in UI for vertices
+ - Delete object accel <delete> key, Dupe object Ctrl-D
+ - Fix for legacy call not purging all meshes causing a crash with clear()
+   which caused pools to fill with duplicate objects
+ - Fix for some pools allocating too many slots to one object
+ - Fix print info
+ - Automatic C# libfreyja binding python script
+ - Avoid crash generating UI tree for bad data
+ - Vertex welding by tolerance distance
+ - Unreferenced vertices are stripped on face deletes now
+ - A few sample shaders provided
+ - Material support for shaders back in ( shaders will serialise and set )
+ - GLSL example programs for per-pixel lighting, etc
+ - Pretty GLSL compile and link error/warning dialogs
+ - Vertex program automatically loaded based on fragment filename
+ - More packaging and rules fixes
+ - New snapshot packaging rules
+ - New debian packaging rules, partial osx rules merge, cleanup
+ - Merging debian control files, etc into svn
+ - Merging FreyjaOpenGL and the aging Texture class begins
+ - Lots of packaging and fixing package bugs
+ - More ABI cleanup to purge legacy usage
+ - All plugins should build again, but many use legacy ABI
+ - Bone rendering now user prefs controlled
+ - libfreyja FreyjaImage support for more plugin paths
+ - All freyja iterator/fsm code marked legacy status
+ - GLSL / ARB fragment UI control and info dialog debugging
+ - Some more plugins updated to 0.9.5 ABI
+ - Fix for linux snapshots ( missing freyja.sh shell script )
+ - linux ia32 python2.4 enabled snapshot builds
+ - Support for OpenGL GLSL fragment programs
+ - Support for OpenGL ARB fragment programs
+
+
+ Kagura prealpha, 0.9.5.2
+ 20061124-20061212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Fixes, packaging, and porting for release
+ - UI plugins' build fix
+ - Fix for bad TextureABI usage
+ - Cleaned up some very old OpenGL code and removed the need to toggle
+   ARB multitexture calls for broken gl headers
+ - Python plugin crash fix caused by garbage input strings
+ - More API / ABI clean up for upcoming release
+ - UI plugin to call any python plugin from inside modeler 
+ - Python plugin support hooked up
+ - Python binding generator... written in python for fun
+ - Legacy free plugins: milkshape
+ - Freyja text format supports 'gaps' now
+ - Slash and Burn: Various legacy ABIs either completely removed or partitioned
+ - Mesh merge/dupe/split/mirror/multiSelect hooked up in UI
+ - Ask me if I'm brave -- replacing RenderModel a few days before RC2  =)
+ - Touching up Mesh class to remove legacy usage like vertex list delimiting
+   anding things like internal / external object split/merge/etc operations
+ - Per group normal flipping
+ - FIX for render error in FreyjaRender::DrawUVWindow and removed legacy code
+ - FIX for Mesh::UpdateVertexReferenceWithSelectedBias() wasn't clearing cache
+ - Mesh scale is now a 'scale about cursor' operation
+ - freyja text format support for all track types
+ - Dump serialized mesh pool's stack if array is empty ( no undo to disk )
+ - freyja text format flushes materials before loading now
+ - More freyja text format polish ( can autoload materials via callback, etc )
+ - The blood of an Elf was taken to purify this release
+ - ChangeLog date stamp now is range of first patch to 'release' 
+   instead of first patch, which confused people to no end.
+
+
+ Kuroi Kinyoubi 
+ 20061124 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Mesh API clean up cont... 
+ - Fixes for freyja modeler material load / editor UI updates
+ - Text based 'freyja' file format for 'native' testing ( no anim / skel yet )
+ - MeshABI update cont ( including file I/O )
+ - Bigger UI update than intended  ;)
+ - Fix for material blending
+ - Several plugins fixed after ABI change: mdl, 3ds, mel, etc
+ - Run around and made sure plugins at least built with ABI changes
+ - Disabled some plugins there were never implemented and shouldn't have
+   been checked into svn
+ - Legacy MeshABI calls moved into separate object or completely removed.
+ - FIX Ja and legacy ABI weight support back
+ - FIX to make selection box dominate over 'move'
+ - Control points and bounding box selector added back ( kinda hacky )
+ - User preferences set in UI now persist without editing any files
+ - 'Old school' weighting assignment ala freyja 0.8.x added back
+ - FIX scale in orbital view
+ - FIX for pick bones with mouse wasn't logged here
+ - Skeletal debug rendering
+ - Forgot to mention autokeyframe was merged in.. isn't that important?  ;) 
+ - FIX for cursor placement/mode with 'keyboard modifier modes'
+ - FIX for Bone creation/root transforms
+ - FIX Bone/Joint editing fixes -- don't worry it's still mostly broken
+ - FPS cap at 60fps
+ - Simple timer mstl::Timer
+ - Documentation clean up
+ - FIX for soft breakpoint insertion on i386 arch builds
+ - Curve view KISS - <Object mode, Current selected> eg 'Bone, 1', 'Mesh, 0'
+   No editing still, since I might add b-splines or something nice later
+ - Minor plugin touch ups
+ - FIX for face select by group
+ - Skel Vertex blending in interface and backend ( for vertex morph conversion )
+   Still pretty buggy
+ - Many minor ABI updates and util functions related to skeletal keyframes
+ - New BoneTrack implementation to 'split' rot/loc, inside a pretty API
+ - FIX plugin directory system now weeds out dupes and filters
+   for 0.9.5 version by directory naming
+
+
+ 20061102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - FIX free view zoom
+ - FIX free view wasn't generating correct pick ray when scene translated
+ - FIX Scale/Move cursor working in oribital view
+ - FIX tools build for 0.9.5 and some useful scripts for lib path / debugging
+ - Finally wrote a generic buffered file reader class to speed up loading
+ - Unit testing maddness as it's time to polish up and bug fix
+ - SDLUnitTest fixed up to use the older versions of classes it depended on
+   and work with other newer APIs
+ - Some plugin updates for keyframes, skeletons, etc
+ - FIX jpeg and png plugins Makefiles didn't link to required libs
+ - Ported all the interface plugins to use new 'summonbox' widget,
+   which means you can see plugins when you're in fullscreen now via the tab
+ - FIX Bug in mgtk vargs peek ( it's about time to swtich to full mlisp )
+ - New expander option to let you 'seat' other widgets inside ( even plugins )
+ - FIX Application plugin system attempts to only open files with proper ext
+ - FIX Material names no longer 'nuked' by any interface usage
+ - FreyjaRender changes to use arrays based rendering for solid, no material
+ - FIX Oh yeah... forgot to fix the damn rotation cursor did that now  =)
+ - Select multiviewport 'window' by clicking instead of silly spinbutton
+ - New GL arrays based rendering (memory shared in 0.9.5, so no extra overhead)
+ - Vertex animation you can see  ;)
+ - FIX Texture uploading in perlinnoise plugin wasn't hooked to mlisp
+ - Only load filenames checked to module extentions at least ( save some time )
+ - FIX for some texture/material rendering issues
+ - FIX UV projections fixed, but not improved besides adding forced guides
+ - FIX Keyframes should be able to use the Transform Box now
+ - Guide UV unwrap using crappy uv gen algorithms for now
+ - Mesh copy/cut/paste back in, however doesn't behave the same
+ - Some new transform implementations
+ - Groups utils ( very niice )
+ - FIX UV window now bound to fMaterial to toggle color cube / material
+ - Lame skeletal animation test in using linear interpolation ( no skinning )
+ - JA v1 extention to save smoothing groups ( upwards compatible )
+ - FIX mesh normals saved back correctly in JA v1
+ - New expander widget ( widget crazy this month it seems )
+ - Interface for smoothing groups, selected faces gets normal gen
+   usage in backend too
+ - New UI elements, fixes for toggle buttons, and new dual events/vargs
+ - OpenGL extentions enabled again, please report bugs
+ - Removed age old COLORED_POLYGON support ( this was very old )
+ - 'Solid plane' for testing out models in orbit view unleashed
+ - Misc fixes, material UI moved to shelf
+ - Toolbar seperator
+ - Keyframe/Track serialization routinues ( yay )
+ - New Skeletal animation keyframes
+ - Curve editor test starts ( just outputting linear interpolation atm )
+ - Vertex animation added to mesh in backend ( no interface yet )
+ - Fix for mesh keyframe rotation
+ - Keyframe backend test with mesh animation done
+ - FIX for the pull down modifier events
+ - FIX for scale cursor 
+ - FIX rotation cursor reversal bug
+ - Material control 'shelf tab' -- very nice
+ - Light 3d cursor events hooked up real quick
+ - Tune up for backend keyfame implementation ( ch-ch-changes )
+ - Unsmoothed/filtered keyframe animation test for 'Pos' 
+ - FIX for animation scheme not being able to adjust viewport offset
+ - FIX recent files with spaces should cache and reload now
+ - User controled four window render setting ( Not all controls hooked up )
+ - Reverse Engineer plugin UI updated
+ - 'Radio toggle' fix for various modifier and major modes
+ - Removal of a ton of obsolete code
+ - Style clean up in FreyjaRender to guidelines, so it's more readable
+ - Viewport code clean up and new dynamic control
+ - FIX utpackage vfs loads correct human readable labels now
+ - Animation/key toggles from mesh / skeleton editing to animation modes now
+ - Curve editor window test ( just a render test don't wet yourself )
+ - Four window view test for pref controlled window
+ - FIX for Free view not rendering model
+ - New UI for keyframing
+ - Refactoring KeyFrame API, so it can be extendable to all object types
+
+
+ 20061021 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - Improved mgtk tree system with new helper layer
+ - mgtk generic tree update
+ - mgtk removed extra checking code, leaks, etc
+ - mgtk using MSTL assert messages ( for fun debug sessions )
+ - Tinkering with 3d transform cursors
+ - BoneABI World pos accessor ( doesn't use cached transforms yet )
+ - Cleaned up prefs dialog with tabs
+ - Some more trashy new icons
+ - PickRay visibility toggle enabled in interface
+ - Removed libfreyja CopyModel subsystem
+ - Removal of some dead libfreyja code
+ - UI hook up for new skeleton backend slowly finishing up
+ - Unified 'toggle' event widgets to sync in mgtk layer not app
+ - Added colored lighting back in
+ - Bone color prefs
+ - Stubs for various things like vertex/uv radius settings and toggles
+ - 'View' toolbar completely disabled you can reenable it via uncommenting
+   the code in your freyja-dev.mlisp file and restarting freyja
+ - mgtk menu_item_toggle for check/togglable menu items ( closes todo )
+ - Bounding volume on selected mesh render toggle ( closes todo )
+ - UI reduction / changes for more screen space for meshes
+ - Lots of misc changes
+
+
+ 20060820 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - Updated TODO
+ - Interface evolution continues
+ - Bone pick / name edit from tree *was checked in
+ - Forgot to mention new command pattern system
+ - Removed some old classes no longer needed
+ - Model transforms
+ - Mesh selection ( with per face collision )
+ - Finishing up testing of some features before view abstraction
+ - UV editor fixes
+ - Material editor fixes 
+ - Operations over multi-selected objects
+ - Undo for about all the currently working features
+ - More 'ideal planes' for editing
+ - Cursor/Ray/View fixes
+ - All plugins rewritten
+ - FreyjaFile* replaced by mstl SystemIO
+
+
+ 20060803 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - Major rewrite/refactor of MVC into a View and Controller to be used
+   as a template for the new Plugin Arch style control scheme
+ - Merging FreyjaControl and FreyjaModel into a single class, and will
+   then break it up into new InterfacePlugins as needed
+ - Crash fixes
+ - Lots of refactoring 
+ - New 3d cursor geometery to look more 'pro'
+ - All new Ray casting and controls using it
+
+
+ 20060704 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - Crash fixes
+ - Local plugins 
+ - New test system to avoid installing to test the whole system
+ - Minor clean ups all around 
+ - Masssive build update
+
+
+ 20060617 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - Fixes for mesh creation and rendering
+ - Updates to build system
+ - Finalized new plugin build structure
+ - Egg removed
+
+
+ 20060430 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - 0.9.5 build with stubs ( Has 0.9.3 API wrappers to 0.9.5 API )
+ - Code clean up
+ - FreyjaFSM a real singleton now --
+   Kids don't use this in plugins use the C ABI for state machine access
+
+
+ 20060423 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - win32 builds of lineageII tools
+ - Several bug fixes
+ - New boundingvolume update in libhel
+ - All new libfreyja Mesh class ( not hooked up yet )
+ - Minor refactoring pass in libfreyja cont
+
+
+ 20060304 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - Minor refactoring pass in libfreyja
+ - Generic transforms like 0.10 for trunk ( new implementation )
+ - Undo test converted into full subsystem with serialization support
+
+
+ 20060225 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - bsa.so plugin enabled in build again
+ - Fix for FreyjaFileReader integer reads on 64bit arch
+ - 3d cursor UI with test control off vertex move
+ - Fix for renderModel fucking up matrix stack
+ - Light controlled by 3d cursor test in free view
+ - Bone translate controlled by 3d cursor test in free view
+ - KeyFrame from dancer in libfreyja trunk
+ - Fix for stack
+ - Undo test for bone transforms in free view using 3d cursor
+
+
+ 20060216 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - Python plugin requires USING_PYTHON define now
+ - Fix for Makefiles to build on AMD64 and newer gcc 4s
+ - Fix for vargs bug in freyja_print_args for newer implementations
+
+
+ 20050831 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - libfreyja backend for anim/keyframing
+
+
+ 20050830 Terry 'Mongoose' Hendrix II  <mongooseichiban@gmail.com>
+ - psk.so Fix for dancer skeleton loader
+ - freyja (win32) freyja.lnk and freyja.ico added to svn
+ - freyja Fix for material texture loading to automate ids, etc
+ - md5.so Fix for new skeletal system
+ - Started new changelog for trunk, since svn logs are lacking
+ - bmp.so Color fix and vertical flip
+ - 3ds.so Fix for crash causing dozens of NULL materials
+ - libhel Fix for Quaternion <--> Euler math, new unit test
+ - libfreyja Fix for dancer bone renderer
+ - various model plugins updated for new Bone ABI
+ - libfreyja New dancer bones backport to trunk finished and commited
