@@ -1,0 +1,12 @@
+Source: libluawrapper
+Section: unknown
+Priority: optional
+Maintainer: Terry Hendrix (Mongoose) <mongooseichiban@gmail.com>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 5.1.0
+
+Package: libluawrapper
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: The tinyxml support library for freyja.
+ This is a library facade for multiple linkage of lua.
