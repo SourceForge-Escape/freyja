@@ -1,0 +1,142 @@
+ ===================================================================
+
+  Title   : Freyja Gnome Requirements
+  Version : 0.3.0
+  Author  : Terry 'Mongoose' Hendrix II
+  Date    : 2001-08-23
+
+ ===================================================================
+
+ 0. Using this document
+
+ 1. Overview 
+
+ 2. Subsystems 
+
+  2.1. Rendering system
+
+  2.2. Modeling system
+
+  2.3. Particle system
+
+  2.4. Shader system
+
+  2.5. Animation system
+
+  2.6. Plug-in systems for backend
+
+  2.7. User Interface
+
+   2.7.1. Gnome interface
+
+   2.7.2. Plug-in systems for interface
+
+ ===================================================================
+
+ 0. Using this document
+
+    This is a living document, so please check back often for changes
+    and updates.  Feel free to contribute to the requirements.  If
+    you don't ask for a feature that's not here, then you'll be be out
+    of luck once this project goes back into implementation phase.
+
+    Requirements is the most important document in the project.  It's
+    this document that is the true base of the project.  All code,
+    metadata, and scripting starts here.  I know I have a huge 
+    collection of tracers in the project, but they are just as much 
+    for prototyping as much as use.   I will remove and replace a lot
+    of the codebase for Freyja Gnome 0.2.2.
+
+    If you wish to contribute to the project, please contact me at
+    the given email address.
+
+ ===================================================================
+
+  1. Overview
+
+       Freyja isn't a large monolithic program.  It uses modular
+       subsystems, and is able to load plugins at runtime to add
+       custom features.
+
+       Freyja will soon fracture into more atomic peices for use 
+       in the Freyja_Gnome modeler and OpenRaider.  freyja_image,
+       freyja_egg, freyja_particle, and etc will become seperate
+       library projects.  This focuses on the Freyja_Gnome modeler
+       and freyja_egg.  However they'll all be laid out here in 
+       part.
+
+
+ 2. Subsystems 
+
+  
+  2.2. Modeling system
+
+       The modeling system renders, controls, and stores geometeric
+       and animation data.  It also has a plug-in interface for
+       interpolibility and to add custom features.
+
+   2.2.1. Model structure
+
+          The model structure follows the Egg v9.xx spec outline.
+          This format handles vertex morph, bone1, bone2, and tag
+          animation techniques.  It also handles external systems
+          by allowing metadata stored in the file/memory format to
+          classify, identify, and control 3 space positioning via
+          a metadata marker.
+
+          Mesh types: Framed_Mesh, Static_Mesh
+          Bone types: Tags, Bone1, Bone2
+
+   2.2.2. Model interface
+
+   2.2.3. Model rendering
+
+   2.2.4. Modeling plug-in scripting
+
+  2.3. Particle system
+
+  2.4. Shader system
+
+   2.4.1. Shader editor
+
+          Allow user to build custom shaders by choosing:
+          textures ( ordered layers ), blend func, and etc
+
+          Shader is bound to a mesh.  
+          + Edit a mesh at a time
+          + Redo drawing to handle this
+
+          shader
+          {
+            string : texture filename
+            index : texture id
+            index : blend func
+            bool : alpha enabled
+            ...
+          }
+
+  2.5. Animation system
+
+  2.6. Plug-in systems for backend
+
+   2.6.1. Plugin init
+
+          Load all plugins in plugin dir, and check using new
+          plugin-check() and some kind of version string/header.
+
+  2.7. Interface
+
+   2.7.1. Render
+
+   2.7.2. Model
+
+   2.7.3. Gnome interface
+
+   2.7.4. Plug-in systems for interface
+
+
+ ===================================================================
+
+
+
+
