@@ -1,0 +1,21 @@
+
+ TODO
+
+	o Update Quaternion computations, add unit test
+
+ ChangeLog
+
+ libhel-0.0.1 20050108
+	o libsetup.sh update
+	o Did some tweaking to libhel Quaternion and Vector3d classes
+
+ 2004.12.24:
+	o Fix for include issues with GCC 3.4
+
+
+ 2004.08.06:
+	o Fix for new mstl interator use
+
+
+ 2004.xx.xx:
+	o Fixed Matrix vec3_t multiply to use correct translation indices
