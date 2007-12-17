@@ -37,28 +37,35 @@ class Printer
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Printer() {}
+	Printer();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructor.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual ~Printer() {}
+	virtual ~Printer();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Deconstructor.
 	 *
 	 ------------------------------------------------------*/
 
-	static void Log( const char* filename, const char* format, ... );
+	virtual void Log( const char* filename, const char* format, ... );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	static void Print( const char* format, ... );
+	void Print( const char* format, ... );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void PrintArgs( const char* format, va_list* args );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -72,13 +79,43 @@ class Printer
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void PrintError( const char* s );
+	void PrintError( const char* format, ... );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void PrintErrorArgs( const char* format, va_list* args );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void PrintErrorMessage( const char* s );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 };
+
+
+////////////////////////////////////////////////////////////
+// Inline methods
+////////////////////////////////////////////////////////////
+
+inline
+Printer::Printer()
+{ 
+}
+
+
+inline
+Printer::~Printer()
+{ 
+}
 
 
 inline
@@ -165,7 +202,51 @@ void Printer::Print( const char* format, ... )
 
 
 inline
-void Printer::ErrorArgs( const char* format, va_list *args )
+void Printer::PrintErrorArgs( const char* format, va_list* args )
+{
+	char buffer[1024];
+	unsigned int l;
+
+	/* Strip message of an trailing carrage return 
+	 *  and print to stdout and the status bar */
+	vsnprintf(buffer, 1024, format, *args);
+	
+	l = strlen(buffer);
+  
+	if (!l || !buffer[0])
+		return;
+
+	if (buffer[l-1] == '\n')
+		buffer[l-1] = 0;
+
+	fprintf(stderr, "%s\n", buffer);
+}
+
+	
+inline
+void Printer::PrintArgs( const char* format, va_list* args )
+{
+	char buffer[1024];
+	unsigned int l;
+
+	/* Strip message of an trailing carrage return 
+	 *  and print to stdout and the status bar */
+	vsnprintf(buffer, 1024, format, *args);
+	
+	l = strlen(buffer);
+  
+	if (!l || !buffer[0])
+		return;
+
+	if (buffer[l-1] == '\n')
+		buffer[l-1] = 0;
+
+	fprintf(stderr, "%s\n", buffer);
+}
+
+
+inline
+void Printer::PrintErrorMessage( const char* s )
 {
 	fprintf( stderr, "ERROR: %s\n", s );
 }
@@ -178,5 +259,10 @@ void Printer::PrintMessage( const char* s )
 }
 
 } // namespace freyja
+
+
+
+
+
 
 #endif // GUARD__FREYJA_PRINTER_H_

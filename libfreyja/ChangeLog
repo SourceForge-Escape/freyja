@@ -6,6 +6,8 @@
 
  Kagura alpha, 0.10.0.0
  20071217 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ * Patch for svn with minor 0.9.5 fixes.
+ * Removed legacy support for LegacyABI, FreyjaFSM.
  * Partial commit into trunk.
  * Forked from 0.9.5 branch.
 

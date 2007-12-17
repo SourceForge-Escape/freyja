@@ -26,13 +26,12 @@
 #include <mstl/String.h>
 #include "Printer.h"
 #include "PluginABI.h"
-#include "FreyjaFSM.h"
 #include "freyja.h"
 
 using namespace mstl;
 using namespace freyja;
 
-Printer *gPrinter = NULL;
+Printer* gPrinter = NULL;
 uint32 gFreyjaMemoryTick = 0;
 uint32 gFreyjaMemoryNews = 0;
 uint32 gFreyjaMemoryDeletes = 0;
@@ -44,7 +43,7 @@ FreyjaAssertCallback gFreyjaDebugInfoHandler = NULL;
 // Managed ABI ( Not 'public' )
 ///////////////////////////////////////////////////////////////////////
 
-void freyja__setPrinter(Printer *printer, bool freyjaManaged)
+void freyja__setPrinter( Printer* printer, bool freyjaManaged )
 {
 	if (!printer)
 		return;
@@ -61,19 +60,19 @@ void freyja__setPrinter(Printer *printer, bool freyjaManaged)
 }
 
 
-void *freyjaModuleImportFunction(void *handle, const char *name)
+void* freyjaModuleImportFunction( void* handle, const char* name )
 {
 	return SystemIO::ImportFunction(handle, name);
 }
 
 
-void *freyjaModuleLoad(const char *module)
+void* freyjaModuleLoad( const char* module )
 {
 	return SystemIO::ModuleLoad(module);
 }
 
 
-void freyjaModuleUnload(void *handle)
+void freyjaModuleUnload( void* handle )
 {
 	SystemIO::ModuleUnload(handle);
 }
@@ -85,13 +84,10 @@ void freyjaModuleUnload(void *handle)
 
 void freyjaSpawn()
 {
-	if (FreyjaFSM::GetInstance())
+	static bool init = false;
+
+	if ( !init )
 	{
-		FreyjaFSM *fsm = FreyjaFSM::GetInstance();
-
-		/* Here just to avoid compiler warnings and removal by opt */
-		fsm->freyjaGetCount(FREYJA_VERTEX);
-
 		/* Setup basic default stdout printer */
 		freyja__setPrinter(new Printer(), true);
 
@@ -99,32 +95,26 @@ void freyjaSpawn()
 		freyjaPluginDirectoriesInit();
 		freyjaPluginsInit();
 
-		freyjaPrintMessage("libfreyja invoked using freyjaSpawn()");
+		freyjaPrintMessage("freyjaSpawn(): Invoked libfreyja plugins.");
+		init = true;
 	}
 	else
 	{
-		freyjaPrintMessage("libfreyja freyjaSpawn() failed unexpectedly");
+		freyjaPrintMessage("freyjaSpawn(): Already spawned.");
 	}
 }
 
 
 void freyjaFree()
 {
-	FreyjaFSM *FreyjaFSM = FreyjaFSM::GetInstance();
-	
-	if (FreyjaFSM)
-	{
-		delete FreyjaFSM;
-	}
-
 	freyjaPluginShutdown();
 
-	freyjaPrintMessage("\nlibfreyja stopped using freyjaFree()");
+	freyjaPrintMessage("\nfreyjaFree(): libfreyja plugins shutdown.");
 
 	// Memory stats
 	freyjaPrintMessage("\nMemoryPool stats:\n %u allocations\n %u deallocations\n %u operations\n\n", gFreyjaMemoryNews, gFreyjaMemoryDeletes, gFreyjaMemoryTick);
 
-	if (gPrinter)
+	if ( gPrinter )
 	{
 		freyjaPrintMessage("\nlibfreyja stopping line printer");
 		delete gPrinter;
@@ -152,7 +142,7 @@ byte freyjaAssertMessage(const char *file, unsigned int line,
 	{
 		va_list args;
 		va_start(args, format);	
-		gPrinter->MessageArgs(format, &args);
+		gPrinter->PrintArgs(format, &args);
 		va_end(args);
 	}
 	else
@@ -208,7 +198,7 @@ byte freyjaDebugInfoMessage(const char *file, unsigned int line,
 	{
 		va_list args;
 		va_start(args, format);	
-		gPrinter->MessageArgs(format, &args);
+		gPrinter->PrintArgs(format, &args);
 		va_end(args);
 	}
 	else
@@ -242,41 +232,37 @@ byte freyjaDebugInfoMessage(const char *file, unsigned int line,
 
 void freyjaPrintMessage(const char *format, ...)
 {
-	va_list args;
-	
-	va_start(args, format);	
+	char* s;
+	MSTL_STRING_INLINE_VARG( s, format );
 
 	if (gPrinter)
 	{
-		gPrinter->MessageArgs(format, &args);
+		gPrinter->Print(s);
 	}
 	else
 	{
-		vfprintf(stdout, format, args);
-		printf("\n");
+		printf("%s\n", s);
 	}
 
-	va_end(args);
+	MSTL_STRING_INLINE_VARG_FREE( s );
 }
 
 
 void freyjaPrintError(const char *format, ...)
 {
-	va_list args;
-	
-	va_start(args, format);	
+	char* s;
+	MSTL_STRING_INLINE_VARG( s, format );
 
 	if (gPrinter)
 	{
-		gPrinter->ErrorArgs(format, &args);
+		gPrinter->PrintError( s );
 	}
 	else
 	{
-		vfprintf(stderr, format, args);
-		fprintf(stderr, "\n");
+		fprintf(stderr, "%s\n", s);
 	}
 
-	va_end(args);
+	MSTL_STRING_INLINE_VARG_FREE( s );
 }
 
 

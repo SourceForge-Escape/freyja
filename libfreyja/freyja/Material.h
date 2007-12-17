@@ -33,7 +33,7 @@
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
-#include "FreyjaTexture.h"
+#include "Texture.h"
 
 using namespace mstl;
 
@@ -112,7 +112,7 @@ class Material
 	 * Post : Sets metadata
 	 ------------------------------------------------------*/
 
-	const char *GetName() { return mName; }
+	const char *GetName() { return mName.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns Material's name or NULL
@@ -157,18 +157,6 @@ class Material
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Unsets passed flag
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::TextFileReader &r);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serializes from diskfile
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::FileReader &r);
-	/*------------------------------------------------------
-	 * Pre  : Reads the material data from disk
-	 * Post : Returns true on success
 	 ------------------------------------------------------*/
 
 #if TINYXML_FOUND
@@ -217,8 +205,6 @@ class Material
 	 * Post : Gets Material's texture filename or NULL
 	 ------------------------------------------------------*/
 
-	const static uint32 mVersion = 3;
-
 	int32 mId;                  /* Unique identifier */
 
 	uint32 mFlags;              /* Bit flags */
@@ -255,19 +241,16 @@ class Material
 	// int load_shader(const char *filename)
 	static int (*mLoadShaderFunc)(const char *filename);
 
- private:
 
-
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
-
+ protected:
 
 	////////////////////////////////////////////////////////////
-	// Private Mutators
+	// Protected
 	////////////////////////////////////////////////////////////
 
-	char mName[64];             /* Material name */
+	const static uint32 mVersion = 3;
+
+	String mName;               /* Material name */
 
 	String mBlendSrcString;     /* Blending source human readable string */
 

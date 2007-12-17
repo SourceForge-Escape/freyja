@@ -91,12 +91,11 @@ set(Objs
 	freyja/BoneABI
 	freyja/Camera
 	freyja/CameraABI
-	freyja/FreyjaFSM
 	freyja/Image
-	freyja/KeyFrame
-	freyja/LegacyABI
+	freyja/Keyframe
 	freyja/Light
 	freyja/LightABI
+	freyja/LuaABI
 	freyja/Material
 	freyja/MaterialABI
 	freyja/Mesh
@@ -109,7 +108,6 @@ set(Objs
 	freyja/Plugin
 	freyja/Printer
 	freyja/PythonABI
-	freyja/LuaABI
 	freyja/Renderable
 	freyja/RigidBody
 	freyja/QueryABI

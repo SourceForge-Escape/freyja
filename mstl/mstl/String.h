@@ -229,8 +229,6 @@ class String
 };
 
 
-
-
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
@@ -469,12 +467,45 @@ void String::Set(const char *format, ...)
 }
 
 
-
 #ifdef WIN32
-#   define strdup String::Strdup
+#   define strdup mstl::String::Strdup
 #endif
 
-} // End namespace mst
+} // namespace mstl
+
+////////////////////////////////////////////////////////////
+// Macros
+////////////////////////////////////////////////////////////
+
+/* A cross platform macro for passing varg strings as a buffered string. */
+#define MSTL_STRING_INLINE_VARG( string_name, format ) \
+	if ( !format || !format[0] ) {	\
+		string_name = NULL;	\
+	}	\
+	else {	\
+		const unsigned int sz = 1024; \
+		char buf[sz]; \
+		va_list args; \
+		va_start(args, format); \
+		int truncated = vsnprintf(buf, sz, format, args); \
+		buf[sz-1] = 0; \
+		va_end(args); \
+		\
+		if ( truncated >= (int)sz ) {	\
+			unsigned int len = truncated + 1; \
+			string_name = new char[ len ]; \
+			\
+			va_start( args, format );\
+			vsnprintf( string_name, len, format, args );\
+			string_name[len-1] = '\0';\
+			va_end( args );\
+		}	\
+		else {	\
+			string_name = mstl::String::Strdup( buf );	\
+		}	\
+	}
+
+#define MSTL_STRING_INLINE_VARG_FREE( string_name ) \
+	delete [] string_name;
 
 #endif // GUARD__MSTL_STRING_H_
-
