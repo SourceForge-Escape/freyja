@@ -1,0 +1,35 @@
+;; -*- Mode: Lisp; tab-width: 4; indent-tabs-mode: t -*-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Project: Freyja
+; Author : Terry 'Mongoose' Hendrix II
+; Website: http://icculus.org/freyja
+; Email  : mongoose@icculus.org
+; Comment: Interface for pak vfs plugin
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;(dialog "Freyja :: Pak Reader" eDialogPakReader 0
+;	(vbox 0 0 1 1 0
+(summonbox "FirstPartyPluginSlot"
+	(handlebox 1
+	(vbox 1 1 0 1 1
+	(expander "Pak Reader Plugin 1.0" 0 
+
+		;(hbox 1 1 0 1 1
+		;	(icon "freyja-dev.png"	IconSize_Dialog)
+		;	(label "Pak Reader "	0.0	1.5))
+
+		(hbox 1 1 0 1 1
+			(button "Reset VFS"	eMode	ePakReaderMenuUpdate))
+
+		;(hbox 1 1 1 1 1
+			(vbox 0 0 1 1 1
+				(tree	ePakReaderDirs	eSetCurrentPakDirname))
+			(vbox 0 0 1 1 1
+				(tree	ePakReaderFiles	eSetCurrentPakFilename));)
+	)
+
+;	(hbox 1 0 0 1 0 (hsep))
+)
+))
+
