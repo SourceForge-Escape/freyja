@@ -1,0 +1,80 @@
+;; -*- Mode: Lisp; tab-width: 4; indent-tabs-mode: t -*-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Project: Freyja
+; Author : Terry 'Mongoose' Hendrix II
+; Website: http://icculus.org/freyja
+; Email  : mongoose@icculus.org
+; Comment: Interface for perlin noise plugin
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;(dialog "Freyja :: Reverse Engineer" eDialogReverseEngineer 0
+;	(vbox 0 0 0 0 0
+
+(summonbox "FirstPartyPluginSlot"
+	(handlebox 1
+	(vbox 1 1 0 1 1
+	(expander "Reverse Engineer 2.0" 0 
+
+		(hbox 0 0 0 1 0
+			(icon "freyja-dev.png" IconSize_Dialog)
+			(vbox 0 0 0 0 0
+				(label "Reverse Engineer Plugin"  0.0 0.5)
+				(label2 "Help add more model support!")))
+
+		;; Input filename
+		(label "1. Open a file" 0.0 0.5)
+		;(textbox eReverseEngineerFilename)
+		;(filechoosertoolbar_button 
+		;	"gtk-open" "Open" "Loads model file" 
+		;	"Open Model..." eReverseEngineerFilename "mode=open")
+		(filechooserbutton "Open file..." "Open raw file..." eReverseEngineerFilename "*.*")
+
+		(hbox 1 0 0 1 0 (hsep))
+
+		(label "2. Make your best guess"  0.0 0.5)
+		(hbox 1 0 0 1 0 (hsep))
+
+		;; Vertex extractor
+		(label "Vertex extractor"  0.0 0.5)
+		(label2 "<small>Operator: X Y Z U V / *   Type: 0 1 2 u s b f</small>")
+		(textbox eReverseEngineerVString)
+		(hbox 1 0 0 1 0
+			(label "Vertex Offset "  0.0 0.5)
+			(spinbutton 0 0 99999999 eReverseEngineerVOffset))
+		(hbox 1 0 0 1 0
+			(label "Vertex Count "  0.0 0.5)
+			(spinbutton 0 0 999999 eReverseEngineerVCount))
+		(hbox 1 0 0 1 0
+			(label "Vertex Skip "  0.0 0.5)
+			(spinbutton 0 0 1024 eReverseEngineerVSkip))
+
+		;; Face extractor
+		(hbox 1 0 0 1 0 (hsep))
+		(label "Face extractor "  0.0 0.5)
+		(label2 "<small>Operator: A B C D M     Type: 0 i s f</small>")
+		(textbox eReverseEngineerFString)
+		(hbox 1 0 0 1 0
+			(label "Face Offset "  0.0 0.5)
+			(spinbutton 0 0 999999 eReverseEngineerFOffset))
+		(hbox 1 0 0 1 0
+			(label "Face Count "  0.0 0.5)
+			(spinbutton 0 0 999999 eReverseEngineerFCount))
+
+		(hbox 1 0 0 1 0 (hsep))
+		(label "3. Generate a mesh"  0.0 0.5)
+		(button "Generate" eMode eReverseEngineer)
+
+		(hbox 1 0 0 1 0 (hsep))
+		(label "4. Erase model to restart"  0.0 0.5)
+		(button "Erase" eMode eReverseEngineerDelete)
+	)
+
+	;(hbox 1 0 0 1 0 (hsep))
+)
+))
+
+
+
+

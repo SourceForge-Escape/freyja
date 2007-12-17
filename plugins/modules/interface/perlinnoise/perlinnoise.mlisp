@@ -1,0 +1,76 @@
+;; -*- Mode: Lisp; tab-width: 4; indent-tabs-mode: t -*-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;
+; Project: Freyja
+; Author : Terry 'Mongoose' Hendrix II
+; Website: http://icculus.org/freyja
+; Email  : mongoose@icculus.org
+; Comment: Interface for perlin noise plugin
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;(dialog "Freyja :: PerlinNoise test" eDialogPerlinNoise 0
+	;(vbox 0 0 0 0 0
+(summonbox "FirstPartyPluginSlot"
+	(handlebox 1
+	(vbox 1 1 0 1 1
+	(expander "PerlinNoise Plugin 1.0" 0 
+		(menubar
+			(submenu ePerlinNoiseMenu "_Tools"))
+
+		(hbox 1 0 0 1 0
+			;(icon "freyja-dev.png" IconSize_Menu)
+			(label "Perlin Noise "  0.0 0.5))
+
+		(hbox 1 0 0 1 0
+			(label "Seed "  0.0 0.5)
+			(spinbutton 257 0 1000 ePerlinNoiseSeed))
+
+		(hbox 1 0 0 1 0
+			(label "Width "  0.0 0.5)
+			(spinbutton 256 8 1024 ePerlinNoiseW))
+
+		(hbox 1 0 0 1 0
+			(label "Height "  0.0 0.5)
+			(spinbutton 256 8 1024 ePerlinNoiseH))
+
+		(hbox 1 0 0 1 0
+			(label "Clamping on? "  0.0 0.5)
+			(spinbutton 1 0 1 ePerlinNoiseClamp))
+
+		(hbox 1 0 0 1 0
+			(label "iA "  0.0 0.5) 
+			(spinbutton2 1.0 0.0 99999.0 1.0 1.0 1.0 1 ePerlinNoiseIA))
+
+		(hbox 1 0 0 1 0
+			(label "iB "  0.0 0.5) 
+			(spinbutton2 2.0 0.0 99999.0 1.0 1.0 1.0 1 ePerlinNoiseIB))
+
+		(hbox 1 0 0 1 0
+			(label "d "  0.0 0.5) 
+			(spinbutton2 20.0 0.0 100.0 1.0 1.0 1.0 3 ePerlinNoiseD))
+
+		(hbox 1 0 0 1 2 
+			(label "Modulate color " 0.0 0.5)
+			(colorbutton 1 eColorPerlinMult))
+
+		(hbox 1 0 0 1 2 
+			(label "Add color " 0.0 0.5)
+			(colorbutton 1 eColorPerlinAdd))
+
+		(hbox 1 0 0 1 0
+			(button "Generate texture" eMode ePerlinNoiseGen))
+
+	) ; Local expander
+
+;(hbox 1 0 0 1 0 (hsep))
+
+) ; Dialog / Summon
+
+))
+
+(color	eColorPerlinMult		0.61	0.51	0.35	1.0) 
+(color	eColorPerlinAdd			0.51	0.51	0.29	1.0) 
+
+
+
