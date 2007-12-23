@@ -58,7 +58,35 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+
+	////////////////////////////////////////////////////////////
+	// Public Interfaces
+	////////////////////////////////////////////////////////////
+
 	FREYJA_XMLSERIALIZER_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer interface macro.
+	 *
+	 ------------------------------------------------------*/
+
+	virtual const char* GetType() const
+	{ return "Bone"; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer tag type.
+	 *
+	 ------------------------------------------------------*/
+ 
+	virtual uint32 GetVersion() const
+	{ return 0; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer tag version.
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_RENDERABLE_INTERFACE
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : XmlSerializer interface macro.
@@ -70,38 +98,46 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	hel::Mat44& GetBindPose() { return mBindPose; }
+	const hel::Mat44& GetBindPose() const
+	{ return mBindPose; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns this bone's rest/bind pose transform
 	 ------------------------------------------------------*/
 
-	hel::Mat44& GetInverseBindPose() { return mBindToWorld; }
+	const hel::Mat44& GetInverseBindPose() const
+	{ return mBindToWorld; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns this bone's 'rest to world' transform
 	 ------------------------------------------------------*/
 
-	//hel::Mat44& GetWorldPose() { return mTrack.mWorld; }
+	//const hel::Mat44& GetWorldPose() const { return mTrack.mWorld; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns this bone's 'world' transform
 	 ------------------------------------------------------*/
 
+	virtual freyja::Node* Duplicate() const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Copy of this node sans children.
+	 *
+	 ------------------------------------------------------*/
 
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void AddChild(index_t child);
+	//void AddChild(index_t child);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Add child bone to this bone by <child> UID.
 	 *
 	 ------------------------------------------------------*/
 
-	void RemoveChild(index_t child);
+	//void RemoveChild(index_t child);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Remove child bone of this bone by <child> UID.
@@ -139,14 +175,25 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void NotifyChildrenToUpdateBindPose();
+	static freyja::Bone* Cast( freyja_ptr ptr )
+	{ return (freyja::Bone*)ptr; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 * Notes: FIXME Add RTTI checking.
+	 *
+	 ------------------------------------------------------*/
+
+protected:
+
+	void UpdateBindPoseOfChildren();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Updates this bone's child bind transforms only.
 	 *
 	 ------------------------------------------------------*/
 
-	void NotifyChildrenToUpdateWorldPose( index_t track, vec_t time );
+	void UpdateWorldPoseOfChildren( index_t track, vec_t time );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Updates this bone's child world transforms only.
@@ -166,8 +213,9 @@ public:
 									  * this cache of the current orientation 
 									  * and translation in matrix form */
 
-	//BoneTrack mTrack;                /* Animation track(s) - only one in test */
-	//uint32 mTrackCount;              /* How many tracks are loaded? */
+private:
+	Bone(const freyja::Bone&);
+	
 };
 
 

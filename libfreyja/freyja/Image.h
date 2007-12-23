@@ -7,7 +7,7 @@
  * Email   : stu7440@westga.edu
  * Object  : MtkImage
  * License : GPL See file COPYING, also (C) 2000 Mongoose
- * Comments: This is the mtkImage agent/class for mtk
+ * Comments: This is the mtkImage class for mtk
  *
  *
  *           This file was generated using Mongoose's C++ 
@@ -16,20 +16,21 @@
  *-- History ------------------------------------------------ 
  *
  * 2004.08.21:
- * Mongoose - MtkImage repackaged as FreyjaImage with mostly minor changes
+ * Mongoose - MtkImage repackaged as Image with mostly minor changes
  *
  * 2000.10.05:
  * Mongoose - Created
  ==========================================================================*/
 
-
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJAIMAGE_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJAIMAGE_H_
+#ifndef GUARD__FREYJA_IMAGE_H__
+#define GUARD__FREYJA_IMAGE_H__
 
 #include <stdarg.h>
 
 
-class FreyjaImage
+namespace freyja {
+
+class Image
 {
  public:
 
@@ -46,7 +47,7 @@ class FreyjaImage
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	FreyjaImage();
+	Image();
 	/*--------------------------------------------
 	 * Created  : 2000-10-05 by Mongoose
 	 * Modified : 
@@ -55,13 +56,13 @@ class FreyjaImage
 	 * Post : MtkImage object is constructed
 	 --------------------------------------------*/
 
-	FreyjaImage(const FreyjaImage &img);
+	Image(const Image &img);
 	/*--------------------------------------------
 	 * Pre  : None
 	 * Post : MtkImage object is constructed
 	 --------------------------------------------*/
 
-	virtual ~FreyjaImage();
+	virtual ~Image();
 	/*--------------------------------------------
 	 * Created  : 2000-10-05 by Mongoose
 	 * Modified : 
@@ -308,7 +309,7 @@ class FreyjaImage
 
  private:
 
-	FreyjaImage &operator=(const FreyjaImage &img);
+	Image &operator=(const Image &img);
 
 	////////////////////////////////////////////////////////////
 	// Private Accessors
@@ -319,73 +320,52 @@ class FreyjaImage
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-   int getNextPower(int seed);
-  /*--------------------------------------------
-   * Created  : 2000-10-05 by Mongoose
-   * Modified : 
-   *
-   * Pre  : seed is valid ( last power )
-   * Post : Returns next power of 2
-   --------------------------------------------*/
-
-   int loadIndexedPixmap(unsigned char *image, int width, int height);
-  /*--------------------------------------------
-   * Created  : 2000-10-05 by Mongoose
-   * Modified : 
-   *
-   * Pre  : image must be valid indexed image
-   *        width must be valid
-   *        height must be valid
-   *        pallette must have been previously
-   *        loaded
-   *
-   * Post : Loads indexed image using previously
-   *        loaded pallette
-   --------------------------------------------*/
-
-	virtual void printError(char *format, va_list *args);
-	virtual void printMessage(char *format, va_list *args);
-
-	virtual void print(char *s, ...);
-	/*------------------------------------------------------
-	 * Pre  : Format string and args are valid
-	 * Post : Report messages to stdout
+	int getNextPower(int seed);
+	/*--------------------------------------------
+	 * Created  : 2000-10-05 by Mongoose
+	 * Modified : 
 	 *
-	 *-- History ------------------------------------------
+	 * Pre  : seed is valid ( last power )
+	 * Post : Returns next power of 2
+	 --------------------------------------------*/
+
+	int loadIndexedPixmap(unsigned char *image, int width, int height);
+	/*--------------------------------------------
+	 * Created  : 2000-10-05 by Mongoose
+	 * Modified : 
 	 *
-	 * 1999.07.31: 
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
-
-	virtual void printError(char *s, ...);
-	/*------------------------------------------------------
-	 * Pre  : String and args are valid
-	 * Post : Report an error to stderr
+	 * Pre  : image must be valid indexed image
+	 *        width must be valid
+	 *        height must be valid
+	 *        pallette must have been previously
+	 *        loaded
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 1999.07.31:
-	 * Mongoose - Created
-	 ------------------------------------------------------*/
+	 * Post : Loads indexed image using previously
+	 *        loaded pallette
+	 --------------------------------------------*/
 
 
-   unsigned char *_image;                 /* Image buffer */
+	static mstl::Vector<mstl::String> mPluginDirectories;
 
-   unsigned char *_palette;               /* Image palette */
+	unsigned char *_image;                 /* Image buffer */
 
-   int _width;                            /* Width of image */
+	unsigned char *_palette;               /* Image palette */
 
-   int _height;                           /* Height of image */
+	int _width;                            /* Width of image */
 
-   int _original_width;                   /* Width before transforms */
+	int _height;                           /* Height of image */
 
-   int _original_height;                  /* Height before transforms */
+	int _original_width;                   /* Width before transforms */
+	
+	int _original_height;                  /* Height before transforms */
 
-   colormode_t _color_mode;               /* Color mode of image */
+	colormode_t _color_mode;               /* Color mode of image */
 
-   int _image_bpp;                        /* Color depth of image */ 
+	int _image_bpp;                        /* Color depth of image */ 
 
-   int _palette_bpp;                      /* Color depth of palette */
+	int _palette_bpp;                      /* Color depth of palette */
 };
 
-#endif
+} // namespace freyja
+
+#endif // GUARD__FREYJA_IMAGE_H__

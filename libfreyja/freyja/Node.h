@@ -52,7 +52,8 @@ public:
 
 		tWorld = 1,
 		tParent,
-		tPivot, //	tCenterMass,
+		tPivot, 
+		//tCenterMass,
 		tLocal
 
 	} TransformSpace;
@@ -84,7 +85,7 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	Node(const char* name);
+	Node( const char* name );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -101,49 +102,48 @@ public:
 	// Properties
 	////////////////////////////////////////////////////////////
 
-	FREYJA_XMLSERIALIZER_INTERFACE
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : XmlSerializer interface macro.
-	 *
-	 ------------------------------------------------------*/
-
-	bool IsMuted() { return mMuted; }
+	bool IsMuted() const
+	{ return mMuted; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Is this node allowing content editing?
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void Mute() { mMuted = true; }
+	virtual void Mute() 
+	{ mMuted = true; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Set this node to not allow content editing.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void UnMute() { mMuted = false; }
+	virtual void UnMute() 
+	{ mMuted = false; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Set this node to allow content editing.
 	 *
 	 ------------------------------------------------------*/
 
-	const char* GetMetadata() { return mMetadata.c_str(); }
+	const char* GetMetadata() const
+	{ return mMetadata.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Get metadata for this node.
 	 *
 	 ------------------------------------------------------*/
 
-	void SetMetadata(const char* metadata) { mMetadata = metadata; }
+	void SetMetadata(const char* metadata) 
+	{ mMetadata = metadata; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Set metadata for this node.
 	 *
 	 ------------------------------------------------------*/
 
-	const char* GetName() { return mName.c_str(); }
+	const char* GetName() const
+	{ return mName.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Get the human readable name of this node.
@@ -157,14 +157,14 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual freyja::Node* Duplicate();
+	virtual freyja::Node* Duplicate() const = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Copy of this node sans children.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void DuplicateChildren( freyja::Node* parent, bool recurse );
+	virtual void DuplicateChildren( freyja::Node* parent, bool recurse ) const;
 	/*------------------------------------------------------
 	 * Pre  : <parent>'s children will be duplicated and added to this node.     
 	 *        <recurse> if you want to copy the entire subtree.
@@ -173,7 +173,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual freyja::Node* GetParent() 
+	virtual freyja::Node* GetParent() const
 	{ return mParent; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -199,7 +199,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual uint32 GetChildCount()
+	virtual uint32 GetChildCount() const
 	{ return mChildren.size(); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -222,7 +222,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void RemoveChild( uint32 child_index );
+	virtual void RemoveChild( uint16 child_index );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -236,21 +236,24 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	const hel::Vec3& GetPosition() const { return mPosition; }
+	const hel::Vec3& GetPosition() const
+	{ return mPosition; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get position property.
 	 *
 	 ------------------------------------------------------*/
 
-	const hel::Quat& GetOrientation() const { return mOrientation; }
+	const hel::Quat& GetOrientation() const
+	{ return mOrientation; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get orientation property.
 	 *
 	 ------------------------------------------------------*/
 
-	const hel::Vec3& GetScale() const { return mScale; }
+	const hel::Vec3& GetScale() const
+	{ return mScale; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get scale property.
@@ -318,12 +321,15 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	freyja_ptr GetUID()
-	{ return this; }
+	freyja_ptr GetUID() const
+	{ return (freyja_ptr)this; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns this pointer as void* for C ABI
 	 *        and for Unique Identifer use.
+	 *
+	 *        Basically, this lets other languages reference
+	 *        nodes by address rather than a contrived id system.
 	 *
 	 ------------------------------------------------------*/
 
@@ -342,19 +348,14 @@ protected:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void NotifyParentOnDelete() = 0;
+	virtual void NotifyOnDelete()
+	{ } // FIXME
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Notify observers that this node is being removed.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void NotifyChildrenOnDelete() = 0;
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
 
 	//byte mFlags;                              /* State flags. */
 

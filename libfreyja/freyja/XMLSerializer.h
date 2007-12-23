@@ -19,22 +19,6 @@
 #ifndef GUARD__FREYJA_XMLSERIALIZER_H_
 #define GUARD__FREYJA_XMLSERIALIZER_H_
 
-#if TINYXML_FOUND
-#   include <tinyxml/tinyxml.h>
-
-#   define FREYJA_XMLSERIALIZER_INTERFACE \
-    virtual bool Serialize( TiXmlElement* parent ) const; \
-	virtual bool Unserialize( TiXmlElement* node );
-
-#   define FREYJA_XMLSERIALIZER_NODE TiXmlElement*
-
-#else
-
-//#   define FREYJA_XMLSERIALIZER_INTERFACE 
-#   define FREYJA_XMLSERIALIZER_NODE void*
-
-#endif // TINYXML_FOUND
-
 
 namespace freyja {
 
@@ -91,6 +75,24 @@ public:
 };
 
 } // namespace freyja
+
+
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+
+#   define FREYJA_XMLSERIALIZER_INTERFACE \
+    virtual bool Serialize( TiXmlElement* parent ) const; \
+	virtual bool Unserialize( TiXmlElement* node ); 
+ 
+#   define FREYJA_XMLSERIALIZER_NODE TiXmlElement*
+
+#else
+
+//#   define FREYJA_XMLSERIALIZER_INTERFACE 
+#   define FREYJA_XMLSERIALIZER_NODE void*
+
+#endif // TINYXML_FOUND
+
 
 #endif // GUARD__FREYJA_XMLSERIALIZER_H_
 

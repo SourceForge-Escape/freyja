@@ -42,13 +42,13 @@ public:
 		fNone =  0,
 		fHighlighted =  1,    /* This should be rendered with a highlight.*/
 		fHidden = 2,          /* This hidden/not rendered on the client. */
-		fShadowCaster = 8,   /* This generates shadow volumes. */   
+		fShadowCaster = 8,    /* This generates shadow volumes. */   
 		fShadowReceiver = 16, /* This receives shadow volumes. */
 		fHasLoD = 32          /* This has Levels of Detail. */    
 
 		// Doesn't really fit in this class.
-		//fSelected =  2,       /* This is marked as selected. */
-		//fRayHit = 8,          /* This was marked in a Ray hit test. */
+		//fSelected = 64,       /* This is marked as selected. */
+		//fRayHit = 128,        /* This was marked in a Ray hit test. */
 	} RenderFlag;
 
 
@@ -118,21 +118,22 @@ public:
 	virtual const hel::Quat& GetWorldOrientation() const = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Get the final world orientation of this renderable.
 	 *
 	 ------------------------------------------------------*/
 
 	virtual const hel::Vec3& GetWorldPosition() const = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Get the final world position of this renderable.
 	 *
 	 ------------------------------------------------------*/
 
 	virtual freyja::Material* GetMaterial() const = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Get the Material pointer for this renderable.
+	 *        This can be NULL.
 	 *
 	 ------------------------------------------------------*/
 
@@ -144,5 +145,10 @@ protected:
 
 
 } // end namespace freyja
+
+#   define FREYJA_RENDERABLE_INTERFACE \
+	virtual const hel::Quat& GetWorldOrientation() const; \
+	virtual const hel::Vec3& GetWorldPosition() const; \
+	virtual freyja::Material* GetMaterial() const; 
 
 #endif // GUARD__FREYJA_RENDERABLE_H_

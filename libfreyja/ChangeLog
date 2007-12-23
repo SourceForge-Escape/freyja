@@ -5,13 +5,20 @@
  =====================================================================
 
  Kagura alpha, 0.10.0.0
+
+ 20071222 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ * Lua metaprogramming script update to support 0.10.
+ * Removed obsolete code from Bone.
+
  20071217 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  * Patch for svn with minor 0.9.5 fixes.
  * Removed legacy support for LegacyABI, FreyjaFSM.
  * Partial commit into trunk.
  * Forked from 0.9.5 branch.
 
+
  Kagura prealpha, 0.9.5.18
+
  20071212 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  * Forked libfreyja for 0.9.6 design changes. ( 0.10 )
  * Fix for mgtk_color_set().

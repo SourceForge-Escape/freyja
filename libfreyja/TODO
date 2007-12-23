@@ -1,0 +1,7 @@
+
+
+ * Have Renderable write its own XML tag inside children.
+	- Provide it as a serialization helper function inside Node.
+
+
+

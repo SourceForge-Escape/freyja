@@ -32,7 +32,7 @@ import time
 gDateStamp = time.localtime(time.time())
 gForcePythonDefine = 0
 gPath = "./freyja"
-gLuaHeaders = "\n\nextern \"C\" {\n#include \"lua5.1/lua.h\"\n#include \"lua5.1/lualib.h\"\n#include \"lua5.1/lauxlib.h\"\n}\n\n#include \"Lua.h\"\n\n Lua gLuaVM;"
+gLuaHeaders = "\n\n#include <lua/Lua.h>\n\n Lua gLuaVM;"
 
 gFuncWrappers = []
 gFuncBindings = []
@@ -166,12 +166,12 @@ def PrintOutFreyjaBindLua():
 	print "\n"
 
 
-def StoreWrapperFunction(li):
+def StoreWrapperFunction(abi, li):
 	count = nameat = 0
 
 	for i in li:
 		count = count + 1
-		if re.match('.*freyja', i):
+		if re.match(abi, i):
 			name = i
 			nameat = count
 			break
@@ -208,7 +208,7 @@ def StoreWrapperFunction(li):
 				lua_stack += "\tconst char *" + identifier  + " = lua_tostring(L, " + `lua_stack_count` + ");\n"
 
 			# Integers
-			elif re.match('(index_t|int32|char|uint32|byte)', li[i]):
+			elif re.match('(index_t|int32|char|uint32|byte|int16|uint16|freyja_id)', li[i]):
 				identifier = re.sub(';', '', li[i+1])
 
 				if re.match('(.*\\*)', li[i]):
@@ -276,6 +276,13 @@ def StoreWrapperFunction(li):
 					lua_stack_count += 1
 					lua_stack += "\t" + identifier + "["+`n`+"] = lua_tonumber(L, " + `lua_stack_count` + ");\n"
 
+			# Userdata
+			elif re.match('(freyja_ptr)', li[i]):
+				identifier = re.sub(';', '', li[i+1])
+				pass_vars += identifier + ", "
+				lua_stack_count += 1
+				lua_stack += "\t" + li[i] + " " + identifier + " = lua_touserdata(L, " + `lua_stack_count` + ");\n"
+
 			else:
 				identifier = li[i]
 
@@ -299,7 +306,6 @@ def StoreWrapperFunction(li):
 		s += "\tif ( stack_count < " + `lua_stack_count` + " )\n\t\treturn 0;\n\n"
 		s += lua_stack
 
-
 	# Returns string
 	if re.match('(.*char\\*)', li[0]) or re.match('(.*char\\*)', li[1]):
 		s += "\tconst char *string_value = " + name + "(" + pass_vars +");\n"
@@ -307,7 +313,7 @@ def StoreWrapperFunction(li):
 		s += "\treturn 1;"
 
 	# Returns integer
-	elif re.match('(index_t|int32|uint32|byte|char)', li[0]):
+	elif re.match('(index_t|int32|uint32|byte|char|uint16|int16|freyja_id)', li[0]):
 		s += "\tint integer_value = " + name + "(" + pass_vars +");\n"
 		s += "\tlua_pushnumber(L, integer_value);\n"
 		s += "\treturn 1;"
@@ -316,6 +322,12 @@ def StoreWrapperFunction(li):
 	elif re.match('(vec_t|float)', li[0]):
 		s += "\tvec_t real_value = " + name + "(" + pass_vars +");\n"
 		s += "\tlua_pushnumber(L, real_value);\n"
+		s += "\treturn 1;"
+
+	# Returns userdata
+	elif re.match('(freyja_ptr)', li[0]):
+		s += "\tfreyja_ptr real_value = " + name + "(" + pass_vars +");\n"
+		s += "\tlua_pushlightuserdata(L, real_value);\n"
 		s += "\treturn 1;"
 
 	# Returns void
@@ -354,7 +366,8 @@ def BufferFunctionDeclaration(f):
 	buf = re.sub('\/\\*.*\\*\/', '', buf)
 
 	# Strip out references
-	buf = re.sub('&', '', buf)
+	# Should not have references anywhere in C ABI  :3  
+	#buf = re.sub('&', '', buf)
 
 	# Dump parsed 'lines' into generated file for debugging
 	#print "/* $$$ " + buf + " $$$ */"
@@ -368,7 +381,7 @@ def ImportBindings(filepath, basename):
 	# Uber forceful abi binding enforcement
     # Only ABI functions in the proper header will recieve a python binding
 	abi = re.sub('ABI.h', '', basename)
-	accessor = "freyjaGet" + abi
+	#accessor = "freyjaGet" + abi
 	mutator = "freyja" + abi
 	
 	try:
@@ -387,33 +400,14 @@ def ImportBindings(filepath, basename):
 		if i == "":
 			break
 
-		if not re.match('.*freyja.*\\(.*\\);', i):
-			i = ""
-
-		elif re.match('^.*' + accessor + '.*\\(', i):
+		if re.match('^.*' + mutator + '.*\\(', i):
 			# Don't expose C++ ABI to python
 			if not re.match('.*::', i):
 				p = re.sub('.\\*', '* ', i)
 				p = re.sub(',', ';\n', p)
 				p = re.sub('(\\(|\\)|\n)', ' ', p)
 				li = p.split()
-				StoreWrapperFunction(li)
-
-				s = re.sub('\\(.*', '', i)
-				s = re.sub('.* ', '', s)
-				s = re.sub(' ', '', s)
-				s = re.sub('(\\*|\n)', '', s)
-				StoreBindFunction(s)
-				over = ""
-
-		elif re.match('^.*' + mutator + '.*\\(', i):
-			# Don't expose C++ ABI to python
-			if not re.match('.*::', i):
-				p = re.sub('.\\*', '* ', i)
-				p = re.sub(',', ';\n', p)
-				p = re.sub('(\\(|\\)|\n)', ' ', p)
-				li = p.split()
-				StoreWrapperFunction(li)
+				StoreWrapperFunction(mutator, li)
 
 				s = re.sub('\\(.*', '', i)
 				s = re.sub('.* ', '', s)
@@ -422,6 +416,26 @@ def ImportBindings(filepath, basename):
 				s = re.sub('\n', '', s)
 				StoreBindFunction(s)
 				over = ""
+
+		#elif not re.match('.*freyja.*\\(.*\\);', i):
+		#	i = ""
+
+		#elif re.match('^.*' + accessor + '.*\\(', i):
+			# Don't expose C++ ABI to python
+		#	if not re.match('.*::', i):
+		#		p = re.sub('.\\*', '* ', i)
+		#		p = re.sub(',', ';\n', p)
+		#		p = re.sub('(\\(|\\)|\n)', ' ', p)
+		#		li = p.split()
+		#		StoreWrapperFunction(li)
+
+		#		s = re.sub('\\(.*', '', i)
+		#		s = re.sub('.* ', '', s)
+		#		s = re.sub(' ', '', s)
+		#		s = re.sub('(\\*|\n)', '', s)
+		#		StoreBindFunction(s)
+		#		over = ""
+
 
 	f.close()
 
@@ -478,15 +492,6 @@ def UpdateBindings():
 	print "\t{ NULL, NULL }\n};\n\n"
 
 	PrintOutFreyjaBindLua()
-
-	# Temp build-in
-	print "#   ifdef LUAWRAPPER_FOUND"
-	print "#       include \"Lua.cpp\""
-	print "#   else"
-	print "#       include \"Lua.cpp\""
-	print "#   endif // LUAWRAPPER_FOUND"
-
-	print "#endif // LUA_FOUND\n\n"
 
 	PrintOutFreyjaLuaABI()
 

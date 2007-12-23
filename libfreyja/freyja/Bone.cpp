@@ -60,7 +60,7 @@ Bone::~Bone()
 
 			/* Update transforms. */
 			child->UpdateBindPose();
-			child->UpdateBindPoseForChildren();
+			child->UpdateBindPoseOfChildren();
 		}
 	}
 }
@@ -75,172 +75,109 @@ Bone::~Bone()
 // XML serialization.
 ////////////////////////////////////////////////////////////
 
-
-//#warning FIXME This needs to be rewritten for 'BONE' level serail unit to be called from skeleton.
-
-bool Bone::SerializePool(TiXmlElement *container)
+bool Bone::Serialize( TiXmlElement* container ) const
 {	
-	if (!container)
+	if ( !container || !mSkeleton )
 		return false;
 
-	TiXmlElement *bones = new TiXmlElement("bones");
-	bones->SetAttribute("version", "2");
+	TiXmlElement* bone = new TiXmlElement( GetType() );
+	bone->SetAttribute( "version", GetVersion() );	
+	//bone->SetAttribute( "skeleton", mSkeleton->GetName() );
+	bone->SetAttribute( "name", GetName() );
+	//bone->SetAttribute( "flags", GetFlags() );
 
-	// Assuming only one skeleton is ever loaded at a time.  ( It better be)
-	const char *skeleton = freyjaGetSkeletonName(0) ? freyjaGetSkeletonName(0) : "unknown";
-	bones->SetAttribute("skeleton", skeleton);
+	if ( GetParent() )
+		bone->SetAttribute( "parent", GetParent()->GetName() );
 
-	container->LinkEndChild(bones);
+	TiXmlElement* position = new TiXmlElement( "position" );
+	position->SetDoubleAttribute( "x", GetPosition().mX );
+	position->SetDoubleAttribute( "y", GetPosition().mY );
+	position->SetDoubleAttribute( "z", GetPosition().mZ );
+	bone->LinkEndChild( position );
 
-	uint32 i;
-	foreach(mGobalPool, i)
+	TiXmlElement* orientation = new TiXmlElement( "orientation" );
+	orientation->SetDoubleAttribute( "x", GetOrientation().mX );
+	orientation->SetDoubleAttribute( "y", GetOrientation().mY );
+	orientation->SetDoubleAttribute( "z", GetOrientation().mZ );
+	orientation->SetDoubleAttribute( "w", GetOrientation().mW );
+	bone->LinkEndChild( orientation );
+
+	if ( GetMetadata() )
 	{
-		Bone *b = mGobalPool[i];
+		TiXmlElement* metadata = new TiXmlElement("metadata");
+		TiXmlText* text = new TiXmlText( GetMetadata() );
 
-		if (!b)
-			continue;
+		/* Metadata is NOT written out as CDATA to avoid parsing it. */
+		//text->SetCDATA(true);
 
-		TiXmlElement *bone = new TiXmlElement("bone");
-		bone->SetAttribute("id", b->mUID);
-		bone->SetAttribute("name", b->mName);
-		bone->SetAttribute("flags", b->mFlags);
-
-		{
-			int idx = (b->mParent == INDEX_INVALID) ? -1 : b->mParent;
-			bone->SetAttribute("parent", idx);
-		}
-
-		//bone->SetAttribute("skeleton", b->mSkeleton);
-
-		TiXmlElement *translate = new TiXmlElement("translate");
-		translate->SetDoubleAttribute("x", b->mTranslation.mX);
-		translate->SetDoubleAttribute("y", b->mTranslation.mY);
-		translate->SetDoubleAttribute("z", b->mTranslation.mZ);
-		bone->LinkEndChild(translate);
-
-		TiXmlElement *rotate = new TiXmlElement("rotate");
-		rotate->SetDoubleAttribute("x", b->mRotation.mX);
-		rotate->SetDoubleAttribute("y", b->mRotation.mY);
-		rotate->SetDoubleAttribute("z", b->mRotation.mZ);
-		rotate->SetDoubleAttribute("w", b->mRotation.mW);
-		bone->LinkEndChild(rotate);
-
-		// Metadata is NOT written out as CDATA to avoid parsing it.
-		if ( b->mMetaData.c_str() )
-		{
-			TiXmlElement *metadata = new TiXmlElement("metadata");
-			TiXmlText *text = new TiXmlText( b->mMetaData.c_str() );
-			//text->SetCDATA(true);
-			metadata->LinkEndChild(text);
-			bone->LinkEndChild(metadata);
-		}
-
-		bones->LinkEndChild(bone);
+		metadata->LinkEndChild(text);
+		bone->LinkEndChild(metadata);
 	}
+
+	container->LinkEndChild( bone );
 
 	return true;
 }
 
 
-bool Bone::UnserializePool(TiXmlElement *container)
+bool Bone::Unserialize( TiXmlElement* xml_bone )
 {
-	if (!container)
+	if ( !xml_bone )
 		return false;
 
-	TiXmlElement *bones = container->FirstChildElement("bones");
-
-	if (!bones)
-		return false;
-
-	int version = 0;
-	bones->QueryIntAttribute("version", &version);
-
-	if (version != 2)
-		return false;
-	
-	/* This is only called to swap out skeletal systems, so it's brutal. */
-	Vector<Bone *> tmp;
-	ResetPool(); // NUKE ANY OTHER BONES 
-	freyjaSkeletonPoolClear(); // NUKE ANY OTHER SKELETONS
-
-	// Create a new skeleton.
-	index_t skeleton = freyjaSkeletonCreate();
-	freyjaSkeletonName(skeleton, bones->Attribute("skeleton"));
-
-	TiXmlElement *bone = (bones) ? bones->FirstChildElement() : NULL;
-	for( ; bone; bone = bone->NextSiblingElement() )
 	{
-		Bone *b = FREYJA_NEW Bone();
-		tmp.push_back(b);
-		b->mSkeleton = skeleton;
-		b->AddToPool();
-		freyjaSkeletonAddBone(skeleton, b->GetUID());
+		/* Make sure it's the same serialization version. */
+		int version = 0;
+		xml_bone->QueryIntAttribute("version", &version);
+		if ( version != (int)GetVersion() )
+			return false;
+	}
 
-		int idx = -1;
-		bone->QueryIntAttribute("id", &idx);
-		b->mUID = (idx > -1) ? idx : INDEX_INVALID;
+	/*
+	const char* skeleton_name = xml_bone->Attribute( "skeleton" );
+	freyja::Skeleton* skeleton = ResourceManager::GetSkeleton( skeleton_name );
+
+	if ( !skeleton )
+		return false;
+
+	const char* bone_name = xml_bone->Attribute( "name" );
+	freyja::Bone* bone = skeleton->CreateBone( bone_name );
+	*/
+
+	const char* bone_name = xml_bone->Attribute( "name" );
+	SetName( bone_name );
+
+	{
+		const char* parent_name = xml_bone->Attribute( "parent" );
+		freyja::Bone* parent = mSkeleton->GetBone( parent_name );
 		
-		{
-			const char *name = bone->Attribute("name");
-			freyjaPrintMessage("! bone '%s'...", name);
-			b->SetName(name);
-		}
-
-		idx = 0;
-		bone->QueryIntAttribute("flags", &idx);
-		b->mFlags = idx;
-
-		idx = -1;
-		bone->QueryIntAttribute("parent", &idx);
-		b->mParent = (idx > -1) ? idx : INDEX_INVALID;
-
-		TiXmlElement *child = bone->FirstChildElement();
-		for( ; child; child = child->NextSiblingElement() )
-		{
-			String s = child->Value();
-
-			if (s == "translate")
-			{
-				child->QueryFloatAttribute("x", &b->mTranslation.mX);
-				child->QueryFloatAttribute("y", &b->mTranslation.mY);
-				child->QueryFloatAttribute("z", &b->mTranslation.mZ);
-			}
-			else if (s == "rotate")
-			{
-				child->QueryFloatAttribute("x", &b->mRotation.mX);
-				child->QueryFloatAttribute("y", &b->mRotation.mY);
-				child->QueryFloatAttribute("z", &b->mRotation.mZ);
-				child->QueryFloatAttribute("w", &b->mRotation.mW);
-			}
-			else if (s == "metadata")
-			{
-				b->mMetaData = child->GetText();
-			}
-		}
+		if ( parent )
+			parent->AddChild( this );
 	}
 
-	unsigned int i;
-	foreach(tmp, i)
+	TiXmlElement *child = xml_bone->FirstChildElement();
+	for( ; child; child = child->NextSiblingElement() )
 	{
-		// FIXME: Map UIDs to rebulid skeleton properly
-		//        to account for sparse bone pool...
-		//        which should never happen, as the pool 
-		//        should be 'cleaned' to avoid sparse bones.
-		if (tmp[i])
+		String s = child->Value();
+		
+		if (s == "position")
 		{
-			unsigned int j = tmp[i]->mParent;
-
-			if (j < tmp.size() && tmp[j])
-			{
-				printf("%i -> %i\n", i, j);	
-				tmp[j]->AddChild(i);
-			}
+			child->QueryFloatAttribute( "x", &mPosition.mX );
+			child->QueryFloatAttribute( "y", &mPosition.mY );
+			child->QueryFloatAttribute( "z", &mPosition.mZ );
+		}
+		else if (s == "orientation")
+		{
+			child->QueryFloatAttribute( "x", &mOrientation.mX );
+			child->QueryFloatAttribute( "y", &mOrientation.mY );
+			child->QueryFloatAttribute( "z", &mOrientation.mZ );
+			child->QueryFloatAttribute( "w", &mOrientation.mW );
+		}
+		else if (s == "metadata")
+		{
+			SetMetadata( child->GetText() );
 		}
 	}
-
-	// Rebuild this mess!
-	freyjaSkeletonRootIndex(skeleton, 0);
-	freyjaSkeletonUpdateBones(skeleton);
 
 	return true;
 }
@@ -250,26 +187,26 @@ bool Bone::UnserializePool(TiXmlElement *container)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-Bone *Bone::Duplicate()
+freyja::Node* Bone::Duplicate() const
 { 
 	/* We don't duplicate children in this method. */
-	Bone *b = FREYJA_NEW Bone();
-	b->mMetaData = mMetaData;
-	b->mFlags = mFlags;
-	b->mName = "Copy of "
-	b->mName += mName;
-	b->mSkeleton = mSkeleton;
-	b->mParent = mParent;
-	b->mRotation = mRotation;
-	b->mTranslation = mTranslation;
-	b->mLocalTransform = mLocalTransform;
-	b->mBindPose = mBindPose;
-	b->mBindToWorld = mBindToWorld;
+	mstl::String name = "Copy of " + mName;
 
-	return b;
+	freyja::Bone* bone = FREYJA_NEW freyja::Bone( mSkeleton, name.c_str() );
+
+	bone->mParent = mParent;
+	bone->mPosition = mPosition;
+	bone->mOrientation = mOrientation;
+	bone->mMetadata = mMetadata;
+	bone->mLocalTransform = mLocalTransform;
+	bone->mBindPose = mBindPose;
+	bone->mBindToWorld = mBindToWorld;
+	bone->mRenderFlags = GetRenderFlags();
+
+	return bone;
 }
 
-
+#if 0
 void Bone::DuplicateChildren(Bone *orig_parent, Bone *parent, 
 							 bool recurse, bool link)
 {
@@ -303,10 +240,11 @@ void Bone::DuplicateChildren(Bone *orig_parent, Bone *parent,
 		}
 	}
 }
-
+#endif
 
 void Bone::UpdateBindPose()
 {
+#if 0
 	// In this local case order doesn't matter for these operations
 	mLocalTransform = mRotation;
 	mLocalTransform.Translate(mTranslation);
@@ -325,6 +263,7 @@ void Bone::UpdateBindPose()
 	}
 
 	mBindPose.GetInverse(mBindToWorld);
+#endif
 }
 
 
@@ -359,7 +298,7 @@ void Bone::UpdateBindPoseForParent()
 }
 #endif
 
-
+#if 0
 void Bone::UpdateBindPoseForChildren()
 {
 	for (uint32 i = 0, n = mChildren.size(); i < n; ++i)
@@ -444,6 +383,7 @@ void Bone::UpdateWorldPoseForChildren(index_t track, vec_t time)
 		}
 	}
 }
+#endif
 
 
 ////////////////////////////////////////////////////////////
