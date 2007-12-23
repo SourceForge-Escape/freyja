@@ -39,15 +39,28 @@ class Texture
  public:
 
 	enum PixelFormat {
-		Indexed8,
-		RGB24,
-		RGBA32
+		Indexed_8bpp,
+		RGB_24bpp,
+		RGBA_32bpp
 	};
 
-	Texture();
+	static freyja::Texture* Create( byte* pixmap,
+									uint16 width, uint16 height, 
+									PixelFormat format );
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructor.
+	 * Pre  : Pixmap must be allocated and have deminsion.
+	 *
+	 * Post : Conditional Constructor returns Texture. 
+	 *        Returns NULL on invalid precondition.
+	 *
+	 ------------------------------------------------------*/
+
+	static freyja::Texture* Create( const char* filename );
+	/*------------------------------------------------------
+	 * Pre  : filename must be for a valid image file.
+	 *
+	 * Post : Conditional Constructor returns Texture.
+	 *        Returns NULL on invalid precondition.
 	 *
 	 ------------------------------------------------------*/
 
@@ -58,22 +71,7 @@ class Texture
 	 *
 	 ------------------------------------------------------*/
 
-	const char* GetFilename() 
-	{ return mFilename.c_str(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns filename attribute or NULL.
-	 ------------------------------------------------------*/
-
-	void SetFilename( const char* filename )
-	{ mFilename = filename; }
-	/*------------------------------------------------------
-	 * Pre  : Name is valid string.
-	 * Post : Sets Texture filename attribute.
-	 *
-	 ------------------------------------------------------*/
-
-	const char* GetName() 
+	const char* GetName() const
 	{ return mName.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -88,29 +86,60 @@ class Texture
 	 *
 	 ------------------------------------------------------*/
 
-	byte* mImage;
-
-	byte* mPalette;
-
-	uint32 mBitDepth;
-
-	PixelFormat mPixelFormat;
-
-	uint32 mWidth;
-
-	uint32 mHeight;
+	uint16 GetBytesPerPixel( Texture::PixelFormat format );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns bytes per pixel given format.
+	 *
+	 ------------------------------------------------------*/
 
 
  protected:
 
-	Texture(const Texture& texture);
+	Texture();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructor.
+	 *
+	 ------------------------------------------------------*/
 
-	Texture &operator=(const Texture& texture);
+	Texture(const Texture& texture);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructor.
+	 *
+	 ------------------------------------------------------*/
+
+	Texture& operator=(const Texture& texture);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Assignment operator.
+	 *
+	 ------------------------------------------------------*/
 
 	mstl::String mName;                /* Texture name */
 	
 	mstl::String mFilename;            /* Filename of image */
+
+	PixelFormat mPixelFormat;
+
+	byte* mImage;
+
+	uint16 mWidth;
+
+	uint16 mHeight;
 };
+
+
+inline
+uint16 Texture::GetBytesPerPixel( Texture::PixelFormat format )
+{ 
+	return ( (format == Indexed_8bpp) ? 1 :
+			 (format == RGB_24bpp) ? 3 :
+			 (format == RGBA_32bpp) ? 4 : 
+			 0 );	
+}
+
 
 } // namespace freyja
 

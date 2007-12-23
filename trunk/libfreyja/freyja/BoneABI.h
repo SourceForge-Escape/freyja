@@ -33,7 +33,7 @@ extern "C" {
 	// Types: Bone, Node, XMLSerializer
 	///////////////////////////////////////////////////////////////////////
 
-	freyja_ptr freyjaBoneCreate( freyja_ptr skeleton, freyja_id bone ); 
+	freyja_ptr freyjaBoneCreate( freyja_ptr skeleton, const char* name ); 
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns pointer to Bone or NULL.
@@ -47,11 +47,8 @@ extern "C" {
 
 
 	///////////////////////////////////////////////////////////////////////
-	// BONE
+	// BONE 0.9.3 - 0.9.5
 	///////////////////////////////////////////////////////////////////////
-
-
-
 
 	const vec_t *freyjaGetBoneBindPose16fv(freyja_ptr boneIndex);
 	/*------------------------------------------------------

@@ -52,17 +52,17 @@ class Skeleton :
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Skeleton( );
+	Skeleton(const char* name );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of Skeleton
+	 * Post : Constructor.
 	 *
 	 ------------------------------------------------------*/
 
 	~Skeleton( );
 	/*------------------------------------------------------
-	 * Pre  : Skeleton object is allocated
-	 * Post : Deconstructs an object of Skeleton
+	 * Pre  : 
+	 * Post : Destructor.
 	 *
 	 ------------------------------------------------------*/
 
@@ -118,6 +118,15 @@ class Skeleton :
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Sets the root bone.
+	 *
+	 ------------------------------------------------------*/
+
+	static freyja::Skeleton* Cast( freyja_ptr ptr )
+	{ return (freyja::Skeleton*)ptr; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 * Notes: FIXME Add RTTI checking.
 	 *
 	 ------------------------------------------------------*/
 

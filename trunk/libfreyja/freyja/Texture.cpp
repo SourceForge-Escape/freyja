@@ -33,11 +33,10 @@ Texture::Texture() :
 	mFilename(),            /* Filename of image */
 	mImage(NULL),
 	mPalette(NULL),
-	mBitDepth(0),
 	mPixelFormat(RGB24),
+	mBitDepth(0),
 	mWidth(0),
-	mHeight(0),
-	mUID(INDEX_INVALID)         /* Used by Gobal Pool */
+	mHeight(0)
 {
 }
 
@@ -52,14 +51,74 @@ FreyjaTexture::~FreyjaTexture()
 }
 
 
+freyja::Texture* Texture::Create( const char* filename )
+{
+	FreyjaImage image;
+	if ( image.loadImage(filename) != 0 )
+		return NULL;
+
+	byte* pixmap;
+	image.getImage( &pixmap );
+
+	PixelFormat format = RGBA_32;
+	uint32 byteDepth;
+
+	switch ( image.getColorMode() )
+	{
+	case FreyjaImage::RGBA_32:
+		byteDepth = 4;
+		colorMode = RGBA_32;
+		break;
+
+	case FreyjaImage::RGB_24:
+		byteDepth = 3;
+		colorMode = RGB_24;
+		break;
+
+	case FreyjaImage::INDEXED_8:
+		byteDepth = 1;
+		colorMode = INDEXED_8;
+		break;
+
+	default:
+		byteDepth = 0;
+	}
+
+	return Create( pixbuf, image.getWidth(), image.getHeight(), format );
+}
+
+
+freyja::Texture* 
+Texture::Create( byte* pixmap,
+				 uint16 width, 
+				 uint16 height,
+				 PixelFormat format )
+{
+	uint32 size = width * height * GetBytesPerPixel( format );
+	freyja::Texture* texture = NULL;
+
+	if ( pixbuf && size )
+	{
+		texture = new freyja::Texture();
+		texture->mImage = new byte[ size ];
+		memcpy( texture->mImage, image, size );
+		texture->mWidth = width;
+		texture->mHeight = height;
+		texture->mPixelFormat = format;
+	}
+
+	return texture;
+}
+
+
 ////////////////////////////////////////////////////////////
 // Unit Test code
 ////////////////////////////////////////////////////////////
 
-#ifdef UNIT_TEST_FREYJATEXTURE
-int runFreyjaTextureUnitTest(int argc, char *argv[])
+#ifdef UNIT_TEST_FREYJA_TEXTURE
+int runTextureUnitTest(int argc, char *argv[])
 {
-	FreyjaTexture test;
+	Texture test;
 
 	return 0;
 }
@@ -67,9 +126,9 @@ int runFreyjaTextureUnitTest(int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-	printf("[FreyjaTexture class test]\n");
+	printf("[Texture class test]\n");
 
-	return runFreyjaTextureUnitTest(argc, argv);
+	return runTextureUnitTest(argc, argv);
 }
 #endif
 
@@ -79,19 +138,17 @@ int main(int argc, char *argv[])
 // Texture ( 0.9.3 ABI, Can't be used with freyjaIterators )
 ///////////////////////////////////////////////////////////////////////
 
-index_t freyjaTextureCreateFilename(const char *filename)
-{	
+freyja_ptr freyjaTextureCreate( const char* filename )
+{
 	FreyjaImage image;
-	index_t uid;
-	byte *pixmap;
+	if ( image.loadImage(filename) != 0 )
+		return NULL;
+
+	byte* pixmap;
+	image.getImage( &pixmap );
+
 	freyja_colormode_t colorMode = RGBA_32;
 	uint32 byteDepth;
-
-
-	if (image.loadImage(filename) != 0)
-		return INDEX_INVALID;
-
-	image.getImage(&pixmap);
 
 	switch (image.getColorMode())
 	{
@@ -114,28 +171,34 @@ index_t freyjaTextureCreateFilename(const char *filename)
 		byteDepth = 0;
 	}
 
-	uid = freyjaTextureCreateBuffer(pixmap, byteDepth, 
+	if ( pixbuf == 0x0 || size == 0 || byteDepth == 0 )
+	{
+		return NULL;
+	}
+
+	freyja::Texture* texture = freyjaTextureCreateBuffer(pixmap, byteDepth, 
 									image.getWidth(), image.getHeight(),
 									colorMode);
 
 	/* Texture will delete the image copy here on scope exit */
-	return uid;
+	return texture;
 }
 
 
-index_t freyjaTextureCreateBuffer(byte *image, uint32 byteDepth,
-                                  uint32 width, uint32 height,
-                                  freyja_colormode_t type)
+freyja_ptr 
+freyjaTextureCreateBuffer( byte* pixbuf, 
+						   byte depth,
+						   uint16 width, 
+						   uint16 height,
+						   freyja_colormode_t type )
 {
-	FreyjaTexture *texture = new FreyjaTexture();
-	index_t uid;
+	freyja::Texture *texture = new freyja::Texture();
 	uint32 i, count, size =  width * height * byteDepth;
 	bool found = false;
 
-
-	if (image == 0x0 || size == 0 || byteDepth == 0)
+	if ( pixbuf == 0x0 || size == 0 || byteDepth == 0 )
 	{
-		return INDEX_INVALID;
+		return NULL;
 	}
 
 	/* Setup texture */
@@ -250,18 +313,6 @@ void freyjaGetTextureImage(index_t textureIndex,
 			}
 		}
 	}
-}
-
-
-uint32 freyjaGetTexturePoolCount()
-{
-	return gFreyjaTextures.size();
-}
-
-
-uint32 freyjaGetTextureCount()
-{
-	return gFreyjaTextureCount;
 }
 
 

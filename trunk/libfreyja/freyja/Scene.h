@@ -155,11 +155,11 @@ private:
 
 	mstl::list<freyja::Metadata*> mMetadata;      /* */
 
-	mstl::list<freyja::Skeleton*> mSkeletons;     /* */
-
 	// FIXME: These should be shared by all scenes.
 	// Break these out into a level above scene, and use instances in scenes.
 	// Something like ResourceManager or something, and have them inherit from Resource.
+
+	mstl::list<freyja::Skeleton*> mSkeletons;     /* */
 
 	mstl::list<freyja::Material*> mMaterials;     /* */
 

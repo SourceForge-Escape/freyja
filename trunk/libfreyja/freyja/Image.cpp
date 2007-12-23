@@ -29,21 +29,21 @@
 #include <mstl/Vector.h>
 #include <mstl/String.h>
 
-#ifdef FREYJAIMAGE_PLUGINS
+#ifdef IMAGE_PLUGINS
 #   include "PluginABI.h"
 #endif
 
-#include "FreyjaImage.h"
+#include "freyja.h"
+#include "Image.h"
 
 
-#define FREYJAIMAGE_COLOR_WEIGHT_GREYSCALE 0
-
+#define IMAGE_COLOR_WEIGHT_GREYSCALE 0
 
 using namespace mstl;
+using namespace freyja;
 
-extern Vector<mstl::String> gImagePluginDirectories;
 
-FreyjaImage::FreyjaImage() :
+Image::Image() :
 	_image(NULL),
 	_palette(NULL),
     _width(0),
@@ -57,7 +57,7 @@ FreyjaImage::FreyjaImage() :
 }
 
 
-FreyjaImage::FreyjaImage(const FreyjaImage &img) :
+Image::Image(const Image &img) :
 	_image(NULL),
 	_palette(NULL),
     _width(img._width),
@@ -86,13 +86,13 @@ FreyjaImage::FreyjaImage(const FreyjaImage &img) :
 }
 
 
-FreyjaImage::~FreyjaImage()
+Image::~Image()
 {
 	erase();
 }
 
 
-void FreyjaImage::erase()
+void Image::erase()
 {
    if (_image)
       delete [] _image;
@@ -108,31 +108,31 @@ void FreyjaImage::erase()
 }
 
 
-int FreyjaImage::getWidth()
+int Image::getWidth()
 {
 	return _width;
 }
 
 
-int FreyjaImage::getHeight()
+int Image::getHeight()
 {
 	return _height;
 }
 
 
-int FreyjaImage::getOriginalWidth()
+int Image::getOriginalWidth()
 {
   return _original_width;
 }
 
 
-int FreyjaImage::getOriginalHeight()
+int Image::getOriginalHeight()
 {
 	return _original_height;
 }
 
 
-void FreyjaImage::setColorMode(colormode_t mode)
+void Image::setColorMode(colormode_t mode)
 {
 	if (!_image || _width < 1 || _height < 1)
 		return;
@@ -148,7 +148,7 @@ void FreyjaImage::setColorMode(colormode_t mode)
 				for ( unsigned int i = 0, n = _width * _height; i < n; ++i )
 				{
 					const unsigned int idx = i * 3;
-#if FREYJAIMAGE_COLOR_WEIGHT_GREYSCALE
+#if IMAGE_COLOR_WEIGHT_GREYSCALE
 					/* Convert greyscale using 'obsolete' color weights.
 					 * I forgot why this filter was ever used, so it's disabled by default. */ 
 					const unsigned char pixel = _image[i];
@@ -199,7 +199,7 @@ void FreyjaImage::setColorMode(colormode_t mode)
 
 
 //FIXME: Add support for 32bit!
-int FreyjaImage::setPalette(unsigned char *buffer, int bpp)
+int Image::setPalette(unsigned char *buffer, int bpp)
 {
   if (buffer && buffer != _palette && 
       (bpp == 8 || bpp == 16 || bpp == 24))
@@ -215,19 +215,19 @@ int FreyjaImage::setPalette(unsigned char *buffer, int bpp)
     return 0;
   }
 
-  printf("FreyjaImage::LoadPaletteBuffer()> Assertion Error bpp not {8,16,24}\n");
+  printf("Image::LoadPaletteBuffer()> Assertion Error bpp not {8,16,24}\n");
   return -1;
 }
 
 
-int FreyjaImage::loadIndexedPixmap(unsigned char *image, int width, int height)
+int Image::loadIndexedPixmap(unsigned char *image, int width, int height)
 {
   int i, size, index;
 
 
   if (!image || /* !_palette || */ !width || !height || image == _image)
   {
-    printf("FreyjaImage::LoadIndexedBuffer> Assertion failed\n");
+    printf("Image::LoadIndexedBuffer> Assertion failed\n");
     return -1;
   }
 
@@ -291,14 +291,14 @@ int FreyjaImage::loadIndexedPixmap(unsigned char *image, int width, int height)
 }
 
 
-void FreyjaImage::brightenPalette(float p)
+void Image::brightenPalette(float p)
 {
   int i;
 
 
   if (p <= 0.0 || p > 0.999)
   {
-    printf("FreyjaImage::BrightenPalette> %f isn't a postive percentage\n", p);
+    printf("Image::BrightenPalette> %f isn't a postive percentage\n", p);
     return;
   }
 
@@ -314,7 +314,7 @@ void FreyjaImage::brightenPalette(float p)
 }
 
 
-void FreyjaImage::getImage(unsigned char **buffer)
+void Image::getImage(unsigned char **buffer)
 {
 	*buffer = NULL;
 
@@ -344,7 +344,7 @@ void FreyjaImage::getImage(unsigned char **buffer)
 }
 
 
-void FreyjaImage::getPalette(unsigned char **buffer)
+void Image::getPalette(unsigned char **buffer)
 {
   *buffer = NULL;
 
@@ -359,7 +359,7 @@ void FreyjaImage::getPalette(unsigned char **buffer)
 }
 
 
-void FreyjaImage::getIndexedImage(unsigned char **buffer)
+void Image::getIndexedImage(unsigned char **buffer)
 {
   int size = _width * _height;
   float rgb[3];
@@ -370,7 +370,7 @@ void FreyjaImage::getIndexedImage(unsigned char **buffer)
 
   if (!_image || !_palette)
   {
-    printf("FreyjaImage::IndexedImage> No image or palette allocated\n");
+    printf("Image::IndexedImage> No image or palette allocated\n");
     return;
   }
 
@@ -386,7 +386,7 @@ void FreyjaImage::getIndexedImage(unsigned char **buffer)
   }
 }
 
-void FreyjaImage::flipVertical()
+void Image::flipVertical()
 {
   int i, j;
   unsigned char *swap_row = NULL;
@@ -428,7 +428,7 @@ void FreyjaImage::flipVertical()
 }
 
 
-int FreyjaImage::loadPixmap(unsigned char *image, 
+int Image::loadPixmap(unsigned char *image, 
 								 unsigned int w, unsigned int h,
 								 colormode_t mode)
 {
@@ -477,7 +477,7 @@ int FreyjaImage::loadPixmap(unsigned char *image,
 //
 // Note if you have a small palette this may 'wash' to black
 // quickly after running through a few times ( 0.0 is default )
-unsigned int FreyjaImage::matchPaletteColor(color3_t rgb)
+unsigned int Image::matchPaletteColor(color3_t rgb)
 {
   color3_t color;
   float best_weight, current_weight;
@@ -486,7 +486,7 @@ unsigned int FreyjaImage::matchPaletteColor(color3_t rgb)
 
   if (!_palette)
   {
-    printf("FreyjaImage::MatchColor> ERROR no palette loaded\n");
+    printf("Image::MatchColor> ERROR no palette loaded\n");
     return 0;
   }
 
@@ -518,7 +518,7 @@ unsigned int FreyjaImage::matchPaletteColor(color3_t rgb)
   return best;
 }
 
-void FreyjaImage::getPaletteColor(unsigned int i, color3_t rgb)
+void Image::getPaletteColor(unsigned int i, color3_t rgb)
 {
   if (i > 0 && i < 256 && rgb && _palette)
   {
@@ -529,9 +529,9 @@ void FreyjaImage::getPaletteColor(unsigned int i, color3_t rgb)
 }	
 
 
-int FreyjaImage::loadImage(const char *filename)
+int Image::loadImage(const char *filename)
 {
-#ifdef FREYJAIMAGE_PLUGINS
+#ifdef IMAGE_PLUGINS
 	SystemIO::FileReader reader;
 	int (*import_img)(char *filename, unsigned char **image,
 					  unsigned int *width, unsigned int *height, 
@@ -550,7 +550,7 @@ int FreyjaImage::loadImage(const char *filename)
 		return -1;
 	}
 
-	print("[FreyjaImage plugin system invoked]");
+	print("[Image plugin system invoked]");
 
 	// It IS very funny to see a C++ foreach implementation along side code that
 	// was used with software renderers years ago  =)
@@ -626,14 +626,14 @@ int FreyjaImage::loadImage(const char *filename)
 	}
 	}
 #else
-	print("FreyjaImage: This build was compiled w/o plugin support");
+	freyjaPrintMessage("Image: This build was compiled w/o plugin support");
 #endif
 
 	return -1;
 }
 
 
-int FreyjaImage::loadPaletteLMP(const char *filename)
+int Image::loadPaletteLMP(const char *filename)
 {
   FILE *f;
 	
@@ -653,7 +653,7 @@ int FreyjaImage::loadPaletteLMP(const char *filename)
   return -1;
 }
 
-int FreyjaImage::loadPaletteMTK(const char *filename)
+int Image::loadPaletteMTK(const char *filename)
 {
   FILE *f;
   int i;
@@ -692,9 +692,9 @@ int FreyjaImage::loadPaletteMTK(const char *filename)
 }
 
 
-int FreyjaImage::saveImage(const char *filename, const char *module_name)
+int Image::saveImage(const char *filename, const char *module_name)
 {
-#ifdef FREYJAIMAGE_PLUGINS
+#ifdef IMAGE_PLUGINS
 	SystemIO::FileReader reader;
 	char symbol[256];
 	int (*export_img)(char *filename, unsigned char *image,
@@ -705,7 +705,7 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 	void *handle;
 
 
-	print("[FreyjaImage plugin system invoked]");
+	print("[Image plugin system invoked]");
 
 	unsigned int i;
 	foreach (gImagePluginDirectories, i)
@@ -760,14 +760,14 @@ int FreyjaImage::saveImage(const char *filename, const char *module_name)
 	if (done)
 		return 0;
 #else
-	print("FreyjaImage: This build was compiled w/o plugin support");
+	freyjaPrintMessage("Image: This build was compiled w/o plugin support");
 #endif
 
 	return -1;
 }
 
 
-int FreyjaImage::savePaletteMTK(const char *filename)
+int Image::savePaletteMTK(const char *filename)
 {
   FILE *f;
   int i;
@@ -795,20 +795,20 @@ int FreyjaImage::savePaletteMTK(const char *filename)
   return 1;
 }
 
-FreyjaImage::colormode_t FreyjaImage::getColorMode()
+Image::colormode_t Image::getColorMode()
 {
   return _color_mode;
 }
 
 
-void FreyjaImage::scaleImage()
+void Image::scaleImage()
 {
 	scaleImage(1024, 1024);
 }
 
 
 /* This code based off on gluScaleImage()  */
-void FreyjaImage::scaleImage(unsigned int maxW, unsigned int maxH)
+void Image::scaleImage(unsigned int maxW, unsigned int maxH)
 {
    int i, j, k;
    float* tempin;
@@ -1002,7 +1002,7 @@ void FreyjaImage::scaleImage(unsigned int maxW, unsigned int maxH)
    _image = image;
 }
 
-int FreyjaImage::getNextPower(int seed)
+int Image::getNextPower(int seed)
 {
   int i;
 
@@ -1012,39 +1012,3 @@ int FreyjaImage::getNextPower(int seed)
   return i;
 }
 
-
-void FreyjaImage::printError(char *format, va_list *args)
-{
-
-	fprintf(stdout, "FreyjaImage> ");
-	vfprintf(stdout, format, *args);
-	fprintf(stdout, "\n");
-}
-
-
-void FreyjaImage::printMessage(char *format, va_list *args)
-{
-	fprintf(stderr, "FreyjaImage> ");
-	vfprintf(stderr, format, *args);
-	fprintf(stderr, "\n");
-}
-
-
-void FreyjaImage::print(char *s, ...)
-{
-	va_list args;
-
-	va_start(args, s);
-	printMessage(s, &args);
-	va_end(args);
-}
-
-
-void FreyjaImage::printError(char *s, ...)
-{
-	va_list args;
-	
-	va_start(args, s);
-	printError(s, &args);
-	va_end(args);
-}
