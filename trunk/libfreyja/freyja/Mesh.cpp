@@ -25,9 +25,6 @@
 using namespace freyja;
 using namespace hel;
 
-Vector<Mesh *> Mesh::mGobalPool;
-//index_t Mesh::mNextUID = 0;
-
 #define GROUP_FACE_WITHOUT_BITMAPS 0
 
 
@@ -35,166 +32,50 @@ Vector<Mesh *> Mesh::mGobalPool;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Mesh::Mesh() :
-	mTrack(),
-	mVertexAnimTrack(),
-	mBlendVerticesTime(-1.0f),
-	mBlendVertices(),
-	mUID(INDEX_INVALID),
-	mInitBoundingVol(false),
-	mPacked(false),
-	mFlags(0),
-	mMaterialIndex(0),
-	mPosition(),
-	mRotation(),  // Store as Euler Angles for 'Size' interface
-	mScale(),
-	mBoundingVolume(),
-	mVertexPool(),
-	mFreedVertices(),
-	mNormalPool(),
-	mFreedNormals(),
-	mColorPool(),
-	mFreedColors(),
-	mTexCoordPool(),
-	mFreedTexCoords(),
+Mesh::Mesh( const char* name ) :
+	SceneNode( name ),
+	mMeshOptions(0),
+	mVertexArray(),
+	mColorArray(),
+	mNormalArray(),
+	mTexcoordArray(),
+	mGaps(),
+	mSelectedVertices(),
+	mSelectedFaces(),
+	mSelectedEdges(),
 	mFaces(),
 	mVertices(),
-	mWeights(),
 	mPlanes(),
 	mEdges()
-{
-	mVertexPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
-	mNormalPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
-	mColorPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
-	mTexCoordPool.SetFlag(mstl::Vector<vec_t>::fNonClass);
-
-	mName.Set("Mesh%i", mUID);
-	
-	mFlags = 0;
-	mMaterialIndex = 0;
-	mPosition = Vec3(0.0f, 0.0f, 0.0f);
-	mRotation = Vec3(0.0f, 0.0f, 0.0f);
-	mScale = Vec3(1.0f, 1.0f, 1.0f);
-
-	// FIXME: Define larger intial boundary? 
-	//mBoundingVolume = ...;
-}
+{ }
 
 
 Mesh::Mesh(const Mesh &mesh) :
-	mTrack(mesh.mTrack),
-	mVertexAnimTrack(mesh.mVertexAnimTrack),
-	mBlendVerticesTime(-1.0f),
-	mBlendVertices(),
-	mUID(INDEX_INVALID),
-	mInitBoundingVol(false),
-	mPacked(false),
-	mFlags(mesh.mFlags),
-	mMaterialIndex(mesh.mMaterialIndex),
-	mPosition(mesh.mPosition),
-	mRotation(mesh.mRotation),
-	mScale(mesh.mScale),
-	mBoundingVolume(mesh.mBoundingVolume),
-	mVertexPool(mesh.mVertexPool),
-	mFreedVertices(mesh.mFreedVertices),
-	mNormalPool(mesh.mNormalPool),
-	mFreedNormals(mesh.mFreedNormals),
-	mColorPool(mesh.mColorPool),
-	mFreedColors(mesh.mFreedColors),
-	mTexCoordPool(mesh.mTexCoordPool),
-	mFreedTexCoords(mesh.mFreedTexCoords),
-	mFaces(),
-	mVertices(),
-	mWeights(),
-	mPlanes(),
-	mEdges()
+	SceneNode( mesh.mName.c_str() ),
+	mMeshOptions( mesh.mMeshOptions ),
+	mVertexArray( mesh.mVertexArray ),
+	mColorArray( mesh.mColorArray ),
+	mNormalArray( mesh.mNormalArray ),
+	mTexcoordArray( mesh.mTexcoordArray ),
+	mGaps( mesh.mGaps ),
+	mSelectedVertices( mesh.mSelectedVertices ),
+	mSelectedFaces( mesh.mSelectedFaces ),
+	mSelectedEdges( mesh.mSelectedEdges ),
+	mFaces( mesh.mFaces ),
+	mVertices( mesh.mVertices ),
+	mPlanes( mesh.mPlanes ),
+	mEdges( mesh.mEdges )
 {
-	mName.Set("Mesh%i", mUID);
-
-	uint32 i;
-
-	foreach (((Mesh&)mesh).mVertices, i)
-	{
-		if (((Mesh&)mesh).mVertices[i])
-		{
-			mVertices.push_back(new Vertex(*(((Mesh&)mesh).mVertices[i])));
-		}
-		else  // Need to NULL pad to exact match if needed
-		{
-			mVertices.push_back(NULL);
-		}
-
-		DEBUG_MSG("\t%i - vertices copied\n", i);
-	}
-
-
-	foreach (((Mesh&)mesh).mFaces, i)
-	{
-		if (((Mesh&)mesh).mFaces[i])
-		{
-			mFaces.push_back(new Face(*(((Mesh&)mesh).mFaces[i])));
-		}
-		else  // Need to NULL pad to exact match if needed
-		{
-			mFaces.push_back(NULL);
-		}
-
-		DEBUG_MSG("\t%i - Facees copied\n", i);
-	}
-
-
-	foreach (((Mesh&)mesh).mWeights, i)
-	{
-		if (((Mesh&)mesh).mWeights[i])
-		{
-			mWeights.push_back(new Weight(*(((Mesh&)mesh).mWeights[i])));
-		}
-		else  // Need to NULL pad to exact match if needed
-		{
-			mWeights.push_back(NULL);
-		}
-
-		DEBUG_MSG("\t%i - weights copied\n", i);
-	}
-
-	//VertexCleanup();
-}
+#warning FIXME Needs to copy Node, SceneNode, etc attributes too.
+ }
 
 
 Mesh::~Mesh()
 {
-	// Force removal in case of bad delete calls
-	if (GetMesh(mUID) == this)
-		RemoveFromPool();
-
-	uint32 i;
-
-	foreach (mWeights, i)
-	{
-		if (mWeights[i])
-		{
-			delete mWeights[i];
-			mWeights[i] = NULL;
-		}
-	}
-
-	foreach (mVertices, i)
-	{
-		if (mVertices[i])
-		{
-			delete mVertices[i];
-			mVertices[i] = NULL;
-		}
-	}
-
-	foreach (mFaces, i)
-	{
-		if (mFaces[i])
-		{
-			delete mFaces[i];
-			mFaces[i] = NULL;
-		}
-	}
+	mFaces.clear();
+	mVertices.clear();
+	mPlanes.clear();
+	mEdges.clear();
 }
 
 
@@ -202,48 +83,54 @@ Mesh::~Mesh()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-bool Mesh::CopyVertexBuffer(mstl::Vector<vec_t> &buffer)
+bool Mesh::CopyVertexArray( freyja::FloatArray& array ) const
 { 
-	if (buffer.size() < mVertexPool.size())
-	{
-		buffer.resize(mVertexPool.size());
-	}
-		
-	if (buffer.get_array() && 
-		buffer.size() >= mVertexPool.size())
-	{
-		memcpy(buffer.get_array(), 
-			   mVertexPool.get_array(), 
-			   sizeof(vec_t) * mVertexPool.size() );
-		
-		return true;
-	}
-	
+	array = mVertexArray;
+	return ( array.GetSize() >= mVertexArray.GetSize() );
+}
+
+
+bool Mesh::Serialize( XMLSerializerNode parent ) const
+{
+#warning FIXME
+	return false;
+}
+
+bool Mesh::Unserialize( XMLSerializerNode node )
+{
+#warning FIXME
 	return false;
 }
 
 
-bool Mesh::CopyVertexBlendBuffer(mstl::Vector<vec_t> &buffer)
-{ 
-	if (buffer.size() < mBlendVertices.size())
-	{
-		buffer.resize(mBlendVertices.size());
-	}
-		
-	if (buffer.get_array() && 
-		buffer.size() >= mBlendVertices.size())
-	{
-		memcpy(buffer.get_array(), 
-			   mBlendVertices.get_array(), 
-			   sizeof(vec_t) * mBlendVertices.size() );
-		
-		return true;
-	}
-	
-	return false;
+mstl::String Mesh::GetInfo() const
+{
+#warning FIXME
+	return mstl::String( "Mesh" );
 }
 
 
+const hel::Quat& Mesh::GetWorldOrientation() const
+{
+#warning FIXME
+	return mOrientation;
+}
+
+
+const hel::Vec3& Mesh::GetWorldPosition() const
+{
+#warning FIXME
+	return mPosition;
+}
+
+
+void Mesh::DuplicateChildren( freyja::Node* parent, bool recurse )
+{
+#warning FIXME
+}
+
+
+#if FIXME
 bool Mesh::GetShadowVolume(mstl::Vector<vec_t> &shadowVolume,
 					 vec3_t lightPos, vec3_t pos, vec_t cinf)
 {
@@ -331,132 +218,6 @@ bool Mesh::GetBlendShadowVolume(mstl::Vector<vec_t> &shadowVolume,
 	}
 
 	return false;
-}
-
-
-void Mesh::GetSelectedVertices(Vector<index_t> &list) 
-{
-	list.clear();
-
-	for (uint32 i = 0, icount = GetVertexCount(); i < icount; ++i)
-	{
-		Vertex *v = GetVertex(i);
-
-		if (!v) 
-			continue;
-
-		if (v->mFlags & Vertex::fSelected)
-		{
-			list.push_back(i);
-		}
-	}	
-}
-
-
-bool Mesh::UnserializeXML(const char* filename)
-{
-#if TINYXML_FOUND
-	if (!filename)
-		return false;
-
-	TiXmlDocument doc(filename);
-
-	if ( !doc.LoadFile() )
-	{
-		freyjaPrintMessage("XML ERROR: %s, Line %i, Col %i\n", 
-		             doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
-		return false;
-	}
-
-	TiXmlElement *root = doc.RootElement(); 
-
-	if (!root) 
-	{
-		freyjaPrintMessage("XML ERROR: Couldn't find document root for '%s'!\n", filename );
-		return false;
-	}
-
-	TiXmlElement *child = root->FirstChildElement();
-	for( ; child; child = child->NextSiblingElement() )
-	{
-		String s = child->Value();
-
-		// Only handle the first one encountered given this is a class method.
-		if ( s == "mesh" )
-		{
-			return Unserialize( child );
-		}
-	}
-
-#endif // TINYXML_FOUND
-
-	return false;
-}
-
-
-bool Mesh::SerializePool(SystemIO::TextFileWriter &w, const char *name,
-						 Vector<vec_t> &array, mstl::stack<index_t> &stack)
-{
-	if (!array.size())
-	{
-		w.Print("\t%sStack %u\n", name, 0);
-		w.Print("\t%sArray %u\n", name, 0);	
-		return true;
-	}
-
-	{
-		w.Print("\t%sStack %u\n", name, stack.size());
-		mstl::StackNode<index_t> *cur = stack.top();
-
-		// FIXME: This will cause it to read in reverse, but it doesn't matter 
-		while (cur)
-		{
-			index_t data = cur->Data();
-			w.Print("%u ", data);
-			cur = cur->Prev();
-		}
-
-		w.Print("\n");
-	}
-
-	w.Print("\t%sArray %u\n", name, array.size());
-	for (uint32 i = 0, n = array.size(); i < n; ++i)
-	{
-		if (i % 3 == 0) w.Print("\n\t"); // Makes it easier on text editors
-		w.Print("%f ", array[i]);
-	}
-	w.Print("\n");
-
-	return true;
-}
-
-
-bool Mesh::SerializePool(SystemIO::TextFileReader &r, const char *name,
-						 Vector<vec_t> &array, mstl::stack<index_t> &stack)
-{
-	freyjaPrintMessage("Loading %s pool...\n", name);
-
-	{
-		r.ParseSymbol(); // name + "Stack"
-		int32 count = r.ParseInteger();
-
-		while (count > 0)
-		{
-			stack.push(r.ParseInteger());
-			--count;
-		}
-	}
-
-	r.ParseSymbol(); // name + "Array"
-	int32 count = r.ParseInteger();
-
-	while (count > 0)
-	{
-		array.push_back(r.ParseFloat());
-		--count;
-	}
-
-	return true;
 }
 
 
@@ -731,134 +492,6 @@ bool Mesh::WeldTexCoords(index_t replace, index_t texcoord)
 
 	// Mark unused index in the texcoord pool
 	mFreedTexCoords.push(replace);
-
-	return true;
-}
-
-
-bool Mesh::SerializeBuffer(TiXmlElement *container, 
-						   const char *name, Vector<vec_t> &array)
-{
-	// NOTE: You lose 'gaps' this way  =/
-
-	if (!array.size())
-	{
-		// Nothing to write home about, literally...
-		return true;
-	}
-
-	TiXmlElement *buffer = new TiXmlElement(name);
-	buffer->SetAttribute("reserve", array.size() );
-
-	for (uint32 i = 0, n = array.size()/3; i < n; ++i)
-	{
-		unsigned int idx = i * 3;
-
-		TiXmlElement *element = new TiXmlElement("vec3");
-		element->SetAttribute("id", idx/3 );
-		element->SetDoubleAttribute("x", array[idx] );
-		element->SetDoubleAttribute("y", array[idx+1] );
-		element->SetDoubleAttribute("z", array[idx+2] );
-		buffer->LinkEndChild(element);
-	}
-
-	container->LinkEndChild(buffer);
-	return true;
-}
-
-
-bool Mesh::UnserializeBuffer(TiXmlElement *container, 
-							 const char *name, Vector<vec_t> &array)
-{
-	// Have to read which gap type above this level
-
-	if (!container)
-		return false;
-
-	int attr;
-	container->QueryIntAttribute("reserve", &attr);
-
-	if (attr < 0) attr = 16;
-
-	// attr - this is currently the old array reserve size.
-	array.reserve(attr);
-	
-	TiXmlElement *child = container->FirstChildElement();
-	for( ; child; child = child->NextSiblingElement() )
-	{
-		String s = child->Value();
-		
-		// FIXME: should check id's in future, in case of hand edited files.
-		if (s == "vec3")
-		{
-			child->QueryIntAttribute("id", &attr);
-			
-			float x, y, z;
-			x = y = z = 0.0f;
-			child->QueryFloatAttribute("x", &x);
-			child->QueryFloatAttribute("y", &y);
-			child->QueryFloatAttribute("z", &z);
-
-			//array[id*3] = x;
-			//array[id*3+1] = y;
-			//array[id*3+2] = z;
-			
-			array.push_back(x);
-			array.push_back(y);
-			array.push_back(z);
-		}
-	}
-
-	return true;
-}
-
-
-bool Mesh::SerializeBufferGaps(TiXmlElement *container, 
-							   const char *name, mstl::stack<index_t> &s)
-{
-	if (s.empty())
-	{
-		// Nothing to write home about, literally...
-		return true;
-	}
-
-	mstl::stack<index_t> copy; 
-	TiXmlElement *gaps = new TiXmlElement(name);
-
-	while ( !s.empty() )
-	{
-		index_t item = s.pop();
-		TiXmlElement *element = new TiXmlElement("gap");
-		element->SetAttribute("id", item );	
-		gaps->LinkEndChild(element);
-		copy.push(item);
-	}
-
-	// We don't really care about order
-	while ( !copy.empty() )
-	{
-		s.push(copy.pop());
-	}
-
-	container->LinkEndChild(gaps);
-	return true;	
-}
-
-
-bool Mesh::UnserializeBufferGaps(TiXmlElement *container, 
-								 const char *name, mstl::stack<index_t> &s)
-{
-	// Have to read which gap type above this level
-
-	if (!container)
-		return false;
-
-	TiXmlElement *child = container->FirstChildElement();
-	for(int attr; child; child = child->NextSiblingElement() )
-	{
-		child->QueryIntAttribute("id", &attr);
-		s.push(attr);
-	}
 
 	return true;
 }
@@ -1162,16 +795,9 @@ bool Mesh::Unserialize(TiXmlElement *mesh)
 }
 
 
-void Mesh::GetVertexArrayPos(index_t vertexIndex, vec3_t xyz)
-{	
-	if (vertexIndex < mVertexPool.size())
-		GetTripleVec(mVertexPool, vertexIndex, xyz);	
-}
-
-
-Vertex *Mesh::GetVertex(index_t vertexIndex)
+freyja::Vertex* Mesh::GetVertex( index_t vertexIndex )
 {
-	if (vertexIndex < mVertices.size())
+	if ( vertexIndex < mVertices.size() )
 		return mVertices[vertexIndex];
 
 	return NULL;
@@ -2065,7 +1691,7 @@ void Mesh::ApplyTrianglarTesselation()
 				Face* face2 = GetFace( CreateFace() );
 				FREYJA_ASSERTMSG( face2, "Face allocation failed!" );
 
-#warning "FIXME: Fix up vertex references and neighbours."
+				//#warning "FIXME: Fix up vertex references and neighbours."
 
 				if ( face2 )
 				{
@@ -2131,7 +1757,7 @@ void Mesh::ApplyTrianglarTesselation()
 
 		default:
 			;
-#warning "FIXME: Didn't add a case for general polygons, which should tesselate on import anyway."
+			//#warning "FIXME: Didn't add a case for general polygons, which should tesselate on import anyway."
 		}
 	}
 }
@@ -3877,7 +3503,7 @@ void Mesh::RotateAboutPoint(const hel::Vec3 &point, const hel::Vec3 &v)
 
 void Mesh::Scale(const hel::Vec3 &v)
 {
-	ScaleAboutPoint(GetPosition(), v);
+	ScaleAboutPoint(GetPosition(), v); 
 }
 
 
@@ -3916,23 +3542,6 @@ void Mesh::Translate(const hel::Vec3 &v)
 	mBoundingVolume.mBox.mMin[0] += v.mVec[0];
 	mBoundingVolume.mBox.mMin[1] += v.mVec[1];
 	mBoundingVolume.mBox.mMin[2] += v.mVec[2];
-}
-
-
-void Mesh::SelectedFacesRotateUVMap(vec_t z)
-{
-	MSTL_MSG("FIXME");
-}
-
-void Mesh::SelectedFacesScaleUVMap(vec_t x, vec_t y)
-{
-	MSTL_MSG("FIXME");
-}
-
-
-void Mesh::SelectedFacesTranslateUVMap(vec_t x, vec_t y)
-{
-	MSTL_MSG("FIXME");
 }
 
 
@@ -4081,39 +3690,7 @@ void Mesh::ConvertFaceToTexCoordPloymapping(index_t face)
 	}
 }
 
-
-////////////////////////////////////////////////////////////
-// Private Accessors
-////////////////////////////////////////////////////////////
-
-bool Mesh::SerializePool(SystemIO::FileWriter &w, 
-						 Vector<vec_t> &v, mstl::stack<index_t> &s)
-{
-	mstl::stack<index_t> copy; // We don't really care about order
-
-	w.WriteLong(v.size());
-
-	for ( uint32 i = 0; i < v.size(); ++i )
-	{
-		w.WriteFloat32(v[i]);
-	}
-		
-	w.WriteLong(s.size());
-
-	for ( uint32 i = 0; i < s.size(); ++i )
-	{
-		index_t item = s.pop();
-		copy.push(item);
-		w.WriteLong(item);
-	}
-
-	while ( !copy.empty() )
-	{
-		s.push(copy.pop());
-	}
-
-	return true;
-}
+#endif // FIXME
 
 
 ////////////////////////////////////////////////////////////
@@ -4121,48 +3698,6 @@ bool Mesh::SerializePool(SystemIO::FileWriter &w,
 ////////////////////////////////////////////////////////////
 
 
-
-#if TINYXML_FOUND
-	bool SerializeWeight(TiXmlElement *container)
-	{	
-		if (!container)
-			return false;	
-		
-		TiXmlElement *weight = new TiXmlElement("weight");
-		int attr;
-		
-		attr = (mVertexIndex == INDEX_INVALID) ? -1 : mVertexIndex;
-		weight->SetAttribute("vertex", attr);
-		
-		attr = (mBoneIndex == INDEX_INVALID) ? -1 : mBoneIndex;
-		weight->SetAttribute("bone", attr);
-
-		weight->SetDoubleAttribute("value", mWeight);
-		container->LinkEndChild(weight);
-
-		return true;
-	}
-
-	bool UnserializeWeight(TiXmlElement *container)
-	{
-		if (!container)
-			return false;
-
-		TiXmlElement *weight = container;//->FirstChildElement("weight");
-
-		if (!weight)
-			return false;
-
-		int attr;
-		weight->QueryIntAttribute("vertex", &attr);
-		mVertexIndex = attr < 0 ? INDEX_INVALID : attr;
-		weight->QueryIntAttribute("bone", &attr);
-		mBoneIndex = attr < 0 ? INDEX_INVALID : attr;
-		weight->QueryFloatAttribute("value", &mWeight);
-
-		return true;
-	}
-#endif
 
 ////////////////////////////////////////////////////////////
 // Unit Test code

@@ -19,8 +19,19 @@
 #ifndef GUARD__FREYJA_XMLSERIALIZER_H_
 #define GUARD__FREYJA_XMLSERIALIZER_H_
 
+#if TINYXML_FOUND
+#   include <tinyxml/tinyxml.h>
+#endif // TINYXML_FOUND
+
 
 namespace freyja {
+
+#if TINYXML_FOUND
+typedef TiXmlElement* XMLSerializerNode;
+#else // TINYXML_FOUND
+typedef void* XMLSerializerNode;
+#endif // TINYXML_FOUND
+
 
 class XMLSerializer
 {
@@ -55,44 +66,28 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-#if TINYXML_FOUND
-
-	virtual bool Serialize(TiXmlElement* parent) const = 0;
+	virtual bool Serialize(XMLSerializerNode parent) const = 0;
 	/*------------------------------------------------------
 	 * Pre  : <parent> is this object's parent in XML tree.
 	 * Post : Serializes this object to XML.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual bool Unserialize(TiXmlElement* node) = 0;
+	virtual bool Unserialize(XMLSerializerNode node) = 0;
 	/*------------------------------------------------------
 	 * Pre  : <node> is this object in XML tree.
 	 * Post : Unserializes node from XML.
 	 *
 	 ------------------------------------------------------*/
-
-#endif // TINYXML_FOUND
 };
 
 } // namespace freyja
 
-
-#if TINYXML_FOUND
-#   include <tinyxml/tinyxml.h>
-
 #   define FREYJA_XMLSERIALIZER_INTERFACE \
-    virtual bool Serialize( TiXmlElement* parent ) const; \
-	virtual bool Unserialize( TiXmlElement* node ); 
- 
-#   define FREYJA_XMLSERIALIZER_NODE TiXmlElement*
-
-#else
-
-//#   define FREYJA_XMLSERIALIZER_INTERFACE 
-#   define FREYJA_XMLSERIALIZER_NODE void*
-
-#endif // TINYXML_FOUND
-
+    virtual const char* GetType() const; \
+    virtual uint32 GetVersion() const; \
+    virtual bool Serialize( XMLSerializerNode parent ) const; \
+	virtual bool Unserialize( XMLSerializerNode node ); 
 
 #endif // GUARD__FREYJA_XMLSERIALIZER_H_
 

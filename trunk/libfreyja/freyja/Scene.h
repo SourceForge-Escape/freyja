@@ -30,6 +30,12 @@
 #include <mstl/String.h>
 
 #include "Node.h"
+#include "Camera.h"
+#include "Light.h"
+#include "Mesh.h"
+#include "Skeleton.h"
+#include "Metadata.h"
+#include "PixelBuffer.h"
 
 
 namespace freyja {
@@ -39,6 +45,10 @@ class SceneManager;
 class Scene 
 {
 public:
+
+	typedef mstl::list<freyja::Renderable*>::iterator RenderListIterator;
+	typedef mstl::list<freyja::Renderable*> RenderList;
+
 
 	////////////////////////////////////////////////////////////
 	// Constructors
@@ -58,92 +68,37 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	FREYJA_XMLSERIALIZER_INTERFACE
+	bool Serialize( const char* filename ) const;
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : XmlSerializer interface macro.
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-
-	////////////////////////////////////////////////////////////
-	// Public Accessors
-	////////////////////////////////////////////////////////////
-
-	hel::Mat44 &GetBindPose() { return mBindPose; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns this bone's rest/bind pose transform
-	 ------------------------------------------------------*/
-
-	hel::Mat44 &GetInverseBindPose() { return mBindToWorld; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns this bone's 'rest to world' transform
-	 ------------------------------------------------------*/
-
-	hel::Mat44 &GetWorldPose() { return mTrack.mWorld; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns this bone's 'world' transform
-	 ------------------------------------------------------*/
-
-	byte GetFlags() { return mFlags; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get this bone's option flags
-	 ------------------------------------------------------*/
-
-	const char *GetName() { return mName; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get the human readable name of this bone
-	 ------------------------------------------------------*/
-
-	index_t GetParent() { return mParent; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get the UID of this bone's parent bone or 
-	 *        INDEX_INVALID if it has no parent
-	 ------------------------------------------------------*/
-
-	uint32 GetTrackCount() { return mTrackCount; }
+	bool Unserialize( const char* filename );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
-	BoneTrack &GetTrack(uint32 track) { return mTrack; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Only supporting one 'range/anim' in test: F(track) <- F(0)
-	 ------------------------------------------------------*/
+	bool Add( freyja::Mesh* mesh );
 
-	bool Serialize(SystemIO::TextFileWriter &w);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
+	freyja::Mesh* GetSelectedMesh() const;
 
-	mstl::String mMetaData;          /* Metadata for bone */
+	void SetSelectedMesh( freyja::Mesh* mesh );
 
-	byte mFlags;                     /* Options bitmap */
+	bool Remove( freyja::Mesh* mesh );
 
-	mstl::String mName;              /* Human readable identifier */
-
-	mstl::String mFilename;
+	RenderListIterator GetRenderListIterator()
+	{ return mRenderList.begin(); }
 
 
-private:
+protected:
 
-	////////////////////////////////////////////////////////////
-	// Private Accessors
-	////////////////////////////////////////////////////////////
+	mstl::String mFilename;                       /* Filename if this has been saved as a disk file. */
 
-
-	////////////////////////////////////////////////////////////
-	// Private Mutators
-	////////////////////////////////////////////////////////////
+	RenderList mRenderList;                       /* */
 
 	mstl::list<freyja::Bone*> mBones;             /* */
 
@@ -163,7 +118,7 @@ private:
 
 	mstl::list<freyja::Material*> mMaterials;     /* */
 
-	mstl::list<freyja::Texture*> mTextures;       /* */
+	mstl::list<freyja::PixelBuffer*> mPixelBuffers;       /* */
 };
 
 

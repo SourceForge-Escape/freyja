@@ -5,8 +5,8 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/freyja/
  * Email   : mongooseichiban@gmail.com
- * Object  : VertexArray
  * License : No use w/o permission (C) 2004-2006 Mongoose
+ * Object  : FloatArray
  * Comments: This is the VertexArray class.
  *
  *
@@ -16,11 +16,13 @@
  * Mongoose - Created, split from Mesh.h
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_VERTEXARRAY_H_
-#define GUARD__FREYJA_VERTEXARRAY_H_
+#ifndef GUARD__FREYJA_FLOATXARRAY_H_
+#define GUARD__FREYJA_FLOATARRAY_H_
 
 #include <hel/math.h>
+#include <hel/Mat44.h>
 #include <mstl/Vector.h>
+#include <mstl/stack.h>
 #include <mstl/SystemIO.h>
 
 #include "XMLSerializer.h"
@@ -28,64 +30,36 @@
 
 namespace freyja {
 
-class VertexArray : 
+class FloatArray : 
 		public XMLSerializer
 {
 public:
 
-	VertexArray( const uint32 count );
+	FloatArray( const uint32 count, const uint16 width = 3 );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	VertexArray( );
+	FloatArray( );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	VertexArray( const VertexArray& array );
+	FloatArray( const FloatArray& array );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	~VertexArray();
+	~FloatArray();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual const char* GetType() { return "VertexArray"; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns tag string (often just class name). 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual uint32 GetVersion() { return 1; } 
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns serial format version. 
-	 *
-	 ------------------------------------------------------*/
-
-	bool Serialize( TiXmlElement* parent );
-	/*------------------------------------------------------
-	 * Pre  : <parent> is this object's parent in XML tree.
-	 * Post : Serializes this object to XML.
-	 *
-	 ------------------------------------------------------*/
-
-	bool Unserialize( TiXmlElement* node );
-	/*------------------------------------------------------
-	 * Pre  : <node> is this object in XML tree.
-	 * Post : Unserializes node from XML.
 	 *
 	 ------------------------------------------------------*/
 
@@ -128,10 +102,10 @@ public:
 	 *        
 	 ------------------------------------------------------*/
 
-	uint32 NewElement3fv( vec3_t xyz );
+	void SwapElements( uint32 idx_a, uint32 idx_b, const uint32 size = 3 );
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Fills in array gaps or appends with new value.
+	 * Post : Copies <size> elements from <array> to offset <idx>.
 	 *        
 	 ------------------------------------------------------*/
 
@@ -160,30 +134,87 @@ public:
 	 *        
 	 ------------------------------------------------------*/
 
-	void GetTripleVec(Vector<vec_t> &v, index_t tIndex, vec3_t xyz);
+	void Get3fv( index_t idx, vec3_t xyz ) const;
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 *        
 	 ------------------------------------------------------*/
 
-	void SetTripleVec(Vector<vec_t> &v, index_t tIndex, const vec3_t xyz);
+	void Set3fv( index_t idx, const vec3_t xyz );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 *        
 	 ------------------------------------------------------*/
 
-	const vec_t* GetArray() { return mArray.get_array(); }
+	const vec_t* GetArray() //const
+	{ return mArray.get_array(); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns the array.
+	 *        
+	 ------------------------------------------------------*/
 
-	uint32 Size() { return mArray.size(); }
-	
+	uint32 GetElementCount() const
+	{ return ( GetSize() / GetWidth() ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns the element count.
+	 *        
+	 ------------------------------------------------------*/
+
+	uint32 GetSize() const
+	{ return mArray.size(); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns the array size.
+	 *        
+	 ------------------------------------------------------*/
+
+	uint16 GetWidth() const
+	{ return mWidth; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns the element width.
+	 *        
+	 ------------------------------------------------------*/
+
+	virtual const char* GetType() const
+	{ return "FloatArray"; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns tag string (often just class name). 
+	 *
+	 ------------------------------------------------------*/
+
+	virtual uint32 GetVersion() const
+	{ return 0; } 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns serial format version. 
+	 *
+	 ------------------------------------------------------*/
+
+	bool Serialize( XMLSerializerNode parent ) const;
+	/*------------------------------------------------------
+	 * Pre  : <parent> is this object's parent in XML tree.
+	 * Post : Serializes this object to XML.
+	 *
+	 ------------------------------------------------------*/
+
+	bool Unserialize( XMLSerializerNode node );
+	/*------------------------------------------------------
+	 * Pre  : <node> is this object in XML tree.
+	 * Post : Unserializes node from XML.
+	 *
+	 ------------------------------------------------------*/
 
 private:
 
 	mstl::Vector<vec_t> mArray;     /* Vertex array. */
 
-	mstl::stack<uint32> mGaps;      /* Track any gaps in array usage. */
+	uint16 mWidth;
 };
 
 

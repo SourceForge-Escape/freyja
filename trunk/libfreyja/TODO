@@ -3,5 +3,41 @@
  * Have Renderable write its own XML tag inside children.
 	- Provide it as a serialization helper function inside Node.
 
+ * Replace MetadataRenderable with hook into MeshRenderable.
 
+ * Replace Texture and Image with PixelBuffer.
+
+ * Resource.
+	- 'Cache' system for Material / Mesh / Skeleton / etc.
+
+ * LuaABI
+	- Provide binary file I/O wrapper.
+
+ * Compute weight normals/tangents/etc
+	- SkeletalMeshRenderable will need tangent FloatArray.
+
+ * JA Import Module.
+
+
+	// FIXME: { Face index arrays : materials }, count 
+	//        for rendering use.
+
+	- Finish freyja::Node 
+	- Rewrite Bone / Skeleton using the node/graph system first.
+		- Skeleton 
+			- map<string, bone>
+			- map<string, animation>
+			- list<Observer*>
+			- list<Bone*>
+		- Bone : Node
+	- Rewrite Keyframe system.
+
+ * FloatPixelBuffer
+
+ * ProcPixelBuffer
+
+ * Move much of freyja3d::FreyjaControl into freyja::Scene.
+	- Iterators, selected, etc.
+	- Have the UI focus on wrapping Node virtual methods instead of concrete types.
+	- Pick by Ray and type.
 

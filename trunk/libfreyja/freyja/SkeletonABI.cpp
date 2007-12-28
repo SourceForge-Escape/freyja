@@ -22,6 +22,9 @@
 #include "freyja.h"
 #include "Bone.h"
 #include "Skeleton.h"
+#include "SkeletonABI.h"
+
+using namespace freyja;
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -31,7 +34,7 @@
 
 freyja_ptr freyjaSkeletonCreate( const char* name )
 {
-	freyja::Skeleton* skeleton = new freyja::Skeleton( name );
+	Skeleton* skeleton = new Skeleton( name );
 
 #warning FIXME Add this skeleton to resource manager.
 
@@ -48,21 +51,21 @@ void freyjaSkeletonDelete( freyja_ptr skeleton )
 
 freyja_ptr freyjaSkeletonGetBone( freyja_ptr skeleton_ptr, freyja_id bone )
 {
-	freyja::Skeleton* skeleton = Skeleton::Cast( skeleton_ptr );
+	Skeleton* skeleton = Skeleton::Cast( skeleton_ptr );
 	return (skeleton) ? skeleton->GetBone( bone ) : NULL;
 }
 
 
 uint32 freyjaSkeletonGetBoneCount( freyja_ptr skeleton_ptr )
 {
-	freyja::Skeleton* skeleton = Skeleton::Cast( skeleton_ptr );
+	Skeleton* skeleton = Skeleton::Cast( skeleton_ptr );
 	return (skeleton) ? skeleton->GetBoneCount() : 0;
 }
 
 
 freyja_ptr freyjaSkeletonGetRoot( freyja_ptr skeleton_ptr )
 {
-	freyja::Skeleton* skeleton = Skeleton::Cast( skeleton_ptr );
+	Skeleton* skeleton = Skeleton::Cast( skeleton_ptr );
 	return (skeleton) ? skeleton->GetRoot() : 0;
 }
 
@@ -74,8 +77,8 @@ freyja_ptr freyjaSkeletonGetRoot( freyja_ptr skeleton_ptr )
 
 void freyjaSkeletonSetRoot( freyja_ptr skeleton_ptr, freyja_ptr bone_ptr )
 {
-	freyja::Skeleton* skeleton = Skeleton::Cast( skeleton_ptr );
-	freyja::Bone* bone = Bone::Cast( bone_ptr );
+	Skeleton* skeleton = Skeleton::Cast( skeleton_ptr );
+	Bone* bone = Bone::Cast( bone_ptr );
 
 	if ( skeleton && bone )
 	{
@@ -84,7 +87,7 @@ void freyjaSkeletonSetRoot( freyja_ptr skeleton_ptr, freyja_ptr bone_ptr )
 }
 
 
-
+#if ABI_0_9_5
 index_t gFreyjaCurrentBone = INDEX_INVALID;
 
 void freyjaBonePoolClear()
@@ -855,3 +858,5 @@ void freyjaBoneRotKeyFrameQuat4f(index_t bone, index_t track, index_t key,
 		}
 	}
 }
+
+#endif // ABI_0_9_5

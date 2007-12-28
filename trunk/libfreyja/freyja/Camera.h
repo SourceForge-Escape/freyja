@@ -38,8 +38,8 @@
  *            and algorithms from Yuri Zhivago's trview
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_CAMERA_H_
-#define GUARD__FREYJA_MONGOOSE_CAMERA_H_
+#ifndef GUARD__FREYJA_CAMERA_H_
+#define GUARD__FREYJA_CAMERA_H_
 
 #include <hel/math.h>
 #include <hel/Mat44.h>
@@ -348,4 +348,4 @@ class Camera
 } // namespace freyja
 
 
-#endif
+#endif // GUARD__FREYJA_CAMERA_H_

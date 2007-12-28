@@ -63,33 +63,24 @@ public:
 	// Public Interfaces
 	////////////////////////////////////////////////////////////
 
-	FREYJA_XMLSERIALIZER_INTERFACE
+	FREYJA_NODE_INTERFACE
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : XmlSerializer interface macro.
+	 * Post : Node implementation.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual const char* GetType() const
-	{ return "Bone"; }
+	FREYJA_XMLSERIALIZER_INTERFACE
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : XmlSerializer tag type.
-	 *
-	 ------------------------------------------------------*/
- 
-	virtual uint32 GetVersion() const
-	{ return 0; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : XmlSerializer tag version.
+	 * Post : XmlSerializer implementation.
 	 *
 	 ------------------------------------------------------*/
 
 	FREYJA_RENDERABLE_INTERFACE
 	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : XmlSerializer interface macro.
+	 * Pre  : 
+	 * Post : Renderable implementation.
 	 *
 	 ------------------------------------------------------*/
 
@@ -116,13 +107,6 @@ public:
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns this bone's 'world' transform
-	 ------------------------------------------------------*/
-
-	virtual freyja::Node* Duplicate() const;
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Copy of this node sans children.
-	 *
 	 ------------------------------------------------------*/
 
 
@@ -193,7 +177,7 @@ protected:
 	 *
 	 ------------------------------------------------------*/
 
-	void UpdateWorldPoseOfChildren( index_t track, vec_t time );
+	//void UpdateWorldPoseOfChildren( index_t track, vec_t time );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Updates this bone's child world transforms only.
@@ -217,6 +201,16 @@ private:
 	Bone(const freyja::Bone&);
 	
 };
+
+
+inline
+const char* Bone::GetType() const
+{ return "Bone"; }
+
+ 
+inline
+uint32 Bone::GetVersion() const
+{ return 0; }
 
 
 } // namespace freyja

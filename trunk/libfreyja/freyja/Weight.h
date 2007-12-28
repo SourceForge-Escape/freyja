@@ -75,6 +75,51 @@ public:
 	vec_t mWeight;
 };
 
+
+
+#if 0
+	//TINYXML_FOUND
+	bool SerializeWeight(TiXmlElement *container)
+	{	
+		if (!container)
+			return false;	
+		
+		TiXmlElement *weight = new TiXmlElement("weight");
+		int attr;
+		
+		attr = (mVertexIndex == INDEX_INVALID) ? -1 : mVertexIndex;
+		weight->SetAttribute("vertex", attr);
+		
+		attr = (mBoneIndex == INDEX_INVALID) ? -1 : mBoneIndex;
+		weight->SetAttribute("bone", attr);
+
+		weight->SetDoubleAttribute("value", mWeight);
+		container->LinkEndChild(weight);
+
+		return true;
+	}
+
+	bool UnserializeWeight(TiXmlElement *container)
+	{
+		if (!container)
+			return false;
+
+		TiXmlElement *weight = container;//->FirstChildElement("weight");
+
+		if (!weight)
+			return false;
+
+		int attr;
+		weight->QueryIntAttribute("vertex", &attr);
+		mVertexIndex = attr < 0 ? INDEX_INVALID : attr;
+		weight->QueryIntAttribute("bone", &attr);
+		mBoneIndex = attr < 0 ? INDEX_INVALID : attr;
+		weight->QueryFloatAttribute("value", &mWeight);
+
+		return true;
+	}
+#endif
+
 } // End namespace freyja
 
 

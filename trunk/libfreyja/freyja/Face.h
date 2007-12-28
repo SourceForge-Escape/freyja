@@ -22,6 +22,7 @@
 #include <hel/math.h>
 #include <hel/Vec3.h>
 #include <mstl/Vector.h>
+#include "Node.h"
 #include "freyja.h"
 
 namespace freyja {
@@ -33,14 +34,7 @@ class Face
 {
 public:
 
-	typedef enum {
-		fNone      =  0,
-		fRayHit    =  1,
-		fAlpha     =  2
-	} Flags;
-
-
-	Face();
+	Face( freyja::Node* owner, index_t offset );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -75,16 +69,16 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	const byte GetSmoothingGroup( ) const 
-	{ return mSmoothingGroup; }
+	//const byte GetSmoothingGroup( ) const 
+	//{ return mSmoothingGroup; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	void SetSmoothingGroup( const byte group ) 
-	{ mSmoothingGroup = group; }
+	//void SetSmoothingGroup( const byte group ) 
+	//{ mSmoothingGroup = group; }
 	/*------------------------------------------------------
 	 * Pre  : Groups:  1-24,    Normal smoothing groups
 	 *                25-32,    Reserved for special use
@@ -110,16 +104,23 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	byte mFlags;                      /* Option flags. */
+	// Obsolete alpha is determined by owner
+	//byte mFlags;                      /* Option flags. */
 
-	byte mSmoothingGroup;             /* Smoothing group. */
+	// Obsolete smoothing group is determined by owner.
+	//byte mSmoothingGroup;             /* Smoothing group. */
 
 	byte mVisible;                    /* Light visiblity test 2^(light_id) cached. */
 
-	// FIXME: This is handled by the Mesh now using material face lists/arrays.
-	byte mMaterial;                   /* Material id reference. */
+	// This is handled by the OWNER now using material face lists/arrays.
+	//byte mMaterial;                   /* Material id reference. */
 
-	hel::Vec3 mNormal;                /* Assumes co-planar. */
+	freyja::Node* mOwner;
+	index_t mListOffset;
+	//byte mVertexCount; // this is provided by function
+	
+
+	hel::Vec3 mNormal;                /* Assumes co-planar vertices. */
 
 	mstl::Vector<Vertex*> mVertices;  /* Vertices that comprise this face. */
 
@@ -134,11 +135,12 @@ public:
 ////////////////////////////////////////////////////////////
 
 inline
-Face::Face() :
-	mFlags(fNone),
-	mSmoothingGroup(0),
+Face::Face( freyja::Node* owner, index_t offset ) :
+	//mFlags(fNone),
+	//mSmoothingGroup(0),
 	mVisible(0),
-	mMaterial(0),
+	mOwner( owner ),
+	mListOffset( offset ),
 	mNormal(0.0f, 1.0f, 0.0f),
 	mVertices(),
 	mEdges(),

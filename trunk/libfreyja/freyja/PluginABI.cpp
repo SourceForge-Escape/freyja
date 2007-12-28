@@ -29,7 +29,6 @@
 #include <mstl/SystemIO.h>
 #include <zlib.h>
 #include "MaterialABI.h"
-#include "ModelABI.h"
 #include "MeshABI.h"
 #include "Metadata.h"
 #include "BoneABI.h"
@@ -37,12 +36,16 @@
 #include "PluginABI.h"
 #include "PythonABI.h"
 #include "Skeleton.h"
+#include "XMLSerializer.h"
 #include "Plugin.h"
 
 mstl::Vector<freyja::PluginDesc *> gFreyjaPlugins;
 mstl::Vector<mstl::String> gPluginDirectories;
 mstl::Vector<mstl::String> gImagePluginDirectories;
 int32 gCurrentFreyjaPlugin = -1;
+
+
+using namespace mstl;
 
 
 //////////////////////////////////////////////////////////////////////
@@ -108,7 +111,7 @@ void freyjaPluginDirectoriesInit()
 	freyjaPluginAddDirectory("plugins/model");
 	gImagePluginDirectories.push_back(mstl::String("plugins/image"));
 #else
-	String s = getenv("HOME");
+	mstl::String s = getenv("HOME");
 	s += "/.freyja/plugins/model";
    	freyjaPluginAddDirectory(s.c_str());
 
@@ -125,7 +128,7 @@ void freyjaPluginDirectoriesInit()
 
 void freyjaPluginAddDirectory(const char *dir)
 {
-	if (!dir || !dir[0] || !SystemIO::File::IsDirectory(dir))
+	if (!dir || !dir[0] || !mstl::SystemIO::File::IsDirectory(dir))
 		return;
 
 	uint32 i;
@@ -152,7 +155,7 @@ void freyjaPluginFilename1s(const char *filename)
 void freyjaPluginsInit()
 {
 #ifdef FREYJA_PLUGINS
-	SystemIO::FileReader reader;
+	mstl::SystemIO::FileReader reader;
 	mstl::String module;
 	freyja::PluginDesc plugin;
 	const char *module_filename;
@@ -214,9 +217,9 @@ void freyjaPluginsInit()
 			if (reader.IsDirectory(module_filename))
 				continue;
 
-			if (!SystemIO::CheckModuleExt(module_filename))
+			if (!mstl::SystemIO::CheckModuleExt(module_filename))
 			{
-				if (SystemIO::CheckFilenameExt(module_filename, ".py"))
+				if (mstl::SystemIO::CheckFilenameExt(module_filename, ".py"))
 					freyjaPython1s(module_filename, "<symbol>InitPlugin</symbol>", "init;");
 					
 				continue;
@@ -254,7 +257,7 @@ void freyjaPluginsInit()
 
 int32 freyjaImportModel(const char *filename)
 {
-	SystemIO::FileReader reader;
+	mstl::SystemIO::FileReader reader;
 
 	if (!reader.DoesFileExist(filename))
 	{
@@ -262,78 +265,7 @@ int32 freyjaImportModel(const char *filename)
 		return -1;
 	}
 
-	if (SystemIO::File::CompareFilenameExtention(filename, ".freyja") == 0)
-	{
-		SystemIO::TextFileReader tr; 
-
-		if (tr.Open(filename))
-		{
-			tr.ParseSymbol(); // Freyja
-			tr.ParseSymbol(); // 0.9.5
-
-			tr.ParseSymbol(); // Version
-			tr.ParseInteger(); // == 1
-
-			tr.ParseSymbol(); // mMeshCount
-			uint32 mMeshCount = tr.ParseInteger();
-
-			tr.ParseSymbol(); // mBoneCount
-			uint32 mBoneCount = tr.ParseInteger();
-
-			tr.ParseSymbol(); // mSkeletonCount
-			uint32 mSkeletonCount = tr.ParseInteger();
-
-			tr.ParseSymbol(); // mMaterialCount
-			uint32 mMaterialCount = tr.ParseInteger();
-
-			uint32 count = mMaterialCount;
-			if (count)
-			{
-				freyjaMaterialClearAll();
-			}
-			while (count > 0)
-			{
-				freyjaMaterialLoadChunkTextJA(tr);
-				--count;
-			}
-
-			count = mMeshCount;
-			while (count > 0)
-			{
-				freyjaMeshLoadChunkTextJA(tr);
-				--count;
-			}
-
-			count = mBoneCount;
-			while (count > 0)
-			{
-				freyjaBoneLoadChunkTextJA(tr);
-				--count;
-			}
-
-			count = mSkeletonCount;
-			while (count > 0)
-			{
-				index_t skel = freyjaSkeletonCreate();
-				freyjaPrintMessage("> Reading in skeleton %i...", skel);
-				if (Skeleton::GetSkeleton(skel))
-					Skeleton::GetSkeleton(skel)->Serialize(tr);
-
-				--count;
-			}
-		}
-		return 0;
-	}
-
-
-	/* Check for native freyja JA format */
-	if (freyjaCheckModel(filename) == 0)
-	{
-		if (freyjaLoadModel(filename) == 0)
-			return 0;
-		
-		return -1;
-	}
+#warning FIXME Add support for native XML format here.
 
 
 #ifdef FREYJA_PLUGINS
@@ -360,9 +292,9 @@ int32 freyjaImportModel(const char *filename)
 			if (reader.IsDirectory(module_filename))
 				continue;
 
-			if (!SystemIO::CheckModuleExt(module_filename))
+			if (!mstl::SystemIO::CheckModuleExt(module_filename))
 			{
-				if (SystemIO::CheckFilenameExt(module_filename, ".py"))
+				if (mstl::SystemIO::CheckFilenameExt(module_filename, ".py"))
 					freyjaPython1s(module_filename, "<symbol>ImportModel</symbol>", filename);
 					
 				continue;
@@ -526,7 +458,6 @@ int gzread_buffer(const char* filename, char*& buffer, const unsigned int& size)
 int freyjaExportScene(const char* filename)
 {
 #if TINYXML_FOUND
-
 	if ( !filename || !filename[0] )
 		return -1;
 
@@ -545,12 +476,12 @@ int freyjaExportScene(const char* filename)
 	root->LinkEndChild( materials );
 	for (uint32 i = 0, n = freyjaGetMaterialCount(); i < n; ++i)
 	{
-		Material *mat = freyjaGetMaterialClass( i );
-
-		if (mat)
-		{
-			mat->Serialize( materials );
-		}
+		//FIXME freyja::Material *mat = freyjaGetMaterialClass( i );
+		//
+		//if (mat)
+		//{
+		//	mat->Serialize( materials );
+		//}
 	}
 
 	// Scene
@@ -558,15 +489,16 @@ int freyjaExportScene(const char* filename)
 	root->LinkEndChild( scene );
 
 	//    Metadata
-	for (uint32 i = 0, n = Metadata::GetObjectCount(); i < n; ++i)
-	{
-		Metadata* metadata = Metadata::GetObjectByUid( i );
-
-		if (metadata)
-		{
-			metadata->Serialize( materials );
-		}
-	}
+	//for (uint32 i = 0, n = Metadata::GetObjectCount(); i < n; ++i)
+	//{
+		//FIXME
+		//freyja::Metadata* metadata = Metadata::GetObjectByUid( i );
+		//
+		//if (metadata)
+		//{
+		//	metadata->Serialize( materials );
+		//}
+	//}
 	
 
 
@@ -586,6 +518,7 @@ int freyjaExportScene(const char* filename)
 	//       SkeletonInstance
 
 	//       Meshes
+#if 0
 	for (uint32 i = 0, n = Mesh::GetCount(); i < n; ++i)
 	{
 		Mesh* mesh = Mesh::GetMesh( i );
@@ -595,7 +528,7 @@ int freyjaExportScene(const char* filename)
 			mesh->Serialize( model );
 		}
 	}
-
+#endif
 
 	TiXmlPrinter printer;
 	printer.SetIndent( "\t" );
@@ -656,99 +589,27 @@ int32 freyjaExportModel(const char *filename, const char *type)
 		return -100;
 
 	/* Check for native format. */
-	if (strcmp(type, "freyja") == 0)
+	if ( strcmp(type, "freyja") == 0 )
 	{
 		if ( !freyjaExportScene( filename ) )
 		{
 			return 0;
 		}
-
-		SystemIO::TextFileWriter tw; 
-
-		if (tw.Open(filename))
-		{
-			tw.Print("%s\n", FREYJA_API_VERSION);
-			tw.Print("Version 1\n");
-
-			uint32 mcount = freyjaGetMeshCount();
-			uint32 mallocated = 0;
-			for (uint32 i = 0; i < mcount; ++i)
-			{
-				if (freyjaGetMeshClass(i))
-					++mallocated;
-			}
-				
-			tw.Print("mMeshCount %u\n", mallocated);
-
-			uint32 bcount = freyjaGetBoneCount();
-			uint32 ballocated = 0;
-			for (uint32 i = 0; i < bcount; ++i)
-			{
-				if (freyjaIsBoneAllocated(i))
-					++ballocated;
-			}
-			
-			tw.Print("mBoneCount %u\n", ballocated);
-
-			tw.Print("mSkeletonCount %u\n", Skeleton::GetCount()); // FIXME
-
-			uint32 matcount = freyjaGetMaterialCount();
-			uint32 matallocated = 0;
-			for (uint32 i = 0; i < matcount; ++i)
-			{
-				if (freyjaGetMaterialClass(i))
-					++matallocated;
-			}
-			
-			tw.Print("mMaterialCount %u\n", matallocated);
-
-
-			// Classes
-			for (uint32 i = 0; i < matcount; ++i)
-			{
-				if (freyjaGetMaterialClass(i))
-					freyjaGetMaterialClass(i)->Serialize(tw);
-			}
-
-			for (uint32 i = 0; i < mcount; ++i)
-			{
-				if (freyjaGetMeshClass(i))
-					freyjaMeshSaveChunkTextJA(tw, i);
-			}
-
-			for (uint32 i = 0; i < bcount; ++i)
-			{
-				if (freyjaIsBoneAllocated(i))
-					freyjaBoneSaveChunkTextJA(tw, i);
-			}
-
-			for (uint32 i = 0; i < Skeleton::GetCount(); ++i)
-			{
-				freyjaPrintMessage("> Wrtitng skeleton %i...", i);
-				if (Skeleton::GetSkeleton(i))
-					Skeleton::GetSkeleton(i)->Serialize(tw);
-			}
-		}
-		return 0;
 	}
 
 
 #ifdef FREYJA_PLUGINS
-	SystemIO::FileReader reader;
+	mstl::SystemIO::FileReader reader;
 	mstl::String module, symbol;
 	bool saved = false;
-	char *name;
 	int (*export_mdl)(char *filename);
 	void *handle;
-	unsigned long i;
-
 
 	freyjaPrintMessage("[FreyjaPlugin module loader invoked]\n");
-
-	name = (char*)type;
+	char* name = (char*)type;
 
 	/* Check for other format */
-	for (i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
+	for (unsigned long i = gPluginDirectories.begin(); i < gPluginDirectories.end(); ++i)
 	{
 		if (!reader.OpenDir(gPluginDirectories[i].c_str()))
 		{
@@ -758,7 +619,7 @@ int32 freyjaExportModel(const char *filename, const char *type)
 
 		module.Set("%s/%s%s", 
 				   gPluginDirectories[i].c_str(), name, 
-				   SystemIO::GetModuleExt());
+				   mstl::SystemIO::GetModuleExt());
 		symbol.Set("freyja_model__%s_export", name);
 
 
@@ -805,16 +666,14 @@ int32 freyjaExportModelByModule(const char *filename, const char *module)
 #ifdef FREYJA_PLUGINS
 	freyja::PluginDesc *plugin = freyjaGetPluginClassByFilename(module);
 
-	if (!plugin || !SystemIO::File::DoesFileExist(plugin->mFilename.c_str()))
+	if (!plugin || !mstl::SystemIO::File::DoesFileExist(plugin->mFilename.c_str()))
 	{
 		freyjaPrintError("Module '%s' couldn't be found.", module);
 		return -1;
 	}
 												
-	String symbol = "freyja_model__";
-	symbol += plugin->mName;
+	mstl::String symbol = "freyja_model__" + plugin->mName;
 	symbol += "_export";
-
 	freyjaPrintError("! *** %s", symbol.c_str());
 
 	bool saved = false;

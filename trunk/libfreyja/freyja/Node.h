@@ -9,9 +9,6 @@
  * License : No use w/o permission (C) 2005-2007 Mongoose
  * Comments: This is the scene graph node interface.
  * 
- *-- Test Defines -----------------------------------------------
- *           
- * UNIT_TEST_NODE - Builds class as a console unit test. 
  *
  *-- History ------------------------------------------------ 
  *
@@ -37,9 +34,7 @@
 
 namespace freyja {
 
-class Node;
-typedef mstl::list<freyja::Node*>::iterator NodeChildIterator;
-
+class NodeObserver;
 
 class Node : 
 		public mstl::ObserverSubject, 
@@ -58,21 +53,9 @@ public:
 
 	} TransformSpace;
 
-
-	class NodeObserver : 
-		public mstl::Observer
-	{
-	public:
-		virtual ~NodeObserver() {}
-		virtual void NotifyUpdate( const Node* node ) {}
-		virtual void NotifyDelete( const Node* node ) {}
-		virtual void NotifyParent( const Node* node ) {}
-		virtual void NofityUnparent( const Node* node ) {}
-	protected:
-		NodeObserver() : mstl::Observer() {}
-	};
-
+	typedef mstl::list<freyja::Node*>::iterator ChildIterator;
 	typedef mstl::avl_tree<mstl::String, freyja::Node*> ChildDictionary;
+	typedef mstl::list<freyja::Node*> ChildList;
 
 
 	////////////////////////////////////////////////////////////
@@ -157,6 +140,14 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	static freyja::Node* Cast( freyja_ptr ptr )
+	{ return (freyja::Node*)ptr; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : FIXME Add RTTI checking.
+	 *
+	 ------------------------------------------------------*/
+
 	virtual freyja::Node* Duplicate() const = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -164,7 +155,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void DuplicateChildren( freyja::Node* parent, bool recurse ) const;
+	virtual void DuplicateChildren( freyja::Node* parent, bool recurse ) = 0;
 	/*------------------------------------------------------
 	 * Pre  : <parent>'s children will be duplicated and added to this node.     
 	 *        <recurse> if you want to copy the entire subtree.
@@ -192,10 +183,17 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual freyja::Node* GetChild( uint16 child_index ); 
+	virtual freyja::Node* GetChild( const uint16 id ) const; 
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns child with id or NULL.
+	 *
+	 ------------------------------------------------------*/
+
+	virtual freyja::Node* GetChild( const char* name ) const; 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns child with name or NULL.
 	 *
 	 ------------------------------------------------------*/
 
@@ -203,36 +201,22 @@ public:
 	{ return mChildren.size(); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Gets the number of children in ChildList.
 	 *
 	 ------------------------------------------------------*/
 
-	NodeChildIterator GetChildIterator()
+	ChildIterator GetChildIterator() const
 	{ return mChildren.begin(); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns interator for ChildList.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void RemoveChild( freyja::Node* child );
+	virtual mstl::String GetInfo() const = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual void RemoveChild( uint16 child_index );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual void RemoveChildren( );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
+	 * Post : Return debug / text details of node.
 	 *
 	 ------------------------------------------------------*/
 
@@ -260,24 +244,64 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	const hel::Vec3& GetWorldPosition() const;
+	freyja_ptr GetUID() const
+	{ return (freyja_ptr)this; }
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : 
+	 * Post : Returns this pointer as void* for C ABI
+	 *        and for Unique Identifer use.
+	 *
+	 *        Basically, this lets other languages reference
+	 *        nodes by address rather than a contrived id system.
+	 *
 	 ------------------------------------------------------*/
 
-	const hel::Quat& GetWorldOrientation() const;
+	virtual void RemoveChild( freyja::Node* child );
 	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
+	 * Pre  : 
+	 * Post : Removes child from ChildList.
+	 *
 	 ------------------------------------------------------*/
 
-	// No more Euler arrays to avoid confusion!  
+	virtual void RemoveChildren( );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Removes all children from ChildList.
+	 *
+	 ------------------------------------------------------*/
+
+	const void SetPosition( const hel::Vec3& v )
+	{ mPosition = v; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get position property.
+	 *
+	 ------------------------------------------------------*/
+
+	const void SetOrientation( const hel::Quat& q )
+	{ mOrientation = q; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get orientation property.
+	 *
+	 ------------------------------------------------------*/
+
+	const void SetScale( const hel::Vec3& v )
+	{ mScale = v; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get scale property.
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Transforms
+	////////////////////////////////////////////////////////////
 
 	virtual void Pitch( const vec_t angle, TransformSpace about = tParent );
 	/*------------------------------------------------------
 	 * Pre  : <angle> is in radians.
-	 *
 	 * Post : X-axis rotation ( Euler angles componet ).
 	 *
 	 ------------------------------------------------------*/
@@ -285,7 +309,6 @@ public:
 	virtual void Roll( const vec_t angle, TransformSpace about = tParent );
 	/*------------------------------------------------------
 	 * Pre  : <angle> is in radians.
-	 *
 	 * Post : Z-axis rotation ( Euler angles componet ).
 	 *
 	 ------------------------------------------------------*/
@@ -293,16 +316,13 @@ public:
 	virtual void Yaw( const vec_t angle, TransformSpace about = tParent );
 	/*------------------------------------------------------
 	 * Pre  : <angle> is in radians.
-	 *
 	 * Post : Y-axis rotation ( Euler angles componet ).
 	 *
 	 ------------------------------------------------------*/
 
-	//void RotateAboutPoint(const hel::Vec3& point, const hel::Vec3& v);
 	virtual void Rotate( const vec_t angle, const hel::Vec3& axis, TransformSpace about = tParent );
 	/*------------------------------------------------------
 	 * Pre  : <angle> is in radians.
-	 *
 	 * Post : Abitrary axis rotation ( Axis angles ).
 	 *
 	 ------------------------------------------------------*/
@@ -321,20 +341,12 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	freyja_ptr GetUID() const
-	{ return (freyja_ptr)this; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns this pointer as void* for C ABI
-	 *        and for Unique Identifer use.
-	 *
-	 *        Basically, this lets other languages reference
-	 *        nodes by address rather than a contrived id system.
-	 *
-	 ------------------------------------------------------*/
-
 
 protected:
+
+	////////////////////////////////////////////////////////////
+	// Protected methods.
+	////////////////////////////////////////////////////////////
 
 	virtual void AddChild( freyja::Node* child ) 
 	{ 
@@ -348,16 +360,22 @@ protected:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void NotifyOnDelete()
-	{ } // FIXME
+	virtual void NotifyOnDelete() const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Notify observers that this node is being removed.
 	 *
 	 ------------------------------------------------------*/
 
+	void Copy( freyja::Node* node ) const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Copy member values.
+	 *
+	 ------------------------------------------------------*/
 
-	//byte mFlags;                              /* State flags. */
+
+	//byte mFlags;                            /* State flags. */
 
 	bool mMuted;                              /* Determines if editing is allowed. */
 
@@ -375,8 +393,21 @@ protected:
 
 	freyja::Node* mParent;                    /* Node parent. */
  
-	mstl::list<freyja::Node*> mChildren;      /* Node children. */
+	ChildList mChildren;                      /* Node children. */
 	ChildDictionary mChildDictionary;
+};
+
+
+class NodeObserver : 
+	public mstl::Observer
+{
+public:
+	NodeObserver() : mstl::Observer() {}
+	virtual ~NodeObserver() {}
+	virtual void NotifyUpdate( const Node* node ) {}
+	virtual void NotifyDelete( const Node* node ) {}
+	virtual void NotifyParent( const Node* node ) {}
+	virtual void NofityUnparent( const Node* node ) {}
 };
 
 
@@ -410,7 +441,18 @@ Node::Node( const char* name ) :
 { }
 
 
+inline
+Node::~Node( )
+{ }
+
+
 } // namespace freyja
+
+#   define FREYJA_NODE_INTERFACE \
+	virtual freyja::Node* Duplicate() const; \
+	virtual void DuplicateChildren( freyja::Node* parent, bool recurse ); \
+	virtual mstl::String GetInfo() const;
+
 
 #endif // GUARD__FREYJA_NODE_H_
 

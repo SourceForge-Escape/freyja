@@ -20,6 +20,7 @@
  ==========================================================================*/
 
 #include <hel/math.h>
+#include <mstl/String.h>
 
 #include "Skeleton.h"
 #include "Bone.h"
@@ -48,7 +49,7 @@ Bone::~Bone()
 	}
 		
 	/* Reparent children to parent, and update bind pose. */
-	for ( NodeChildIterator it = GetChildIterator(); it != it.end(); ++it )
+	for ( Node::ChildIterator it = GetChildIterator(); it != it.end(); ++it )
 	{
 		freyja::Bone* child = (freyja::Bone*)(*it);
 		
@@ -75,7 +76,7 @@ Bone::~Bone()
 // XML serialization.
 ////////////////////////////////////////////////////////////
 
-bool Bone::Serialize( TiXmlElement* container ) const
+bool Bone::Serialize( XMLSerializerNode container ) const
 {	
 	if ( !container || !mSkeleton )
 		return false;
@@ -120,7 +121,7 @@ bool Bone::Serialize( TiXmlElement* container ) const
 }
 
 
-bool Bone::Unserialize( TiXmlElement* xml_bone )
+bool Bone::Unserialize( XMLSerializerNode xml_bone )
 {
 	if ( !xml_bone )
 		return false;
@@ -158,7 +159,7 @@ bool Bone::Unserialize( TiXmlElement* xml_bone )
 	TiXmlElement *child = xml_bone->FirstChildElement();
 	for( ; child; child = child->NextSiblingElement() )
 	{
-		String s = child->Value();
+		mstl::String s = child->Value();
 		
 		if (s == "position")
 		{
@@ -180,6 +181,27 @@ bool Bone::Unserialize( TiXmlElement* xml_bone )
 	}
 
 	return true;
+}
+
+
+const hel::Quat& Bone::GetWorldOrientation() const
+{
+#warning FIXME
+	return mOrientation;
+}
+
+
+const hel::Vec3& Bone::GetWorldPosition() const
+{
+#warning FIXME
+	return mPosition;
+}
+
+
+freyja::Material* Bone::GetMaterial() const
+{
+#warning FIXME
+	return NULL;
 }
 
 
@@ -206,10 +228,15 @@ freyja::Node* Bone::Duplicate() const
 	return bone;
 }
 
-#if 0
-void Bone::DuplicateChildren(Bone *orig_parent, Bone *parent, 
-							 bool recurse, bool link)
+
+void Bone::DuplicateChildren( freyja::Node* parent, bool recurse )
 {
+#warning FIXME
+#if FIXME
+	Bone* orig_parent = parent;
+	parent = this;
+	bool link = true;
+
 	if (orig_parent && parent)
 	{
 		uint32 count = orig_parent->mChildren.size();
@@ -239,8 +266,56 @@ void Bone::DuplicateChildren(Bone *orig_parent, Bone *parent,
 			}
 		}
 	}
-}
 #endif
+}
+
+
+mstl::String Bone::GetInfo() const
+{
+	mstl::String info;
+
+	info = "Bone";
+#if 0
+	info += " '" + mName + "'\n";
+	info += "Parent '";
+	info += ( mParent ? mParent->GetName() : "NULL" ) + "'\n";
+
+
+			s.Set("\nTranslate %f %f %f\n", bone->mTranslation.mX, bone->mTranslation.mY, bone->mTranslation.mZ);
+			info += s;
+
+			{
+				hel::Vec3 v;
+				bone->mRotation.GetEulerAngles(v.mVec);
+				s.Set("\nRotation (quat->Euler) %f %f %f\n", v.mX, v.mY, v.mZ);
+				info += s;
+			}
+
+			info += "\nLocalTransform\n";
+			s = bone->mLocalTransform.ToString();
+			s.Replace('{', ' ');
+			s.Replace('}', '\n');
+			s.Replace('|', '\n');
+			info += s;
+
+			info += "\nBindPose\n";
+			s = bone->mBindPose.ToString();
+			s.Replace('{', ' ');
+			s.Replace('}', '\n');
+			s.Replace('|', '\n');
+			info += s;
+
+			info += "\nWorld\n";
+			s = bone->mTrack.mWorld.ToString();
+			s.Replace('{', ' ');
+			s.Replace('}', '\n');
+			s.Replace('|', '\n');
+	info += s;	
+#endif
+
+	return info;			
+}
+
 
 void Bone::UpdateBindPose()
 {
@@ -298,9 +373,10 @@ void Bone::UpdateBindPoseForParent()
 }
 #endif
 
-#if 0
-void Bone::UpdateBindPoseForChildren()
+
+void Bone::UpdateBindPoseOfChildren()
 {
+#if FIXME
 	for (uint32 i = 0, n = mChildren.size(); i < n; ++i)
 	{
 		Bone *b = GetBone(mChildren[i]);
@@ -318,9 +394,11 @@ void Bone::UpdateBindPoseForChildren()
 			b->UpdateBindPoseForChildren();
 		}
 	}
+#endif
 }
 
 
+#if 0
 void Bone::UpdateWorldPose(index_t track, vec_t time)
 {
 	BoneTrack &t = GetTrack(track);

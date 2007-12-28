@@ -56,14 +56,17 @@ public:
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Renderable( );
+	Renderable( ) :
+		mRenderFlags( fNone )
+	{ }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Renderable
 	 *
 	 ------------------------------------------------------*/
 
-	virtual ~Renderable( );
+	virtual ~Renderable( )
+	{ }
 	/*------------------------------------------------------
 	 * Pre  : Renderable object is allocated
 	 * Post : Deconstructs an object of Renderable

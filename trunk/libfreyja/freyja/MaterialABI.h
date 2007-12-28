@@ -293,15 +293,7 @@ extern "C" {
 	 * Post : Material's blend destination <factor> is set
 	 *
 	 ------------------------------------------------------*/
-}
 
-
-#   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
-#      include <mstl/SystemIO.h>
-#      include <freyja/Material.h>
-freyja::Material *freyjaGetMaterialClass(index_t materialIndex);
-bool freyjaMaterialLoadChunkTextJA(SystemIO::TextFileReader &r);
-
-#   endif // defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
+} // extern "C"
 
 #endif // GUARD__FREYJA_MATERIALABI_H_

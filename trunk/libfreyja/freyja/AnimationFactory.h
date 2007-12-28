@@ -97,8 +97,8 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-    virtual bool SerializeAnimation( const char* name, FREYJA_XMLSERIALIZER_NODE parent ) const;
-	virtual bool UnserializeAnimation( FREYJA_XMLSERIALIZER_NODE node );	
+	//virtual bool SerializeAnimation( const char* name, XMLSerializerNode parent ) const;
+	//virtual bool UnserializeAnimation( XMLSerializerNode node );	
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : XmlSerializer interface.

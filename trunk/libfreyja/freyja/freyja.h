@@ -73,14 +73,6 @@ extern "C" {
 										const char* message);
 
 	typedef enum {
-		INDEXED_8 = 1, 
-		RGB_24, 
-		RGBA_32
-
-	} freyja_colormode_t;
-
-
-	typedef enum {
 		FREYJA_MODEL = 1,
 		FREYJA_MESH,
 		FREYJA_POLYGON,

@@ -44,7 +44,6 @@ class Skeleton :
  public:
 
 	typedef mstl::avl_tree<mstl::String, freyja::Bone*> BoneDictionary;
-
 	typedef mstl::avl_tree<mstl::String, freyja::Animation*> AnimationDictionary;
 
 
@@ -130,13 +129,26 @@ class Skeleton :
 	 *
 	 ------------------------------------------------------*/
 
-	FREYJA_XMLSERIALIZER_INTERFACE
+	FREYJA_NODE_INTERFACE
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : XmlSerializer interface macro.
+	 * Post : Node implementation.
 	 *
 	 ------------------------------------------------------*/
 
+	FREYJA_XMLSERIALIZER_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer implementation.
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_RENDERABLE_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renderable implementation.
+	 *
+	 ------------------------------------------------------*/
 
  private:
 

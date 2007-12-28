@@ -72,10 +72,10 @@ int32 freyjaLoadMaterialASCII(index_t materialIndex, const char *filename)
 	vec4_t diffuse;
 	vec4_t specular;
 	vec4_t emissive;
-	vec_t shininess;
+	vec_t shininess = 0.0f;
 	unsigned int texture = 0;
-	unsigned int blend_src;
-	unsigned int blend_dest;
+	unsigned int blend_src = 0;
+	unsigned int blend_dest = 0;
 	int32 mIndex = materialIndex;
 	//int32 mIndex = freyjaMaterialCreate();
 
@@ -745,23 +745,3 @@ void freyjaMaterialBlendDestination(index_t materialIndex, uint32 factor)
 	}
 }
 
-
-Material *freyjaGetMaterialClass(index_t materialIndex)
-{
-	if (materialIndex < gFreyjaMaterials.size())
-	{
-		if (gFreyjaMaterials[materialIndex])
-			return gFreyjaMaterials[materialIndex];
-	}	
-
-	return 0x0;
-}
-
-
-bool freyjaMaterialLoadChunkTextJA(SystemIO::TextFileReader &r)
-{
-	index_t mat = freyjaMaterialCreate();
-	freyjaPrintMessage("> Reading in material %i...", mat);
-	Material *m = freyjaGetMaterialClass(mat);
-	return m ? m->Serialize(r) : false;
-}

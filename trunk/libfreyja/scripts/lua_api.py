@@ -14,7 +14,7 @@
 # Enabling python support in libfreyja:
 #
 #  Set gForcePythonDefine = 1 for force compiliation of Python 
-#  support, or add LUA_FOUND to compile flags in Makefile.
+#  support, or add LUAWRAPPER_FOUND to compile flags in Makefile.
 #
 #  Then (re)build libfreyja.
 #
@@ -32,7 +32,8 @@ import time
 gDateStamp = time.localtime(time.time())
 gForcePythonDefine = 0
 gPath = "./freyja"
-gLuaHeaders = "\n\n#include <lua/Lua.h>\n\n Lua gLuaVM;"
+gLuaHeaders = ""
+#\n\n#include <lua/Lua.h>\n\n Lua gLuaVM;"
 
 gFuncWrappers = []
 gFuncBindings = []
@@ -117,35 +118,39 @@ def PrintOutFreyaQueryBinding():
 	print ""
 
 
-def PrintOutFreyjaLuaABI():
+def PrintOutFreyjaLuaABI_old():
 	print "void freyjaLuaCommand1s(const char *s)"
 	print "{"
-	print "#ifdef LUA_FOUND"
+	print "#ifdef LUAWRAPPER_FOUND"
 	print "\tFreyja_BindLua();"
 	print "\t"
 	print "\tif (s && s[0])\n\t\tgLuaVM.ExecuteCommandSilently(s);"
 	print "\t"
 	print "#else"
 	print "\tfreyjaPrintError(\"[Module '%s' failed to load.  Rebuild with Lua support.]\", plugin);"
-	print "#endif // LUA_FOUND"
+	print "#endif // LUAWRAPPER_FOUND"
 	print "}"
 	print "\n"
 	print "\n"
 	print "void freyjaLuaScript1s(const char *s)"
 	print "{"
-	print "#ifdef LUA_FOUND"
+	print "#ifdef LUAWRAPPER_FOUND"
 	print "\tFreyja_BindLua();"
 	print "\t"
 	print "\tif (s && s[0])\n\t\tgLuaVM.ExecuteFile(s);"
 	print "\t"
 	print "#else"
 	print "\tfreyjaPrintError(\"[Module '%s' failed to load.  Rebuild with Lua support.]\", plugin);"
-	print "#endif // LUA_FOUND"
+	print "#endif // LUAWRAPPER_FOUND"
 	print "}"
 	print "\n"
 
 
-def PrintOutFreyjaBindLua():
+def PrintOutFreyjaLuaABI():
+	print ""
+
+
+def PrintOutFreyjaBindLua_Old():
 	print "void Freyja_BindLua()"
 	print "{"
 	print "\tstatic bool init = false;"
@@ -165,8 +170,28 @@ def PrintOutFreyjaBindLua():
 	print "}"
 	print "\n"
 
+def PrintOutFreyjaBindLua():
+	print "#ifdef LUAWRAPPER_FOUND"
+	print "void freyja_lua_register_functions( lua_State* state )"
+	print "{"
+	print "\tstatic bool init = false;"
+	print "\t"
+	print "\tif ( !init )"
+	print "\t{"
+	print "\t\tinit = true;"
+	print "\t\tlua_freyja_bind_t *cur;"
+	print "\t\tunsigned int i = 0;"	
+	print "\t\t"
+	print "\t\twhile ( (cur = &gLibFreyja_LuaBinds[i++]) && cur->symbol )"
+	print "\t\t{"
+	print "\t\t\tlua_register( state, cur->symbol, cur->func );"
+	print "\t\t}"
+	print "\t}"	
+	print "}"
+	print "#endif // LUAWRAPPER_FOUND"
 
-def StoreWrapperFunction(abi, li):
+
+def StoreWrapperFunction( abi, li ):
 	count = nameat = 0
 
 	for i in li:
@@ -186,29 +211,28 @@ def StoreWrapperFunction(abi, li):
 	unsupported = False	
 
 	# Function blacklist, these are mostly for deprecated functions
-	if name == "freyjaGetBoneName":
-		unsupported = True
-	elif name == "freyjaMeshCreateLattice":
-		unsupported = True
-	elif name == "freyjaLuaBindFunc":
-		unsupported = True
+	#if name == "freyjaGetBoneName":
+	#	unsupported = True
+	#elif name == "freyjaMeshCreateLattice":
+	#	unsupported = True
+	#elif name == "freyjaLuaBindFunc":
+	#	unsupported = True
 
 
 	for i in range(nameat, len(li)):
-		if re.match('.*const.*', li[i]):
+		# Strings
+		if re.match('(char *|const char *|const char*|char*)', li[i]):
+			identifier = re.sub(';', '', li[i+1])
+			pass_vars += identifier + ", "
+			lua_stack_count += 1
+			lua_stack += "\tconst char* " + identifier  + " = lua_tostring(L, " + `lua_stack_count` + ");\n"
+		elif re.match('.*const.*', li[i]):
 			tmp = ""
-		elif re.match('.*;', li[i]):
-			tmp = re.sub(';.*', ';\n', li[i])
+		#elif re.match('.*;', li[i]):
+		#	tmp = re.sub(';.*', ';\n', li[i])
 		else:
-			# Strings
-			if re.match('(.*char\\*)', li[i]):
-				identifier = re.sub(';', '', li[i+1])
-				pass_vars += identifier + ", "
-				lua_stack_count += 1
-				lua_stack += "\tconst char *" + identifier  + " = lua_tostring(L, " + `lua_stack_count` + ");\n"
-
 			# Integers
-			elif re.match('(index_t|int32|char|uint32|byte|int16|uint16|freyja_id)', li[i]):
+			if re.match('(index_t|int32|char|uint32|byte|int16|uint16|freyja_id)', li[i]):
 				identifier = re.sub(';', '', li[i+1])
 
 				if re.match('(.*\\*)', li[i]):
@@ -219,7 +243,7 @@ def StoreWrapperFunction(abi, li):
 				lua_stack += "\t" + li[i] + " " + identifier  + " = (int)lua_tonumber(L, " + `lua_stack_count` + ");\n"
 
 			# Enumerations
-			elif re.match('(freyja_transform_action_t|freyja_colormode_t)', li[i]):
+			elif re.match('(freyja_transform_action_t|freyja_pixelformat_t)', li[i]):
 				identifier = re.sub(';', '', li[i+1])
 				pass_vars += identifier + ", "
 				lua_stack += "\t" + li[i] + " " + identifier  + " = ("+li[i]+")(int)lua_tonumber(L, " + `lua_stack_count` + ");\n"
@@ -288,8 +312,8 @@ def StoreWrapperFunction(abi, li):
 
 
 
-	if re.match('.*vec_t\\*', li[0]):
-		unsupported = True
+	#if re.match('.*vec_t\\*', li[0]):
+	#	unsupported = True
 
 	if unsupported:
 		s += "#warning \"Unsupported function binding.\"\n"
@@ -326,8 +350,8 @@ def StoreWrapperFunction(abi, li):
 
 	# Returns userdata
 	elif re.match('(freyja_ptr)', li[0]):
-		s += "\tfreyja_ptr real_value = " + name + "(" + pass_vars +");\n"
-		s += "\tlua_pushlightuserdata(L, real_value);\n"
+		s += "\tfreyja_ptr userdata_value = " + name + "(" + pass_vars +");\n"
+		s += "\tlua_pushlightuserdata(L, userdata_value);\n"
 		s += "\treturn 1;"
 
 	# Returns void
@@ -466,7 +490,7 @@ def UpdateBindings():
 	print ""
 
 	if gForcePythonDefine == 1:
-		print "#define LUA_FOUND"
+		print "#define LUAWRAPPER_FOUND"
 
 	for i in li:
 		if re.match('.*ABI.h', i) and not re.match('(Plugin|Legacy|QueryABI|ControlPoint|LuaABI|PythonABI|.*~)', i):
@@ -475,7 +499,7 @@ def UpdateBindings():
 
 	print "#include \"freyja.h\""
 	print "#include \"LuaABI.h\""
-	print "#ifdef LUA_FOUND"
+	print "#ifdef LUAWRAPPER_FOUND"
 	print gLuaHeaders
 	print "\n"
 
@@ -488,12 +512,14 @@ def UpdateBindings():
 	print "lua_freyja_bind_t gLibFreyja_LuaBinds[] = {"
 	for i in gFuncBindings:
 		print i
-	print "{ \"freyjaQueryInteger\", lua_freyjaQueryInteger },"
+	print "\t{ \"freyjaQueryInteger\", lua_freyjaQueryInteger },"
 	print "\t{ NULL, NULL }\n};\n\n"
 
 	PrintOutFreyjaBindLua()
 
 	PrintOutFreyjaLuaABI()
+
+	print "#endif // LUAWRAPPER_FOUND"
 
 
 if __name__ == "__main__":

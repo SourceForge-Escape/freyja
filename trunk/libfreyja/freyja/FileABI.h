@@ -6,17 +6,18 @@
  * Website : http://icculus.org/freyja
  * Email   : mongooseichiban@gmail.com
  * Object  : 
- * License : No use w/o permission (C) 2005-2007 Mongoose
- * Comments: This is the SceneNode C ABI.
+ * License : No use w/o permission (C) 2007 Mongoose
+ * Comments: This is the File C ABI, which is great for Lua and Python use.
+ *
  *
  *-- History ------------------------------------------------ 
  *
- * 2007.12.12:
- * Mongoose - Created, moved from other headers
+ * 2007.12.24:
+ * Mongoose - Created.
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_SCENENODEABI_H_
-#define GUARD__FREYJA_SCENENODEABI_H_
+#ifndef GUARD__FREYJA_FILEABI_H_
+#define GUARD__FREYJA_FILEABI_H_
 
 #include "freyja.h"
 
@@ -24,29 +25,22 @@
 extern "C" {
 
 	///////////////////////////////////////////////////////////////////////
-	// SceneNode 0.10.0 ABI
+	// freyjaFile 0.10.0 ABI
 	//
-	// Implements: Node, XMLSerializer
 	///////////////////////////////////////////////////////////////////////
 
-	void freyjaSceneNodeGetBoundingBox( freyja_ptr scenenode, vec3_t min, vec3_t max );
+	freyja_ptr freyjaFileOpen( const char* filename, const char* mode ); 
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Gets min and max of axis aligned bounding volume.
+	 * Post : Returns pointer to fileobject or NULL.
 	 ------------------------------------------------------*/
 
-	void freyjaSceneNodeGetBoundingSphereCenter( freyja_ptr scenenode, vec3_t center );
+	void freyjaFileClose( freyja_ptr file );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Gets center of spherical bounding volume.
-	 ------------------------------------------------------*/
-
-	vec_t freyjaSceneNodeGetBoundingSphereRadius( freyja_ptr scenenode );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets radius of spherical bounding volume.
+	 * Post : 
 	 ------------------------------------------------------*/
 
 } // extern "C"
 
-#endif // GUARD__FREYJA_SCENENODEABI_H_
+#endif // GUARD__FREYJA_FILEABI_H_
