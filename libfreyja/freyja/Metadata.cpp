@@ -21,10 +21,6 @@
 
 #include <mstl/Vector.h>
 
-#if TINYXML_FOUND
-#   include <tinyxml/tinyxml.h>
-#endif
-
 #include "freyja.h"
 #include "Mesh.h"
 
@@ -37,118 +33,40 @@ using namespace freyja;
 using namespace mstl;
 
 
-Vector<Metadata*> gMetadataGobalPool;
-
-// FIXME: Flush pool on exit!!!!
-
-
 ////////////////////////////////////////////////////////////
 // Public 
 ////////////////////////////////////////////////////////////
 
-bool Metadata::AddToPool()
-{
-	// This must not be in pool yet if uid is invalid.
-	if ( mUid == INDEX_INVALID )
-	{
-		for (uint32 i = 0, count = gMetadataGobalPool.size(); i < count; ++i)
-		{
-			if ( gMetadataGobalPool[i] == 0x0 )
-			{
-				mUid = i;
-				gMetadataGobalPool.assign( mUid, this );
-				return true;
-			}
-			else if ( gMetadataGobalPool[i] == this )
-			{
-				// Possible error state was found, so quietly 'fix'.
-				// This is mostly likely caused by calling the method repeatedly.
-				mUid = i;
-				return false;
-			}
-		}
-
-		mUid = gMetadataGobalPool.size();
-		gMetadataGobalPool.push_back( this );
-		return true;
-	}
-
-	return false;
-}
-
-
-Metadata *Metadata::GetObjectByUid(index_t uid)
-{
-	if ( uid < gMetadataGobalPool.size() )
-		return gMetadataGobalPool[uid];
-
-	return NULL;
-}
-
-
-uint32 Metadata::GetObjectCount()
-{
-	return gMetadataGobalPool.size();
-}
-
-
-bool Metadata::RemoveFromPool()
-{
-	if ( mUid < gMetadataGobalPool.size() )
-	{
-		gMetadataGobalPool.assign(mUid, 0x0);
-		mUid = INDEX_INVALID;
-		return true;
-	}
-
-	// Possible error state was found, so quietly 'fix'.
-	// This is mostly likely caused by calling the method repeatedly.
-	mUid = INDEX_INVALID;
-	return false;
-}
-
-
 void Metadata::SetModel(const char* model)
 {
-	if ( !model )
-		return;
-
-	// Do we already use the requested renderable instance?
-	if ( GetModel() && !strcmp( GetModel(), model ) )
-	{
-		// Do some 'check cache' call here later optionally.
-	}
-	else
-	{
-		mRenderable = Renderable::ImportToCache( model );
-	}
+	// FIXME: Load mesh into scene if not already loaded, and
+	// set renderable to this metadata's model.
 }
 
 
-#if TINYXML_FOUND
-
-bool Metadata::Serialize(TiXmlElement* container)
+bool Metadata::Serialize(XMLSerializerNode container) const
 {
+#if TINYXML_FOUND
 	if ( !container )
 		return false;
 
 	TiXmlElement *metadata = new TiXmlElement("freyja-metadata");
 	container->LinkEndChild( metadata );
 	metadata->SetAttribute("name", mName.c_str() );
-	metadata->SetAttribute("type", mType.c_str() );
+	metadata->SetAttribute("type", mMetadataType.c_str() );
 
-	TiXmlElement *pos = new TiXmlElement("pos");
+	TiXmlElement *pos = new TiXmlElement("position");
 	metadata->LinkEndChild( pos );
-	pos->SetDoubleAttribute("x", mPos.mX);
-	pos->SetDoubleAttribute("y", mPos.mY);
-	pos->SetDoubleAttribute("z", mPos.mZ);	
+	pos->SetDoubleAttribute("x", mPosition.mX);
+	pos->SetDoubleAttribute("y", mPosition.mY);
+	pos->SetDoubleAttribute("z", mPosition.mZ);	
 
-	TiXmlElement *rot = new TiXmlElement("rot");
+	TiXmlElement *rot = new TiXmlElement("orientation");
 	metadata->LinkEndChild( rot );
-	rot->SetDoubleAttribute("x", mRot.mX);
-	rot->SetDoubleAttribute("y", mRot.mY);
-	rot->SetDoubleAttribute("z", mRot.mZ);	
-	rot->SetDoubleAttribute("w", mRot.mW);	
+	rot->SetDoubleAttribute("x", mOrientation.mX);
+	rot->SetDoubleAttribute("y", mOrientation.mY);
+	rot->SetDoubleAttribute("z", mOrientation.mZ);	
+	rot->SetDoubleAttribute("w", mOrientation.mW);	
 
 	TiXmlElement *scale = new TiXmlElement("scale");
 	metadata->LinkEndChild( scale );
@@ -165,10 +83,10 @@ bool Metadata::Serialize(TiXmlElement* container)
 		metadata->LinkEndChild( data );
 	}
 
-	if ( mMaterial.c_str() )
+	if ( GetMaterial() )
 	{
 		TiXmlElement *data = new TiXmlElement("material");
-		TiXmlText *text = new TiXmlText( mMaterial.c_str() );
+		TiXmlText *text = new TiXmlText( GetMaterial()->GetName() );
 		//text->SetCDATA(true);
 		data->LinkEndChild( text );
 		metadata->LinkEndChild( data );
@@ -184,11 +102,15 @@ bool Metadata::Serialize(TiXmlElement* container)
 	}
 
 	return true;
+#else // TINYXML_FOUND
+	return false;
+#endif // TINYXML_FOUND
 }
 
 
-bool Metadata::Unserialize(TiXmlElement* metadata)
+bool Metadata::Unserialize(XMLSerializerNode metadata)
 {
+#if TINYXML_FOUND
 	if ( !metadata )
 		return false;
 
@@ -199,97 +121,55 @@ bool Metadata::Unserialize(TiXmlElement* metadata)
 	}
 
 	mName = metadata->Attribute("name");
-
-	mType = metadata->Attribute("type");
+	mMetadataType = metadata->Attribute("type");
 
 	TiXmlElement *child = metadata->FirstChildElement();
 	for( ; child; child = child->NextSiblingElement() )
 	{
 		String s = child->Value();
 
-		if (s == "pos")
+		if (s == "position")
 		{
-			child->QueryFloatAttribute("x", &mPos.mX);
-			child->QueryFloatAttribute("y", &mPos.mY);
-			child->QueryFloatAttribute("z", &mPos.mZ);
+			child->QueryFloatAttribute("x", &mPosition.mX);
+			child->QueryFloatAttribute("y", &mPosition.mY);
+			child->QueryFloatAttribute("z", &mPosition.mZ);
 		}
 		else if (s == "scale")
 		{
-			// FIXME: Not supported as quat yet
 			child->QueryFloatAttribute("x", &mScale.mX);
 			child->QueryFloatAttribute("y", &mScale.mY);
 			child->QueryFloatAttribute("z", &mScale.mZ);
 		}
-		else if (s == "rot")
+		else if (s == "orientation")
 		{
 			// FIXME: Not supported as quat yet
-			child->QueryFloatAttribute("x", &mRot.mX);
-			child->QueryFloatAttribute("y", &mRot.mY);
-			child->QueryFloatAttribute("z", &mRot.mZ);
-			child->QueryFloatAttribute("w", &mRot.mW);
+			child->QueryFloatAttribute("x", &mOrientation.mX);
+			child->QueryFloatAttribute("y", &mOrientation.mY);
+			child->QueryFloatAttribute("z", &mOrientation.mZ);
+			child->QueryFloatAttribute("w", &mOrientation.mW);
 		}
 		else if (s == "metadata")
 		{
 			mMetadata = child->GetText();
-	//index_t mMaterialIndex;  // set via material loader using string as input ^
 		}
 		else if (s == "material")
 		{
-			mMaterial = child->GetText();
+			// FIXME: Load from resource manager!
+			//mMaterial = child->GetText();
 		}
 		else if (s == "model")
 		{
 			SetModel( child->GetText() );
-			// FIXME: Setup renderable!
-			//mModel = MetadataRenderable::GetInstance( child->GetText() );
 		}
 	}
 
 	return true;
-}
-
-#endif // TINYXML_FOUND
-
-
-bool Metadata::Unserialize(const char* filename)
-{
-#if TINYXML_FOUND
-	if (!filename)
-		return false;
-
-	TiXmlDocument doc(filename);
-
-	if ( !doc.LoadFile() )
-	{
-		freyja_print("XML ERROR: %s, Line %i, Col %i\n", 
-		             doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
-		return false;
-	}
-
-	TiXmlElement *root = doc.RootElement(); 
-
-	if (!root) 
-	{
-		freyja_print("XML ERROR: Couldn't find document root for '%s'!\n", filename );
-		return false;
-	}
-
-	TiXmlElement *child = root->FirstChildElement();
-	for( ; child; child = child->NextSiblingElement() )
-	{
-		String s = child->Value();
-
-		// Only handle the first one encountered given this is a class method.
-		if ( s == "freyja-metadata" )
-		{
-			return Unserialize( child );
-		}
-	}
-
-#endif // TINYXML_FOUND
-
+#else // TINYXML_FOUND
 	return false;
+#endif // TINYXML_FOUND
 }
+
+
 
 
 ////////////////////////////////////////////////////////////

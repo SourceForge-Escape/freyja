@@ -5,8 +5,8 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/freyja/
  * Email   : mongooseichiban@gmail.com
- * Object  : FreyjaMesh
  * License : No use w/o permission (C) 2004-2007 Mongoose
+ * Object  : Mesh
  * Comments: This is the freyja::Mesh and class.
  *
  *
@@ -40,7 +40,6 @@
 #define GUARD__FREYJA_MESH_H__
 
 #include <hel/Ray.h>
-#include "Track.h"
 #include "Weight.h"
 #include "Vertex.h"
 #include "Face.h"
@@ -48,11 +47,12 @@
 #include "Plane.h"
 
 #include "SceneNode.h"
-#include "VertexArray.h"
+#include "FloatArray.h"
 
 namespace freyja {
 
-class Mesh : public SceneNode
+class Mesh : 
+		public SceneNode
 {
 public:	
 	
@@ -60,7 +60,22 @@ public:
 	//	fV3N3T2 = 0,
 	//	fV4N3T3,
 	//	
-	//} Format;
+	//} VertexFormat;
+
+
+	// This is a child of mesh in scenegraph -- you can't render Mesh directly in general.
+	// Allows for material sorting, alpha pass, etc.
+	class TriangleList :
+		public Node
+	{
+	public:
+
+		// bool mAlpha; // Move this to material, sort by material
+
+		freyja::Material* mMaterial;    /* All faces in this list use this material. */
+		mstl::Vector<uint32> mIndices;  /* Triangle list. */
+	};
+
 
 
 	////////////////////////////////////////////////////////////
@@ -70,18 +85,18 @@ public:
 	Mesh( const char* name );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of Mesh
+	 * Post : Constructor.
 	 *
 	 ------------------------------------------------------*/
 
 	Mesh( const Mesh& mesh );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of Mesh
+	 * Post : Copy constructor.
 	 *
 	 ------------------------------------------------------*/
 
-	~Mesh();
+	~Mesh( );
 	/*------------------------------------------------------
 	 * Pre  : Mesh object is allocated
 	 * Post : Deconstructs an object of Mesh
@@ -95,6 +110,27 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	freyja::Vertex* CreateVertex( const vec3_t pos );
+	/*------------------------------------------------------
+	 * Pre  : <pos> is the XYZ coordinates of the vertex.
+	 *
+	 * Post : This creates a new 'wrapper' vertex that handles
+	 *        a vertex format entry for face(s).
+	 *
+	 ------------------------------------------------------*/
+
+	freyja::Edge* CreateEdge( freyja::Vertex* a, freyja::Vertex* b );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns a new edge or NULL on error.
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Geometry methods
+	////////////////////////////////////////////////////////////
+
 	void AddVertexToFace( freyja::Face* face, freyja::Vertex* vertex );
 	/*------------------------------------------------------
 	 * Pre  : <face> and <vertex> are allocated, and don't already 
@@ -107,70 +143,21 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	freyja::Vertex* CreateVertex( const vec3_t pos );
-	/*------------------------------------------------------
-	 * Pre  : <pos> is the XYZ coordinates of the vertex.
-	 *
-	 * Post : This creates a new 'wrapper' vertex that handles
-	 *        a vertex format entry for face(s).
-	 *
-	 ------------------------------------------------------*/
-
-	freyja::Edge* CreateEdge( freyja::Vertex* vertex0, freyja::Vertex* vertex1 );
-
-
-	////////////////////////////////////////////////////////////
-	// Weight methods
-	////////////////////////////////////////////////////////////
-
-	freyja::Weight* CreateWeight( freyja::Bone* bone, freyja::Vertex* vertex );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	Weight *GetWeight(index_t w) 
-	{ return (w < mWeights.size()) ? mWeights[w] : NULL; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	uint32 GetWeightCount() { return mWeights.size(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void RemoveWeight( freyja::Weight* weight );
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 ------------------------------------------------------*/
-
 
 	////////////////////////////////////////////////////////////
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	bool CopyVertexBuffer(mstl::Vector<vec_t> &buffer);
+	bool CopyVertexArray( freyja::FloatArray& array ) const;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Copies the vertex buffer to external Vector.
+	 * Post : Copies the vertex array to external array.
 	 *        Returns true on success.
 	 *
 	 ------------------------------------------------------*/
 
-	bool CopyVertexBlendBuffer(mstl::Vector<vec_t> &buffer);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Copies vertex blend buffer to external Vector.
-	 *        Returns true on success.
-	 *
-	 ------------------------------------------------------*/
-
-	bool GetBlendShadowVolume(mstl::Vector<vec_t> &shadowVolume,
-							  vec3_t lightPos, vec3_t pos, vec_t cinf);
+	//virtual bool GetShadowVolume( mstl::Vector<vec_t>& shadowVolume,
+	//							  vec3_t lightPos, vec3_t pos, vec_t cinf ) const;
 	/*------------------------------------------------------
 	 * Pre  : <cinf> > 0.0f - Then apply max occlusion distance.
 	 * 
@@ -180,16 +167,90 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool GetShadowVolume(mstl::Vector<vec_t> &shadowVolume,
-						 vec3_t lightPos, vec3_t pos, vec_t cinf);
+	const mstl::list<Face*>& GetSelectedFaces( ) const
+	{ return mSelectedFaces; }
 	/*------------------------------------------------------
-	 * Pre  : <cinf> > 0.0f - Then apply max occlusion distance.
-	 * 
-	 * Post : Rebuilds shadow volume for this mesh.
-	 *        Uses currently past in shadow volume buffer.
-	 *        Returns true on success.
+	 * Pre  :  
+	 * Post : Get a list of unique faces marked selected
 	 *
 	 ------------------------------------------------------*/
+
+	void GetUniqueVerticesInFaces( const mstl::Vector<index_t>& faces,
+								   mstl::Vector<index_t>& vertices) const;
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get a list of unique vertices in faces list
+	 *
+	 ------------------------------------------------------*/
+
+	freyja::Face* GetFace( index_t idx ) const;
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	uint32 GetFaceCount() const 
+	{ return mFaces.size(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	const mstl::list<Vertex*>& GetSelectedVertices( ) const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Return a list of vertices flagged fSelected 
+	 *        ( by index )
+	 ------------------------------------------------------*/
+
+	freyja::Face* PickFace( hel::Ray& ray, hel::Vec3& tuv ) const;
+	/*------------------------------------------------------
+	 * Pre  : <ray> the pick ray.
+	 *
+	 * Post : Returns first face encountered or NULL if none.
+	 *        <tuv> Contains t, and uv results from intersection.
+	 *
+	 *        Sets no flags on any face.
+	 ------------------------------------------------------*/
+
+	freyja::Edge* PickEdge( hel::Ray& ray, vec_t& t ) const;
+	/*------------------------------------------------------
+	 * Pre  : <r> the pick ray.
+	 *
+	 * Post : Returns first edge encountered or NULL if none.
+	 *        <t> term where ray intersected edge bbox target.
+	 *
+	 ------------------------------------------------------*/
+
+	const vec_t* GetVertexArray() const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns vertex array.
+	 ------------------------------------------------------*/
+
+	const vec_t* GetNormalArray() const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns normal array.
+	 ------------------------------------------------------*/
+
+	const vec_t* GetTexCoordArray() const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns texcoord array.
+	 ------------------------------------------------------*/
+
+	uint32 GetVertexArrayCount() const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public Mutators
+	////////////////////////////////////////////////////////////
 
 	void CollapseEdge(index_t face, uint32 a, uint32 b, uint32 c, uint32 d);
 	/*------------------------------------------------------
@@ -204,34 +265,7 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void GetSelectedFaces(Vector<index_t>& faces);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get a list of unique faces marked selected
-	 *
-	 ------------------------------------------------------*/
-
-	void GetUniqueVerticesInFaces(const Vector<index_t>& faces,
-								  Vector<index_t>& vertices);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get a list of unique vertices in faces list
-	 *
-	 ------------------------------------------------------*/
-
 	void SelectVerticesOfSelectedFaces();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void ClearFlagForSelectedFaces(Face::Flags flag);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	void SetFlagForSelectedFaces(Face::Flags flag);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -257,71 +291,6 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	//void GetColor(index_t colorIndex, vec4_t rgba)
-	//{ GetVec(mColorPool, 4, colorIndex, rgba); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	Face *GetFace(index_t idx);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	uint32 GetFaceCount() { return mFaces.size(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//void GetNormal(index_t normalIndex, vec3_t xyz)
-	//{ GetTripleVec(mNormalPool, normalIndex, xyz); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//uint32 GetNormalCount() { return mNormalPool.size(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	const mstl::list<Vertex*>& GetSelectedVertices( );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Return a list of vertices flagged fSelected 
-	 *        ( by index )
-	 ------------------------------------------------------*/
-
-	//void GetTexCoord(index_t texCoordIndex, vec3_t uvw)
-	//{	GetTripleVec(mTexCoordPool, texCoordIndex, uvw);	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//uint32 GetVertexArrayCount() { return mVertexPool.size(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//uint32 GetTexCoordCount() { return mTexCoordPool.size(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	Vertex *GetVertex(index_t vertexIndex);
-	/*------------------------------------------------------
-	 * Pre  : vertexIndex is valid for this mesh
-	 * Post : Return vertex if it exists or NULL
-	 ------------------------------------------------------*/
-
 	hel::Vec3 GetVertexNormal(index_t idx);
 	void SetVertexNormal(index_t idx, hel::Vec3 n);
 	/*------------------------------------------------------
@@ -342,37 +311,14 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	uint32 GetVertexCount() { return mVertices.size(); }
+	uint32 GetVertexCount() const
+	{ return mVertices.size(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	void GetVertexPos(index_t vertex, vec3_t xyz)
-	{
-		if (vertex < mVertices.size() && mVertices[vertex])
-			GetVertexArrayPos(mVertices[vertex]->mVertexIndex, xyz);
-	}
-	/*------------------------------------------------------
-	 * Pre  : <vertex> is an mVertices[] index.
-	 * Post : Correct Get method for class Vertex position
-	 *        with bounds checking.
-	 ------------------------------------------------------*/
-
-	void SetVertexPos(index_t vertex, vec3_t xyz)
-	{
-		if (vertex < mVertices.size() && mVertices[vertex])
-			SetVertexArrayPos(mVertices[vertex]->mVertexIndex, xyz);
-	}
-	/*------------------------------------------------------
-	 * Pre  : <vertex> is an mVertices[] index.
-	 * Post : Correct Set method for class Vertex position
-	 *        with bounds checking.
-	 ------------------------------------------------------*/
-
-
-
-	bool Intersect(hel::Ray &r, vec_t &t);
+	bool Intersect(hel::Ray& ray, vec_t& t);
 	/*------------------------------------------------------
 	 * Pre  : If mesh is fHidden intersects will always return false
 	 *
@@ -380,28 +326,8 @@ public:
 	 *        This checks the bsphere, then bbox for collision.
 	 ------------------------------------------------------*/
 
-	int PickFace(Face::Flags flag, hel::Ray &r, hel::Vec3 &tuv);
-	/*------------------------------------------------------
-	 * Pre  : <flag> ignore faces with this flag.
-	 *        <r> the pick ray.
-	 *
-	 * Post : Returns index of first face encountered or -1 if DNE.
-	 *        <tuv> Contains t, and uv results from intersection.
-	 *
-	 *        Sets no flags on any face.
-	 ------------------------------------------------------*/
-
-	int PickEdge(hel::Ray &r, vec_t &t);
-	/*------------------------------------------------------
-	 * Pre  : <r> the pick ray.
-	 *
-	 * Post : Returns index of first edge encountered or -1 if none.
-	 *        <t> term where ray intersected edge bbox target.
-	 *
-	 ------------------------------------------------------*/
-
-	bool IntersectHitBox(hel::Ray &r, 
-						 const hel::Vec3 &min, const hel::Vec3 &max, vec_t &t);
+	bool IntersectHitBox(hel::Ray& ray, 
+						 const hel::Vec3& min, const hel::Vec3& max, vec_t& t);
 	/*------------------------------------------------------
 	 * Pre  : <r> the pick ray.
 	 *
@@ -410,7 +336,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool IntersectPerFace(hel::Ray &r, vec_t &t);
+	bool IntersectPerFace(hel::Ray &ray, vec_t &t);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns true if 'hit', and <t> the time along ray
@@ -418,8 +344,8 @@ public:
 	 *        top of just bounding volume checks.
 	 ------------------------------------------------------*/
 	
-	bool IntersectClosestFace(hel::Ray &r, int &face0) 
-	{ return IntersectFaces(r, face0, false); }
+	bool IntersectClosestFace(hel::Ray &ray, int &face0) 
+	{ return IntersectFaces(ray, face0, false); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : <face0> First face encountered along ray, or -1 if DNE.
@@ -439,7 +365,7 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	bool IntersectClosestVertex(hel::Ray &r, int &vertex0, vec_t radius);
+	bool IntersectClosestVertex(hel::Ray &ray, int &vertex0, vec_t radius);
 	/*------------------------------------------------------
 	 * Pre  : <radius> Sets selected flag on all faces hit
 	 *
@@ -448,7 +374,7 @@ public:
 	 *        Clears old fRayHit results on all other vertices.
 	 ------------------------------------------------------*/
 
-	bool IntersectUVFaces(hel::Ray &r, int &face0, bool markAll, 
+	bool IntersectUVFaces(hel::Ray &ray, int &face0, bool markAll, 
 						  index_t material);
 	/*------------------------------------------------------
 	 * Pre  : Current <material> is used as a filter.
@@ -458,7 +384,7 @@ public:
 	 *        Always sets fRayHit flag on face0, clears old results. 
 	 ------------------------------------------------------*/
 
-	bool IntersectFaces(hel::Ray &r, int &face0, bool markAll);
+	bool IntersectFaces(hel::Ray &ray, int &face0, bool markAll);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : <face0> First face encountered along ray, or -1 if DNE.
@@ -514,13 +440,6 @@ public:
 	 *       All facets will be added to their vertex references.
 	 ------------------------------------------------------*/
 
-	FREYJA_XMLSERIALIZER_INTERFACE
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : XmlSerializer interface macro.
-	 *
-	 ------------------------------------------------------*/
-
 
 	////////////////////////////////////////////////////////////
 	// Move to external algorithms.
@@ -560,6 +479,12 @@ public:
 	 * Post : Makes UV spherical projection for selected faces
 	 ------------------------------------------------------*/
 
+	//void ClampAllTexCoords()
+	//{ ClampAllTexCoords(0.0f, 1.0f); }
+
+	//void ClampAllTexCoords(vec_t min, vec_t max)
+	//{ ClampVecValues(mTexCoordPool, min, max); }
+
 	void RecomputeFaceNormal(index_t face, bool full);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -588,37 +513,6 @@ public:
 	 * Post : Clears option flag for <vertex>
 	 ------------------------------------------------------*/
 
-	Mesh* CopyWithBlendedVertices();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Copies this mesh, except the blend vertices
-	 *        replace the unweighted vertices.
-	 *
-	 *        Returns mesh outside of pool control. 
-	 *
-	 ------------------------------------------------------*/
-
-	index_t CreateVertexKeyframeFromBlended(index_t track, vec_t time);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : The blend vertices are converted to a 
-	 *        vertex morph keyframe.
-	 *
-	 *        Returns valid index on success. 
-	 *
-	 ------------------------------------------------------*/	
-
-	index_t CreateVertexKeyframeFromImport(index_t track, vec_t time, Vector<vec_t>& vertices);
-	/*------------------------------------------------------
-	 * Pre  : List must have the same number of vertices as mesh.
-	 *
-	 * Post : The imported vertices are converted to a 
-	 *        vertex morph keyframe.
-	 *
-	 *        Returns valid index on success. 
-	 *
-	 ------------------------------------------------------*/	
-
 	void SetVertexFlags(index_t vertex, uint32 flags);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -641,9 +535,22 @@ public:
 	 *        then you'll have to delete it yourself.
 	 ------------------------------------------------------*/
 
-	Mesh *Split(bool trim);
+	Mesh* PartialCopy() const;
 	/*------------------------------------------------------
-	 * Pre  : If <trim> is true remove the selected faces
+	 * Pre  : 
+	 *
+	 * Post : Not like the old school 2000.11.30 API, Read
+	 *
+	 *        A new mesh is made from this mesh based on the
+	 *        currently fSelected flagged Faces.
+	 *
+	 *        This mesh exists outside of the scene.
+	 *        If you want to add use the AddToPool() method.
+	 ------------------------------------------------------*/
+
+	Mesh* Split();
+	/*------------------------------------------------------
+	 * Pre  : Remove the selected faces
 	 *        from this mesh after splitting off to another mesh.
 	 * 
 	 * Post : Not like the old school 2000.11.30 API, Read
@@ -687,31 +594,18 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
-
-
-	/*
-	index_t CreateVertex(const vec3_t xyz)
-	{
-		hel::Vec3 n(0.0f, 1.0f, 0.0f); 
-		hel::Vec3 t(0.5f, 0.5f, 0.0f);
-		return CreateVertex(xyz, t.mVec, n.mVec);
-	}
-	*/
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns local index of new Vertex
-	 ------------------------------------------------------*/
-
-	index_t CreateVertex(const vec3_t xyz, const vec3_t uvw, const vec3_t nxyz);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Returns local index of new Vertex
-	 ------------------------------------------------------*/
-
 	void ExtrudeFace(index_t face, vec3_t displacement);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Extrudes <face> along vector <displacement>
+	 ------------------------------------------------------*/
+
+
+	bool WeldTexCoords(index_t replace, index_t texcoord);
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Replace is replaced by texcoord.
+	 *        
 	 ------------------------------------------------------*/
 
 	void CheckArrayRefs(index_t vertex, bool &v, 
@@ -726,35 +620,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void RemoveWeightSelectedVertices(index_t bone);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	void SetWeightSelectedVertices(index_t bone, vec_t weight);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-
-
-
-
-
-
-	bool WeldTexCoords(index_t replace, index_t texcoord);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Replace is replaced by texcoord.
-	 *        
-	 ------------------------------------------------------*/
-
-	void MarkVerticesOfFacesWithFlag(Face::Flags flag, 
-									 Vertex::Flags mark, bool clear);
+	//void MarkVerticesOfFacesWithFlag(Face::Flags flag, Vertex::Flags mark, bool clear);
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Every face with <flag> set will set all its
@@ -763,10 +629,6 @@ public:
 	 *        If <clear> is true all vertices not marked will
 	 *        have flag <mark> cleared.
 	 ------------------------------------------------------*/
-
-	void ConvertAllFacesToTexCoordPloymapping();
-
-	void ConvertFaceToTexCoordPloymapping(index_t face);
 
 	void VertexCleanup();
 	/*------------------------------------------------------
@@ -845,12 +707,6 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	//void ClampAllTexCoords()
-	//{ ClampAllTexCoords(0.0f, 1.0f); }
-
-	//void ClampAllTexCoords(vec_t min, vec_t max)
-	//{ ClampVecValues(mTexCoordPool, min, max); }
-
 	void SetFaceSmoothingGroup(index_t face, uint32 group);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -886,261 +742,112 @@ public:
 	 ------------------------------------------------------*/
 
 
-
-
-	////////////////////////////////////////////////////////////
-	// Array exposure
-	////////////////////////////////////////////////////////////
-
-	void GetVertexArrayPos(index_t vertexIndex, vec3_t xyz);
-	void SetVertexArrayPos(index_t vertexIndex, const vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : NOTE This is not the same as GetVertexClassPos
-	 *        This is the ith point stored in the point array
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	vec_t *GetVertexArray()
-	{ return mVertexPool.get_array(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns vertex array ( great for rendering )
-	 ------------------------------------------------------*/
-
-	vec_t *GetNormalArray()
-	{ return mNormalPool.get_array(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns normal array ( great for rendering )
-	 ------------------------------------------------------*/
-
-	vec_t *GetTexCoordArray()
-	{ return mTexCoordPool.get_array(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns texcoord array ( great for rendering )
-	 ------------------------------------------------------*/
-
-
-	//////////////////////////////////////////////////////////////////////////
-	// Animation tracks interface
-	// Testing embedded keyframing, so bare with me...
-	// these methods only support one 'animation' atm, but enforcing interface
-	// API usage makes it a transparent fix to API users later.
-	//////////////////////////////////////////////////////////////////////////
-
-	//uint32 GetTransformTrackCount() {return 1;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//index_t NewTransformTrack() {return 0;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//TransformTrack &GetTransformTrack(uint32 track) 
-	//{ return mTrack; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//uint32 GetVertexAnimTrackCount() {return 1;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//uint32 GetVertexAnimKeyframeCount(uint32 track) 
-	//{ return mVertexAnimTrack.GetKeyframeCount();}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//index_t NewVertexAnimTrack() {return 0;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//VertexAnimTrack &GetVertexAnimTrack(uint32 track) {return mVertexAnimTrack;}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//vec_t *GetBlendVerticesArray() { return mBlendVertices.get_array(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//uint32 GetBlendVerticesCount() { return mBlendVertices.size(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//void ResetBlendVertices()
-	//{
-	//	vec_t *array = mBlendVertices.get_array();
-	//	if (array)
-	//		memset(array, 0, mBlendVertices.size()*sizeof(vec_t));
-	//}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	//void SyncBlendVertices()
-	//{
-	//	if (mBlendVertices.size() < mVertexPool.size())
-	//	{
-	//		mBlendVertices.resize(mVertexPool.size());
-	//	}
-	//}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-
-
-
-
 	////////////////////////////////////////////////////////////
 	// Transforms
 	////////////////////////////////////////////////////////////
 
-	//void TransformTexCoords(hel::Mat44 &mat)
-	//{ TripleVec_Transform(mTexCoordPool, mat); }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Applies matrix transform to texcoord pool
-	 ------------------------------------------------------*/
-
-	//void TransformNormals(hel::Mat44 &mat)
-	//{ TripleVec_Transform(mNormalPool, mat); }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Applies matrix transform to normal pool
-	 ------------------------------------------------------*/
-
-	//void TransformVertices(hel::Mat44 &mat)
-	//{
-	//	TripleVec_Transform(mVertexPool, mat);
-	//	mInitBoundingVol = false;
-	//	UpdateBoundingVolume(); // Handles rotations correctly ( keeps AABB )
-	//}
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Applies matrix transform to vertices pool
-	 ------------------------------------------------------*/
-
-	void TransformFacesWithFlag(Face::Flags flag, hel::Mat44 &mat);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Applies matrix transform to face with flag set
-	 ------------------------------------------------------*/
-
-	void TransformFacesInList(Vector<index_t> &faces, hel::Mat44 &mat);
+	void TransformFaceList( mstl::list<Face*>& faces, hel::Mat44& mat );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to faces in index list
 	 ------------------------------------------------------*/
 
-	void TransformVerticesWithFlag(Vertex::Flags flag, hel::Mat44 &mat);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Applies matrix transform to vertices with flag set
-	 ------------------------------------------------------*/
-
-	void TransformVerticesInList(Vector<index_t> &vertices, hel::Mat44 &mat);
+	void TransformVertexList( mstl::list<Vertex*>& vertices, hel::Mat44& mat );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Applies matrix transform to vertices in index list
 	 ------------------------------------------------------*/
 
-	void SelectedFacesRotateUVMap(vec_t z);
+	void TransformTexcoordList( mstl::list<index_t>& texcoords, hel::Mat44& mat );
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Translates mesh based on Position()
+	 * Post : 
 	 ------------------------------------------------------*/
 
-	void SelectedFacesScaleUVMap(vec_t x, vec_t y);
+
+	////////////////////////////////////////////////////////////
+	// Public Interfaces
+	////////////////////////////////////////////////////////////
+
+	static freyja::Mesh* Cast( freyja_ptr ptr )
+	{ return (freyja::Mesh*)ptr; }
 	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Translates mesh based on Position()
+	 * Pre  : 
+	 * Post : FIXME Add RTTI checking.
+	 *
 	 ------------------------------------------------------*/
 
-	void SelectedFacesTranslateUVMap(vec_t x, vec_t y);
+	FREYJA_NODE_INTERFACE
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Translates mesh based on Position()
+	 * Post : Node implementation.
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_XMLSERIALIZER_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer implementation.
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_RENDERABLE_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renderable implementation.
+	 *
 	 ------------------------------------------------------*/
 
 
 protected:
 
 	////////////////////////////////////////////////////////////
-	// Protected Accessors
+	// Protected.
 	////////////////////////////////////////////////////////////
 
+	byte mMeshOptions;                     /* Options bitmap. */
 
-	////////////////////////////////////////////////////////////
-	// Protected Mutators
-	////////////////////////////////////////////////////////////
+	freyja::FloatArray mVertexArray;       /* Arrays to define geometry. */
+	freyja::FloatArray mColorArray;
+	freyja::FloatArray mNormalArray;
+	freyja::FloatArray mTexcoordArray;
 
-	void DeleteVertexHelper(Vertex **array, index_t vertex);
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : This is called by methods that also do ref fixing.
-	 *
-	 ------------------------------------------------------*/
-
-	//TransformTrack mTrack;            /* Mesh transform animation track */
-
-	//VertexAnimTrack mVertexAnimTrack; /* Mesh vertex animation track  */
-
-	//vec_t mBlendVerticesTime;         /* Last time this was updated */
-
-	//Vector<vec_t> mBlendVertices;     /* Skeletal vertex blending use  */
-
-	bool mPacked;
-
-	Vector<vec_t> mVertexPool;
-	mstl::stack<index_t> mFreedVertices;
-
-	Vector<vec_t> mNormalPool;
-	mstl::stack<index_t> mFreedNormals;
-
-	Vector<vec_t> mColorPool;
-	mstl::stack<index_t> mFreedColors;
-
-	Vector<vec_t> mTexCoordPool;
-	mstl::stack<index_t> mFreedTexCoords;
+	mstl::stack<uint32> mGaps;             /* Gaps in array usage. */
 
 	mstl::list<Vertex*> mSelectedVertices; /* List of selected vertices. */
 
 	mstl::list<Face*> mSelectedFaces;      /* List of selected faces. */
 
 	mstl::list<Edge*> mSelectedEdges;      /* List of selected edges. */
-	
 
-	Vector<Face *> mFaces;
+	mstl::Vector<freyja::Face*> mFaces;
 
-	Vector<Vertex *> mVertices;
+	mstl::Vector<freyja::Vertex*> mVertices;
 
-	Vector<Weight *> mWeights;
+	mstl::Vector<freyja::Plane*> mPlanes;
 
-	Vector<Plane *> mPlanes;
-
-	Vector<Edge *> mEdges;
+	mstl::Vector<freyja::Edge*> mEdges;
 };
+
+
+inline
+const char* Mesh::GetType() const
+{ return "Mesh"; }
+
+ 
+inline
+uint32 Mesh::GetVersion() const
+{ return 0; }
+
+
+inline
+freyja::Node* Mesh::Duplicate() const
+{ return new Mesh(*this); }
+
+
+inline
+freyja::Material* Mesh::GetMaterial() const
+{ return NULL; }
 
 } // namespace freyja
 

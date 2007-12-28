@@ -23,40 +23,51 @@
 
 extern "C" {
 
+#if LUA_FOUND_INCLUDE
+#   include <lua.h>
+#   include <lualib.h>
+#   include <lauxlib.h>
+#else // LUA_FOUND_INCLUDE
+#   include <lua5.1/lua.h>
+#   include <lua5.1/lualib.h>
+#   include <lua5.1/lauxlib.h>
+#endif // LUA_FOUND_INCLUDE
+
+
 	////////////////////////////////////////////////////////////////
-	// Lua ABI 0.9.5
+	// Lua ABI 0.10.0
 	////////////////////////////////////////////////////////////////
 
-	void freyjaLuaCommand1s(const char *command);
+#ifdef LUA_FOUND
+	void freyja_lua_register_functions( lua_State* state );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+#endif
+
+	//void freyjaLuaBindFunc( const char* symbol, void* function );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaLuaScript1s(const char *filename);
+	//void freyjaLuaCommand1s( const char* command );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaLuaBindFunc(const char *symbol, void *function);
+	//void freyjaLuaScript1s( const char* filename );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
-}
 
-#   if defined( __cplusplus ) && defined( USING_FREYJA_CPP_ABI )
-#      include <lua/Lua.h>
+} // extern "C"
 
-    const Lua &freyjaGetLuaVM();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns pointer to Lua VM used by libfreyja.
-	 ------------------------------------------------------*/
-
-#   endif // __cplusplus
 #endif // GUARD__FREYJA_LUAABI_H_

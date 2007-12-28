@@ -26,16 +26,11 @@
 #ifndef GUARD__FREYJA_MATERIAL_H_
 #define GUARD__FREYJA_MATERIAL_H_
 
-#if TINYXML_FOUND
-#   include <tinyxml/tinyxml.h>
-#endif
-
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
 #include <mstl/String.h>
-#include "Texture.h"
-
-using namespace mstl;
+#include "PixelBuffer.h"
+#include "XMLSerializer.h"
 
 
 namespace freyja {
@@ -59,13 +54,13 @@ class Material
 	 * Post : Constructs an object of FreyjaMaterial
 	 ------------------------------------------------------*/
 
-	Material(const Material &fm);
+	Material(const Material& material);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaMaterial
 	 ------------------------------------------------------*/
 
-	Material &operator=(const Material &fm);
+	Material &operator=(const Material& material);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -82,7 +77,16 @@ class Material
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-   static int32 GetBlendIndex(int blend);
+	bool operator < ( const Material& material ) const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Sorting is used to automatically order
+	 *        RenderList.  For example 'alpha' render pass is
+	 *        always after 'solid'.
+	 *
+	 ------------------------------------------------------*/
+
+	static int32 GetBlendIndex(int blend);
 	/*------------------------------------------------------
 	 * Pre  : Pass blend value, Built with HAVE_GL
 	 * Post : Returns -1 if not used, or index if used
@@ -94,58 +98,44 @@ class Material
 	 * Post : Returns number of unique materials
 	 ------------------------------------------------------*/
 
-	uint32 GetFlags();
+	uint32 GetFlags() const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get currently set flags
 	 ------------------------------------------------------*/
 
-	uint32 GetId();
+	uint32 GetId() const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns unique material id ( 1..N, or 0 if invalid )
 	 ------------------------------------------------------*/
 
-	const char *GetMetaData() { return mMetaData.c_str(); }
+	const char* GetMetadata() const
+	{ return mMetadata.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets metadata
 	 ------------------------------------------------------*/
 
-	const char *GetName() { return mName.c_str(); }
+	const char* GetName() const
+	{ return mName.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns Material's name or NULL
 	 ------------------------------------------------------*/
 
-	const char *GetShaderFilename();
+	const char* GetShaderFilename() const
+	{ return mShaderFilename.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets Material's shader filename or NULL
 	 ------------------------------------------------------*/
 
-	const char *GetTextureFilename();
+	const char* GetTextureFilename() const
+	{ return mTextureFilename.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets Material's texture filename or NULL
-	 ------------------------------------------------------*/
-
-	uint32 GetSerializeSize();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::FileWriter &w);
-	/*------------------------------------------------------
-	 * Pre  : Writes this material out to disk
-	 * Post : Returns true on success
-	 ------------------------------------------------------*/
-
-	virtual bool Serialize(SystemIO::TextFileWriter &w);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serializes the to diskfile as a chunk
 	 ------------------------------------------------------*/
 
 
@@ -153,27 +143,26 @@ class Material
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void ClearFlag(Flags flag) { mFlags &= ~flag; }
+	void ClearFlag(Flags flag)
+	{ mFlags &= ~flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Unsets passed flag
 	 ------------------------------------------------------*/
 
-#if TINYXML_FOUND
-	bool Serialize(TiXmlElement *container);
+	bool Serialize(XMLSerializerNode container);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	bool Unserialize(TiXmlElement *container);
+	bool Unserialize(XMLSerializerNode container);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
-#endif
 
 	void SetFlag(Flags flag) { mFlags |= flag; }
 	/*------------------------------------------------------
@@ -181,13 +170,14 @@ class Material
 	 * Post : Sets passed flag
 	 ------------------------------------------------------*/
 
-	void SetName(const char *name);
+	void SetName(const char* name);
 	/*------------------------------------------------------
 	 * Pre  : Name is valid string
 	 * Post : Sets Material's name
 	 ------------------------------------------------------*/
 
-	void SetMetaData(const char *s) { mMetaData = s; }
+	void SetMetadata(const char* s)
+	{ mMetadata = s; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets metadata
@@ -248,20 +238,35 @@ class Material
 	// Protected
 	////////////////////////////////////////////////////////////
 
-	const static uint32 mVersion = 3;
+	const static uint32 mVersion = 4; /* Material version. */
 
-	String mName;               /* Material name */
+	mstl::String mName;               /* Material name */
 
-	String mBlendSrcString;     /* Blending source human readable string */
+	mstl::String mFilename;           /* Material filename or NULL/empty string. */
 
-	String mBlendDestString;    /* Blending source human readable string */
+	mstl::String mMetadata;           /* Useful for additional plugin material data. */
 
-	String mTextureFilename;    /* This is used for file I/O to map classes */
+	mstl::String mShader;             /* Generated shader. */
 
-	String mShaderFilename;     /* This is used for file I/O to map classes */
+	PixelBuffer* mDiffuseMap;            /* Various texture maps. */
+	PixelBuffer* mEmissiveMap;
+	PixelBuffer* mSpecularMap;
+	PixelBuffer* mNormalMap;
+	PixelBuffer* mHeightMap;
+	PixelBuffer* mDecalMap;
 
-	String mMetaData;           /* Useful for additional plugin material data */
+
+	// 0.9.5 API
+
+	mstl::String mBlendSrcString;     /* Blending source human readable string */
+
+	mstl::String mBlendDestString;    /* Blending source human readable string */
+
+	mstl::String mTextureFilename;    /* This is used for file I/O to map classes */
+
+	mstl::String mShaderFilename;     /* This is used for file I/O to map classes */
 };
+
 
 } // End namespace freyja
 

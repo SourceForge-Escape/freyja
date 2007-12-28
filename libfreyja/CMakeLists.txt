@@ -91,7 +91,8 @@ set(Objs
 	freyja/BoneABI
 	freyja/Camera
 	freyja/CameraABI
-	freyja/Image
+	freyja/FileABI
+	freyja/FloatArray
 	freyja/Keyframe
 	freyja/Light
 	freyja/LightABI
@@ -101,9 +102,12 @@ set(Objs
 	freyja/Mesh
 	freyja/MeshABI
 	freyja/Metadata
+	freyja/Node
+	freyja/NodeABI
 	freyja/PakABI
 	freyja/PakReader
 	freyja/PerlinNoise
+	freyja/PixelBuffer
 	freyja/PluginABI
 	freyja/Plugin
 	freyja/Printer
@@ -111,8 +115,11 @@ set(Objs
 	freyja/Renderable
 	freyja/RigidBody
 	freyja/QueryABI
+	freyja/Scene
+	freyja/SceneABI
+	freyja/SceneNodeABI
 	freyja/Skeleton
-	freyja/Texture
+	freyja/SkeletonABI 
 	freyja/Vertex
 )
 

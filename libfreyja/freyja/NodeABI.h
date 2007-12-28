@@ -31,9 +31,9 @@ extern "C" {
 	//
 	///////////////////////////////////////////////////////////////////////
 
-	freyja_ptr freyjaNodeDuplicate( freyja_id node, byte children ); 
+	freyja_ptr freyjaNodeDuplicate( freyja_ptr node ); 
 	/*------------------------------------------------------
-	 * Pre  : If children is non-zero a subgraph will be duplicated.
+	 * Pre  : 
 	 * Post : Returns pointer to clone or NULL.
 	 ------------------------------------------------------*/
 
@@ -49,7 +49,7 @@ extern "C" {
 	 * Post : Set human readable name for node.
 	 ------------------------------------------------------*/
 
-	freyja_ptr freyjaNodeGetParent( freyja_id node ); 
+	freyja_ptr freyjaNodeGetParent( freyja_ptr node ); 
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns pointer to parent or NULL if none.
@@ -65,20 +65,6 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Checks flags for a selection set.
-	 ------------------------------------------------------*/
-
-	// FIXME: Could be World / Parent / Local relative!
-	void freyjaNodeSetPosition3f( freyja_ptr node, vec_t x, vec_t y, vec_t z );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set parent relative position.
-	 ------------------------------------------------------*/
-
-	void freyjaNodeSetOrientationQuat4f( freyja_ptr node,
-	                                     vec_t w, vec_t x, vec_t y, vec_t z );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set parent relative orientation.
 	 ------------------------------------------------------*/
 
 
@@ -98,18 +84,31 @@ extern "C" {
 	 * Post : Set human readable name for node.
 	 ------------------------------------------------------*/
 
-	void freyjaNodeSetParent( freyja_ptr node, freyja_ptr node ); 
+	void freyjaNodeSetParent( freyja_ptr node, freyja_ptr parent ); 
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Attaches node to parent's graph.
 	 ------------------------------------------------------*/
 
-	void freyjaNodeSetPosition( freyja_ptr node, const vec3_t xyz );
+	void freyjaNodeSetPosition3fv( freyja_ptr node, const vec3_t xyz );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets <node> attribute position.
 	 ------------------------------------------------------*/
 
+	// FIXME: Could be World / Parent / Local relative!
+	void freyjaNodeSetPosition3f( freyja_ptr node, vec_t x, vec_t y, vec_t z );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set parent relative position.
+	 ------------------------------------------------------*/
+
+	void freyjaNodeSetOrientationQuat4f( freyja_ptr node,
+	                                     vec_t w, vec_t x, vec_t y, vec_t z );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set parent relative orientation.
+	 ------------------------------------------------------*/
 
 } // extern "C"
 

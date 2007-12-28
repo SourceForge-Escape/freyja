@@ -19,32 +19,24 @@
  *
  *-- History ------------------------------------------------ 
  *
+ * 2007.12.26:
+ * Mongoose - Metadata becomes a non-abstract Node in 10.0 design.
+ *
  * 2006.04.29:
  * Mongoose - Created
  ==========================================================================*/
 
-#ifndef GUARD__LIBFREYJA_METADATA_H_
-#define GUARD__LIBFREYJA_METADATA_H_
+#ifndef GUARD__FREYJA_METADATA_H_
+#define GUARD__FREYJA_METADATA_H_
 
-#include <hel/math.h>
-#include <hel/Vec3.h>
-#include <hel/Quat.h>
-
-#include <mstl/String.h>
-#include <mstl/SystemIO.h>
-#include <mstl/Vector.h>
-
-#if TINYXML_FOUND
-#   include <tinyxml/tinyxml.h>
-#endif
-
-#include "Renderable.h"
+#include "Node.h"
 #include "freyja.h"
 
 
 namespace freyja {
 
-class Metadata
+class Metadata :
+		public Node
 {
 public:
 
@@ -71,132 +63,70 @@ public:
 	// Public 
 	////////////////////////////////////////////////////////////
 
-	bool AddToPool();
+	virtual const char* GetType() const
+	{ return "Metadata"; }
 	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Places this object in gobal pool if not there.
-	 *        Returns false on failure.
+	 * Pre  :  
+	 * Post : XmlSerializer tag type.
+	 *
+	 ------------------------------------------------------*/
+ 
+	virtual uint32 GetVersion() const
+	{ return 0; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer tag version.
 	 *
 	 ------------------------------------------------------*/
 
-	const hel::Vec3& GetPos() const;
+	bool Serialize( XMLSerializerNode metadata ) const;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns object position in world space.
+	 * Post : XmlSerializer implementation.
 	 *
 	 ------------------------------------------------------*/
 
-	const Renderable* GetRenderable() const;
+	bool Unserialize( XMLSerializerNode metadata );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns object's geometric representation.
+	 * Post : XmlSerializer implementation.
 	 *
 	 ------------------------------------------------------*/
 
-	const hel::Quat& GetRot() const;
+	freyja::Material* GetMaterial() const
+	{ return mMaterial; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns object oreintation in world space.
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	const hel::Vec3& GetScale() const;
+	const char* GetMetadataType() const;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns object scale.
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	index_t GetUid();
+	void SetMetadataType(const char* type);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns UID.
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	bool RemoveFromPool();
+	const char* GetModel() const
+	{ return NULL; } // FIXME
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Removes this object in gobal pool if there.
-	 *        Returns false on failure.
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	void SetPos(const hel::Vec3& pos);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets object position in world space.
-	 *
-	 ------------------------------------------------------*/
-
-	void SetRot(const hel::Quat& q);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets object orientation.
-	 *
-	 ------------------------------------------------------*/
-
-	void SetScale(const hel::Vec3& scale);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets object scale.
-	 *
-	 ------------------------------------------------------*/
-
-#if TINYXML_FOUND
-
-	bool Serialize(TiXmlElement* metadata);
-	bool Unserialize(TiXmlElement* metadata);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : XML object serialization methods.
-	 *        Returns false on failure.
-	 *
-	 ------------------------------------------------------*/
-
-#endif // TINYXML_FOUND
-
-	bool Unserialize(const char* filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : XML object serialization from given file.
-	 *        Returns false on failure.
-	 *
-	 ------------------------------------------------------*/
-
-	const char* GetName() { return mName.c_str(); }
-	void SetName(const char* name) { mName = name; }
-
-	const char* GetType() { return mType.c_str(); }
-	void SetType(const char* type) { mType = type; }
-
-	const char* GetMetadata() { return mMetadata.c_str(); }
-	void SetMetadata(const char* metadata) { mMetadata = metadata; }
-
-	Renderable* GetRenderable() { return mRenderable; }
-
-	const char* GetModel() { return mRenderable ? mRenderable->mModel.c_str() : NULL; }
 	void SetModel(const char* model);
-
-	const char* GetMaterial() { return mMaterial.c_str(); }
-	void SetMaterial(const char* material) { mMaterial = material; }
-
-
-	////////////////////////////////////////////////////////////
-	// Static Methods
-	////////////////////////////////////////////////////////////
-
-	static Metadata *GetObjectByUid(index_t uid);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns object from gobal pool or NULL.
-	 *
-	 ------------------------------------------------------*/
-
-	static uint32 GetObjectCount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns object count from gobal pool.
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
@@ -221,27 +151,9 @@ public:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	index_t mUid;                  /* Unique MetaData object identifier. */
+	freyja::Material* mMaterial;
 
-	uint32 mFlags;                 /* Option flags. */
-
-	mstl::String mName;            /* User given object name. */
-
-	mstl::String mType;            /* User given object type. */
-
-	mstl::String mMetadata;        /* User given XML metadata. */
-
-	Renderable* mRenderable;       /* Used as a geometric symbol. */
-
-	mstl::String mMaterial;        /* Optional material for Renderable. */
-
-	index_t mMaterialIndex;
-
-	hel::Vec3 mPos;                /* Common 3d properties for metadata objects. */
-
-	hel::Quat mRot;
-
-	hel::Vec3 mScale;
+	mstl::String mMetadataType;
 };
 
 
@@ -251,18 +163,7 @@ public:
 ////////////////////////////////////////////////////////////
 
 inline
-Metadata::Metadata() :
-		mUid(INDEX_INVALID),
-		mFlags(0),
-		mName(),
-		mType(),
-		mMetadata(),
-		mRenderable(NULL),
-		mMaterial(),
-		mMaterialIndex(0),
-		mPos(),
-		mRot(),
-		mScale()
+Metadata::Metadata()
 { }
 
 
@@ -271,62 +172,6 @@ Metadata::~Metadata()
 { }
 
 
-inline
-const hel::Vec3& Metadata::GetPos() const
-{
-	return mPos;
-}
-
-
-inline
-const Renderable* Metadata::GetRenderable() const
-{
-	return mRenderable;
-}
-
-
-inline
-const hel::Quat& Metadata::GetRot() const
-{
-	return mRot;
-}
-
-
-inline
-const hel::Vec3& Metadata::GetScale() const
-{
-	return mScale;
-}
-
-
-inline
-index_t Metadata::GetUid()
-{
-	return mUid;
-}
-
-
-inline
-void Metadata::SetPos(const hel::Vec3& pos)
-{
-	mPos = pos;
-}
-
-
-inline
-void Metadata::SetScale(const hel::Vec3& scale)
-{
-	mScale = scale;
-}
-
-
-inline
-void Metadata::SetRot(const hel::Quat& q)
-{
-	mRot = q;
-}
-
-
 } // freyja
 
-#endif // GUARD__LIBFREYJA_METADATA_H_
+#endif // GUARD__FREYJA_METADATA_H_

@@ -5,9 +5,12 @@
  * Author  : Terry 'Mongoose' Hendrix II
  * Website : http://www.icculus.org/freyja/
  * Email   : mongooseichiban@gmail.com
+ * License : No use w/o permission (C) 2004-2007 Mongoose
  * Object  : Vertex
- * License : No use w/o permission (C) 2004-2006 Mongoose
- * Comments: This is the freyja::Vertex class.
+ * Comments: 
+ *           Owner: Mesh
+ *           References: Faces
+ *           Provides: Vertex, Texcoord, and Normal indices.
  *
  *
  *-- History ------------------------------------------------ 
@@ -19,21 +22,16 @@
 #ifndef GUARD__FREYJA_VERTEX_H_
 #define GUARD__FREYJA_VERTEX_H_
 
-#if TINYXML_FOUND
-#   include <tinyxml/tinyxml.h>
-#endif
-
 #include <hel/math.h>
 #include <mstl/Vector.h>
-#include <mstl/SystemIO.h>
+#include <mstl/list.h>
+
+#include "XMLSerializer.h"
 #include "freyja.h"
 
 
 namespace freyja {
 
-// Owner: Mesh
-// References: Faces
-// Provides: Vertex, Texcoord, and Normal indices.
 
 class Vertex
 {
@@ -50,13 +48,6 @@ public:
 
 	} Flags;
 
-	Vertex(index_t vertex, index_t texcoord, index_t normal);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
 	Vertex();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -64,7 +55,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	Vertex(const Vertex &v);
+	Vertex( const Vertex& v );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -78,115 +69,61 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	static size_t SerializedSize();
+	bool Serialize( XMLSerializerNode container );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	bool Serialize(mstl::SystemIO::FileWriter &w);
+	bool Unserialize( XMLSerializerNode container );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	bool Serialize(mstl::SystemIO::TextFileWriter &w);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	bool Serialize(mstl::SystemIO::TextFileReader &r);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-#if TINYXML_FOUND
-	bool Serialize(TiXmlElement *container);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	bool Unserialize(TiXmlElement *container);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-#endif
-
-	void Meld(Vertex &v);
+	void Meld( Vertex& v );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 	
-	const byte &GetFlags() { return mFlags; }
+	const byte& GetFlags( ) 
+	{ return mFlags; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns option flag bitmap.
 	 *
 	 ------------------------------------------------------*/
 
-	void ClearFlag(Flags flag) { if (!(mFlags & fMuted)) mFlags &= ~flag; }
+	void ClearFlag( Flags flag ) 
+	{ mFlags &= ~flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Clears option flag if not mute.
 	 *
 	 ------------------------------------------------------*/
 
-	void SetFlag(Flags flag) { if (!(mFlags & fMuted)) mFlags |= flag; }
+	void SetFlag( Flags flag )
+	{ mFlags |= flag; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets option flag if not mute.
 	 *
 	 ------------------------------------------------------*/
-
-	bool IsMuted() { return (mFlags & fMuted); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 'Unlocks' current option flags.
-	 *
-	 ------------------------------------------------------*/
-
-	void ClearMuted() { mFlags &= ~fMuted; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 'Unlocks' current option flags.
-	 *
-	 ------------------------------------------------------*/
-
-	void SetMuted() { mFlags |= fMuted; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 'Locks' current option flags.
-	 *
-	 ------------------------------------------------------*/
 	
-	mstl::Vector<index_t> &GetFaceRefs() { return mFaceRefs; }
+	mstl::list<index_t>& GetFaceRefs() 
+	{ return mFaceRefs; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Access the Face references.
 	 *
 	 ------------------------------------------------------*/
 
-	mstl::Vector<index_t> &GetTmpRefs() { return mTmpRefs; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Access the Temp references.
-	 *
-	 ------------------------------------------------------*/
-
-	void WeldTexCoords(index_t replace, index_t texcoord)
-	{ if (mTexCoordIndex == replace) mTexCoordIndex = texcoord;	}
+	//void WeldTexCoords(index_t replace, index_t texcoord)
+	//{ if (mTexCoordIndex == replace) mTexCoordIndex = texcoord;	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Attempt to replace texcoord reference.
@@ -196,19 +133,16 @@ public:
 
 	byte mFlags;                /* State flags */
 
-	index_t mVertexIndex; 		/* Pool storage of XYZ position */
+	// mSharedVertexIndex
 
-	index_t mTexCoordIndex;     /* Pool storage of UV[W] coordinate */
+	// mBufferIndex
 
-	index_t mNormalIndex; 		/* Pool storage of XYZ normal */
 
-	index_t mMaterial;          /* Material index */
+protected:
 
-private:
+	mstl::list<index_t> mIndices;   /* Buffer indices this Vertex object controls. */
 
-	mstl::Vector<index_t> mFaceRefs;  /* Face references */
-
-	mstl::Vector<index_t> mTmpRefs;   /* Used for special methods */
+	mstl::list<index_t> mFaceRefs;  /* Face references */
 };
 
 } // End namespace freyja

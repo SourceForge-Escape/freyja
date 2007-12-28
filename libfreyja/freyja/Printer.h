@@ -202,6 +202,42 @@ void Printer::Print( const char* format, ... )
 
 
 inline
+void Printer::PrintError( const char* format, ... )
+{
+	if ( format && format[0] )
+	{
+		const unsigned int sz = 1024;
+		char buf[sz];
+
+		va_list args;
+		va_start(args, format);
+		int truncated = vsnprintf(buf, sz, format, args);
+		buf[sz-1] = 0;
+		va_end(args);
+
+		/* More than 1k string was needed, so allocate one. */
+		if ( truncated >= (int)sz )
+		{
+			unsigned int len = truncated + 1; // Doesn't include '\0'
+			char* s = new char[ len ];
+
+			va_start( args, format );
+			vsnprintf( s, len, format, args );
+			s[len-1] = '\0';
+			va_end( args );
+
+			PrintErrorMessage( s );
+			delete [] s;
+		}
+		else
+		{
+			PrintErrorMessage( buf );
+		}
+	}
+}
+
+
+inline
 void Printer::PrintErrorArgs( const char* format, va_list* args )
 {
 	char buffer[1024];

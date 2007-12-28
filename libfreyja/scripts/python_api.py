@@ -94,12 +94,12 @@ def PrintOutFreyjaPythonGobals():
 	print "\n"
 
 
-def StoreWrapperFunction(li):
+def StoreWrapperFunction( abi, li):
 	count = nameat = 0
 
 	for i in li:
 		count = count + 1
-		if re.match('.*freyja', i):
+		if re.match('.*' + abi, i):
 			name = i
 			nameat = count
 			break
@@ -118,17 +118,22 @@ def StoreWrapperFunction(li):
 			tmp = re.sub(';.*', ';\n', li[i])
 			func_vars += tmp
 		else:
-			if re.match('(.*char\\*)', li[i]):
+			if re.match('(char*|char *)', li[i]):
 				parse_types += "s"
 				pass_vars += li[i+1] + ", "
 				parse_vars += "&" + li[i+1] + ", "
+				func_vars += "\t" + 'char*' + " "
+			elif re.match('(freyja_ptr|freyja_id)', li[i]):
+				parse_types += "l"
+				pass_vars += li[i+1] + ", "
+				parse_vars += "&" + li[i+1] + ", "
 				func_vars += "\t" + li[i] + " "
-			elif re.match('(index_t|int32|char|uint32|byte)', li[i]):
+			elif re.match('(index_t|int32|uint32|uint16|int16|char|byte)', li[i]):
 				parse_types += "i"
 				pass_vars += li[i+1] + ", "
 				parse_vars += "&" + li[i+1] + ", "
 				func_vars += "\t" + li[i] + " "
-			elif re.match('(freyja_transform_action_t|freyja_colormode_t)', li[i]):
+			elif re.match('(freyja_transform_action_t|freyja_pixelformat_t)', li[i]):
 				parse_types += "i"
 				pass_vars += li[i+1] + ", "
 				parse_vars += "&" + li[i+1] + ", "
@@ -186,10 +191,13 @@ def StoreWrapperFunction(li):
 		s += "#if FIXME\n\t/* No support for returning pointers yet... */\n"
 
 
-	if re.match('(.*char\\*)', li[0]) or re.match('(.*char\\*)', li[1]):
+	if re.match('(const char*)', li[0]) or re.match('(char*)', li[1]):
 		# Returns string
 		s += "\treturn PyString_FromString(" + name + "(" + pass_vars +"));"
-	elif re.match('(index_t|int32|uint32|byte|char)', li[0]):
+	elif re.match('(freyja_ptr)', li[0]):
+		# Returns pointer
+		s += "\treturn PyLong_FromVoidPtr(" + name + "(" + pass_vars +"));"
+	elif re.match('(index_t|int32|uint32|uint16|int16|byte|char|freyja_id)', li[0]):
 		# Returns integer
 		s += "\treturn PyInt_FromLong(" + name + "(" + pass_vars +"));"
 	elif re.match('(vec_t|float)', li[0]):
@@ -244,10 +252,8 @@ def ImportBindings(filepath, basename):
 
 	# Uber forceful abi binding enforcement
     # Only ABI functions in the proper header will recieve a python binding
-	abi = re.sub('ABI.h', '', basename)
-	accessor = "freyjaGet" + abi
-	mutator = "freyja" + abi
-	
+	abi = "freyja" + re.sub('ABI.h', '', basename)
+		
 	try:
 		f = open(filename, "r")
 
@@ -264,17 +270,17 @@ def ImportBindings(filepath, basename):
 		if i == "":
 			break
 
-		if not re.match('.*freyja.*\\(.*\\);', i):
-			i = ""
+		#if not re.match('.*freyja.*\\(.*\\);', i):
+		#	i = ""
 
-		elif re.match('^.*' + accessor + '.*\\(', i):
+		elif re.match('^.*' + abi + '.*\\(', i):
 			# Don't expose C++ ABI to python
 			if not re.match('.*::', i):
 				p = re.sub('.\\*', '* ', i)
 				p = re.sub(',', ';\n', p)
 				p = re.sub('(\\(|\\)|\n)', ' ', p)
 				li = p.split()
-				StoreWrapperFunction(li)
+				StoreWrapperFunction( abi, li )
 
 				s = re.sub('\\(.*', '', i)
 				s = re.sub('.* ', '', s)
@@ -283,22 +289,8 @@ def ImportBindings(filepath, basename):
 				StoreBindFunction(s)
 				over = ""
 
-		elif re.match('^.*' + mutator + '.*\\(', i):
-			# Don't expose C++ ABI to python
-			if not re.match('.*::', i):
-				p = re.sub('.\\*', '* ', i)
-				p = re.sub(',', ';\n', p)
-				p = re.sub('(\\(|\\)|\n)', ' ', p)
-				li = p.split()
-				StoreWrapperFunction(li)
-
-				s = re.sub('\\(.*', '', i)
-				s = re.sub('.* ', '', s)
-				s = re.sub(' ', '', s)
-				s = re.sub('\\*', '', s)
-				s = re.sub('\n', '', s)
-				StoreBindFunction(s)
-				over = ""
+		else:
+			i = ""
 
 	f.close()
 
@@ -332,11 +324,12 @@ def UpdateBindings():
 		print "#define USING_PYTHON"
 
 	for i in li:
-		if re.match('.*ABI.h', i) and not re.match('(Plugin|Legacy|.*~)', i):
+		if re.match('.*ABI.h', i) and not re.match('(Lua|Python|Plugin|Legacy|Query|.*~)', i):
 			print "#include \"" + i + '"'
 			sucess = ImportBindings(gPath, i)
 
 	print "#include \"freyja.h\""
+	print "#include \"PythonABI.h\""
 	print "#ifdef USING_PYTHON"
 	print "#include <" + gPythonHeader + ">"
 	print "\n"

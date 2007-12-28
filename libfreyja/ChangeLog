@@ -6,8 +6,24 @@
 
  Kagura alpha, 0.10.0.0
 
+ 20071228 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ * 
+ * Removed functions from lua_api.py blacklist.
+ * Tracer build for freyja 10.0 ( UI and libs run ).
+ * Stubs for various 10.0 ABIs.
+ * External Lua vm for libfreyja -- removed wrapper usage.
+ * Stubbed out a lot of 0.9.5 calls in freyja3d.
+ * Hooked up new 10.0 renderlist to freyja3d.
+
+ 20071226 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ * PixelBuffer class replaces Texture and Image.
+ * Python metaprogramming script update to support 0.10.
+ * FileABI endianess aware binary file I/O wrapper for C.
+ * Mesh split up into base, skeletal, morph for new design.
+ * Removed obsolete code from Mesh.
+
  20071222 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- * Lua metaprogramming script update to support 0.10.
+ * Lua metaprogramming script update to support 0.10. (1166)
  * Removed obsolete code from Bone.
 
  20071217 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>

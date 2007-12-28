@@ -25,6 +25,8 @@
 using namespace mstl;
 using namespace freyja;
 
+#if 0
+
 Vertex::Vertex(index_t vertex, index_t texcoord, index_t normal) :
 	mFlags(fNone),
 	mVertexIndex(vertex),
@@ -206,3 +208,4 @@ void Vertex::Meld(Vertex &v)
 	mMaterial = v.mMaterial;
 }
 	
+#endif // 0

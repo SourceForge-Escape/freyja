@@ -17,14 +17,13 @@
  ==========================================================================*/
 
 #include "freyja.h"
+#include "PakReader.h"
 #include "PakABI.h"
 
 
 ///////////////////////////////////////////////////////////////////////
 //  Pak VFS 0.9.3-0.9.5 ABI
 ///////////////////////////////////////////////////////////////////////
-
-#include "FreyjaPakReader.h"
 
 Vector<FreyjaPakReader*> gFreyjaPaks;
 uint32 gFreyjaPakCount = 0;

@@ -107,7 +107,7 @@ void freyjaCameraPos3f(index_t cameraIndex, vec_t x, vec_t y, vec_t z)
 }
 
 
-void freyjaCameraPos3fv(index_t cameraIndex, vec3_t xyz)
+void freyjaCameraPos3fv(index_t cameraIndex, const vec3_t xyz)
 {
 	Camera* cam = freyjaGetCameraObject(cameraIndex);
 	if (cam) cam->SetPos( Vec3(xyz) );
@@ -132,7 +132,7 @@ void freyjaCameraTarget3f(index_t cameraIndex, vec_t x, vec_t y, vec_t z)
 }
 
 
-void freyjaCameraTarget3fv(index_t cameraIndex, vec3_t xyz)
+void freyjaCameraTarget3fv(index_t cameraIndex, const vec3_t xyz)
 {
 	Camera* cam = freyjaGetCameraObject(cameraIndex);
 	if (cam) cam->SetTarget( Vec3(xyz) );
@@ -168,6 +168,22 @@ const char *freyjaGetCameraNameString(index_t cameraIndex)
 	return " "; 
 }
 
+
+void freyjaCameraUp3f(index_t cameraIndex, vec_t x, vec_t y , vec_t z)
+{
+	vec3_t xyz = { x, y, z };
+	freyjaGetCameraUp3fv( cameraIndex, xyz );
+}
+
+
+void freyjaCameraUp3fv(index_t cameraIndex, const vec3_t xyz)
+{
+	Camera* cam = freyjaGetCameraObject(cameraIndex);
+	if (cam) 
+	{
+		cam->SetUp( xyz );
+	}
+}
 
 void freyjaGetCameraUp3fv(index_t cameraIndex, vec3_t xyz)
 {

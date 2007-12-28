@@ -36,19 +36,23 @@ public:
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	SceneNode();
+	SceneNode()
+	{ }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	SceneNode(const char* name);
+	SceneNode(const char* name) :
+		Node( name )
+	{ }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	virtual ~SceneNode();
+	virtual ~SceneNode()
+	{ }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -92,13 +96,6 @@ public:
 	// Properties
 	////////////////////////////////////////////////////////////
 
-	FREYJA_XMLSERIALIZER_INTERFACE
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : XmlSerializer interface macro.
-	 *
-	 ------------------------------------------------------*/
-
 	//virtual NodeAnimationTrack* CreateNodeAnimationTrack( Animation* animation );
 	/*------------------------------------------------------
 	 * Pre  :  
@@ -108,22 +105,6 @@ public:
 
 
 protected:
-
-	virtual void NotifyParentOnDelete() 
-	{ /* FIXME */ }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual void NotifyChildrenOnDelete() 
-	{ /* FIXME */ }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
 
 	hel::BoundingBoxCombo mBoundingVolume;    /* BoundingVolume composite. */
 };

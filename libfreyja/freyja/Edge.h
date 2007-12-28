@@ -20,6 +20,7 @@
 #define GUARD__FREYJA_EDGE_H_
 
 #include <hel/math.h>
+#include <mstl/list.h>
 
 #include "freyja.h"
 

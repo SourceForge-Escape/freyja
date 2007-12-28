@@ -44,15 +44,19 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns the number of skeletons in the scene.
-	 * Notes: FIXME This should be outside of Scene in Resource.
 	 ------------------------------------------------------*/
 
 	uint32 freyjaSceneGetMeshCount( freyja_ptr scene );
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Returns number of meshes ins scene.
+	 * Post : Returns number of meshes in scene.
 	 ------------------------------------------------------*/
 
+	uint32 freyjaSceneGetPixelbufferCount( freyja_ptr scene );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns the number of pixelbuffers in scene.
+	 ------------------------------------------------------*/
 
 } // extern "C"
 
