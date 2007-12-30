@@ -34,7 +34,7 @@
 
 #include "freyja_events.h"
 #include "freyja3d_scenegraph.h"
-#include "FreyjaControl.h"
+#include "Control.h"
 
 using namespace freyja3d;
 using namespace freyja;
@@ -227,7 +227,7 @@ void eMeshUnselectVertices()
 
 void eSetSelectedViewport(unsigned int value)
 {
-	FreyjaControl::GetInstance()->SetSelectedViewport(value);
+	//FreyjaControl::GetInstance()->SetSelectedViewport(value);
 }
 
 
@@ -675,8 +675,8 @@ void eGenerateCube()
 		freyja::Mesh* mesh = (freyja::Mesh*)freyjaMeshCreateCube(v.mVec, size);
 		gScene->Add( mesh );
 		gScene->SetCurrentMesh( mesh );
-		FreyjaControl::GetInstance()->Dirty();
-		
+		//FreyjaControl::GetInstance()->Dirty();
+
 		freyja3d_scenegraph_update();
 	}
 }
@@ -813,45 +813,45 @@ void eMeshGenerateNormals()
 // This should be moved back into control with a -W/Int prefix
 void eMoveObject()
 {
-	FreyjaControl::GetInstance()->EvMoveObject(1);
+	//FreyjaControl::GetInstance()->EvMoveObject(1);
 }
 
 void eRotateObject()
 {
-	FreyjaControl::GetInstance()->EvRotateObject(1);
+	//FreyjaControl::GetInstance()->EvRotateObject(1);
 }	
 
 void eScaleObject()
 {
-	FreyjaControl::GetInstance()->EvScaleObject(1);
+	//FreyjaControl::GetInstance()->EvScaleObject(1);
 }	
 
 void eSelect()
 {
-	FreyjaControl::GetInstance()->EvSelectObject(1);
+	//FreyjaControl::GetInstance()->EvSelectObject(1);
 }
 
 void eUnselect()
 {
-	FreyjaControl::GetInstance()->EvUnselectObject(1);
+	//FreyjaControl::GetInstance()->EvUnselectObject(1);
 }		
 
 
 void eBoneSelect()
 {
-	FreyjaControl::GetInstance()->SetObjectMode(FreyjaControl::tBone);
-	FreyjaControl::GetInstance()->SetActionMode(FreyjaControl::aSelect);
+	//FreyjaControl::GetInstance()->SetObjectMode(FreyjaControl::tBone);
+	//FreyjaControl::GetInstance()->SetActionMode(FreyjaControl::aSelect);
 	freyja_print("Select bone...");
 }
 
 
 void eBoneNew()
 {
-	FreyjaControl::GetInstance()->SetObjectMode(FreyjaControl::tBone);
-	FreyjaControl::GetInstance()->CreateObject();
+	//FreyjaControl::GetInstance()->SetObjectMode(FreyjaControl::tBone);
+	//FreyjaControl::GetInstance()->CreateObject();
 	//freyja_print("Select new child bone placement directly...");
 	//mEventMode = BONE_ADD_MODE;
-	FreyjaControl::GetInstance()->Dirty();
+	//FreyjaControl::GetInstance()->Dirty();
 }
 
 
@@ -929,13 +929,14 @@ void eAboutDialog()
 
 void eAnimationNext()
 {
-	FreyjaControl::GetInstance()->SetSelectedAnimation(FreyjaControl::GetInstance()->GetSelectedAnimation() + 1);
+	//FreyjaControl::GetInstance()->SetSelectedAnimation(FreyjaControl::GetInstance()->GetSelectedAnimation() + 1);
 	freyja_print("Animation Track[%i].", 
-				 FreyjaControl::GetInstance()->GetSelectedAnimation());
+				 0);//			 FreyjaControl::GetInstance()->GetSelectedAnimation());
 }
 
 void eAnimationPrev()
 {
+#if 0
 	if (FreyjaControl::GetInstance()->GetSelectedAnimation())
 		FreyjaControl::GetInstance()->SetSelectedAnimation(FreyjaControl::GetInstance()->GetSelectedAnimation() - 1);
 	else
@@ -943,17 +944,18 @@ void eAnimationPrev()
 	
 	freyja_print("Animation Track[%i].", 
 				 FreyjaControl::GetInstance()->GetSelectedAnimation());
+#endif
 }
 
 
 void eLightPos(uint32 i, vec_t value)
 {
-	uint32 light = FreyjaControl::GetInstance()->GetSelectedLight();
+	uint32 light = 0;//FreyjaControl::GetInstance()->GetSelectedLight();
 	vec3_t pos;
 	freyjaGetLightPosition4v(light, pos);
 	pos[i] = value;
 	freyjaLightPosition4v(light, pos);
-	FreyjaControl::GetInstance()->Dirty();	
+	//FreyjaControl::GetInstance()->Dirty();	
 }
 
 
@@ -977,9 +979,9 @@ void eLightPosZ(vec_t value)
 
 void ePolygonSize(uint32 value)
 {
-	FreyjaControl::GetInstance()->SetFaceEdgeCount(value);
-	freyja_print("Polygons creation using %i sides", 
-				 FreyjaControl::GetInstance()->GetFaceEdgeCount());
+	//FreyjaControl::GetInstance()->SetFaceEdgeCount(value);
+	//freyja_print("Polygons creation using %i sides", 
+	//			 FreyjaControl::GetInstance()->GetFaceEdgeCount());
 }
 
 
@@ -1128,14 +1130,14 @@ void eMetadataIterator(unsigned int id)
 
 void eCameraIterator(unsigned int id)
 {
-	FreyjaControl::GetInstance()->SetSelectedCamera( id );
+	//FreyjaControl::GetInstance()->SetSelectedCamera( id );
 	freyja_print( "camera%i selected.", id );
 }
 
 
 void eLightIterator(unsigned int id)
 {
-	FreyjaControl::GetInstance()->SetSelectedLight( id );
+	//FreyjaControl::GetInstance()->SetSelectedLight( id );
 	freyja_print( "light%i selected.", id );
 }
 

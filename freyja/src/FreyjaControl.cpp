@@ -149,13 +149,7 @@ FreyjaControl::FreyjaControl() :
 
 	/* Hook up the view */
 	mRender = FreyjaRender::GetInstance();
-	FREYJA_ASSERTMSG(mRender, "FreyjaRender Singleton control allocation failure");
 
-	if (!mRender)
-	{
-		SystemIO::Print("See '%s' for possible errors.\n", FREYJA_LOG_FILE);
-		exit(-1);
-	}
 }
 
 
@@ -1085,21 +1079,6 @@ void FreyjaControl::RevertFile()
 }
 
 
-void FreyjaControl::Shutdown()
-{
-	bool exiting = true;
-
-	if ( !mCleared && !mgtk::ExecuteConfirmationDialog("ExitWarningDialog") )
-	{
-		exiting = false;
-	}
-
-	if (exiting)
-	{
-		SaveUserPreferences();
-		freyja_event_exit();
-	}
-}
 
 
 void FreyjaControl::TexcoordCombine()
@@ -4465,150 +4444,6 @@ void FreyjaControl::SetSelectedMesh(uint32 i)
 }
 
 
-
-
-bool FreyjaControl::SaveUserPreferences()
-{
-	String filename = freyja_rc_map_string( FREYJA_USER_PREF_FILE );
-	SystemIO::TextFileWriter w;
-	MSTL_MSG("\tSaving '%s'...", filename.c_str());	
-
-	if (!w.Open(filename.c_str()))
-		return false;
-
-	w.Print("-- Custom colors\n");
-
-	for (uint32 i = 0; i < 13; ++i)
-	{
-		String s;
-		float r, g, b, a;
-		int id;
-	 
-		switch (i)
-		{
-		case 0:
-			s = "eColorBackground";
-			id = eColorBackground;
-			break;
-
-		case 1:
-			s = "eColorGrid";
-			id = eColorGrid;
-			break;
-
-		case 2:
-			s = "eColorMesh";
-			id = eColorMesh;
-			break;
-
-		case 3:
-			s = "eColorMeshHighlight";
-			id = eColorMeshHighlight;
-			break;
-
-		case 4:
-			s = "eColorVertex";
-			id = eColorVertex;
-			break;
-
-		case 5:
-			s = "eColorVertexHighlight";
-			id = eColorVertexHighlight;
-			break;
-
-		case 6:
-			s = "eColorBone";
-			id = eColorBone;
-			break;
-
-		case 7:
-			s = "eColorBoneHighlight";
-			id = eColorBoneHighlight;
-			break;
-
-		case 8:
-			s = "eColorLightAmbient";
-			id = eColorLightAmbient;
-			break;
-
-		case 9:
-			s = "eColorLightDiffuse";
-			id = eColorLightDiffuse;
-			break;
-
-		case 10:
-			s = "eColorLightSpecular";
-			id = eColorLightSpecular;
-			break;
-
-		case 11:
-			s = "eColorJoint";
-			id = eColorJoint;
-			break;
-
-		case 12:
-			s = "eColorJointHighlight";
-			id = eColorJointHighlight;
-			break;
-
-		default:
-			continue;
-		}
-
-		freyja_event_get_color(id, &r, &g, &b, &a);
-		w.Print("mgtk_color_set( \"%s\", %f, %f, %f, %f )\n", s.c_str(), r, g, b, a);
-	}
-
-	w.Print("\n");
-
-	{
-		w.Print("-- Custom boolean values\n");
-
-		const char* format = "mgtk_boolean_set( \"%s\", %i )\n";
-		int n = (mRender->GetFlags() & FreyjaRender::fGrid) ? 1 : 0;
-		w.Print(format, "eRenderGrid",n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fFace) ? 1 : 0;
-		w.Print(format, "eRenderFace", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fBoundingVolumes) ? 1 : 0;
-		w.Print(format, "eRenderBbox", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fPoints) ? 1 : 0;
-		w.Print(format, "eRenderVertex", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fWireframe) ? 1 : 0;
-		w.Print(format, "eRenderWireframe", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fLighting) ? 1 : 0;
-		w.Print(format, "eRenderLighting", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fMaterial) ? 1 : 0;
-		w.Print(format, "eRenderMaterial", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fDrawPickRay) ? 1 : 0;
-		w.Print(format, "eRenderPickRay", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fBones) ? 1 : 0;
-		w.Print(format, "eRenderSkeleton", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fBones2) ? 1 : 0;
-		w.Print(format, "eRenderSkeleton2", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fBones3) ? 1 : 0;
-		w.Print(format, "eRenderSkeleton3", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fBoneName) ? 1 : 0;
-		w.Print(format, "eRenderBoneName", n);
-
-		n = (mRender->GetFlags() & FreyjaRender::fSkeletalVertexBlending) ? 1 : 0;
-		w.Print(format, "eSkeletalDeform", n);
-	}
-
-	return true;
-}
-
-
 void FreyjaControl::PaintObject(vec_t x, vec_t y)
 {
 #if FIXME
@@ -5489,7 +5324,7 @@ void FreyjaControl::EvViewportUV()
 	SetSelectedView(DRAW_UV);
 	if (mRender->GetFlags() & FreyjaRender::fViewports)
 		mRender->mViewports[mSelectedViewport].plane = DRAW_UV;
-	freyja_event_gl_refresh();
+	Dirty();
 }
 
 
@@ -5499,7 +5334,7 @@ void FreyjaControl::EvViewportCurve()
 	SetSelectedView(DRAW_CURVE);
 	if (mRender->GetFlags() & FreyjaRender::fViewports)
 		mRender->mViewports[mSelectedViewport].plane = DRAW_CURVE;
-	freyja_event_gl_refresh();
+	Dirty();
 }
 
 
@@ -5512,7 +5347,7 @@ void FreyjaControl::EvViewportCamera()
 		mRender->mViewports[mSelectedViewport].plane = DRAW_CAMERA;
 		mRender->mViewports[mSelectedViewport].camera = GetSelectedCamera();
 	}
-	freyja_event_gl_refresh();
+	Dirty();
 }
 
 
@@ -5522,7 +5357,7 @@ void FreyjaControl::EvViewportMaterial()
 	SetSelectedView(DRAW_MATERIAL);
 	if (mRender->GetFlags() & FreyjaRender::fViewports)
 		mRender->mViewports[mSelectedViewport].plane = DRAW_MATERIAL;
-	freyja_event_gl_refresh();
+	Dirty();
 }
 
 
@@ -5531,9 +5366,9 @@ void FreyjaControl::EvMove()
 	mToken = true;
 
 	Transform(mObjectMode, fTranslate,
-			  freyja_event_get_float(EvMoveXId),
-			  freyja_event_get_float(EvMoveYId),
-			  freyja_event_get_float(EvMoveZId));
+			  mgtk_event_get_float(EvMoveXId),
+			  mgtk_event_get_float(EvMoveYId),
+			  mgtk_event_get_float(EvMoveZId));
 
 	freyja_event_set_float(EvMoveXId, 0.0f);
 	freyja_event_set_float(EvMoveYId, 0.0f);
@@ -5546,9 +5381,9 @@ void FreyjaControl::EvRotate()
 {
 	mToken = true;
 
-	hel::Vec3 rot(freyja_event_get_float(EvRotateXId),
-				  freyja_event_get_float(EvRotateYId),
-				  freyja_event_get_float(EvRotateZId));
+	hel::Vec3 rot(mgtk_event_get_float(EvRotateXId),
+				  mgtk_event_get_float(EvRotateYId),
+				  mgtk_event_get_float(EvRotateZId));
 
 	switch (mObjectMode)
 	{
@@ -5572,13 +5407,13 @@ void FreyjaControl::EvScale()
 {
 	mToken = true;
 	Transform(mObjectMode, fScale,
-			  freyja_event_get_float(EvScaleXId),
-			  freyja_event_get_float(EvScaleYId),
-			  freyja_event_get_float(EvScaleZId));
+			  mgtk_event_get_float(EvScaleXId),
+			  mgtk_event_get_float(EvScaleYId),
+			  mgtk_event_get_float(EvScaleZId));
 		
-	freyja_event_set_float(EvScaleXId, 1.0f);
-	freyja_event_set_float(EvScaleYId, 1.0f);
-	freyja_event_set_float(EvScaleZId, 1.0f);
+	mgtk_event_set_float(EvScaleXId, 1.0f);
+	mgtk_event_set_float(EvScaleYId, 1.0f);
+	mgtk_event_set_float(EvScaleZId, 1.0f);
 	freyja_event_gl_refresh();
 }
 

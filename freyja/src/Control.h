@@ -83,7 +83,7 @@ public:
 	 ------------------------------------------------------*/
 
 	float GetResourceFloat(const char *symbol)
-	{ return freyja_event_get_float(LookupEventSymbol(symbol)); }
+	{ return mgtk_event_get_float(LookupEventSymbol(symbol)); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -91,7 +91,7 @@ public:
 	 ------------------------------------------------------*/
 
 	void SetResourceFloat(const char *symbol, float r)
-	{ return freyja_event_set_float(LookupEventSymbol(symbol), r); }
+	{ return mgtk_event_set_float(LookupEventSymbol(symbol), r); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -130,7 +130,8 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void RefreshContext() { freyja_event_gl_refresh(); }
+	void Dirty() { mgtk_event_gl_refresh(); }
+	void RefreshContext() { Dirty(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

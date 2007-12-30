@@ -181,18 +181,6 @@ src/Cursor.s:
 	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Cursor.s
 
 # target to build an object file
-src/FreyjaControl.o:
-	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaControl.o
-
-# target to preprocess a source file
-src/FreyjaControl.i:
-	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaControl.i
-
-# target to generate assembly for a file
-src/FreyjaControl.s:
-	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaControl.s
-
-# target to build an object file
 src/FreyjaOpenGL.o:
 	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/FreyjaOpenGL.o
 
@@ -347,9 +335,6 @@ help::
 	@echo "... src/Cursor.o"
 	@echo "... src/Cursor.i"
 	@echo "... src/Cursor.s"
-	@echo "... src/FreyjaControl.o"
-	@echo "... src/FreyjaControl.i"
-	@echo "... src/FreyjaControl.s"
 	@echo "... src/FreyjaOpenGL.o"
 	@echo "... src/FreyjaOpenGL.i"
 	@echo "... src/FreyjaOpenGL.s"

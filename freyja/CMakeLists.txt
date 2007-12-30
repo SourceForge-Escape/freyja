@@ -102,7 +102,6 @@ set(Objs
 	src/ControlPrinter
 	src/Cursor
 	src/FreyjaRender
-	src/FreyjaControl
 	src/FreyjaOpenGL
 	src/MaterialControl
 	src/OpenGLPrinter

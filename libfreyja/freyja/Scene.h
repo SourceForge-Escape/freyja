@@ -168,6 +168,15 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	bool GetModified(  ) const
+	{ return true; } // FIXME
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Has this been modified since the last call to
+	 *        Serialize( )?
+	 *
+	 ------------------------------------------------------*/
+
 	RenderableIterator GetRenderListIterator() const
 	{ return mRenderList.begin(); }
 	/*------------------------------------------------------
