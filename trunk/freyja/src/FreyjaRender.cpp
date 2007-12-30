@@ -48,7 +48,8 @@
 
 #include "freyja_events.h"
 #include "Plugins.h"
-#include "FreyjaControl.h"
+#include "Control.h"
+#include "Cursor.h"
 
 #include "FreyjaRender.h"
 
@@ -93,9 +94,24 @@ vec_t FreyjaRender::mVertexPointSize = 3.5f;
 
 matrix_t gModelViewMatrix;
 
-extern freyja::Scene* gScene;
+freyja3d::Cursor gCursor;
+freyja3d::Cursor& GetCursor()
+{ return gCursor; }
 
+index_t GetSelectedCamera()
+{ return 0; }
 
+index_t GetSelectedMaterial()
+{ return 0; }
+
+#warning FIXME View locked.
+freyja_plane_t GetSelectedView()
+{ return PLANE_FREE; }
+
+hel::Vec3 gSceneOffset;
+hel::Vec3& GetSceneTranslation()
+{ return gSceneOffset; }
+ 
 FreyjaRender::FreyjaRender() :
 	mTimer(),
 	mViewMode(VIEWMODE_MODEL_VIEW),
@@ -212,13 +228,13 @@ void FreyjaRender::Draw( freyja::Renderable* renderable )
 void FreyjaRender::DrawCamWindow()
 {
 	// Very hacky quick test for camera 'cursor'
-	//Cursor &cursor = FreyjaControl::GetInstance()->GetCursor();
+	Cursor &cursor = GetCursor( );
 
 	hel::Vec3 pos, target;
 	hel::Vec3 up(0.0f, 1.0f, 0.0f);
 
 	// FIXME: Use viewport's selected camera.
-	index_t camera = FreyjaControl::GetInstance()->GetSelectedCamera();
+	index_t camera = GetSelectedCamera( );
 	freyjaGetCameraPos3fv(camera, pos.mVec);
 	freyjaGetCameraTarget3fv(camera, target.mVec);
 	freyjaGetCameraUp3fv(camera, up.mVec);
@@ -244,7 +260,7 @@ void FreyjaRender::DrawCamWindow()
 		glEnable(GL_LIGHTING);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(FreyjaControl::GetInstance()->GetSelectedMaterial());
+		mglApplyMaterial(GetSelectedMaterial());
 		mglDrawPlane(50.0f, 2.0f, 1.0f);
 		glPopAttrib();
 	}
@@ -392,7 +408,7 @@ void FreyjaRender::DrawFreeWindow()
 		glEnable(GL_LIGHTING);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(FreyjaControl::GetInstance()->GetSelectedMaterial());
+		mglApplyMaterial(GetSelectedMaterial());
 		mglDrawPlane(50.0f, 2.0f, 1.0f);
 		glPopAttrib();
 	}
@@ -472,7 +488,7 @@ void FreyjaRender::DrawFreeWindow()
 
 		{	
 			hel::Vec3 pos, target;
-			index_t camera = FreyjaControl::GetInstance()->GetSelectedCamera();
+			index_t camera = GetSelectedCamera();
 			freyjaGetCameraPos3fv(camera, pos.mVec);
 			freyjaGetCameraTarget3fv(camera, target.mVec);
 
@@ -684,13 +700,13 @@ void FreyjaRender::DrawIcons()
 		glPopMatrix();
 	}
 
-	FreyjaControl::GetInstance()->GetCursor().Display();
+	GetCursor().Display();
 
+#if FIXME
 	/* Special edit modes. */
-	switch ( FreyjaControl::GetInstance()->GetObjectMode() )
+	switch ( GetObjectMode() )
 	{
 	case FreyjaControl::tCamera:
-#if 0
 		for (uint32 i = 0, n = freyjaGetCameraCount(); i < n; ++i)
 		{
 			hel::Vec3 target, pos;
@@ -716,13 +732,12 @@ void FreyjaRender::DrawIcons()
 			mglDrawControlPoint();
 			glPopMatrix();
 		}
-#endif
 		break;
 
 	default:
 		;
 	}
-
+#endif
 
 	// Draw currently enabled plugin 'icons'.
 	// PluginManager.Draw();
@@ -822,7 +837,7 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 		glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(FreyjaControl::GetInstance()->GetSelectedMaterial());
+		mglApplyMaterial(GetSelectedMaterial());
 
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0, 1.0);
@@ -963,7 +978,7 @@ void FreyjaRender::Display()
 	}
 
 	// Mongoose 2002.02.02, Cache for use in calls from here
-	hel::Vec3 v = FreyjaControl::GetInstance()->GetSceneTranslation();
+	hel::Vec3 v = GetSceneTranslation();
 	helCopyVec3(v.mVec, mScroll);
 	
 	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
@@ -1064,7 +1079,7 @@ void FreyjaRender::Display()
 		else
 		{
 			glPushMatrix();
-			DrawWindow(FreyjaControl::GetInstance()->GetSelectedView());
+			DrawWindow( GetSelectedView());
 			glPopMatrix();
 		}
 		break;
@@ -1092,7 +1107,7 @@ void FreyjaRender::Display()
 
 	//CHECK_OPENGL_ERROR( glFlush() );
 	glFlush();
-	freyja_swap_buffers();
+	mgtk_event_gl_refresh();
 
 	mTimer.Reset();
 }
@@ -1255,8 +1270,8 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	// Keyframe animation
 	if (mRenderMode & fKeyFrameAnimation)
 	{
-		uint32 a = FreyjaControl::GetInstance()->GetSelectedAnimation();
-		uint32 k = FreyjaControl::GetInstance()->GetSelectedKeyFrame();	
+		uint32 a = GetSelectedAnimation();
+		uint32 k = GetSelectedKeyFrame();	
 
 		// Mesh animation
 		TransformTrack &tt = m->GetTransformTrack(a);
@@ -1302,10 +1317,10 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
 	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
 
-	if (FreyjaControl::GetInstance()->GetSelectedMesh() == mesh)
+	if (GetSelectedMesh() == mesh)
 	{
-		if (FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tMesh &&
-			FreyjaControl::mControlPoints.size() == 0)
+#if FIXME
+		if (GetObjectMode() == FreyjaControl::tMesh && gControlPoints.size() == 0)
 		{
 			Cursor &cur = FreyjaControl::GetInstance()->GetCursor();
 
@@ -1347,6 +1362,7 @@ void FreyjaRender::RenderMesh(index_t mesh)
 				;
 			}
 		}
+#endif
 
 		if (GetFlags() & fBoundingVolumes)
 		{
@@ -1803,24 +1819,20 @@ void FreyjaRender::RenderModel(index_t model)
 	/* Render meshes */
 	glPushMatrix();
 	
-	if (FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tModel)
+#if FIXME
+	if ( GetObjectMode() == FreyjaControl::tModel )
 	{
-		switch (FreyjaControl::GetInstance()->GetCursor().GetMode())
+		switch ( GetCursor().GetMode() )
 		{
 		case freyja3d::Cursor::Rotation: // About model center ( matrix abuse )
-			glRotatef(FreyjaControl::GetInstance()->GetCursor().mRotate.mVec[0],
-					  1,0,0);
-			glRotatef(FreyjaControl::GetInstance()->GetCursor().mRotate.mVec[1],
-					  0,1,0);
-			glRotatef(FreyjaControl::GetInstance()->GetCursor().mRotate.mVec[2],
-					  0,0,1);
+			glRotatef( GetCursor().mRotate.mVec[0], 1,0,0);
+			glRotatef( GetCursor().mRotate.mVec[1], 0,1,0);
+			glRotatef( GetCursor().mRotate.mVec[2], 0,0,1);
 			break;
 				
 		case freyja3d::Cursor::Translation:
 			{
-				hel::Vec3 u = (FreyjaControl::GetInstance()->GetCursor().mPos -
-						  FreyjaControl::GetInstance()->GetCursor().mLastPos);
-
+				hel::Vec3 u = (GetCursor().mPos - GetCursor().mLastPos);
 				glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
 			}
 			break;
@@ -1829,7 +1841,7 @@ void FreyjaRender::RenderModel(index_t model)
 			;
 		}
 	}
-
+#endif
 
 	if (mRenderMode & fShadowVolume)
 	{
@@ -1897,8 +1909,9 @@ void FreyjaRender::RenderModel(index_t model)
 		glBindTexture(GL_TEXTURE_2D, 0); // 'Color' TextureId
 	}
 
+#if FIXME
 	{
-		Vector<hel::Vec3> ctrlpnts = FreyjaControl::GetControlPoints();
+		Vector<hel::Vec3> ctrlpnts = GetControlPoints();
 
 		glColor3fv(RED);
 
@@ -1920,6 +1933,7 @@ void FreyjaRender::RenderModel(index_t model)
 			mglDrawSelectionBox(min.mVec, max.mVec, DARK_YELLOW);
 		}
 	}
+#endif
 
 #if FIXME
 	/* Render 'old' skeleton, which is comprised of z,y,x rotations. */

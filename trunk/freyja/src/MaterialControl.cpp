@@ -448,8 +448,8 @@ void MaterialControl::RefreshInterface()
 	
 	vec4_t ambient;
 	freyjaGetMaterialAmbient(mIndex, ambient);
-	freyja_event_set_color(eColorMaterialAmbient, 
-						   ambient[0], ambient[1], ambient[2], ambient[3]);
+	mgtk_event_set_color(eColorMaterialAmbient, 
+						 ambient[0], ambient[1], ambient[2], ambient[3]);
 	for (uint32 i = 0; i < 4; ++i)
 	{
 		mgtk_spinbutton_value_set(EvAmbientId[i], ambient[i]);	
@@ -458,8 +458,8 @@ void MaterialControl::RefreshInterface()
 
 	vec4_t diffuse;
 	freyjaGetMaterialDiffuse(mIndex, diffuse);
-	freyja_event_set_color(eColorMaterialDiffuse, 
-						   diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
+	mgtk_event_set_color(eColorMaterialDiffuse, 
+						 diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
 	for (uint32 i = 0; i < 4; ++i)
 	{
 		mgtk_spinbutton_value_set(EvDiffuseId[i], diffuse[i]);
@@ -468,8 +468,8 @@ void MaterialControl::RefreshInterface()
 
 	vec4_t specular;
 	freyjaGetMaterialSpecular(mIndex, specular);
-	freyja_event_set_color(eColorMaterialSpecular, 
-						   specular[0], specular[1], specular[2], specular[3]);
+	mgtk_event_set_color(eColorMaterialSpecular, 
+						 specular[0], specular[1], specular[2], specular[3]);
 	for (uint32 i = 0; i < 4; ++i)
 	{
 		mgtk_spinbutton_value_set(EvSpecularId[i], specular[i]);
@@ -478,7 +478,7 @@ void MaterialControl::RefreshInterface()
 
 	vec4_t emissive;
 	freyjaGetMaterialEmissive(mIndex, emissive);
-	freyja_event_set_color(eColorMaterialEmissive, 
+	mgtk_event_set_color(eColorMaterialEmissive, 
 						   emissive[0], emissive[1], emissive[2], emissive[3]);
 	for (uint32 i = 0; i < 4; ++i)
 	{
@@ -714,7 +714,7 @@ void MaterialControl::SetAmbient(uint32 i, vec_t value)
 	freyjaGetMaterialAmbient(freyjaGetCurrentMaterial(), color);
 	color[i] = value;
 	freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
-	freyja_event_gl_refresh();	
+	mgtk_event_gl_refresh();	
 }
 
 
@@ -724,7 +724,7 @@ void MaterialControl::SetDiffuse(uint32 i, vec_t value)
 	freyjaGetMaterialDiffuse(freyjaGetCurrentMaterial(), color);
 	color[i] = value;
 	freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -734,7 +734,7 @@ void MaterialControl::SetSpecular(uint32 i, vec_t value)
 	freyjaGetMaterialSpecular(freyjaGetCurrentMaterial(), color);
 	color[i] = value;
 	freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -744,7 +744,7 @@ void MaterialControl::SetEmissive(uint32 i, vec_t value)
 	freyjaGetMaterialEmissive(freyjaGetCurrentMaterial(), color);
 	color[i] = value;
 	freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -754,7 +754,7 @@ void MaterialControl::SetEmissive(uint32 i, vec_t value)
 
 void MaterialControl::EvSelect(uint32 value)
 {
-	if (!freyja_event_set_range(EvSelectId, value, 
+	if (!mgtk_event_set_range(EvSelectId, value, 
 								0, freyjaGetMaterialCount()-1))
 	{
 		if (value != freyjaGetCurrentMaterial())
@@ -780,7 +780,7 @@ void MaterialControl::EvSelect(uint32 value)
 void MaterialControl::EvShine(vec_t value)
 {	
 	freyjaMaterialShininess(freyjaGetCurrentMaterial(), value);
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -863,7 +863,7 @@ void MaterialControl::EvBlendSrc(uint32 value)
 		freyja_print("Unknown Blend Source event %i.", value);
 	}
 		
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -937,7 +937,7 @@ void MaterialControl::EvBlendDest(uint32 value)
 		freyja_print("Unknown Blend Dest event %i.", value);
 	}
 
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -954,7 +954,7 @@ void MaterialControl::EvEnableDetailTexture(uint32 value)
 								fFreyjaMaterial_DetailTexture);
 	}
 	freyja_print("Material detail texturing is [%s]", value ? "ON" : "OFF");
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -972,7 +972,7 @@ void MaterialControl::EvEnableNormalize(uint32 value)
 	}
 
 	freyja_print("Material normalization is [%s]", value ? "ON" : "OFF");
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -990,7 +990,7 @@ void MaterialControl::EvEnableBlending(uint32 value)
 	}
 
 	freyja_print("Material blending [%s]", value ? "ON" : "OFF");
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -1008,7 +1008,7 @@ void MaterialControl::EvEnableTexture(uint32 value)
 	}
 
 	freyja_print("Material texture usage is [%s]", value ? "ON" : "OFF");
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 
@@ -1072,7 +1072,7 @@ void MaterialControl::EvSetTextureName(char *text)
 void MaterialControl::EvSetShader(uint32 value)
 {
 	freyjaMaterialShader(freyjaGetCurrentMaterial(), value);
-	freyja_event_gl_refresh();
+	mgtk_event_gl_refresh();
 }
 
 

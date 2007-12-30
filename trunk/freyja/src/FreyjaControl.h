@@ -916,7 +916,7 @@ class FreyjaControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	void Dirty() { mCleared = false; freyja_event_gl_refresh(); }
+	void Dirty() { mCleared = false; mgtk_event_gl_refresh(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Call this when some state in the model or editor
@@ -1400,7 +1400,7 @@ void FreyjaControl::UpdateWindowTitle( const char* prefix, const char* filename 
 	mstl::String title;
 	title.Set( "%s%s (%s) - freyja", 
 			   prefix ? prefix : "", base.c_str(), path.c_str() );
-	freyja_set_main_window_title( title.c_str() );	
+	mgtk_application_window_title( title.c_str() );	
 }
 
 

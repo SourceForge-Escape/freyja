@@ -75,26 +75,15 @@ typedef enum {
 
 } event_subject_id;
 
+#include <freyja/Scene.h>
+extern freyja::Scene* gScene;
+
 
 //////////////////////////////////////////////////////////////////////////////
 // Freyja mgtk interface
 //////////////////////////////////////////////////////////////////////////////
 
-// These are here to keep the old transparent API, without using a facade.
-#define freyja_event_file_dialog mgtk_event_file_dialog
-#define freyja_event_get_color mgtk_event_get_color
-#define freyja_event_set_color mgtk_event_set_color
-#define freyja_event_get_float mgtk_event_get_float
-#define freyja_event_set_float mgtk_spinbutton_value_set
-#define freyja_event_set_range mgtk_event_set_range
-#define freyja_event_gl_refresh mgtk_event_gl_refresh
-#define freyja_set_main_window_title mgtk_application_window_title
-#define freyja_swap_buffers mgtk_event_swap_gl_buffers
-#define freyja_application_window_move mgtk_application_window_move
-#define freyja_event_info_dialog mgtk_create_info_dialog
-#define freyja_event_fullscreen mgtk_application_window_fullscreen
-#define freyja_event_unfullscreen mgtk_application_window_unfullscreen
-#define freyja_event_exit mgtk_event_shutdown
+#define mgtk_event_set_float mgtk_spinbutton_value_set
 
 #define freyja_event_notify_observer1f mgtk_event_notify_observer1f
 //void freyja_event_notify_observer1f(event_subject_id e, float value);
@@ -180,7 +169,7 @@ void freyja_event_gl_refresh();
  *
  ------------------------------------------------------*/
 
-void freyja_event_info_dialog(char *icon, char *message);
+void freyja_event_info_dialog( const char* icon, const char* message );
 /*------------------------------------------------------
  * Pre  : 
  * Post : Spawns info dialog with <message> and <icon>
@@ -194,7 +183,7 @@ void freyja_event_set_float(int event, float value);
  *
  ------------------------------------------------------*/
 
-void freyja_event_shutdown();
+void freyja3d_shutdown();
 /*------------------------------------------------------
  * Pre  : 
  * Post : Cleans up Freyja subsystems
@@ -403,6 +392,30 @@ bool freyja3d_execute_lua_script( const char* filename );
  * Post : 
  *
  ------------------------------------------------------*/
+
+bool freyja3d_save_user_preferences( );
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ *
+ ------------------------------------------------------*/
+
+
+void freyja_handle_application_window_close( );
+void freyja_handle_resource_start( );
+const char* freyja_rc_map( const char* filename );
+void freyja_handle_command(int command);
+void freyja_handle_key_press(int key, int mod);
+void freyja_handle_event1u(int event, unsigned int value);
+void freyja_handle_command2i(int event, int command);
+void freyja_handle_event1f(int event, float value);
+void freyja_handle_gldisplay();
+void freyja_handle_glresize(unsigned int width, unsigned int height);
+void freyja_handle_text(int event, char *text);
+void freyja_handle_text_array(int event, unsigned int count, char **text);
+const char *freyja_get_resource_path_callback( );
+void freyja_handle_motion(int x, int y);
+void freyja_handle_mouse(int button, int state, int mod, int x, int y);
 
 
 #endif // GUARD__FREYJA3D_FREYJA_EVENT_H

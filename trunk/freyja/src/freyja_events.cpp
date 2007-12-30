@@ -44,7 +44,9 @@
 #include <mgtk/QueryDialog.h>
 
 #include "FreyjaRender.h"
-#include "FreyjaControl.h"
+//#include "FreyjaControl.h"
+#include "Control.h"
+#include "MaterialControl.h"
 #include "Plugins.h"
 #include "freyja3d_scenegraph.h"
 #include "freyja_events.h"
@@ -63,7 +65,13 @@ int freyja3d_get_event_id(const char* symbol)
 
 void freyja3d_record_saved_model(const char* filename)
 {
-	FreyjaControl::GetInstance()->RecordSavedModel(filename);
+	//FreyjaControl::GetInstance()->RecordSavedModel(filename);
+}
+
+
+void freyja_event_info_dialog( const char* icon, const char* message )
+{
+	mgtk_create_info_dialog( icon, message );
 }
 
 
@@ -138,12 +146,21 @@ void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
 
 void freyja_handle_application_window_close()
 {
-	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-
 	// There is some bug with some Gtk+ builds that allow this function
 	// to be called again before this exits.  
 	// Also relates to the Cancel doesn't cancel bug.
-	FreyjaControl::GetInstance()->Shutdown();
+	//FreyjaControl::GetInstance()->Shutdown();
+	bool exiting = true;
+
+	if ( gScene->GetModified( ) && !mgtk::ExecuteConfirmationDialog("ExitWarningDialog") )
+	{
+		exiting = false;
+	}
+
+	if ( exiting )
+	{
+		freyja3d_shutdown( );
+	}
 }
 
 
@@ -179,68 +196,68 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 
 	case eColorLightAmbient: 
 		freyjaLightAmbient(freyjaGetCurrentLight(), color);
-		freyja_event_set_color(eColorLightAmbient, r, g, b, a);
+		mgtk_event_set_color(eColorLightAmbient, r, g, b, a);
 		break;
 
 	case eColorLightDiffuse:
 		freyjaLightDiffuse(freyjaGetCurrentLight(), color);
-		freyja_event_set_color(eColorLightDiffuse, r, g, b, a);
+		mgtk_event_set_color(eColorLightDiffuse, r, g, b, a);
 		break;
 
 	case eColorLightSpecular:
 		freyjaLightSpecular(freyjaGetCurrentLight(), color);
-		freyja_event_set_color(eColorLightSpecular, r, g, b, a);
+		mgtk_event_set_color(eColorLightSpecular, r, g, b, a);
 		break;
 
 	case eColorBackground:
 		memcpy(FreyjaRender::mColorBackground, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorBackground, r, g, b, a);
+		mgtk_event_set_color(eColorBackground, r, g, b, a);
 		break;
 
 	case eColorGrid:
 		memcpy(FreyjaRender::mColorGridSeperator, color, sizeof(vec4_t));
 		memcpy(FreyjaRender::mColorGridLine, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorGrid, r, g, b, a);
+		mgtk_event_set_color(eColorGrid, r, g, b, a);
 		break;
 
 	case eColorVertex:
 		memcpy(FreyjaRender::mColorVertex, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorVertex, r, g, b, a);
+		mgtk_event_set_color(eColorVertex, r, g, b, a);
 		break;
 
 	case eColorVertexHighlight:
 		memcpy(FreyjaRender::mColorVertexHighlight, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorVertexHighlight, r, g, b, a);
+		mgtk_event_set_color(eColorVertexHighlight, r, g, b, a);
 		break;
 
 	case eColorMesh:
 		memcpy(FreyjaRender::mColorWireframe, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorMesh, r, g, b, a);
+		mgtk_event_set_color(eColorMesh, r, g, b, a);
 		break;
 
 	case eColorMeshHighlight:
 		memcpy(FreyjaRender::mColorWireframeHighlight, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorMeshHighlight, r, g, b, a);
+		mgtk_event_set_color(eColorMeshHighlight, r, g, b, a);
 		break;
 
 	case eColorBone:
 		memcpy(FreyjaRender::mColorBone, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorBone, r, g, b, a);
+		mgtk_event_set_color(eColorBone, r, g, b, a);
 		break;
 
 	case eColorBoneHighlight:
 		memcpy(FreyjaRender::mColorBoneHighlight, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorBoneHighlight, r, g, b, a);
+		mgtk_event_set_color(eColorBoneHighlight, r, g, b, a);
 		break;
 
 	case eColorJoint:
 		memcpy(FreyjaRender::mColorJoint, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorJoint, r, g, b, a);
+		mgtk_event_set_color(eColorJoint, r, g, b, a);
 		break;
 
 	case eColorJointHighlight:
 		memcpy(FreyjaRender::mColorJointHighlight, color, sizeof(vec4_t));
-		freyja_event_set_color(eColorJointHighlight, r, g, b, a);
+		mgtk_event_set_color(eColorJointHighlight, r, g, b, a);
 		break;
 
 	default:
@@ -248,6 +265,150 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 	}
 
 	mgtk_event_gl_refresh();
+}
+
+
+bool freyja3d_save_user_preferences( )
+{
+	String filename = freyja_rc_map_string( FREYJA_USER_PREF_FILE );
+	SystemIO::TextFileWriter w;
+	MSTL_MSG("\tSaving '%s'...", filename.c_str());	
+
+	if (!w.Open(filename.c_str()))
+		return false;
+
+	w.Print("-- Custom colors\n");
+
+	for (uint32 i = 0; i < 13; ++i)
+	{
+		String s;
+		float r, g, b, a;
+		int id;
+	 
+		switch (i)
+		{
+		case 0:
+			s = "eColorBackground";
+			id = eColorBackground;
+			break;
+
+		case 1:
+			s = "eColorGrid";
+			id = eColorGrid;
+			break;
+
+		case 2:
+			s = "eColorMesh";
+			id = eColorMesh;
+			break;
+
+		case 3:
+			s = "eColorMeshHighlight";
+			id = eColorMeshHighlight;
+			break;
+
+		case 4:
+			s = "eColorVertex";
+			id = eColorVertex;
+			break;
+
+		case 5:
+			s = "eColorVertexHighlight";
+			id = eColorVertexHighlight;
+			break;
+
+		case 6:
+			s = "eColorBone";
+			id = eColorBone;
+			break;
+
+		case 7:
+			s = "eColorBoneHighlight";
+			id = eColorBoneHighlight;
+			break;
+
+		case 8:
+			s = "eColorLightAmbient";
+			id = eColorLightAmbient;
+			break;
+
+		case 9:
+			s = "eColorLightDiffuse";
+			id = eColorLightDiffuse;
+			break;
+
+		case 10:
+			s = "eColorLightSpecular";
+			id = eColorLightSpecular;
+			break;
+
+		case 11:
+			s = "eColorJoint";
+			id = eColorJoint;
+			break;
+
+		case 12:
+			s = "eColorJointHighlight";
+			id = eColorJointHighlight;
+			break;
+
+		default:
+			continue;
+		}
+
+		mgtk_event_get_color(id, &r, &g, &b, &a);
+		w.Print("mgtk_color_set( \"%s\", %f, %f, %f, %f )\n", s.c_str(), r, g, b, a);
+	}
+
+	w.Print("\n");
+
+	{
+		w.Print("-- Custom boolean values\n");
+		FreyjaRender* render = FreyjaRender::GetInstance( );
+
+
+		const char* format = "mgtk_boolean_set( \"%s\", %i )\n";
+		int n = (render->GetFlags() & FreyjaRender::fGrid) ? 1 : 0;
+		w.Print(format, "eRenderGrid",n);
+
+		n = (render->GetFlags() & FreyjaRender::fFace) ? 1 : 0;
+		w.Print(format, "eRenderFace", n);
+
+		n = (render->GetFlags() & FreyjaRender::fBoundingVolumes) ? 1 : 0;
+		w.Print(format, "eRenderBbox", n);
+
+		n = (render->GetFlags() & FreyjaRender::fPoints) ? 1 : 0;
+		w.Print(format, "eRenderVertex", n);
+
+		n = (render->GetFlags() & FreyjaRender::fWireframe) ? 1 : 0;
+		w.Print(format, "eRenderWireframe", n);
+
+		n = (render->GetFlags() & FreyjaRender::fLighting) ? 1 : 0;
+		w.Print(format, "eRenderLighting", n);
+
+		n = (render->GetFlags() & FreyjaRender::fMaterial) ? 1 : 0;
+		w.Print(format, "eRenderMaterial", n);
+
+		n = (render->GetFlags() & FreyjaRender::fDrawPickRay) ? 1 : 0;
+		w.Print(format, "eRenderPickRay", n);
+
+		n = (render->GetFlags() & FreyjaRender::fBones) ? 1 : 0;
+		w.Print(format, "eRenderSkeleton", n);
+
+		n = (render->GetFlags() & FreyjaRender::fBones2) ? 1 : 0;
+		w.Print(format, "eRenderSkeleton2", n);
+
+		n = (render->GetFlags() & FreyjaRender::fBones3) ? 1 : 0;
+		w.Print(format, "eRenderSkeleton3", n);
+
+		n = (render->GetFlags() & FreyjaRender::fBoneName) ? 1 : 0;
+		w.Print(format, "eRenderBoneName", n);
+
+		n = (render->GetFlags() & FreyjaRender::fSkeletalVertexBlending) ? 1 : 0;
+		w.Print(format, "eSkeletalDeform", n);
+	}
+	
+	return true;
 }
 
 
@@ -384,14 +545,9 @@ void freyja_set_dialog_visible(const char *name)
 
 void freyja_handle_resource_init(Resource &r)
 {
-	////////////////////////////////////////////////////////////////////
-	// New freyja events
-	////////////////////////////////////////////////////////////////////
-
-	// Class listeners
-	FREYJA_ASSERTMSG(FreyjaControl::GetInstance() != NULL, "FreyjaControl wasn't instanced before method listeners were attached.");
-	FreyjaControl::GetInstance()->AttachMethodListeners();
-	FreyjaRender::AttachMethodListeners();
+	/* Attach singleton method listeners. */
+	//FreyjaControl::GetInstance()->AttachMethodListeners( );
+	FreyjaRender::AttachMethodListeners( );
 
 	// Non-class listeners
 	freyja3d_misc_events_attach();
@@ -439,11 +595,6 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eColorBoneHighlight", eColorBoneHighlight);
 	r.RegisterInt("eColorJoint", eColorJoint);
 	r.RegisterInt("eColorJointHighlight", eColorJointHighlight);
-
-	/* Load and init plugins */
-#warning FIXME
-	//String dir = freyja_rc_map_string("plugins");	
-	//freyja3d_plugin_application_init( dir.c_str() );
 }
 
 
@@ -457,14 +608,33 @@ void freyja_handle_resource_start()
 	 * Here all the resources are setup, and the main interface starts. 
 	 */
 
+#warning FIXME Replace all the FreyjaControl usage.
+
 	freyja_print("!@Freyja started...");
 
-	freyja_handle_resource_init(FreyjaControl::GetInstance()->GetResource());
+	/* Attempt to allocate singletons. */
+	//FREYJA_ASSERTMSG(FreyjaControl::GetInstance() != NULL, "FreyjaControl allocation failure.  See '%s' for possible errors.", FREYJA_LOG_FILE );
+	FREYJA_ASSERTMSG( FreyjaRender::GetInstance() != NULL, "FreyjaRender Singleton allocation failure.  See '%s' for possible errors.", FREYJA_LOG_FILE );
+	if ( /*!FreyjaControl::GetInstance() ||*/ !FreyjaRender::GetInstance( ) )
+	{
+		SystemIO::Print("See '%s' for possible errors.\n", FREYJA_LOG_FILE );
+		freyja3d_shutdown( );
+		return;
+	}
+
+	//freyja_handle_resource_init(FreyjaControl::GetInstance()->GetResource());
 
 	/* Build the user interface from scripts and load user preferences. */
-	FreyjaControl::GetInstance()->Init();
+	//FreyjaControl::GetInstance()->Init();
 	freyja3d_plugin_init();
 	freyja3d_plugin_application_widget_init();
+
+
+	/* Load and init application plugins. */
+	{
+		String dir = freyja_rc_map_string( "plugins" );	
+		freyja3d_plugin_application_init( dir.c_str() );
+	}
 
 	/* Setup scenegraph widget(s). */
 	freyja3d_scenegraph_init();
@@ -473,6 +643,7 @@ void freyja_handle_resource_start()
 	MaterialControl::GetInstance()->RefreshInterface();
 
 	/* Setup editor modes and drop-down menus */
+#if 0
 	mgtk_option_menu_value_set(eViewportModeMenu, 0);
 	FreyjaControl::GetInstance()->EvModeModel();
 
@@ -481,20 +652,21 @@ void freyja_handle_resource_start()
 
 	mgtk_option_menu_value_set(eObjectMenu, 0);
 	FreyjaControl::GetInstance()->SetActionMode(FreyjaControl::aSelect);
+#endif
 
 	/* Set init window title, log welcome, and refresh OpenGL context */
-	freyja_set_main_window_title(BUILD_NAME);
+	mgtk_application_window_title( BUILD_NAME );
 	freyja_print("Welcome to Freyja %s, %s", VERSION, __DATE__);
 	mgtk_event_gl_refresh();
 
 	/* Mongoose 2002.02.23, Hook for exit() calls */
-	atexit(freyja_event_shutdown);
+	//atexit( freyja3d_shutdown );
 }
 
 
 void freyja_append_eventid(char *symbol, int eventid)
 {
-	FreyjaControl::GetInstance()->GetResource().RegisterInt(symbol, eventid);
+	//FreyjaControl::GetInstance()->GetResource().RegisterInt(symbol, eventid);
 }
 
 
@@ -792,19 +964,20 @@ void freyja_install_user()
 
 void freyja_handle_motion(int x, int y)
 {
-	if (FreyjaControl::GetInstance())
-	{
-		FreyjaControl::GetInstance()->MotionEvent(x, y);
-	}
+	//if (FreyjaControl::GetInstance())
+	
+	//FreyjaControl::GetInstance()->MotionEvent(x, y);
+	
 }
 
 
 void freyja_handle_mouse(int button, int state, int mod, int x, int y)
 {
-	if (FreyjaControl::GetInstance())
-	{
-		FreyjaControl::GetInstance()->MouseEvent(button, state, mod, x, y);
-	}
+
+	//if (FreyjaControl::GetInstance())
+	
+		//FreyjaControl::GetInstance()->MouseEvent(button, state, mod, x, y);
+	
 }
 
 
@@ -857,21 +1030,7 @@ void freyja_print(char *format, ...)
 }
 
 
-void freyja_event_shutdown()
-{
-	if ( FreyjaControl::GetInstance() )
-	{
-		delete FreyjaControl::GetInstance();
-	}
 
-	freyja_print("Thanks for using %s", PROGRAM_NAME);
-	freyja_print("   Build date: %s @ %s", __DATE__, __TIME__);
-	freyja_print("   Build host: %s", BUILD_HOST);
-	freyja_print("   Email addr: %s", EMAIL_ADDRESS);
-	freyja_print("   Web site  : %s", PROJECT_URL);
-
-	ControlPrinter::StopLogging();
-}
 
 
 String freyja_get_resource_path()

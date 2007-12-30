@@ -559,7 +559,7 @@ public:
 	{
 		Flag(flag, t);
 		freyja_print("%s is [%s]", s, t ? "ON" : "OFF");
-		freyja_event_gl_refresh();
+		mgtk_event_gl_refresh();
 	}
 	/*------------------------------------------------------
 	 * Pre  : 
