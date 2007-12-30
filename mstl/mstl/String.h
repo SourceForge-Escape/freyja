@@ -88,27 +88,30 @@ class String
 	 *
 	 ------------------------------------------------------*/
 
+	//String operator+( const String& s, const char* sl ); 
+	//String operator+( const char* sl, const String& s ); 
+
 	char &operator [] (unsigned int i) { return mString[i]; }
 
 	String &operator+=(const String &s) { return *this = *this + s; }
 
-	bool operator!=(const char *s) { return ( Strcmp(s) != 0 );	}
-	bool operator!=(const String &s) { return ( Strcmp(s.mString) != 0 ); }
+	bool operator!=(const char *s) const { return ( Strcmp(s) != 0 );	}
+	bool operator!=(const String &s) const { return ( Strcmp(s.mString) != 0 ); }
 
-	bool operator==(const char *s) { return ( Strcmp(s) == 0 );	}
-	bool operator==(const String &s) { return ( Strcmp(s.mString) == 0 );	}
+	bool operator==(const char *s) const { return ( Strcmp(s) == 0 );	}
+	bool operator==(const String &s) const { return ( Strcmp(s.mString) == 0 );	}
 
-	bool operator<(const String &s) { return ( Strcmp(s.mString) == -1 ); }
-	bool operator<(const char *s) { return ( Strcmp(s) == -1 ); }
+	bool operator<(const String &s) const { return ( Strcmp(s.mString) == -1 ); }
+	bool operator<(const char *s) const { return ( Strcmp(s) == -1 ); }
 
-	bool operator<=(const String &s)	{ return ( Strcmp(s.mString) <= 0 ); }
-	bool operator<=(const char *s) { return ( Strcmp(s) <= 0 ); }
+	bool operator<=(const String &s) const { return ( Strcmp(s.mString) <= 0 ); }
+	bool operator<=(const char *s) const { return ( Strcmp(s) <= 0 ); }
 
-	bool operator>(const String &s) { return ( Strcmp(s.mString) == 1 ); }
-	bool operator>(const char *s) { return ( Strcmp(s) == 1 ); }
+	bool operator>(const String &s) const { return ( Strcmp(s.mString) == 1 ); }
+	bool operator>(const char *s) const { return ( Strcmp(s) == 1 ); }
 
-	bool operator>=(const String &s) { return ( Strcmp(s.mString) >= 0 ); }
-	bool operator>=(const char *s) {	return ( Strcmp(s) >= 0 ); }
+	bool operator>=(const String &s) const { return ( Strcmp(s.mString) >= 0 ); }
+	bool operator>=(const char *s) const {	return ( Strcmp(s) >= 0 ); }
 
 
 	////////////////////////////////////////////////////////////
@@ -138,7 +141,7 @@ class String
 	 *
 	 ------------------------------------------------------*/
 
-	unsigned int length() 
+	unsigned int length() const
 	{ return mLength; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -146,7 +149,7 @@ class String
 	 *
 	 ------------------------------------------------------*/
 
-	const char* c_str() 
+	const char* c_str() const
 	{ return mString; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -162,7 +165,7 @@ class String
 	 *
 	 ------------------------------------------------------*/
 
-	int Strcmp(const char *s);
+	int Strcmp(const char *s) const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : strcmp() like function for Strings and c-strings.
@@ -227,6 +230,10 @@ class String
 
 	unsigned int mLength;      /* Lenght of c-string. */
 };
+
+mstl::String operator + ( const mstl::String& a, const mstl::String& b );
+mstl::String operator + ( const mstl::String& a, const char* b );
+mstl::String operator + ( const char* a, const mstl::String& b );
 
 
 ////////////////////////////////////////////////////////////
@@ -318,6 +325,10 @@ String String::operator+(const String& s)
 }
 
 
+
+
+
+
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
@@ -366,7 +377,7 @@ char* String::Strdup(const char* src)
 
 
 inline
-int String::Strcmp(const char* s)
+int String::Strcmp(const char* s) const
 {
 	// Don't assume strlen can handle NULL or even empty strings
 	size_t len = (s == NULL || s[0] == '\0') ? 0 : strlen(s);
@@ -471,7 +482,34 @@ void String::Set(const char *format, ...)
 #   define strdup mstl::String::Strdup
 #endif
 
+inline
+mstl::String operator + ( const mstl::String& a, const mstl::String& b )
+{
+	mstl::String s(a);
+	s += b;
+	return s;
+}
+
+
+inline
+mstl::String operator + ( const mstl::String& a, const char* b )
+{
+	mstl::String s(a);
+	s += b;
+	return s;
+}
+
+
+inline
+mstl::String operator + ( const char* a, const mstl::String& b )
+{
+	mstl::String s(a);
+	s += b;
+	return s;
+}
+
 } // namespace mstl
+
 
 ////////////////////////////////////////////////////////////
 // Macros

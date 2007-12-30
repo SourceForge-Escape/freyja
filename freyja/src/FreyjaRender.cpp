@@ -93,6 +93,8 @@ vec_t FreyjaRender::mVertexPointSize = 3.5f;
 
 matrix_t gModelViewMatrix;
 
+extern freyja::Scene* gScene;
+
 
 FreyjaRender::FreyjaRender() :
 	mTimer(),
@@ -198,6 +200,12 @@ void FreyjaRender::Rotate(int flags, float n)
 
 	if (flags & Z_F)
 		Rotate(n, 2);
+}
+
+
+void FreyjaRender::Draw( freyja::Renderable* renderable )
+{
+#warning FIXME: No rendering implementation in tracer yet.
 }
 
 
@@ -329,9 +337,11 @@ void FreyjaRender::DrawCamWindow()
 		glPopAttrib();
 	}
 
-	for (uint32 i = 0; i < freyjaGetModelCount(); ++i)
+	RenderableIterator it = gScene->GetRenderListIterator();
+	while ( it != it.end() )
 	{
-		RenderModel(i);
+		Draw( *it );
+		++it;
 	}
 
 	DrawIcons();
@@ -361,8 +371,7 @@ void FreyjaRender::DrawCamWindow()
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glColor3fv(WHITE);
-	mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, 
-					 freyjaGetCameraNameString(camera) );
+	//mPrinter.Print2d(-mScaleEnv, mScaleEnv - 1.5f, 0.06f, freyjaGetCameraNameString(camera) );
 	glPopAttrib();
 }
 
@@ -489,9 +498,11 @@ void FreyjaRender::DrawFreeWindow()
 		glPopAttrib();
 	}
 
-	for (uint32 i = 0; i < freyjaGetModelCount(); ++i)
+	RenderableIterator it = gScene->GetRenderListIterator();
+	while ( it != it.end() )
 	{
-		RenderModel(i);
+		Draw( *it );
+		++it;
 	}
 
 	//glPopMatrix(); // Remove scaling
@@ -526,6 +537,7 @@ void FreyjaRender::DrawFreeWindow()
 
 void FreyjaRender::DrawMetadataRenderables()
 {
+#if FIXME
 	/* Metadata objects */
 	glPushAttrib(GL_LIGHTING_BIT);  
 	glDisable(GL_LIGHTING);
@@ -642,6 +654,8 @@ void FreyjaRender::DrawMetadataRenderables()
 	glPopClientAttrib();
 
 	/* End metadata objects */
+
+#endif // FIXME
 }
 
 
@@ -676,9 +690,10 @@ void FreyjaRender::DrawIcons()
 	switch ( FreyjaControl::GetInstance()->GetObjectMode() )
 	{
 	case FreyjaControl::tCamera:
+#if 0
 		for (uint32 i = 0, n = freyjaGetCameraCount(); i < n; ++i)
 		{
-			Vec3 target, pos;
+			hel::Vec3 target, pos;
 			freyjaGetCameraTarget3fv(i, target.mVec);
 			freyjaGetCameraPos3fv(i, pos.mVec);
 			
@@ -701,6 +716,7 @@ void FreyjaRender::DrawIcons()
 			mglDrawControlPoint();
 			glPopMatrix();
 		}
+#endif
 		break;
 
 	default:
@@ -1211,6 +1227,7 @@ void FreyjaRender::ApplyLights()
 // This sure has a lot of branching...
 void FreyjaRender::RenderMesh(index_t mesh)
 {
+#if FIXME
 	Mesh *m = freyjaGetMeshClass(mesh);
 
 	if (!m)
@@ -1564,6 +1581,8 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	glPopClientAttrib();
 
 	glPopMatrix();
+
+#endif
 }
 
 
@@ -1643,6 +1662,7 @@ void FreyjaRender::RenderMeshShadowVolume(index_t mesh)
 
 void FreyjaRender::RenderMeshShadowVolumeSurfaces(index_t mesh)
 {
+#if FIXME
 	Mesh *m = freyjaGetMeshClass(mesh);
 	vec_t *shadow = NULL, *array = NULL;
 
@@ -1766,7 +1786,7 @@ void FreyjaRender::RenderMeshShadowVolumeSurfaces(index_t mesh)
 		/* Just reset counter don't reallocate. */
 		indices.clear();
 	}
- 
+#endif // FIXME
 }
 
 
@@ -1813,6 +1833,7 @@ void FreyjaRender::RenderModel(index_t model)
 
 	if (mRenderMode & fShadowVolume)
 	{
+#if FIXME
 		// Render each mesh of this model in turn
 		for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
 		{
@@ -1846,6 +1867,7 @@ void FreyjaRender::RenderModel(index_t model)
 				RenderMesh(mesh);
 			}
 		}
+#endif
 	}
 
 
@@ -1899,6 +1921,7 @@ void FreyjaRender::RenderModel(index_t model)
 		}
 	}
 
+#if FIXME
 	/* Render 'old' skeleton, which is comprised of z,y,x rotations. */
 	if (mRenderMode & fBones)
 	{
@@ -2056,7 +2079,8 @@ void FreyjaRender::RenderModel(index_t model)
 		
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
-	
+#endif // FIXME	
+
 	//if (mRenderMode & fBones || mRenderMode & fBones2
 	//	|| mRenderMode & fBones3 || mRenderMode & fBoneName)
 	{
@@ -2069,6 +2093,7 @@ void FreyjaRender::RenderModel(index_t model)
 
 void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 {
+#if FIXME
 	const unsigned char x = 0, y = 1, z = 2;
 	const unsigned char xr = 0, yr = 1, zr = 2;
 
@@ -2174,11 +2199,13 @@ void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
 	}
 
 	glPopMatrix();
+#endif // FIXME
 }
 
 
 void FreyjaRender::DrawCurveWindow()
 {
+#if FIXME
 	const unsigned int width = GetWindowWidth();
 	const unsigned int height = GetWindowHeight();
 	const unsigned int end = 175;
@@ -2384,6 +2411,7 @@ void FreyjaRender::DrawCurveWindow()
 
 	ResizeContext(width, height);
 	glPopMatrix();
+#endif
 }
 
 
@@ -2405,6 +2433,7 @@ void FreyjaRender::DrawUVWindow()
 	glLineWidth(mDefaultLineWidth);
 	glPointSize(mVertexPointSize);
 
+#if FIXME
 	Mesh *m = freyjaGetMeshClass(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -2479,10 +2508,9 @@ void FreyjaRender::DrawUVWindow()
 		}
 	}
 
+#endif // FIXME
+
 	glPopAttrib();
-
-
-	
 
 	ResizeContext(width, height);
 	glPopMatrix();
@@ -2748,10 +2776,12 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 		glPopAttrib();
 	}
 
-	// Draw model geometry, metadata visualizations, and all that good stuff
-	for (unsigned int i = 0; i < freyjaGetModelCount(); ++i)
+	/* Draw model geometry, metadata visualizations, and all that good stuff. */
+	RenderableIterator it = gScene->GetRenderListIterator();
+	while ( it != it.end() )
 	{
-		RenderModel(i);
+		Draw( *it );
+		++it;
 	}
 
 	DrawIcons();

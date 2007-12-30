@@ -25,7 +25,7 @@ bool ControlPrinter::mLogging = false;
 bool ControlPrinter::mInitLogging = false;
 mstl::SystemIO::TextFileWriter ControlPrinter::mLog;
 
-
+#if 0
 void ControlPrinter::PrintArgs(const char *format, va_list *args)
 {
 	const uint32 sz = 1023;
@@ -59,6 +59,7 @@ void ControlPrinter::PrintArgs(const char *format, va_list *args)
 		mLog.Flush();
 	}
 }
+#endif
 
 
 void ControlPrinter::Log(const char *format, ...)

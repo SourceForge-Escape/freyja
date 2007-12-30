@@ -23,13 +23,13 @@
 #define GUARD__FREYJA_SCENENODE_H_
 
 #include <hel/BoundingVolume.h>
-
-//#include "NodeAnimation.h"
 #include "Node.h"
+
 
 namespace freyja {
 
-class SceneNode : public Node
+class SceneNode : 
+		public Node
 {
 public:
 	////////////////////////////////////////////////////////////
@@ -58,6 +58,12 @@ public:
 	 * Post : 
 	 ------------------------------------------------------*/
 
+	//virtual XMLSerializerNode CreateXMLSerializerNode( ) const;
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Creates serializer node for this object.
+	 *
+	 ------------------------------------------------------*/
 
 	////////////////////////////////////////////////////////////
 	// Bounding Volume property

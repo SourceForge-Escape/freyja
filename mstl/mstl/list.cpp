@@ -2,8 +2,8 @@
 
 #include "list.h"
 
-template<>
-int mstl::list<int>::mDefault = 0;
+//template<>
+//int mstl::list<int>::mDefault = 0;
 
 
 bool compare_array_and_list(unsigned int size, int array[], mstl::list<int>& lst)

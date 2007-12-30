@@ -18,9 +18,8 @@
  ==========================================================================*/
 
 #include <mstl/SystemIO.h>
-#include <freyja/FreyjaImage.h>
+#include <freyja/PixelBuffer.h>
 #include <freyja/MaterialABI.h>
-#include <freyja/TextureABI.h>
 #include <freyja/PerlinNoise.h>
 #include "Texture.h"
 #include "FreyjaOpenGL.h"
@@ -28,6 +27,7 @@
 #include "MaterialControl.h"
 
 using namespace freyja3d;
+using namespace freyja;
 	
 
 MaterialControl *MaterialControl::mInstance = NULL;
@@ -632,31 +632,20 @@ bool MaterialControl::LoadTexture(const char *filename)
 	Print("[FreyjaModel::loadTexture]\n");
 	Print(" Loading texture '%s'\n", filename);
 
-	FreyjaImage img;
-	unsigned char *image;
-	unsigned int w, h;
-
-	if (!img.loadImage(filename))
+	PixelBuffer* img = PixelBuffer::Create( filename );
+	if ( img )
 	{
-		img.getImage(&image);
-		w = img.getWidth();
-		h = img.getHeight();
+		byte *image = img->CopyPixmap();
+		uint32 w = img->GetWidth();
+		uint32 h = img->GetHeight();
+		uint16 components = PixelBuffer::GetBytesPerPixel( img->GetPixelFormat() );
 
-		switch (img.getColorMode())
+		if ( components )
 		{
-		case FreyjaImage::RGBA_32:
-			err = LoadTextureBuffer(image, w, h, 32, 4);//Texture::RGBA);
-			break;
-
-		case FreyjaImage::RGB_24:
-			err = LoadTextureBuffer(image, w, h, 24, 3);//Texture::RGB);
-			break;
-
-		case FreyjaImage::INDEXED_8:
-			err = LoadTextureBuffer(image, w, h, 8, 1);//Texture::INDEXED);
-			break;
-
-		default:
+			err = LoadTextureBuffer( image, w, h, components*8, components );
+		}
+		else
+		{
 			Print("MaterialManager: Use RGB_24 and RGBA_32 images only.\n");
 			
 			if (image)
@@ -1097,6 +1086,7 @@ void MaterialControl::EvSetTexture(uint32 value)
 
 void MaterialControl::EvTextureUpload(uint32 id)
 {
+#if FIXME
 	byte *image;
 	uint32 w, h, bpp, type;
 
@@ -1123,6 +1113,7 @@ void MaterialControl::EvTextureUpload(uint32 id)
 			FREYJA_ASSERTMSG(false, "Image type %i is not supported.", type);
 		}
 	}
+#endif
 }
 
 

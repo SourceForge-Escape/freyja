@@ -5,12 +5,12 @@
  * Website: http://icculus.org/~mongoose/
  * Email  : mongooseichiban@gmail.com
  * Object : list<T>
- * Comment: 
+ * Comment: This is actually an slist now if you couldn't tell.
  *
  *-- History -----------------------------------------------
  *
  * 2007.06.27:
- * Mongoose - Created, very basic doubly linked list.
+ * Mongoose - Created, very basic singly linked list.
  ==========================================================================*/
 
 #ifndef GUARD__MSTL_LIST_H
@@ -103,32 +103,53 @@ namespace mstl
 		class iterator
 		{
 		public:
-			iterator(listnode<T> *node) 
+			iterator( listnode<T> *node ) 
 				: mCursor(node) 
 			{}
 			/*--------------------------------------------------------
 			 * Pre  : 
-			 * Post : 
+			 * Post : Constructor.
+			 *
+			 --------------------------------------------------------*/
+
+			iterator( const list<T>::iterator& it ) 
+				: mCursor( it.mCursor ) 
+			{ }
+			/*--------------------------------------------------------
+			 * Pre  : 
+			 * Post : Copy constructor for pass by value.
 			 *
 			 --------------------------------------------------------*/
 
 			~iterator() 
-			{}
+			{ }
 			/*--------------------------------------------------------
 			 * Pre  : 
-			 * Post : 
+			 * Post : Destructor.
 			 *
 			 --------------------------------------------------------*/
+
+			T& operator =(T& data)
+			{ mCursor->SetData( data ); return data; }
 
 			const T& operator*()
-			{ return mCursor ? mCursor->GetData() : list<T>::mDefault; }
+			{ return mCursor->GetData(); }
+			/*--------------------------------------------------------
+			 * Pre  : 
+			 * Post : Dereference operator.
+			 * Notes: This can possibly dereference NULL now.
+			 *
+			 --------------------------------------------------------*/
+
+			bool operator==(const iterator &it) const
+			{ return ( mCursor == it.mCursor ); } 
 			/*--------------------------------------------------------
 			 * Pre  : 
 			 * Post : 
 			 *
 			 --------------------------------------------------------*/
 
-			bool operator!=(const iterator &it)
+			bool operator!=(const iterator &it) const
 			{ return ( mCursor != it.mCursor ); } 
 			/*--------------------------------------------------------
 			 * Pre  : 
@@ -181,7 +202,11 @@ namespace mstl
 		};
 		
  
-		list() : mHead(NULL), mTail(NULL) 
+		list() : 
+			mHead(NULL), 
+			mTail(NULL),
+			mError(NULL),
+			mSize(0)
 		{}
 		/*--------------------------------------------------------
 		 * Pre  : 
@@ -211,7 +236,7 @@ namespace mstl
 		 *
 		 --------------------------------------------------------*/
 
-		iterator begin();
+		iterator begin() const;
 		/*--------------------------------------------------------
 		 * Pre  : 
 		 * Post : 
@@ -225,7 +250,7 @@ namespace mstl
 		 *
 		 --------------------------------------------------------*/
 
-		bool empty();
+		bool empty() const;
 		/*--------------------------------------------------------
 		 * Pre  : 
 		 * Post : 
@@ -296,7 +321,7 @@ namespace mstl
 		 *
 		 --------------------------------------------------------*/
 
-		unsigned int size( );
+		unsigned int size( ) const;
 		/*--------------------------------------------------------
 		 * Pre  : 
 		 * Post : 
@@ -304,12 +329,12 @@ namespace mstl
 		 --------------------------------------------------------*/
 
 	protected: 
+		
+		listnode<T>* mHead;         /* Head of the list */
+		
+		listnode<T>* mTail;         /* Tail of the list */
 
-		static T mDefault;          /* Default value for data. */
-		
-		listnode<T> *mHead;         /* Head of the list */
-		
-		listnode<T> *mTail;         /* Tail of the list */
+		T* mError;                  /* Error value. */
 
 		unsigned int mSize;         /* Element count. */
 	}; 
@@ -321,7 +346,11 @@ namespace mstl
 	////////////////////////////////////////////////////////////
 
 	template <typename T> 
-	list<T>::list(const list<T> &container)
+	list<T>::list(const list<T> &container):
+		mHead(NULL),
+		mTail(NULL),
+		mError(NULL),
+		mSize(0)
 	{
 		listnode<T> *cur = container.mHead;//->GetNext();
 
@@ -336,12 +365,12 @@ namespace mstl
 	template <typename T> 
 	const T& list<T>::back() const
 	{
-		return mTail ? mTail->GetData() : mDefault;  
+		return mTail ? mTail->GetData() : *mError;  
 	}
 
 
 	template <typename T> 
-	class list<T>::iterator list<T>::begin()
+	class list<T>::iterator list<T>::begin() const
 	{
 		return iterator( mHead );  
 	}
@@ -350,7 +379,7 @@ namespace mstl
 	template <typename T> 
 	void list<T>::clear()
 	{
-		while (mHead)
+		while ( mHead )
 		{
 			pop_front();
 		}
@@ -360,7 +389,7 @@ namespace mstl
 
 
 	template <typename T> 
-	bool list<T>::empty()
+	bool list<T>::empty() const
 	{
 		return ( mHead );
 	}
@@ -369,14 +398,14 @@ namespace mstl
 	template <typename T> 
 	class list<T>::iterator list<T>::end()
 	{
-		return iterator( NULL ); //mTail ? mTail->GetNext() : NULL );  
+		return iterator( NULL ); 
 	}
 
 
 	template <typename T> 
 	const T& list<T>::front() const
 	{
-		return mHead ? mHead->GetData() : mDefault;  
+		return mHead ? mHead->GetData() : *mError;  
 	}
 
 
@@ -536,7 +565,7 @@ namespace mstl
 
 
 	template <typename T> 
-	unsigned int list<T>::size( )
+	unsigned int list<T>::size( ) const
 	{
 		return mSize;
 	}

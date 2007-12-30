@@ -50,7 +50,8 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	static Resource &GetResource() { return mResource; } 
+	static Resource& GetResource() 
+	{ return mResource; } 
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -136,6 +137,8 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	static ControlPrinter& GetPrinter() 
+	{ return mPrinter; }
 
 protected:
 

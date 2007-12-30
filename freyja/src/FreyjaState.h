@@ -23,8 +23,8 @@
  * Mongoose - Created, based on test
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MONGOOSE_FREYJASTATE_H_
-#define GUARD__FREYJA_MONGOOSE_FREYJASTATE_H_
+#ifndef GUARD__FREYJA3D_FREYJASTATE_H_
+#define GUARD__FREYJA3D_FREYJASTATE_H_
 
 #include <hel/Mat44.h>
 #include <hel/Vec3.h>
@@ -37,31 +37,29 @@
 
 using namespace freyja;
 
-
-class ActionMeshTranslateExt : public Action
+#if FIXME
+class ActionMeshTranslateExt : 
+	public mstl::Action
 {
  public:
-	ActionMeshTranslateExt(index_t mesh, hel::Vec3 xyz, hel::Vec3 &v) :
+	ActionMeshTranslateExt(freyja::Mesh* mesh, hel::Vec3 xyz, hel::Vec3 &v) :
 		Action(),
 		mCursorXYZ(v),
 		mMesh(mesh),
 		mXYZ(xyz)
 	{ }
 
-	virtual bool Redo() { return false; }
+	virtual bool Redo() 
+	{ return false; }
 
 	virtual bool Undo() 
 	{
-		Mesh *m = Mesh::GetMesh(mMesh);
-
-		if (m)
+		if (mMesh)
 		{
 			// Adjust relative translation to absolote position
-			hel::Mat44 t;
-			hel::Vec3 u = mXYZ - m->GetPosition();
-			t.Translate(u.mVec[0], u.mVec[1], u.mVec[2]);
-			m->SetPosition(mXYZ);
-			m->TransformVertices(t);
+			hel::Vec3 u = mXYZ - mMesh->GetPosition();
+			mMesh->SetPosition(mXYZ);
+			mMesh->Translate( u );
 		}
 
 		mCursorXYZ = mXYZ;
@@ -69,7 +67,7 @@ class ActionMeshTranslateExt : public Action
 	}
 
 	hel::Vec3 &mCursorXYZ;
-	index_t mMesh;                      /* Which mesh? */
+	freyja::Mesh* mMesh;                /* mesh */
 	hel::Vec3 mXYZ;                     /* Storage for 3d transform event */
 };
 
@@ -128,7 +126,7 @@ class ActionMeshTransform : public Action
 class ActionTexCoordTransform : public Action
 {
  public:
-	ActionTexCoordTransform(index_t mesh, index_t texcoord, vec_t u, vec_t v) :
+	ActionTexCoordTransform(freyja::Mesh mesh, index_t texcoord, vec_t u, vec_t v) :
 		Action(),
 		mMesh(mesh),
 		mTexCoordArrayIndex(texcoord),
@@ -140,7 +138,7 @@ class ActionTexCoordTransform : public Action
 
 	virtual bool Undo() 
 	{
-		freyja::Mesh *m = Mesh::GetMesh(mMesh);
+		freyja::Mesh *m = mMesh;
 
 		if (m)
 		{
@@ -152,7 +150,8 @@ class ActionTexCoordTransform : public Action
 		return false;
 	}
 
-	index_t mMesh, mTexCoordArrayIndex;
+	freyja::Mesh* mMesh;
+	index_t mTexCoordArrayIndex;
 	vec_t mU, mV;
 };
 
@@ -361,17 +360,17 @@ class ActionVertexListTransformExt : public Action
 class ActionMeshDelete : public Action
 {
  public:
-	ActionMeshDelete(index_t mesh) :
+	ActionMeshDelete(freyja::Mesh* mesh) :
 		Action(),
-		mMesh(NULL),
-		mOldMeshId(mesh)
+		mMesh(mesh)
 	{
-		freyja::Mesh *m = Mesh::GetMesh(mesh);
+		freyja::Mesh *m = mMesh;
 
 		if (m)
 		{
-			// Copy of mesh outside of pool
+			// Copy of mesh outside of scene
 			mMesh = new Mesh(*m);
+			gScene->Remove( mMesh );
 		}
 	}
 
@@ -381,14 +380,15 @@ class ActionMeshDelete : public Action
 	{
 		if (mMesh)
 		{
-			mMesh->AddToPool();
+			gScene->Add( mMesh );
 		}
 
 		return true;
 	}
 
 	freyja::Mesh *mMesh;
-	index_t mOldMeshId;
 };
 
-#endif
+#endif // FIXME
+
+#endif // GUARD__FREYJA3D_FREYJASTATE_H_

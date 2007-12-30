@@ -40,15 +40,66 @@
 
 namespace freyja {
 
-class SceneManager;
+//class SceneManager;
+
+class SceneResource;
+typedef mstl::avl_tree<mstl::String, SceneResource*> SceneResourceDictionary;
+
+class SceneResource
+{
+public:
+	// Abstract out the current, dict, list, selected list into this class.
+
+	SceneResource( const char* type, SceneResourceDictionary& dict ) :
+		mType( type ),
+		mNodes(),
+		mSelected(),
+		mDictionary()
+	{
+		dict.insert( mType, this ); 
+	}
+
+	~SceneResource()
+	{ }
+
+	const mstl::String& GetType()
+	{ return mType; }
+
+	NodeIterator GetIterator() const
+	{ return mNodes.begin(); }
+
+	NodeList& GetList()
+	{ return mNodes; }
+
+	NodeList& GetSelectedList()
+	{ return mSelected; }
+
+	NodeDictionary& GetDictionary()
+	{ return mDictionary; }
+
+	bool Serialize( XMLSerializerNode container ) const
+	{
+		bool ret = true;
+
+		for ( NodeIterator it = GetIterator(); it != it.end(); ++it )
+		{
+			ret = ret && (*it)->Serialize( container );
+		}
+
+		// FIXME: Serialize selection list too?
+		return ret;
+	}
+
+	mstl::String mType;
+	NodeList mNodes;        
+	NodeList mSelected;
+	NodeDictionary mDictionary;
+};
+
 
 class Scene 
 {
 public:
-
-	typedef mstl::list<freyja::Renderable*>::iterator RenderListIterator;
-	typedef mstl::list<freyja::Renderable*> RenderList;
-
 
 	////////////////////////////////////////////////////////////
 	// Constructors
@@ -62,6 +113,13 @@ public:
 	 ------------------------------------------------------*/
 
 	~Scene( );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	//bool SerializeSelected( const char* filename ) const;
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -82,39 +140,104 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool Add( freyja::Mesh* mesh );
+	bool Add( freyja::Node* node );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Uses RTTI to append to proper list.
+	 *
+	 ------------------------------------------------------*/
 
-	freyja::Mesh* GetSelectedMesh() const;
+	bool Remove( freyja::Node* node );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Uses RTTI to remove from proper list.
+	 *
+	 ------------------------------------------------------*/
 
-	void SetSelectedMesh( freyja::Mesh* mesh );
+	void Select( freyja::Node* node );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Uses RTTI to add to proper selected list.
+	 *
+	 ------------------------------------------------------*/
 
-	bool Remove( freyja::Mesh* mesh );
+	void Unselect( freyja::Node* node );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Uses RTTI to remove from proper selected list.
+	 *
+	 ------------------------------------------------------*/
 
-	RenderListIterator GetRenderListIterator()
+	RenderableIterator GetRenderListIterator() const
 	{ return mRenderList.begin(); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	Mesh* GetCurrentMesh( ) const
+	{ return mCurrentMesh; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get currently used mesh for editing.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetCurrentMesh( Mesh* mesh )
+	{ mCurrentMesh = mesh; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set currently used mesh for editing.
+	 *
+	 ------------------------------------------------------*/
 
 
 protected:
 
-	mstl::String mFilename;                       /* Filename if this has been saved as a disk file. */
+	NodeList* GetList( freyja::Node* node );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Uses RTTI to get proper type list.
+	 *
+	 ------------------------------------------------------*/
 
-	RenderList mRenderList;                       /* */
+	NodeList* GetSelectionList( freyja::Node* node );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Uses RTTI to get proper type selection list.
+	 *
+	 ------------------------------------------------------*/
 
-	mstl::list<freyja::Bone*> mBones;             /* */
+	mstl::String mFilename;    /* Filename if this has been saved as a disk file. */
 
-	mstl::list<freyja::Camera*> mCamera;          /* */
+	RenderableList mRenderList;/* */
 
-	mstl::list<freyja::Light*> mLights;           /* */
+	SceneResourceDictionary mResourceDict; /* Dictionary based on node type string. */
 
-	mstl::list<freyja::Mesh*> mMeshes;            /* */
+	/* Move selected bones to skeleton itself? a la mesh and it's components */
+	NodeList mSelectedBones;      /* Special case - bones are contained in Skeletons. */
+	Bone* mCurrentBone;
 
-	mstl::list<freyja::Metadata*> mMetadata;      /* */
+	SceneResource mCameras;       /* */
+	Camera* mCurrentCamera;
+
+	SceneResource mLights;        /* */
+	Light* mCurrentLight;
+
+	// FIXME SkeletalMesh, MorphMesh
+	SceneResource mMeshes;        /* */
+	Mesh* mCurrentMesh;
+
+	SceneResource mMetadata;      /* */
+	Metadata* mCurrentMetadata;
+
+	SceneResource mSkeletons;     /* */
+	Skeleton* mCurrentSkeleton;
 
 	// FIXME: These should be shared by all scenes.
 	// Break these out into a level above scene, and use instances in scenes.
 	// Something like ResourceManager or something, and have them inherit from Resource.
-
-	mstl::list<freyja::Skeleton*> mSkeletons;     /* */
 
 	mstl::list<freyja::Material*> mMaterials;     /* */
 

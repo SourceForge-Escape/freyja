@@ -31,6 +31,7 @@
 using namespace mstl;
 using namespace freyja;
 
+/* All gobals must go here! */
 Printer* gPrinter = NULL;
 uint32 gFreyjaMemoryTick = 0;
 uint32 gFreyjaMemoryNews = 0;
@@ -43,7 +44,7 @@ FreyjaAssertCallback gFreyjaDebugInfoHandler = NULL;
 // Managed ABI ( Not 'public' )
 ///////////////////////////////////////////////////////////////////////
 
-void freyja__setPrinter( Printer* printer, bool freyjaManaged )
+void freyja_set_printer( Printer* printer, bool freyjaManaged )
 {
 	if (!printer)
 		return;
@@ -82,30 +83,43 @@ void freyjaModuleUnload( void* handle )
 // Public ABI
 ///////////////////////////////////////////////////////////////////////
 
-void freyjaSpawn()
+const char* freyja_get_version()
+{
+	return VERSION;
+}
+
+
+void freyja_start( freyja_ptr printer )
 {
 	static bool init = false;
 
 	if ( !init )
 	{
 		/* Setup basic default stdout printer */
-		freyja__setPrinter(new Printer(), true);
+		if ( printer )
+		{
+			freyja_set_printer( (Printer*)printer, false );
+		}
+		else
+		{
+			freyja_set_printer( new Printer(), true );
+		}
 
 		/* Setup plugins */
-		freyjaPluginDirectoriesInit();
-		freyjaPluginsInit();
+		freyjaPluginDirectoriesInit( );
+		freyjaPluginsInit( );
 
-		freyjaPrintMessage("freyjaSpawn(): Invoked libfreyja plugins.");
+		freyjaPrintMessage( "%s(): Invoked libfreyja plugins.", __func__ );
 		init = true;
 	}
 	else
 	{
-		freyjaPrintMessage("freyjaSpawn(): Already spawned.");
+		freyjaPrintMessage( "%s(): Already spawned.", __func__ );
 	}
 }
 
 
-void freyjaFree()
+void freyja_shutdown( )
 {
 	freyjaPluginShutdown();
 
@@ -122,7 +136,7 @@ void freyjaFree()
 }
 
 
-void freyjaAssertHandler(FreyjaAssertCallback func)
+void freyja_set_assert_handler( FreyjaAssertCallback func )
 {
 	gFreyjaAssertHandler = func;
 }
@@ -409,13 +423,6 @@ const char *freyjaActionToString(freyja_transform_action_t action)
 
 	return "Unknown_Action";
 }
-
-
-const char *libfreyjaVersion()
-{
-	return VERSION;
-}
-
 
 
 ///////////////////////////////////////////////////////////////////////

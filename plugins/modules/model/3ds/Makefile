@@ -169,7 +169,7 @@ depend:
 
 targets: $(TARGETS)
 
-PROG_OBJS=$(BUILDDIR)/3ds.o
+PROG_OBJS=$(BUILDDIR)/3ds.o $(BUILDDIR)/3ds_freyja.o
 
 $(BUILDDIR)/$(MODULE) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(PROG_OBJS)

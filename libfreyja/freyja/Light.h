@@ -26,11 +26,13 @@
 #ifndef GUARD__FREYJA_LIGHT_H_
 #define GUARD__FREYJA_LIGHT_H_
 
-#include <hel/math.h>
+#include "Node.h"
+
 
 namespace freyja {
 
-class Light
+class Light :
+		public Node
 {
  public:
 
@@ -46,7 +48,7 @@ class Light
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Light();
+	Light( const char* name );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of FreyjaLight
@@ -75,25 +77,35 @@ class Light
 	////////////////////////////////////////////////////////////
 
 
-
 	////////////////////////////////////////////////////////////
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void setPosition(vec4_t xyz)
-	{
-		mPos[0] = xyz[0];
-		mPos[1] = xyz[1];
-		mPos[2] = xyz[2];
-	}
 
-	vec4_t mAmbient;          /* Ambient color */
+	////////////////////////////////////////////////////////////
+	// Public interfaces.
+	////////////////////////////////////////////////////////////
 
-	vec4_t mDiffuse;          /* Diffuse color */
+	FREYJA_NODE_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Node implementation.
+	 *
+	 ------------------------------------------------------*/
 
-	vec4_t mSpecular;         /* Specular color */
+	FREYJA_XMLSERIALIZER_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer implementation.
+	 *
+	 ------------------------------------------------------*/
 
-	vec4_t mPos;              /* Light position in 3 space */
+	FREYJA_RENDERABLE_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renderable implementation.
+	 *
+	 ------------------------------------------------------*/
 
 
 private:
@@ -107,14 +119,15 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	unsigned int mId;         /* Unique identifier of this light */
-
-	char mName[64];           /* Light name */
-
 	unsigned int mOptions;    /* Option bitflags */
 
 	light_type_t mType;       /* Type of light */
 
+	vec4_t mAmbient;          /* Ambient color. */
+
+	vec4_t mDiffuse;          /* Diffuse color. */
+
+	vec4_t mSpecular;         /* Specular color. */
 
 	vec4_t mDir;	          /* Direction for directional or spot light use */
 
@@ -123,10 +136,65 @@ private:
 	vec_t mExponent;          /* Exponent for spot light use */
 
 	vec_t mAttenuation;       /* Attenuation factor */
-
-	static unsigned int mCounter;   /* Id generator counter */
 };
 
-} // End namespace freyja
 
-#endif
+inline
+const char* Light::GetType() const
+{ return "Light"; }
+
+ 
+inline
+uint32 Light::GetVersion() const
+{ return 0; }
+
+
+inline
+freyja::Node* Light::Duplicate() const
+{ return new Light(*this); }
+
+
+inline
+freyja::Material* Light::GetMaterial() const
+{ return NULL; }
+
+
+inline
+bool Light::Serialize( XMLSerializerNode parent ) const
+{
+	return false;
+}
+
+inline
+bool Light::Unserialize( XMLSerializerNode node )
+{
+	return false;
+}
+
+inline
+mstl::String Light::GetInfo() const
+{
+	return mstl::String( "Light" );
+}
+
+inline
+const hel::Quat& Light::GetWorldOrientation() const
+{
+	return mOrientation;
+}
+
+inline
+const hel::Vec3& Light::GetWorldPosition() const
+{
+	return mPosition;
+}
+
+inline
+void Light::DuplicateChildren( freyja::Node* parent, bool recurse )
+{
+}
+
+
+} // namespace freyja
+
+#endif  // GUARD__FREYJA_LIGHT_H_

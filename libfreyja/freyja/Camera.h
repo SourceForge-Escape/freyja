@@ -46,13 +46,13 @@
 #include <hel/Quat.h>
 #include <hel/Vec3.h>
 #include <hel/Ray.h>
-
-#include <mstl/Vector.h>
+#include "Node.h"
 
 namespace freyja
 {
 
-class Camera
+class Camera :
+		public Node
 {
 	////////////////////////////////////////////////////////////
 	// Public 
@@ -60,7 +60,7 @@ class Camera
 
  public:
 
-	Camera();
+	Camera( const char* name );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructor.
@@ -146,6 +146,32 @@ class Camera
 
 
 	////////////////////////////////////////////////////////////
+	// Public interfaces.
+	////////////////////////////////////////////////////////////
+
+	FREYJA_NODE_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Node implementation.
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_XMLSERIALIZER_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer implementation.
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_RENDERABLE_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renderable implementation.
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
 	// Protected  
 	////////////////////////////////////////////////////////////
 
@@ -185,164 +211,138 @@ class Camera
 	//mstl::Vector<> mUpTracks;   /* Camera up vector animation tracks. */
 };
 
-	////////////////////////////////////////////////////////////
-	// Inline Methods. 
-	////////////////////////////////////////////////////////////
-	inline
-	Camera::Camera()
-		: mName("camera"),
-		  mMetadata(" "),
-		  mView(),
-		  mTarget(),
-		  mUp(0.0f, 1.0f, 0.0f),
-		  mSide(0.0f, 0.0f, 1.0f),
-		  mRot()
-	{ }
+
+////////////////////////////////////////////////////////////
+// Inline Methods. 
+////////////////////////////////////////////////////////////
+inline
+Camera::Camera( const char* name ) :
+	Node( name ),
+	mView(),
+	mTarget(),
+	mUp(0.0f, 1.0f, 0.0f),
+	mSide(0.0f, 0.0f, 1.0f),
+	mRot()
+{ }
 
 
-	inline
-	Camera::~Camera()
-	{ }
+inline
+Camera::~Camera()
+{ }
 
 
-	inline
-	const char* Camera::GetName()
-	{
-		return this->mName.c_str();
-	}
+inline
+const hel::Vec3& Camera::GetDir()
+{ return mView.GetDir(); }
 
 
-	inline
-	void Camera::SetName(const char* name)
-	{
-		this->mName = name;
-	}
+inline
+void Camera::SetDir(const hel::Vec3& dir)
+{ mView.SetDir( dir ); }
 
 
-	inline
-	const char* Camera::GetMetadata()
-	{
-		return this->mMetadata.c_str();
-	}
+inline
+const hel::Vec3& Camera::GetPos()
+{ return mView.GetOrigin(); }
 
 
-	inline
-	void Camera::SetMetadata(const char* metadata)
-	{
-		this->mMetadata = metadata;
-	}
+inline
+void Camera::SetPos(const hel::Vec3& pos)
+{
+	// Do we want to maintain same up vector or force other side to update?
+	//mUp += pos - mView.mOrigin;
+	//mUp.Norm();
+
+	mView.SetOrigin( pos );
+}
+
+//////
 
 
-	inline
-	const hel::Vec3& Camera::GetDir()
-	{
-		return this->mView.GetDir();
-	}
+inline
+const hel::Quat& Camera::GetRot()
+{ return mRot; }
 
 
-	inline
-	void Camera::SetDir(const hel::Vec3& dir)
-	{
-		this->mView.SetDir( dir );
-	}
+inline
+void Camera::SetRot(const hel::Quat& q)
+{ mRot = q;	}
 
 
-	inline
-	const hel::Vec3& Camera::GetPos()
-	{
-		return this->mView.GetOrigin();
-	}
+inline
+const hel::Vec3& Camera::GetTarget()
+{ return mTarget; }
 
 
-	inline
-	void Camera::SetPos(const hel::Vec3& pos)
-	{
-		// Do we want to maintain same up vector or force other side to update?
-		//mUp += pos - this->mView.mOrigin;
-		//mUp.Norm();
-
-		this->mView.SetOrigin( pos );
-	}
+inline
+void Camera::SetTarget(const hel::Vec3& pos)
+{ mTarget = pos; }
 
 
-	inline
-	const hel::Quat& Camera::GetRot()
-	{
-		return this->mRot;
-	}
+inline
+const hel::Vec3& Camera::GetUp()
+{ return mUp; }
 
 
-	inline
-	void Camera::SetRot(const hel::Quat& q)
-	{
-		this->mRot = q;
-	}
+inline
+void Camera::SetUp(const hel::Vec3& v)
+{ mUp = v; }
 
 
-	inline
-	const hel::Vec3& Camera::GetTarget()
-	{
-		return this->mTarget;
-	}
+inline
+const char* Camera::GetType() const
+{ return "Camera"; }
+
+ 
+inline
+uint32 Camera::GetVersion() const
+{ return 0; }
 
 
-	inline
-	void Camera::SetTarget(const hel::Vec3& pos)
-	{
-		this->mTarget = pos;
-	}
+inline
+freyja::Node* Camera::Duplicate() const
+{ return new Camera(*this); }
 
 
-	inline
-	const hel::Vec3& Camera::GetUp()
-	{
-		return this->mUp;
-	}
+inline
+freyja::Material* Camera::GetMaterial() const
+{ return NULL; }
 
 
-	inline
-	void Camera::SetUp(const hel::Vec3& v)
-	{
-		this->mUp = v;
-	}
+inline
+bool Camera::Serialize( XMLSerializerNode parent ) const
+{
+	return false;
+}
 
+inline
+bool Camera::Unserialize( XMLSerializerNode node )
+{
+	return false;
+}
 
+inline
+mstl::String Camera::GetInfo() const
+{
+	return mstl::String( "Camera" );
+}
 
-	////////////////////////////////////////////////////////////
-	// Camera path ( 0.9.3 API )
-	////////////////////////////////////////////////////////////
+inline
+const hel::Quat& Camera::GetWorldOrientation() const
+{
+	return mOrientation;
+}
 
-	class CameraFlyByNode
-	{
-	public:
-		CameraFlyByNode() 
-			: orientation(), 
-			  position(), 
-			  direction(), 
-			  speed(0.0f), 
-			  time(0.0f) 
-		{ }
+inline
+const hel::Vec3& Camera::GetWorldPosition() const
+{
+	return mPosition;
+}
 
-		hel::Quat orientation;
-		hel::Vec3 position;
-		hel::Vec3 direction;
-		vec_t speed;
-		vec_t time;
-	};
-
-
-	class CameraFlyByPath
-	{ 
-	public:
-		CameraFlyByPath() 
-			: path() 
-		{ }
-
-		~CameraFlyByPath() 
-		{ }
-
-		mstl::Vector <CameraFlyByNode *> path;  /* Flyby path */
-	};
+inline
+void Camera::DuplicateChildren( freyja::Node* parent, bool recurse )
+{
+}
 
 
 } // namespace freyja

@@ -6,8 +6,12 @@
 
  Kagura alpha, 0.10.0.0
 
- 20071228 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  * 
+ * Mesh design changes.
+ * Various implementation updates.
+ * Scene implementation update.
+
+ 20071228 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  * Removed functions from lua_api.py blacklist.
  * Tracer build for freyja 10.0 ( UI and libs run ).
  * Stubs for various 10.0 ABIs.

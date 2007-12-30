@@ -30,6 +30,7 @@
 #include <hel/Ray.h>
 #include <mstl/SystemIO.h>
 #include <mgtk/ResourceEventDelegate.h>
+#include <freyja/Scene.h>
 #include "OpenGLPrinter.h"
 #include "freyja_events.h"
 
@@ -668,6 +669,13 @@ private:
 	/*------------------------------------------------------
 	 * Pre  : texture is valid texture id
 	 * Post : Binds GL texture 
+	 *
+	 ------------------------------------------------------*/
+
+	void Draw( freyja::Renderable* renderable );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 

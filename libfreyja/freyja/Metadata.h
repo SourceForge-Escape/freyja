@@ -44,7 +44,7 @@ public:
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Metadata();
+	Metadata( const char* name );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructs an object of Metadata
@@ -62,44 +62,6 @@ public:
 	////////////////////////////////////////////////////////////
 	// Public 
 	////////////////////////////////////////////////////////////
-
-	virtual const char* GetType() const
-	{ return "Metadata"; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : XmlSerializer tag type.
-	 *
-	 ------------------------------------------------------*/
- 
-	virtual uint32 GetVersion() const
-	{ return 0; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : XmlSerializer tag version.
-	 *
-	 ------------------------------------------------------*/
-
-	bool Serialize( XMLSerializerNode metadata ) const;
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : XmlSerializer implementation.
-	 *
-	 ------------------------------------------------------*/
-
-	bool Unserialize( XMLSerializerNode metadata );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : XmlSerializer implementation.
-	 *
-	 ------------------------------------------------------*/
-
-	freyja::Material* GetMaterial() const
-	{ return mMaterial; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
 
 	const char* GetMetadataType() const;
 	/*------------------------------------------------------
@@ -127,6 +89,32 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+
+	////////////////////////////////////////////////////////////
+	// Public interfaces.
+	////////////////////////////////////////////////////////////
+
+	FREYJA_NODE_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Node implementation.
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_XMLSERIALIZER_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer implementation.
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_RENDERABLE_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renderable implementation.
 	 *
 	 ------------------------------------------------------*/
 
@@ -163,7 +151,8 @@ public:
 ////////////////////////////////////////////////////////////
 
 inline
-Metadata::Metadata()
+Metadata::Metadata( const char* name ) :
+	Node( name )
 { }
 
 
@@ -171,6 +160,49 @@ inline
 Metadata::~Metadata()
 { }
 
+inline
+const char* Metadata::GetType() const
+{ return "Metadata"; }
+
+ 
+inline
+uint32 Metadata::GetVersion() const
+{ return 0; }
+
+
+inline
+freyja::Material* Metadata::GetMaterial() const
+{ return mMaterial; }
+
+
+inline
+mstl::String Metadata::GetInfo() const
+{
+	return mstl::String( "Metadata" );
+}
+
+inline
+const hel::Quat& Metadata::GetWorldOrientation() const
+{
+	return mOrientation;
+}
+
+inline
+const hel::Vec3& Metadata::GetWorldPosition() const
+{
+	return mPosition;
+}
+
+inline
+freyja::Node* Metadata::Duplicate( ) const
+{
+	return NULL;
+}
+
+inline
+void Metadata::DuplicateChildren( freyja::Node* parent, bool recurse )
+{
+}
 
 } // freyja
 

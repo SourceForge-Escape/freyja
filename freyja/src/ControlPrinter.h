@@ -78,7 +78,7 @@ public:
 	 ------------------------------------------------------*/
 
 	static void Print( const char* s );
-	static void PrintArgs(const char *format, va_list *args);
+	//static void PrintArgs(const char *format, va_list *args);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : WARNING: Non-local va_list only works with glibc

@@ -112,7 +112,8 @@ class Vec3
 	 *
 	 ------------------------------------------------------*/
 
-	void Get(vec3_t v) { memcpy(v, mVec, sizeof(vec3_t)); }
+	void Get(vec3_t v) const
+	{ memcpy(v, mVec, sizeof(vec3_t)); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Copies Vec3 to floating point array <v>.

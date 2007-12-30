@@ -34,6 +34,11 @@
 
 namespace freyja {
 
+class Renderable;
+typedef mstl::list<freyja::Renderable*> RenderableList;
+typedef mstl::list<freyja::Renderable*>::iterator RenderableIterator;
+
+
 class Renderable
 {
 public:

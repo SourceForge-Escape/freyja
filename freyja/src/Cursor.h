@@ -27,8 +27,10 @@
 #include <mstl/stack.h>
 
 #include "freyja_events.h"
-#include "FreyjaState.h"
 
+#ifdef FIXME
+#   include "FreyjaState.h"
+#endif
 
 namespace freyja3d {
 

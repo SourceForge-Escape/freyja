@@ -18,13 +18,14 @@
 #include "config.h"
 
 #include <freyja/MeshABI.h>
-#include <freyja/TextureABI.h>
+#include <freyja/PixelBuffer.h>
 #include <freyja/LightABI.h>
 #include <freyja/MaterialABI.h>
 #include <freyja/SkeletonABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/Mesh.h>
 #include <freyja/Bone.h>
+#include <freyja/Scene.h>
 
 #include <mgtk/mgtk_events.h>
 #include <mgtk/ResourceEvent.h>
@@ -36,17 +37,27 @@
 #include "FreyjaControl.h"
 
 using namespace freyja3d;
+using namespace freyja;
 
+extern freyja::Scene* gScene;
 
 void polymap_update_question()
 {
 	if (mgtk::ExecuteConfirmationDialog("PolyMapDialog"))
 	{
-		Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
-		m->ConvertAllFacesToTexCoordPloymapping();
+		//FIXME Mesh *m = gScene->GetSelectedMesh();
+		//FIXME m->ConvertAllFacesToTexCoordPloymapping();
 	}
 }
 
+
+int freyja3d_misc_vec_compare_func(const void* a, const void* b)
+{
+	vec_t aa = *(vec_t*)a;
+	vec_t bb = *(vec_t*)b;
+
+	return ( aa < bb ) ? -1 : ( aa == bb ) ? 0 : 1;
+}
 
 
 ////////////////////////////////////////////////////////////
@@ -62,28 +73,20 @@ void eNoImplementation(ResourceEvent *e)
 
 void eExportKeyAsMesh()
 {
-	Mesh* mesh = freyjaGetMeshClass( FreyjaControl::GetInstance()->GetSelectedMesh() );
+	Mesh* mesh = gScene->GetCurrentMesh();
 
 	if ( mesh )
 	{	
-		Mesh* copy = mesh->CopyWithBlendedVertices();
-		copy->AddToPool();
+		//FIXME Mesh* copy = mesh->CopyWithBlendedVertices();
+		//FIXME copy->AddToPool();
 		freyja_print( "Converted keyframe to mesh." );
 	}
 }
 
 
-int freyja3d_misc_vec_compare_func(const void* a, const void* b)
-{
-	vec_t aa = *(vec_t*)a;
-	vec_t bb = *(vec_t*)b;
-
-	return ( aa < bb ) ? -1 : ( aa == bb ) ? 0 : 1;
-}
-
-
 void eConvertSkelToMeshAnim()
 {
+#if FIXME
 	// FIXME: It might be good to allow an option to pad out times 
 	//        to a set interval instead of just unique frames.
 
@@ -182,11 +185,13 @@ void eConvertSkelToMeshAnim()
 						  __func__, unique_times.size(), clone->GetVertexAnimKeyframeCount(0) );
 		}
 	}
+#endif
 }
 
 
 void eMeshUnselectFaces()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if ( m )
@@ -198,11 +203,13 @@ void eMeshUnselectFaces()
 
 		freyja_print("Reset selected flag on all faces in mesh.");
 	}
+#endif
 }
 
 
 void eMeshUnselectVertices()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if ( m )
@@ -214,6 +221,7 @@ void eMeshUnselectVertices()
 
 		freyja_print("Reset selected flag on all vertices in mesh.");
 	}
+#endif
 }
 
 
@@ -225,46 +233,55 @@ void eSetSelectedViewport(unsigned int value)
 
 void eSelectedFacesGenerateNormals()
 {
-	Mesh *m = freyjaGetMeshClass(FreyjaControl::GetInstance()->GetSelectedMesh());
+#if FIXME
+	Mesh *m = gScene->GetSelectedMesh();
 
 	if (m)
 	{
 		m->SelectedFacesGenerateVertexNormals();
 	}
+#endif
 }
 
 
 void eSelectedFacesFlipNormals()
 {
-	Mesh *m = freyjaGetMeshClass(FreyjaControl::GetInstance()->GetSelectedMesh());
+#if FIXME
+	Mesh *m = gScene->GetSelectedMesh();
 
 	if (m)
 	{
 		m->SelectedFacesFlipVertexNormals();
 	}
+#endif
 }
 
 
 void eSelectedFacesDelete()
 {
-	Mesh *m = freyjaGetMeshClass(FreyjaControl::GetInstance()->GetSelectedMesh());
+#if FIXME
+	Mesh *m = gScene->GetSelectedMesh();
 
 	if (m)
 	{
 		m->DeleteSelectedFaces();
 	}
+#endif
 }
 
 
 void eSmoothingGroupsDialog()
 {
+#if FIXME
 	uint32 id = ResourceEvent::GetResourceIdBySymbol("eSmoothingGroupsDialog");
 	mgtk_event_dialog_visible_set(id, 1);	
+#endif
 }
 
 
 void eSmooth(unsigned int group, unsigned int value)
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -285,11 +302,13 @@ void eSmooth(unsigned int group, unsigned int value)
 
 		freyja_event_gl_refresh();
 	}
+#endif
 }
 
 
 void eGroupClear()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -306,11 +325,13 @@ void eGroupClear()
 		m->SelectedFacesMarkSmoothingGroup(group, false);
 		freyja_event_gl_refresh();
 	}
+#endif
 }
 
 
 void eSetSelectedFacesAlpha()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -323,11 +344,13 @@ void eSetSelectedFacesAlpha()
 	{
 		freyja_print("Alpha flag can not be set. No selected faces.");
 	}
+#endif
 }
 
 
 void eClearSelectedFacesAlpha()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -340,11 +363,13 @@ void eClearSelectedFacesAlpha()
 	{
 		freyja_print("Alpha flag can not be cleared. No selected faces.");
 	}
+#endif
 }
 
 
 void eGroupAssign()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -364,6 +389,7 @@ void eGroupAssign()
 		//m->GroupedFacesGenerateVertexNormals(group);
 		freyja_event_gl_refresh();
 	}
+#endif
 }
 
 
@@ -376,6 +402,7 @@ void eWeight(vec_t w)
 
 void eAssignWeight()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -384,10 +411,12 @@ void eAssignWeight()
 		m->SetWeightSelectedVertices(bone, gWeight);
 		freyja_print("Selected vertices set to bone %i weighting to %f.", bone, gWeight);
 	}
+#endif
 }
 
 void eClearWeight()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -396,19 +425,23 @@ void eClearWeight()
 		m->RemoveWeightSelectedVertices(bone);
 		freyja_print("Selected vertices removing bone %i weighting...", bone);
 	}
+#endif
 }
 
 
 void eBoneRefreshBindPose()
 {
+#if FIXME
 	index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
 	Bone *b = Bone::GetBone( bone );
 	if (b) b->UpdateBindPose();
+#endif
 }
 
 
 void eMirrorMeshX()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -418,10 +451,12 @@ void eMirrorMeshX()
 		freyja_print("Mirroring mesh over X...");
 		m->TransformVertices(mat);
 	}
+#endif
 }
 
 void eMirrorMeshY()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -431,11 +466,13 @@ void eMirrorMeshY()
 		freyja_print("Mirroring mesh over Y...");
 		m->TransformVertices(mat);
 	}
+#endif
 }
 
 
 void eMirrorMeshZ()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -445,11 +482,13 @@ void eMirrorMeshZ()
 		freyja_print("Mirroring mesh over Z...");
 		m->TransformVertices(mat);
 	}
+#endif
 }
 
 
 void eMirrorFacesX()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -460,11 +499,13 @@ void eMirrorFacesX()
 		//m->TransformFacesWithFlag(Face::fSelected, mat);
 		m->TransformVertices(mat);
 	}
+#endif
 }
 
 
 void eMirrorFacesY()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -475,11 +516,13 @@ void eMirrorFacesY()
 		m->TransformFacesWithFlag(Face::fSelected, mat);
 		m->TransformVertices(mat);
 	}
+#endif
 }
 
 
 void eMirrorFacesZ()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
@@ -490,6 +533,7 @@ void eMirrorFacesZ()
 		m->TransformFacesWithFlag(Face::fSelected, mat);
 		m->TransformVertices(mat);
 	}
+#endif
 }
 
 
@@ -502,28 +546,33 @@ void eSnapWeldVertsDist(vec_t d)
 
 void eSnapWeldVerts()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
 		m->WeldVerticesByDistance(gSnapWeldVertsDist);
 	}
+#endif
 }
 
 void eCleanupVertices()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 
 	if (m)
 	{
 		m->VertexCleanup();
 	}
+#endif
 }
 
 
 
 void eGenerateCone()
 {
+#if FIXME
 	FREYJA_INFOMSG(0, "FIXME: Replace obsolete mesh generator.");
 	const char *dialog = "GenerateTubeDialog";
 	int ok = mgtk_execute_query_dialog(dialog);
@@ -540,11 +589,13 @@ void eGenerateCone()
 		freyjaMeshCreateCone(v.mVec, height, radius, wedges);
 		FreyjaControl::GetInstance()->Dirty();
 	}
+#endif
 }
 
 
 void eGenerateCylinder()
 {
+#if FIXME
 	FREYJA_INFOMSG(0, "FIXME: Replace obsolete mesh generator.");
 	const char *dialog = "GenerateTubeDialog";
 	int ok = mgtk_execute_query_dialog(dialog);
@@ -561,11 +612,13 @@ void eGenerateCylinder()
 		freyjaMeshCreateCylinder(v.mVec, height, radius, count, segments);
 		FreyjaControl::GetInstance()->Dirty();
 	}
+#endif
 }
 
 
 void eGenerateTube()
 {
+#if FIXME
 	const char *dialog = "GenerateTubeDialog";
 	int ok = mgtk_execute_query_dialog(dialog);
 
@@ -581,11 +634,13 @@ void eGenerateTube()
 		freyjaMeshCreateTube(v.mVec, height, radius, count, segments);
 		FreyjaControl::GetInstance()->Dirty();		
 	}
+#endif
 }
 
 
 void eGenerateSphere()
 {
+#if FIXME
 	const char *dialog = "GenerateSphereDialog";
 	int ok = mgtk_execute_query_dialog(dialog);
 
@@ -596,10 +651,11 @@ void eGenerateSphere()
 
 		hel::Vec3 v;
 		//freyjaGenerateSphereMesh(v.mVec, radius * 2.0f, count, count);
-		index_t mesh = freyjaMeshCreateSphere(v.mVec, radius * 2.0f, count, count);
-		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
+		freyja::Mesh* mesh = freyjaMeshCreateSphere(v.mVec, radius * 2.0f, count, count);
+		//FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
 		FreyjaControl::GetInstance()->Dirty();
 	}
+#endif
 }
 
 
@@ -616,10 +672,11 @@ void eGenerateCube()
 		float size = mgtk_get_query_dialog_float(dialog, "size");
 
 		hel::Vec3 v(size * -0.5f, 0.0f, size * -0.5f);
-		index_t mesh = freyjaMeshCreateCube(v.mVec, size);
-		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
+		freyja::Mesh* mesh = (freyja::Mesh*)freyjaMeshCreateCube(v.mVec, size);
+		gScene->Add( mesh );
+		gScene->SetCurrentMesh( mesh );
 		FreyjaControl::GetInstance()->Dirty();
-
+		
 		freyja3d_scenegraph_update();
 	}
 }
@@ -627,6 +684,7 @@ void eGenerateCube()
 
 void eGeneratePlane()
 {
+#if FIXME
 	const char *dialog = "GenerateSheetDialog";
 	int ok = mgtk_execute_query_dialog(dialog);
 
@@ -644,11 +702,13 @@ void eGeneratePlane()
 		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
 		FreyjaControl::GetInstance()->Dirty();		
 	}
+#endif
 }
 
 
 void eGenerateCircle()
 {
+#if FIXME
 	const char *dialog = "GenerateCircleDialog";
 	int ok = mgtk_execute_query_dialog(dialog);
 
@@ -662,11 +722,13 @@ void eGenerateCircle()
 		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
 		FreyjaControl::GetInstance()->Dirty();		
 	}
+#endif
 }
 
 
 void eGenerateRing()
 {
+#if FIXME
 	const char *dialog = "GenerateRingDialog";
 	int ok = mgtk_execute_query_dialog(dialog);
 
@@ -681,18 +743,22 @@ void eGenerateRing()
 		FreyjaControl::GetInstance()->SetSelectedMesh(mesh);
 		FreyjaControl::GetInstance()->Dirty();		
 	}
+#endif
 }
 
 
 void eMeshTesselate()
 {
+#if FIXME
 	freyjaMeshTesselateTriangles(FreyjaControl::GetInstance()->GetSelectedMesh());
 	FreyjaControl::GetInstance()->Dirty();
+#endif
 }
 
 
 void eMeshTexcoordSpherical()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 	if (m)
 	{
@@ -701,11 +767,13 @@ void eMeshTexcoordSpherical()
 		polymap_update_question();
 		FreyjaControl::GetInstance()->Dirty();
 	}
+#endif
 }
 
 
 void eMeshTexcoordCylindrical()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 	if (m)
 	{
@@ -714,11 +782,13 @@ void eMeshTexcoordCylindrical()
 		polymap_update_question();
 		FreyjaControl::GetInstance()->Dirty();
 	}
+#endif
 }
 
 
 void eMeshTexcoordPlaneProj()
 {
+#if FIXME
 	Mesh *m = Mesh::GetMesh(FreyjaControl::GetInstance()->GetSelectedMesh());
 	if (m)
 	{
@@ -727,14 +797,17 @@ void eMeshTexcoordPlaneProj()
 		polymap_update_question();
 		FreyjaControl::GetInstance()->Dirty();
 	}
+#endif
 }
 
 
 void eMeshGenerateNormals()
 {
+#if FIXME
 	freyjaMeshGenerateVertexNormals(FreyjaControl::GetInstance()->GetSelectedMesh());
 	freyja_event_gl_refresh();
 	FreyjaControl::GetInstance()->Dirty();
+#endif
 }
 
 // This should be moved back into control with a -W/Int prefix
@@ -784,6 +857,7 @@ void eBoneNew()
 
 void eExtrude()
 {
+#if FIXME
 	// FIXME: Give user the option of pick ray and face normal control
 	hel::Vec3 v = FreyjaRender::mTestRay.GetDir();
 	v *= -8.0f;
@@ -823,14 +897,17 @@ void eExtrude()
 #endif
 
 	FreyjaControl::GetInstance()->Dirty();
+#endif
 }
 
 void eMeshFlipNormals()
 {
+#if FIXME
 	freyjaMeshNormalFlip(FreyjaControl::GetInstance()->GetSelectedMesh());
 	freyja_print("Flipping normals for mesh[%i]", 
 				 FreyjaControl::GetInstance()->GetSelectedMesh());
 	FreyjaControl::GetInstance()->Dirty();
+#endif
 }
 
 
@@ -935,17 +1012,20 @@ void eTestAssertMsgBox()
 
 void eBoneMetadataText(char *text)
 {
+#if FIXME
 	index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
 	Bone *b = Bone::GetBone( bone );
 	if (text && b)
 	{
 		b->mMetaData = text;
 	}
+#endif
 }
 
 
 void eBoneMetadata()
 {
+#if FIXME
 	index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
 	Bone *b = Bone::GetBone( bone );
 	if (b)
@@ -957,11 +1037,13 @@ void eBoneMetadata()
 		mgtk_create_query_dialog_text("gtk-dialog-question", 
 									  s.c_str(), e, b->mMetaData.c_str());
 	}
+#endif
 }
 
 
 void eBoneKeyFrameMetadataText(char *text)
 {
+#if FIXME
 	index_t bone = FreyjaControl::GetInstance()->GetSelectedBone();
 	Bone *b = Bone::GetBone( bone );
 	if (text && b)
@@ -970,11 +1052,13 @@ void eBoneKeyFrameMetadataText(char *text)
 		uint32 key = FreyjaControl::GetInstance()->GetSelectedKeyFrame();
 		track.SetMetadata(key, text);
 	}
+#endif
 }
 
 
 void eBoneKeyFrameMetadata()
 {
+#if FIXME
 	FreyjaControl *cntrl = FreyjaControl::GetInstance();
 
 	index_t bone = cntrl->GetSelectedBone();
@@ -993,12 +1077,14 @@ void eBoneKeyFrameMetadata()
 		mgtk_create_query_dialog_text("gtk-dialog-question", 
 									  s.c_str(), e, track.GetMetadata(id) );
 	}
+#endif
 }
 
 
 #include <freyja/Metadata.h>
 void eMetadataIterator(unsigned int id)
 {
+#if FIXME
 	FreyjaControl::GetInstance()->SetSelectedMetadata( id );
 
 	// Test, Do we want to assume the user always wants to edit from this event?
@@ -1036,6 +1122,7 @@ void eMetadataIterator(unsigned int id)
 		}
 	}
 
+#endif
 }
 
 

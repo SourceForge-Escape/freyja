@@ -149,25 +149,34 @@ extern "C" {
 	//  Freyja library util functions
 	///////////////////////////////////////////////////////////////////////
 
-	void freyjaSpawn();
+	const char* freyja_get_version( );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Starts freyja backend, also does needed allocations
+	 * Post : String version info.
+	 *        
 	 ------------------------------------------------------*/
 
-	void freyjaFree();
+	void freyja_start( freyja_ptr printer );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Stops freyja backend, also frees memory used
+	 * Post : Starts freyja backend.
+	 *
 	 ------------------------------------------------------*/
 
-	void freyjaPrintError(const char *format, ...);
+	void freyja_shutdown( );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Stops freyja backend.
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaPrintError( const char *format, ... );
 	/*------------------------------------------------------
 	 * Pre  : Format string and args are valid
 	 * Post : Report messages to stderr or gPrinter
 	 ------------------------------------------------------*/
 
-	void freyjaAssertHandler(FreyjaAssertCallback func);
+	void freyja_set_assert_handler( FreyjaAssertCallback func );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Assertion event handler is assigned.
@@ -309,12 +318,6 @@ extern "C" {
 	 *        Returns 0 on sucess
 	 ------------------------------------------------------*/
 
-	const char* libfreyjaVersion();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : String version info.
-	 *        
-	 ------------------------------------------------------*/
 
 }
 

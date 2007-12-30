@@ -420,7 +420,7 @@ public:
 	}
 
 
-	Data SearchByKey(Key key, bool *error)
+	Data SearchByKey(Key key, bool *error) const
 	{
 		TreeNode<Key, Data> *seeking;
 

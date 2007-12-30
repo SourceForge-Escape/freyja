@@ -35,6 +35,9 @@
 #include "freyja_events.h"
 
 
+
+#ifdef FIXME
+
 void freyja3d_scenegraph_update_skeleton_helper(mgtk_tree_t* subroot, int event, index_t id)
 {
 	if (!subroot)
@@ -144,7 +147,15 @@ void freyja3d_scenegraph_update_light(mgtk_tree_t* scene)
 		mgtk_tree_add_new_child( light, s.c_str(), event, i );
 	}
 }
+#else
 
+void freyja3d_scenegraph_update_metadata(mgtk_tree_t* scene) {}
+void freyja3d_scenegraph_update_model(mgtk_tree_t* scene) {}
+void freyja3d_scenegraph_update_material(mgtk_tree_t* scene) {}
+void freyja3d_scenegraph_update_skeleton(mgtk_tree_t* scene) {}
+void freyja3d_scenegraph_update_camera(mgtk_tree_t* scene) {}
+void freyja3d_scenegraph_update_light(mgtk_tree_t* scene) {}
+#endif
 
 void freyja3d_scenegraph_update()
 {
@@ -176,6 +187,7 @@ void freyja3d_scenegraph_update()
 	/* Free tree model. */
 	mgtk_tree_delete( scene );
 
+#ifdef FIXME
 	/* Update custom time slider after import for testing... current animation backend sucks. */
 	{
 		int event = freyja3d_get_event_id( "eAnimationSlider" );
@@ -205,6 +217,7 @@ void freyja3d_scenegraph_update()
 			}
 		}
 	}
+#endif
 }
 
 
