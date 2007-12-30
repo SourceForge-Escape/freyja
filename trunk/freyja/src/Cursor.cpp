@@ -146,7 +146,7 @@ bool Cursor::CheckForRayCollision(hel::Ray &r)
 			const uint32 count = 64;
 
 			vec_t x, z, i;
-			Vector<vec_t> xs, zs;
+			mstl::Vector<vec_t> xs, zs;
 			xs.reserve(count);
 			zs.reserve(count);
 
@@ -454,7 +454,7 @@ void Cursor::Draw3dCursorRotHitBoxes()
 	const uint32 count = 64;
 
 	vec_t x, z, i;
-	Vector<vec_t> xs, zs;
+	mstl::Vector<vec_t> xs, zs;
 
 	xs.reserve(count);
 	zs.reserve(count);

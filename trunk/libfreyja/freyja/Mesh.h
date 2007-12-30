@@ -777,6 +777,13 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	virtual XMLSerializerNode CreateXMLSerializerNode( ) const;
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Creates serializer node for this object.
+	 *
+	 ------------------------------------------------------*/
+
 	FREYJA_NODE_INTERFACE
 	/*------------------------------------------------------
 	 * Pre  :  
@@ -812,7 +819,7 @@ protected:
 	freyja::FloatArray mNormalArray;
 	freyja::FloatArray mTexcoordArray;
 
-	mstl::stack<uint32> mGaps;             /* Gaps in array usage. */
+	mstl::list<uint32> mGaps;              /* Gaps in array usage. */
 
 	mstl::list<Vertex*> mSelectedVertices; /* List of selected vertices. */
 
@@ -823,8 +830,6 @@ protected:
 	mstl::Vector<freyja::Face*> mFaces;
 
 	mstl::Vector<freyja::Vertex*> mVertices;
-
-	mstl::Vector<freyja::Plane*> mPlanes;
 
 	mstl::Vector<freyja::Edge*> mEdges;
 };

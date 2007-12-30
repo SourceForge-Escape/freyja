@@ -210,6 +210,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	
 private:
 
 	mstl::Vector<vec_t> mArray;     /* Vertex array. */

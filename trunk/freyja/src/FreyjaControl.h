@@ -29,7 +29,6 @@
 #ifndef GUARD__FREYJA3D_FREYJACONTROL_H_
 #define GUARD__FREYJA3D_FREYJACONTROL_H_
 
-#include <freyja/ModelABI.h>
 #include <freyja/MeshABI.h>
 #include <freyja/BoneABI.h>
 #include <freyja/SkeletonABI.h>
@@ -219,8 +218,7 @@ class FreyjaControl : public Control
 	 ------------------------------------------------------*/
 
 	uint32 GetSelectedBone() { return mSelectedBone; }
-	void SetSelectedBone(uint32 i) 
-	{ if (i < freyjaGetBoneCount()) mSelectedBone = i; }
+	void SetSelectedBone(uint32 i) { mSelectedBone = i; }
 	uint32 mSelectedBone;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -229,8 +227,7 @@ class FreyjaControl : public Control
 	 ------------------------------------------------------*/
 
 	uint32 GetSelectedFace() { return mSelectedFace; }
-	void SetSelectedFace(uint32 i) 
-	{ if (i < freyjaGetMeshPolygonCount(mSelectedMesh)) mSelectedFace = i; }
+	void SetSelectedFace(uint32 i) { mSelectedFace = i; }
 	uint32 mSelectedFace;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -272,8 +269,7 @@ class FreyjaControl : public Control
 	 ------------------------------------------------------*/
 
 	uint32 GetSelectedSkeleton() { return mSelectedSkeleton; }
-	void SetSelectedSkeleton(uint32 i) 
-	{ if (i < freyjaGetSkeletonCount()) mSelectedSkeleton = i; }
+	void SetSelectedSkeleton(uint32 i) { mSelectedSkeleton = i; }
 	uint32 mSelectedSkeleton;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -282,8 +278,7 @@ class FreyjaControl : public Control
 	 ------------------------------------------------------*/
 
 	uint32 GetSelectedTexCoord() { return mSelectedTexCoord; }
-	void SetSelectedTexCoord(uint32 i) 
-	{ if (i < freyjaGetMeshTexCoordCount(mSelectedMesh)) mSelectedTexCoord = i; }
+	void SetSelectedTexCoord(uint32 i) { mSelectedTexCoord = i; }
 	uint32 mSelectedTexCoord;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -292,8 +287,7 @@ class FreyjaControl : public Control
 	 ------------------------------------------------------*/
 
 	uint32 GetSelectedVertex() { return mSelectedVertex; }
-	void SetSelectedVertex(uint32 i) 
-	{ if (i < freyjaGetMeshVertexCount(mSelectedMesh)) mSelectedVertex = i; }
+	void SetSelectedVertex(uint32 i) { mSelectedVertex = i; }
 	uint32  mSelectedVertex;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -365,23 +359,6 @@ class FreyjaControl : public Control
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get current 3d cursor. 
-	 *
-	 ------------------------------------------------------*/
-
-	bool UnserializeMesh(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serializes only currently selected mesh to file. 
-	 *       Returns true if sucessful
-	 *
-	 ------------------------------------------------------*/
-
-	bool SerializeBones(const char *filename);
-	bool UnserializeBones(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Serializes only bones/joints to file. 
-	 *       Returns true if sucessful
 	 *
 	 ------------------------------------------------------*/
 
@@ -639,14 +616,14 @@ class FreyjaControl : public Control
 
 	void EvMeshRepack()
 	{
-		Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
-		if (m) m->Repack();
+		//Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
+		//if (m) m->Repack();
 	}
 
 	void EvPolygonSplit()
 	{
 		Print("Splitting polygon[%i] ...", GetSelectedFace());
-		freyjaMeshPolygonSplit(GetSelectedMesh(), GetSelectedFace());
+		//freyjaMeshPolygonSplit(GetSelectedMesh(), GetSelectedFace());
 		Dirty();
 	}
 
@@ -654,7 +631,7 @@ class FreyjaControl : public Control
 	{
 		Print("Switching all of Mesh[%i]'s faces to material %i ...",
 			  GetSelectedMesh(), GetSelectedMaterial());
-		freyjaMeshMaterial(GetSelectedMesh(), GetSelectedMaterial());
+		//freyjaMeshMaterial(GetSelectedMesh(), GetSelectedMaterial());
 		Dirty();
 	}
 
@@ -675,8 +652,8 @@ class FreyjaControl : public Control
 
 	void EvSelectVerticesByFaces()
 	{
-		Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
-		if (m) m->SelectVerticesOfSelectedFaces();
+		//Mesh *m = Mesh::GetMesh( GetSelectedMesh() );
+		//if (m) m->SelectVerticesOfSelectedFaces();
 	}
 
 	void SetModiferMode(action_type_t mode, const char *name,
@@ -781,13 +758,13 @@ class FreyjaControl : public Control
 
 	void EvRecentKeyframe(uint32 value);
 
-	void EvRecentMeshXML(uint32 value) 
-	{ UnserializeMesh( mRecentMesh.GetFilename(value) ); }
+	void EvRecentMeshXML(uint32 value)
+	{ }//UnserializeMesh( mRecentMesh.GetFilename(value) ); }
 
 	void EvRecentMetadataXML(uint32 value);
 
 	void EvRecentSkeletonXML(uint32 value) 
-	{ UnserializeBones( mRecentSkeleton.GetFilename(value) ); }
+	{ }//UnserializeBones( mRecentSkeleton.GetFilename(value) ); }
 
 	void EvOpenShader(char *text);
 	void EvOpenTexture(char *text);
@@ -1313,7 +1290,7 @@ hel::Ray& FreyjaControl::CastPickRay2(vec_t x, vec_t y)
 inline
 void FreyjaControl::Clear()
 {
-	freyjaModelClear(GetSelectedModel());
+	//freyjaModelClear(GetSelectedModel());
 	UpdateSkeletalUI();
 	mCursor.Reset();
 	mCleared = true;

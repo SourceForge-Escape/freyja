@@ -27,52 +27,17 @@ extern "C" {
 	// CAMERA
 	///////////////////////////////////////////////////////////////////////
 
-	uint32 freyjaGetCameraCount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns number of cameras in scene.
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaCameraPoolClear();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Frees all allocated cameras.
-	 *
-	 ------------------------------------------------------*/
-
-	index_t freyjaCameraCreate();
+	freyja_ptr freyjaCameraCreate( const char* name );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *        
 	 ------------------------------------------------------*/
 
-	void freyjaCameraDelete(index_t cameraIndex);
+	void freyjaCameraDelete( freyja_ptr camera );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaCameraClearFlags(index_t cameraIndex, byte flags);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Clear camera flags
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaCameraSetFlags(index_t cameraIndex, byte flags);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set camera flags
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaCameraName(index_t cameraIndex, const char *name);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set human readable camera name
 	 *
 	 ------------------------------------------------------*/
 
@@ -119,142 +84,6 @@ extern "C" {
 	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
-	const char *freyjaGetCameraNameString(index_t cameraIndex);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 ------------------------------------------------------*/
-
-
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets camera[index]'s position
-	 ------------------------------------------------------*/
-
-	void freyjaCameraMetadata(index_t camera, const char *metadata);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set XML metadata for this camera.
-	 *
-	 ------------------------------------------------------*/
-
-	const char *freyjaGetCameraMetadata(index_t camera);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get XML metadata for this camera.
-	 *
-	 ------------------------------------------------------*/
-
-
-	///////////////////////////////////////////////////////////////
-	// Tracks
-	///////////////////////////////////////////////////////////////
-
-	index_t freyjaCameraCreateTrack(index_t camera);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Make a new camera animation track for mesh
-	 *
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetCameraTrackCount(index_t camera);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Number of animation tracks for this camera.
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaCameraTrackDuration(index_t camera, index_t track, vec_t duration);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set track duration.
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaCameraTrackRate(index_t camera, index_t track, vec_t fps);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set track rate in frames per second.
-	 *
-	 ------------------------------------------------------*/
-
-
-	///////////////////////////////////////////////////////////////
-	// Keyframes 
-	///////////////////////////////////////////////////////////////
-
-	index_t freyjaCameraCreateKeyframe(index_t camera, index_t track, vec_t time);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Make a new camera animation keyframe for track
-	 *
-	 ------------------------------------------------------*/
-
-	uint32 freyjaGetCameraKeyframeCount(index_t camera, index_t track);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Number of keyframes in the track for this camera.
-	 *
-	 ------------------------------------------------------*/
-
-	vec_t freyjaGetCameraKeyframeTime(index_t camera, 
-									  index_t track, index_t key);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Time offset of the keyframe for the track...
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaCameraKeyframeMetadata(index_t camera, 
-									  index_t track, index_t key, 
-									  const char *metadata);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set XML metadata for this keyframe.
-	 *
-	 ------------------------------------------------------*/
-
-	const char *freyjaGetCameraKeyframeMetadata(index_t camera, 
-												index_t track, index_t key);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get XML metadata for this keyframe.
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaCameraKeyframePos3f(index_t camera, index_t track, index_t key,
-								   vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set camera position for keyframe.
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaGetCameraKeyframePos3fv(index_t camera, 
-									   index_t track, index_t key,
-									   vec3_t xyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get camera position for keyframe.
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaGetCameraKeyframeRotQuat4fv(index_t camera, 
-										   index_t track, index_t key,
-										   vec4_t wxyz);
-	/*------------------------------------------------------
-	 * Pre  : Quaterion is WXYZ order to match 0.9.3 ABIs! 
-	 * Post : Get camera orientation for keyframe.
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaCameraKeyframeRotQuat4f(index_t camera, index_t track, index_t key,
-									   vec_t w, vec_t x, vec_t y, vec_t z);
-	/*------------------------------------------------------
-	 * Pre  : Quaterion is WXYZ order to match 0.9.3 ABIs! 
-	 * Post : Set camera orientation for keyframe.
-	 *
-	 ------------------------------------------------------*/
 
 }
 

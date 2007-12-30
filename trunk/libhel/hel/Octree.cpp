@@ -47,8 +47,8 @@ public:
 	TiXmlElement* mElement;
 };
 
-template<>
-XMLNode* mstl::list<XMLNode*>::mDefault = NULL; 
+//template<>
+//XMLNode* mstl::list<XMLNode*>::mDefault = NULL; 
 
 
 ////////////////////////////////////////////////////////////

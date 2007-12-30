@@ -562,13 +562,14 @@ void ePluginImport(ResourceEvent *e)
 					freyja3d_record_saved_model(filename);
 					freyja_print("! Imported: '%s'\n", filename);
 
+#if FIXME
 					// Update skeletal UI
 					if (freyjaGetCurrentSkeleton() == INDEX_INVALID &&
 						freyjaGetSkeletonCount() > 0)
 					{
 						freyjaCurrentSkeleton(0);
 					}
-
+#endif
 					freyja3d_scenegraph_update();
 				}
 			}

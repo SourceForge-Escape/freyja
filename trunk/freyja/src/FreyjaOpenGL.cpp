@@ -23,16 +23,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <hel/Vec3.h>
 #include <freyja/freyja.h>
 #include <freyja/MaterialABI.h>
-
-#ifdef HAVE_FREYJA_IMAGE
-#   include <freyja/FreyjaImage.h>
-#endif
-
-#include <hel/math.h>
-#include <hel/Vec3.h>
+#include <freyja/PixelBuffer.h>
 #include <mstl/SystemIO.h>
+
 #include "Cursor.h"
 #include "Texture.h"
 #include "FreyjaOpenGL.h"
@@ -501,7 +497,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 	}
 
 
-	String s = filename;
+	mstl::String s = filename;
 
 	for (uint32 i = s.length() - 1; i > 0; --i)
 	{
@@ -657,7 +653,7 @@ void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 
 	freyja_print("! %s%s", comment, buffer);
 
-	String s = comment;
+	mstl::String s = comment;
 
 	for (int32 i = 0; i < length; ++i)
 	{

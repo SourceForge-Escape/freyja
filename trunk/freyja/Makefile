@@ -301,6 +301,18 @@ src/freyja_events.s:
 	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/freyja_events.s
 
 # target to build an object file
+src/main.o:
+	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/main.o
+
+# target to preprocess a source file
+src/main.i:
+	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/main.i
+
+# target to generate assembly for a file
+src/main.s:
+	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/main.s
+
+# target to build an object file
 src/misc.o:
 	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/misc.o
 
@@ -365,6 +377,9 @@ help::
 	@echo "... src/freyja_events.o"
 	@echo "... src/freyja_events.i"
 	@echo "... src/freyja_events.s"
+	@echo "... src/main.o"
+	@echo "... src/main.i"
+	@echo "... src/main.s"
 	@echo "... src/misc.o"
 	@echo "... src/misc.i"
 	@echo "... src/misc.s"

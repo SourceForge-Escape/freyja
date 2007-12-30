@@ -49,7 +49,7 @@ Bone::~Bone()
 	}
 		
 	/* Reparent children to parent, and update bind pose. */
-	for ( Node::ChildIterator it = GetChildIterator(); it != it.end(); ++it )
+	for ( NodeIterator it = GetChildIterator(); it != it.end(); ++it )
 	{
 		freyja::Bone* child = (freyja::Bone*)(*it);
 		

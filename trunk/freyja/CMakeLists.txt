@@ -91,11 +91,12 @@ endif(APPLE)
 include_directories( ../mstl ../libfreyja ../libhel ../libmgtk ../tinyxml ../lua .  )
 
 link_directories( ../libfreyja ../libhel ../libmgtk ../tinyxml )
-link_libraries(	-lfreyja-0.9.5 -lhel-0.2.2 -lmgtk-0.1.1 -ltinyxml )
+link_libraries(	-lfreyja-0.10.0 -lhel-0.2.2 -lmgtk-0.1.1 -ltinyxml )
 
 set(Objs
 	src/freyja_events
 	src/freyja3d_scenegraph
+	src/main
 	src/misc
 	src/Control
 	src/ControlPrinter

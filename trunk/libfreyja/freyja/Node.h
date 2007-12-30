@@ -34,7 +34,14 @@
 
 namespace freyja {
 
+class Node;
 class NodeObserver;
+
+typedef mstl::list<freyja::Node*> NodeList;
+typedef mstl::list<freyja::Node*>::iterator NodeIterator;
+typedef mstl::avl_tree<mstl::String, freyja::Node*> NodeDictionary;
+typedef mstl::avl_tree<mstl::String, NodeList*> NodeListDictionary;
+
 
 class Node : 
 		public mstl::ObserverSubject, 
@@ -45,17 +52,11 @@ public:
 
 	typedef enum {
 
-		tWorld = 1,
+		tLocal = 1,
 		tParent,
-		tPivot, 
-		//tCenterMass,
-		tLocal
+		tWorld
 
 	} TransformSpace;
-
-	typedef mstl::list<freyja::Node*>::iterator ChildIterator;
-	typedef mstl::avl_tree<mstl::String, freyja::Node*> ChildDictionary;
-	typedef mstl::list<freyja::Node*> ChildList;
 
 
 	////////////////////////////////////////////////////////////
@@ -82,69 +83,21 @@ public:
 
 
 	////////////////////////////////////////////////////////////
-	// Properties
+	// Public methods.
 	////////////////////////////////////////////////////////////
-
-	bool IsMuted() const
-	{ return mMuted; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Is this node allowing content editing?
-	 *
-	 ------------------------------------------------------*/
-
-	virtual void Mute() 
-	{ mMuted = true; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set this node to not allow content editing.
-	 *
-	 ------------------------------------------------------*/
-
-	virtual void UnMute() 
-	{ mMuted = false; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Set this node to allow content editing.
-	 *
-	 ------------------------------------------------------*/
-
-	const char* GetMetadata() const
-	{ return mMetadata.c_str(); }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get metadata for this node.
-	 *
-	 ------------------------------------------------------*/
-
-	void SetMetadata(const char* metadata) 
-	{ mMetadata = metadata; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Set metadata for this node.
-	 *
-	 ------------------------------------------------------*/
-
-	const char* GetName() const
-	{ return mName.c_str(); }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Get the human readable name of this node.
-	 *
-	 ------------------------------------------------------*/
-
-	void SetName(const char* name) { mName = name; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : Set the human readable name of this node.
-	 *
-	 ------------------------------------------------------*/
 
 	static freyja::Node* Cast( freyja_ptr ptr )
 	{ return (freyja::Node*)ptr; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : FIXME Add RTTI checking.
+	 *
+	 ------------------------------------------------------*/
+
+	virtual XMLSerializerNode CreateXMLSerializerNode( ) const;
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Creates serializer node for this object.
 	 *
 	 ------------------------------------------------------*/
 
@@ -160,25 +113,6 @@ public:
 	 * Pre  : <parent>'s children will be duplicated and added to this node.     
 	 *        <recurse> if you want to copy the entire subtree.
 	 *
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual freyja::Node* GetParent() const
-	{ return mParent; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual void SetParent( freyja::Node* parent ) 
-	{ 
-		mParent = parent; 
-		if ( mParent ) mParent->AddChild( this );
-	}
-	/*------------------------------------------------------
-	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
@@ -205,7 +139,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	ChildIterator GetChildIterator() const
+	NodeIterator GetChildIterator() const
 	{ return mChildren.begin(); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -217,6 +151,39 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Return debug / text details of node.
+	 *
+	 ------------------------------------------------------*/
+
+	const char* GetMetadata() const
+	{ return mMetadata.c_str(); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get metadata for this node.
+	 *
+	 ------------------------------------------------------*/
+
+	bool GetMute() const
+	{ return mMuted; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Is this node allowing content editing?
+	 *        IsMuted() was sexier...
+	 *
+	 ------------------------------------------------------*/
+
+	const char* GetName() const
+	{ return mName.c_str(); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Get the human readable name of this node.
+	 *
+	 ------------------------------------------------------*/
+
+	virtual freyja::Node* GetParent() const
+	{ return mParent; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get parent of this node, which can be NULL.
 	 *
 	 ------------------------------------------------------*/
 
@@ -270,11 +237,47 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+
+	////////////////////////////////////////////////////////////
+	// Properties
+	////////////////////////////////////////////////////////////
+
+	void SetMetadata( const char* metadata ) 
+	{ mMetadata = metadata; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set metadata for this node.
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void SetMute( bool mute ) 
+	{ mMuted = mute; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set this node to [not] allow content editing.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetName( const char* name ) 
+	{ mName = name; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set the human readable name of this node.
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void SetParent( freyja::Node* parent );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : (Re)parent this node to another or NULL.
+	 *
+	 ------------------------------------------------------*/
+
 	const void SetPosition( const hel::Vec3& v )
 	{ mPosition = v; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Get position property.
+	 * Post : Set position property.
 	 *
 	 ------------------------------------------------------*/
 
@@ -282,7 +285,7 @@ public:
 	{ mOrientation = q; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Get orientation property.
+	 * Post : Set orientation property.
 	 *
 	 ------------------------------------------------------*/
 
@@ -290,7 +293,7 @@ public:
 	{ mScale = v; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Get scale property.
+	 * Post : Set scale property.
 	 *
 	 ------------------------------------------------------*/
 
@@ -330,14 +333,14 @@ public:
 	virtual void Scale( const hel::Vec3& scale );
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Scales node (tLocal). 
+	 * Post : Scales node in tLocal space. 
 	 *
 	 ------------------------------------------------------*/
 
 	virtual void Translate( const hel::Vec3& v, TransformSpace about = tParent );
 	/*------------------------------------------------------
 	 * Pre  :  
-	 * Post : Translates node.
+	 * Post : Translates node in given space.
 	 *
 	 ------------------------------------------------------*/
 
@@ -348,15 +351,11 @@ protected:
 	// Protected methods.
 	////////////////////////////////////////////////////////////
 
-	virtual void AddChild( freyja::Node* child ) 
-	{ 
-		child->mParent = this;
-		mChildDictionary.insert( mstl::String( child->GetName() ), child );
-		mChildren.push_back( child );
-	}
+	virtual void AddChild( freyja::Node* child );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Adds child to this node's child list/dict, and
+	 *        removes child from any other parent.
 	 *
 	 ------------------------------------------------------*/
 
@@ -367,7 +366,14 @@ protected:
 	 *
 	 ------------------------------------------------------*/
 
-	void Copy( freyja::Node* node ) const;
+	virtual void NotifyOnParentChange() const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Notify observers that this node is being reparented.
+	 *
+	 ------------------------------------------------------*/
+
+	void CopyNodeMembers( freyja::Node* node ) const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Copy member values.
@@ -393,8 +399,8 @@ protected:
 
 	freyja::Node* mParent;                    /* Node parent. */
  
-	ChildList mChildren;                      /* Node children. */
-	ChildDictionary mChildDictionary;
+	NodeList mChildren;                       /* Node children. */
+	NodeDictionary mChildDictionary;
 };
 
 
@@ -406,8 +412,7 @@ public:
 	virtual ~NodeObserver() {}
 	virtual void NotifyUpdate( const Node* node ) {}
 	virtual void NotifyDelete( const Node* node ) {}
-	virtual void NotifyParent( const Node* node ) {}
-	virtual void NofityUnparent( const Node* node ) {}
+	virtual void NotifyParentChange( const Node* node ) {}
 };
 
 

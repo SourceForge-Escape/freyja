@@ -22,31 +22,20 @@
 #ifndef GUARD__FREYJA_VERTEX_H_
 #define GUARD__FREYJA_VERTEX_H_
 
-#include <hel/math.h>
-#include <mstl/Vector.h>
 #include <mstl/list.h>
-
-#include "XMLSerializer.h"
 #include "freyja.h"
 
 
 namespace freyja {
 
+class Vertex;
+typedef mstl::list<freyja::Vertex*> VertexList;
+typedef mstl::list<freyja::Vertex*>::iterator VertexIterator;
+typedef mstl::list<index_t>::iterator VertexIndexIterator;
 
 class Vertex
 {
 public:
-	typedef enum {
-		fNone        =  0,
-		fHighlighted =  1,
-		fMaterial    =  2,
-		fSelected    =  4,
-		fHidden      =  8,
-		fRayHit      = 16,
-		fSelected2   = 32,   // Only used internally per method in Mesh
-		fMuted       = 64
-
-	} Flags;
 
 	Vertex();
 	/*------------------------------------------------------
@@ -69,51 +58,14 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool Serialize( XMLSerializerNode container );
+	VertexIndexIterator GetIndexIterator() const
+	{ return mIndices.begin(); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Access the Face references.
 	 *
 	 ------------------------------------------------------*/
 
-	bool Unserialize( XMLSerializerNode container );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	void Meld( Vertex& v );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-	
-	const byte& GetFlags( ) 
-	{ return mFlags; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns option flag bitmap.
-	 *
-	 ------------------------------------------------------*/
-
-	void ClearFlag( Flags flag ) 
-	{ mFlags &= ~flag; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Clears option flag if not mute.
-	 *
-	 ------------------------------------------------------*/
-
-	void SetFlag( Flags flag )
-	{ mFlags |= flag; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets option flag if not mute.
-	 *
-	 ------------------------------------------------------*/
-	
 	mstl::list<index_t>& GetFaceRefs() 
 	{ return mFaceRefs; }
 	/*------------------------------------------------------
@@ -122,21 +74,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	//void WeldTexCoords(index_t replace, index_t texcoord)
-	//{ if (mTexCoordIndex == replace) mTexCoordIndex = texcoord;	}
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Attempt to replace texcoord reference.
-	 *
-	 ------------------------------------------------------*/
-
-
-	byte mFlags;                /* State flags */
-
-	// mSharedVertexIndex
-
-	// mBufferIndex
-
+	
 
 protected:
 

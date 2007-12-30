@@ -60,6 +60,7 @@
 
 //INFINITY IEEE
 
+#include "String.h"
 #include "Timer.h"
 #include "System/IO/File.h"
 #include "System/IO/FileReader.h"
@@ -402,6 +403,33 @@ void Basename(const char *filename, char *basename, long size)
 			basename[i+1] = 0;
 		}
 	}
+}
+
+
+static inline
+mstl::String BasenameString( const char* filename )
+{
+	mstl::String base = "";
+
+	/* Check for null or empty input string. */
+	if ( filename && !filename[0] )
+	{
+#ifdef WIN32
+		const char separator = '\\';
+#else
+		const char separator = '/';
+#endif
+
+		mstl::String path = filename;
+		int i = path.find_last_of( separator );
+		if ( i > 0 )
+		{
+			base = path.c_str()+i+1;
+			path[i] = '\0';
+		}
+	}
+
+	return base;
 }
 
 

@@ -8,45 +8,7 @@
  Freyja 0.9.5.18 	TBD
  -----------------------------------------------------------------------------
 
- * Todo
-	- Finish freyja::Node 
-	- Rewrite Bone / Skeleton using the node/graph system first.
-		- Skeleton 
-			- map<string, bone>
-			- map<string, animation>
-			- list<Observer*>
-			- list<Bone*>
-		- Bone : Node
-	- Rewrite Keyframe system.
-
-
- * Hot
-	- SceneGraph and SceneGraphIterator
-		· Merge / Select / Delete / Create SceneGraphs 
-	- New Keyframe system.
-		· Keyframes are toplevel containers with aggregates of typed keys.
-		· MorphMesh, SkelMesh, MorphMeshWithTag
-	- New 2-way Reference index_t system.
-		· Parent / Children : delete / update signal methods
-	- Mutable mode ( readonly ) edit state support.
-	- Hidden property support to make object not rendered.
-	- Break up source files with many classes.
-
- * Library deallocator callbacks.
-
  * Have cmake generate Makefile.Core OBJ rules as included makefile snippet.
-
- * Modules.
-	- Md5 animation import/export.
-		· Retain md5 skeleton from import via metadata for exact matching.
-	- Md2 export.
-	- PSK import / export fixes.
-		· Pad out materials.
-		· Fix skeleton for 0.9.5 skeleton import. ( Shearing, etc )
-	- PSA import / export fixes.
-	- SMD import / export fixes.
-	- Nif5 import.
-	- COLLADA import/export.
 
  * UI
 	- Finish Custom TimeSlider.
@@ -55,35 +17,6 @@
 	- Finish Custom RangeSlider.
 		· Menu option to hide this element.
 		· Ability to drag the start/end sections of the range slider.
-
- * Finish up new AnimationControl, Track, Keyframe, Bone, and Mesh API.
-	- KeyframeInterface.
-	- Go back to integer keyframe based system.
-	- Animation Track / Keyframe snippets, AnimationControl, and generic editing.
-		· All Animation types must use KeyframeInterface for the generic system.
-		· All Animation types must use TrackInterface for generic system.
-		· UV / Skeletal / Motion / Vertex / etc mode selection for generic control.
-		· Ability to copy / paste / drag keyframe from one time marker to another.
-	- QuatKeyframe slerping algorithm selection for user.	
-	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
- 	- Keyframes using sorted list ( TLB index:iterators for random access )
-		· No more NULL 'gaps' and only store 'true count'.
-		· Allows *Next() [list] and *ElementAt() [vector] ABI access.
-	- Joint creation/editing easier for first time users.
-		· Joint editing full undo support. 
-			· Might be able to store state from edit mode chord.
-		· Disable auto joint parenting.
-			· Requires (un)parenting UI for joints with dashed line and cursor.
-	- Render 'static' joints in place during animation scrubs.
-	- Add back animation timer to enable Play/Stop events again.
-		· Timer based refresh for animation playback widget or embedded in view.
-	- Add spinbutton keyframe id selection to scrubber toolbar.
-	- Add frametime setting to scrubber toolbar.
-	- MorphMesh, SkelMesh, etc need to be distinct -- no more multimode meshes.
-		· Blended/overlay frames and subset rendering might be nice too.
-		· Need a way to set mesh type before explict class system is finished.
-	- Enable curve editor for more than debugging.
-	- Fix remaining bugs in md5 animation support.
 
  * libmgtk
  	- Splash screen for Plugin for user feedback on slow systems.

@@ -1,11 +1,18 @@
 
+ * Scene
+	- Merge / Select / Delete / Create / Import / Export
+	- Move much of freyja3d::FreyjaControl into Scene.
+	- Iterators, selected lists, etc.
+	- Have the UI focus on wrapping Node virtual methods instead of concrete types.
+	- Pick by Ray and type.
+	- Move Camera, Light, etc to 10.0 ABI.
 
- * Have Renderable write its own XML tag inside children.
-	- Provide it as a serialization helper function inside Node.
+ * Mesh
+	- Smoothing groups as lists, and pointers in Face back to group.
 
- * Replace MetadataRenderable with hook into MeshRenderable.
+ * Optionally pass allocator / dealloc functions to libfreyja on init.
 
- * Replace Texture and Image with PixelBuffer.
+ * Replace MetadataRenderable with new MeshRenderable.
 
  * Resource.
 	- 'Cache' system for Material / Mesh / Skeleton / etc.
@@ -14,30 +21,72 @@
 	- Provide binary file I/O wrapper.
 
  * Compute weight normals/tangents/etc
-	- SkeletalMeshRenderable will need tangent FloatArray.
+	- SkeletalMeshRenderable will need tangent and normal FloatArray's.
 
- * JA Import Module.
+ * Modules 10.x ABI
+	- JA Import Module.
+	- Threaded import/export modules.
+		· Create new scene for each module.
+		· Merge new scene into given scene when import is done.
+	- Nod/Nad import/export.
+	- Md5 animation import / export.
+		· Retain md5 skeleton from import via metadata for exact matching.
+	- PSK import / export fixes.
+		· Pad out materials.
+		· Fix skeleton for 0.9.5 skeleton import. ( Shearing, etc )
+	- PSA import / export fixes.
+	- SMD import / export fixes.
+	- Md2 import / export.
+	- Nif5 import.
+	- COLLADA import/export.
 
+ * Rewrite Bone / Skeleton using the node/graph system first.
+	- Skeleton 
+		- map<string, bone>
+		- map<string, animation>
+		- list<Observer*>
+		- list<Bone*>
 
-	// FIXME: { Face index arrays : materials }, count 
-	//        for rendering use.
+ * PixelBuffer
+	- FloatPixelBuffer
+	- ProcPixelBuffer
 
-	- Finish freyja::Node 
-	- Rewrite Bone / Skeleton using the node/graph system first.
-		- Skeleton 
-			- map<string, bone>
-			- map<string, animation>
-			- list<Observer*>
-			- list<Bone*>
-		- Bone : Node
-	- Rewrite Keyframe system.
+ * Node
+	- New Transform Keyframe system.
+		· Keyframes are toplevel containers with aggregates of typed keys.
+		· MorphMesh, SkelMesh, MorphMeshWithTag ( parented group instead? )
+	- Mutable mode ( readonly ) edit state support.
+	- Hidden property support to make object not rendered.
+	- Break up source files with many classes.
 
- * FloatPixelBuffer
+ * Library deallocator callbacks.
 
- * ProcPixelBuffer
-
- * Move much of freyja3d::FreyjaControl into freyja::Scene.
-	- Iterators, selected, etc.
-	- Have the UI focus on wrapping Node virtual methods instead of concrete types.
-	- Pick by Ray and type.
+ * Finish up new AnimationControl, Track, Keyframe, Bone, and Mesh API.
+	- KeyframeInterface.
+	- Go back to integer keyframe based system.
+	- Animation Track / Keyframe snippets, AnimationControl, and generic editing.
+		· All Animation types must use KeyframeInterface for the generic system.
+		· All Animation types must use TrackInterface for generic system.
+		· UV / Skeletal / Motion / Vertex / etc mode selection for generic control.
+		· Ability to copy / paste / drag keyframe from one time marker to another.
+	- QuatKeyframe slerping algorithm selection for user.	
+	- Track<> needs TrackInstance/KeyframeInstance to hold 'tween'
+ 	- Keyframes using sorted list ( TLB index:iterators for random access )
+		· No more NULL 'gaps' and only store 'true count'.
+		· Allows *Next() [list] and *ElementAt() [vector] ABI access.
+	- Joint creation/editing easier for first time users.
+		· Joint editing full undo support. 
+			· Might be able to store state from edit mode chord.
+		· Disable auto joint parenting.
+			· Requires (un)parenting UI for joints with dashed line and cursor.
+	- Render 'static' joints in place during animation scrubs.
+	- Add back animation timer to enable Play/Stop events again.
+		· Timer based refresh for animation playback widget or embedded in view.
+	- Add spinbutton keyframe id selection to scrubber toolbar.
+	- Add frametime setting to scrubber toolbar.
+	- MorphMesh, SkelMesh, etc need to be distinct -- no more multimode meshes.
+		· Blended/overlay frames and subset rendering might be nice too.
+		· Need a way to set mesh type before explict class system is finished.
+	- Enable curve editor for more than debugging.
+	- Fix remaining bugs in md5 animation support.
 

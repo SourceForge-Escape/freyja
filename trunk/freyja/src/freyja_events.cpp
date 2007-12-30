@@ -31,15 +31,13 @@
 #include <freyja/freyja.h>
 #include <freyja/LightABI.h>
 #include <freyja/MaterialABI.h>
-#include <freyja/LuaABI.h>
-#include <freyja/FreyjaImage.h>
-#include <freyja/Metadata.h>
+#include <freyja/PixelBuffer.h>
 
 #include <mstl/SystemIO.h>
 
 #include <mgtk/mgtk_events.h>
-#include <mgtk/mgtk_linker.h>
-#include <mgtk/mgtk_lua.h>
+//#include <mgtk/mgtk_linker.h>
+//#include <mgtk/mgtk_lua.h>
 #include <mgtk/mgtk_tree.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/ConfirmationDialog.h>
@@ -353,18 +351,18 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 	*width = 0;
 	*height = 0;
 
-	FreyjaImage img;
+	freyja::PixelBuffer* pixbuf = freyja::PixelBuffer::Create( filename );
 
-	if ( !img.loadImage( filename ) )
+	if ( pixbuf )
 	{
-		unsigned char* swap = NULL;
-		img.setColorMode( FreyjaImage::RGB_24 );
-		img.scaleImage(256, 256);
-		img.getImage(&swap);
-		*image = swap;
-		*width = img.getWidth();
-		*height = img.getHeight();
+		pixbuf->ConvertPixelFormat( freyja::PixelBuffer::RGB_24bpp );
+		pixbuf->Scale(256, 256);
+		*image = pixbuf->CopyPixmap();
+		*width = pixbuf->GetWidth();
+		*height = pixbuf->GetHeight();
 	}
+
+	delete pixbuf;
 }
 
 
@@ -443,8 +441,9 @@ void freyja_handle_resource_init(Resource &r)
 	r.RegisterInt("eColorJointHighlight", eColorJointHighlight);
 
 	/* Load and init plugins */
-	String dir = freyja_rc_map_string("plugins");	
-	freyja3d_plugin_application_init( dir.c_str() );
+#warning FIXME
+	//String dir = freyja_rc_map_string("plugins");	
+	//freyja3d_plugin_application_init( dir.c_str() );
 }
 
 
@@ -938,129 +937,6 @@ void freyja_get_pixmap_filename(char *dest, unsigned int size, char *icon_name)
 	dest[size-1] = 0;
 }
 
-
-int FreyjaAssertCallbackHandler(const char *file, unsigned int line, 
-								const char *function,
-								const char *expression, const char *msg)
-{
-	mstl::String s;
-	s.Set("Assert encountered:\n %s:%i %s()\n '%s'\n %s", 
-		  file, line, function, expression, msg);
-
-#if ENABLE_ASSERT_LOG
-	ControlPrinter::Log("[ASSERT] %s\n", s.c_str());
-#endif
-
-	// FIXME: Make a confirmation dialog as a locale template for this,
-	//        and fill in the 'info' string here every time you call it.
-	ConfirmationDialog q("FreyjaAssertCallbackHandlerDialog", 
-						 "gtk-dialog-error", //"gtk-dialog-warning"
-						 s.c_str(), 
-						 "\nWould you like to continue with errors anyway?",
-						 "gtk-quit", "_Exit", "gtk-ok", "_Continue");
-
-	int action = q.Execute();
-
-#if ENABLE_ASSERT_LOG
-	ControlPrinter::Log("[ASSERT] User %s\n", action ? "continued" : "aborted");
-#endif
-
-	return action;
-}
-
-
-int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line, 
-								   const char *function,
-								   const char *expression, const char *msg)
-{
-	mstl::String s;
-	s.Set("Called from:\n %s:%i %s()\n %s", 
-		  file, line, function, msg); // Removed expression 
-
-#if ENABLE_ASSERT_LOG
-	ControlPrinter::Log("[INFO] %s\n", s.c_str());
-#endif
-
-	ConfirmationDialog q("FreyjaDebugInfoCallbackHandlerDialog", 
-						 "gtk-dialog-info",//"gtk-dialog-warning",
-						 s.c_str(), 
-						 "",
-						 "", "", "gtk-close", "_Close");
-
-	int action = q.Execute();
-
-#if ENABLE_ASSERT_LOG
-	ControlPrinter::Log("[INFO] User %s\n", action ? "ok" : "cancel");
-#endif
-
-	return action;
-}
-
-
-int main(int argc, char *argv[])
-{
-	/* 'Link' up mgtk library stubs to these implementations */
-	mgtk_link_import("mgtk_handle_color", (void*)freyja_handle_color);
-	mgtk_link_import("mgtk_handle_application_window_close", (void*)freyja_handle_application_window_close);
-	mgtk_link_import("mgtk_handle_command", (void*)freyja_handle_command);
-	mgtk_link_import("mgtk_handle_command2i", (void*)freyja_handle_command2i);
-	mgtk_link_import("mgtk_handle_event1u", (void*)freyja_handle_event1u);
-	mgtk_link_import("mgtk_handle_event1f", (void*)freyja_handle_event1f);
-	mgtk_link_import("mgtk_handle_gldisplay", (void*)freyja_handle_gldisplay);
-	mgtk_link_import("mgtk_handle_glresize", (void*)freyja_handle_glresize);
-	mgtk_link_import("mgtk_handle_key_press", (void*)freyja_handle_key_press);
-	mgtk_link_import("mgtk_handle_motion", (void*)freyja_handle_motion);
-	mgtk_link_import("mgtk_handle_mouse", (void*)freyja_handle_mouse);
-	mgtk_link_import("mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
-	mgtk_link_import("mgtk_handle_text_array", (void*)freyja_handle_text_array);
-	mgtk_link_import("mgtk_handle_text", (void*)freyja_handle_text);
-	mgtk_link_import("mgtk_print", (void*)freyja_print);
-	mgtk_link_import("mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
-	mgtk_link_import("mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
-	mgtk_link_import("mgtk_rc_map", (void*)freyja_rc_map);
-	mgtk_link_import("mgtk_get_resource_path", (void*)freyja_get_resource_path_callback);
-
-	/* Enabled logging */
-	mstl::String s = freyja_rc_map_string(FREYJA_LOG_FILE);
-	ControlPrinter::StartLogging(s.c_str());
-
-	/* Report library versions to log. */	
-	ControlPrinter::Log("@ freyja: %s", VERSION);
-	ControlPrinter::Log("@ libfreyja: %s", libfreyjaVersion() );
-	ControlPrinter::Log("@ libhel: %s", helVersionInfo() );
-	ControlPrinter::Log("@ libmgtk: %s", mgtk_version() );
-
-	/* User install of scripts, icons, samples, configs, etc */
-	if ( !freyja_is_user_installed_data_old() )
-		freyja_install_user();
-
-	/* Hookup assert handlers, note freyja assert is also used by this layer */
-	freyjaAssertHandler(FreyjaAssertCallbackHandler);
-	mgtk_assert_handler(FreyjaAssertCallbackHandler);
-	freyjaDebugInfoHandler(FreyjaDebugInfoCallbackHandler);
-
-	/* Hookup resource to event system */
-	ResourceEvent::setResource(&FreyjaControl::GetInstance()->GetResource());
-
-	/* Export Lua mgtk functions to libfreyja VM. */
-	mgtk_lua_register_functions( freyjaGetLuaVM() );
-
-	mgtk_init(argc, argv);
-
-
-	// FIXME: Move UI init here...
-
-
-	/* Load file passed by command line args, CLI parser isn't really needed. */
-	if (argc > 1 && argv[1][0] != '-')
-	{
-		FreyjaControl::GetInstance()->LoadModel(argv[1]);
-	}
-
-	mgtk_start();
-
-	return 0;
-}
 
 
 

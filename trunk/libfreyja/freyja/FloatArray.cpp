@@ -55,7 +55,7 @@ FloatArray::~FloatArray()
 }
 
 
-bool FloatArray::Serialize( TiXmlElement* parent ) const
+bool FloatArray::Serialize( XMLSerializerNode parent ) const
 {
 	
 	// NOTE: You lose 'gaps' this way  =/

@@ -32,10 +32,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-
-#ifdef HAVE_FREYJA_IMAGE
-#   include <freyja/FreyjaImage.h>
-#endif
+#include <freyja/PixelBuffer.h>
 
 #include "FreyjaOpenGL.h"
 #include "Texture.h"
