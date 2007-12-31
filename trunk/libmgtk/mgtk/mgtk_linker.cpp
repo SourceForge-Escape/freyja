@@ -35,6 +35,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include "mgtk_events.h" // Only for mgtk_print
+#include "ResourceEvent.h" // Old observer / listener system.
 #include "mgtk_linker.h" 
 
 
@@ -42,8 +43,8 @@ void (*mgtk_link_callback_get_image_data_rgb24)(const char *, unsigned char **, 
 void (*mgtk_link_handle_color)(int, float, float, float, float) = NULL;
 void (*mgtk_link_handle_application_window_close)() = NULL;
 void (*mgtk_link_handle_command)(int) = NULL;
-void (*mgtk_link_handle_command2i)(int, int) = NULL;
 void (*mgtk_link_handle_event1u)(int, unsigned int) = NULL;
+void (*mgtk_link_handle_event2u)(int, unsigned int, unsigned int) = NULL;
 void (*mgtk_link_handle_event1f)(int, float) = NULL;
 void (*mgtk_link_handle_file_dialog_selection)(int, char *) = NULL;
 void (*mgtk_link_handle_gldisplay)() = NULL;
@@ -82,13 +83,13 @@ int mgtk_link_import(const char *symbol, void *func)
 	{
 		mgtk_link_handle_command = (void (*)(int))func;
 	}
-	else if (strncmp("mgtk_handle_command2i", symbol, 28) == 0)
-	{
-		mgtk_link_handle_command2i = (void (*)(int, int))func;
-	}
 	else if (strncmp("mgtk_handle_event1u", symbol, 26) == 0)
 	{
 		mgtk_link_handle_event1u = (void (*)(int, unsigned int))func;
+	}
+	else if (strncmp("mgtk_handle_event2u", symbol, 26) == 0)
+	{
+		mgtk_link_handle_event2u = (void (*)(int, unsigned int, unsigned int))func;
 	}
 	else if (strncmp("mgtk_handle_event1f", symbol, 26) == 0)
 	{
@@ -192,8 +193,14 @@ const char *mgtk_get_resource_path()
 }
 
 
-void mgtk_handle_command(int command)
+void mgtk_handle_command( int command )
 {
+	if ( !ResourceEvent::listen( command - ResourceEvent::eBaseEvent ) )
+	{
+		mgtk_print( "!%s(%d): Unhandled event.", __func__, command );
+	}
+
+	/* Legacy callback. */
 	if (mgtk_link_handle_command != NULL)
 	{
 		(*mgtk_link_handle_command)(command);
@@ -201,17 +208,28 @@ void mgtk_handle_command(int command)
 }
 
 
-void mgtk_handle_command2i(int event, int command)
+void mgtk_handle_event2u( int event, unsigned int value, unsigned int value2 )
 {
-	if (mgtk_link_handle_command2i != NULL)
+	if ( !ResourceEvent::listen( event - ResourceEvent::eBaseEvent, value, value2 ) )
 	{
-		(*mgtk_link_handle_command2i)(event, command);
+		mgtk_print( "!%s(%i, %u, %u): Unhandled event.", __func__, event, value, value2 );
+	}
+
+	if ( mgtk_link_handle_event2u != NULL )
+	{
+		(*mgtk_link_handle_event2u)( event, value, value2 );
 	}
 }
 
 
 void mgtk_handle_event1u(int event, unsigned int value)
 {
+	if ( !ResourceEvent::listen( event - ResourceEvent::eBaseEvent, value ) )
+	{
+		mgtk_print( "!%s(%i, %i): Unhandled event.", __func__, event, value );
+	}
+
+	/* Legacy callback. */
 	if (mgtk_link_handle_event1u != NULL)
 	{
 		(*mgtk_link_handle_event1u)(event, value);
@@ -221,6 +239,14 @@ void mgtk_handle_event1u(int event, unsigned int value)
 
 void mgtk_handle_event1f(int event, float value)
 {
+	if ( !ResourceEvent::listen( event - ResourceEvent::eBaseEvent, value ) )
+	{
+		//if ( freyja_event2i(eEvent, event) == -1 )
+			mgtk_print( "!%s(%d, %f): Unhandled event.", __func__, event, value );
+			//mgtk_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", eEvent, event);
+	}
+
+	/* Legacy callback. */
 	if (mgtk_link_handle_event1f != NULL)
 	{
 		(*mgtk_link_handle_event1f)(event, value);
@@ -300,8 +326,17 @@ void mgtk_handle_text_array(int event, unsigned int count, char **text_array)
 }
 
 
-void mgtk_handle_text(int event, char *text)
+void mgtk_handle_text( int event, char* text )
 {
+	if ( text == NULL ) // || !text[0] )
+		return;
+
+	if ( !ResourceEvent::listen( event - ResourceEvent::eBaseEvent, text ) )
+	{
+		mgtk_print( "%s(%i, '%s'): Unhandled event.", __func__, event, text );
+	}
+
+	/* Legacy callback. */
 	if (mgtk_link_handle_text != NULL)
 	{
 		(*mgtk_link_handle_text)(event, text);
@@ -309,12 +344,12 @@ void mgtk_handle_text(int event, char *text)
 }
 
 
-void mgtk_print(char *format, ...)
+void mgtk_print( char* format, ... )
 {
-	char buffer[1024];
 	va_list args;
-
 	va_start(args, format);
+
+	char buffer[1024];
 	vsnprintf(buffer, 1024, format, args);
 	va_end(args);
 

@@ -7,6 +7,7 @@
  Kagura alpha, 0.10.0.0
 
  20071226 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ * Various minor fixes and obsolete code removal.
  * FreyjaControl removed from build.
  * Took 0.9.5-18 branch and stripped it down into 10.x tracer build.
 	

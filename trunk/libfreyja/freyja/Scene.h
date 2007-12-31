@@ -126,7 +126,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool Serialize( const char* filename ) const;
+	bool Serialize( const char* filename, bool compression = false ) const;
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 

@@ -784,7 +784,7 @@ int mgtk_lua_rc_menu_item(lua_State *s)
 
 	gtk_widget_show(item);
 
-	if (id != -1)
+	if ( id != -1 )
 	{
 		if ( lua_gettop(s) > 2 && lua_isnumber(s, 3) )
 		{
