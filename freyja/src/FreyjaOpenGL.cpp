@@ -35,6 +35,11 @@
 
 using namespace hel;
 
+
+// FIXME: Merge with OpenGL class.
+Texture gTexture;
+
+
 #if defined(__APPLE__)
    // Nothing to see here
 
@@ -107,14 +112,8 @@ bool OpenGL::ext_cg_shader = false;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-OpenGL *OpenGL::mSingleton = NULL;
+OpenGL* OpenGL::mSingleton = NULL;
 uint32 OpenGL::mObjects = 0;
-
-
-OpenGL *OpenGL::Instance()
-{
-	return mSingleton ? mSingleton : new OpenGL();
-}
 
 
 OpenGL::OpenGL() :
@@ -195,6 +194,15 @@ OpenGL::OpenGL() :
 #   endif // defined(__APPLE__)
 #endif
 
+
+	// InitTexture()
+	gTexture.reset();
+	gTexture.setMaxTextureCount(64);
+	gTexture.setFlag( Texture::fUseMipmaps );
+	unsigned char rgba[4] = {255, 255, 255, 255};
+	gTexture.loadColorTexture(rgba, 32, 32);
+	//mTextureId = 1;
+
 	mSingleton = this;
 }
 
@@ -203,7 +211,6 @@ OpenGL::~OpenGL()
 {
 	if (mTextureIds) 
 		delete [] mTextureIds;
-
 	
 	for (uint32 i = 0; i < mObjects; --i)
 		DeleteFragmentGLSL(i);

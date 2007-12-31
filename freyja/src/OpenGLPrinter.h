@@ -255,6 +255,8 @@ class OpenGLPrinter
 #endif // HAVE_FREETYPE2
 
 	Font mFont;
+
+	bool mInit;
 };
 
 typedef struct

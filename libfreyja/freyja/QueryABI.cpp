@@ -101,7 +101,7 @@ Query *freyjaGetQuery(index_t id)
 }
 
 
-void freyjaQuerySetCallback(FreyjaQueryCallback func)
+void freyja_query_set_callback( FreyjaQueryCallback func )
 {
 	Query::mExecute = func;
 }

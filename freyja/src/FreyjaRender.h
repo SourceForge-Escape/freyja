@@ -121,22 +121,18 @@ public:
 	} flags_t;
 
 
-	static FreyjaRender *GetInstance() 
-	{ return (mInstance ? mInstance : mInstance = new FreyjaRender()); }
-	static FreyjaRender *mInstance;
+	static FreyjaRender* GetInstance( ) 
+	{ return ( mInstance ? mInstance : ( mInstance = new FreyjaRender() ) ); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : FreyjaRender singleton is instanced.
-	 *
-	 *        mInstance pointer is exposed for use with caution.
-	 *        Use asserts with debug builds using the pointer.
+	 * Post : Returns instance of FreyjaRender singleton.
 	 *
 	 ------------------------------------------------------*/
 
 	~FreyjaRender();
 	/*------------------------------------------------------
-	 * Pre  : FreyjaRender exists
-	 * Post : FreyjaRender is deconstructed
+	 * Pre  : 
+	 * Post : Deconstructor.
 	 *
 	 ------------------------------------------------------*/
 
@@ -645,6 +641,8 @@ protected:
 	 *
 	 ------------------------------------------------------*/
 
+	static FreyjaRender* mInstance;
+
 
 private:    
 
@@ -818,9 +816,9 @@ private:
 
 	bool mInitContext;                         /* OpenGL context started? */
 
-	vec3_t mScroll;                            /* Used to cache scroll */
+	hel::Vec3 mScroll;                         /* Scene translation. */
 
-	vec3_t mAngles;                            /* Used to rotate the scene */
+	vec3_t mAngles;                            /* Scene Used to rotate the scene */
 
 	vec_t mScaleEnv;                           /* OpenGL context use */
 	vec_t mFar;

@@ -108,13 +108,10 @@ index_t GetSelectedMaterial()
 freyja_plane_t GetSelectedView()
 { return PLANE_FREE; }
 
-hel::Vec3 gSceneOffset;
-hel::Vec3& GetSceneTranslation()
-{ return gSceneOffset; }
  
 FreyjaRender::FreyjaRender() :
 	mTimer(),
-	mViewMode(VIEWMODE_MODEL_VIEW),
+	mViewMode( VIEWMODE_MODEL_VIEW ),
 	mRenderMode(fBoundingVolSelection | 
 				fBonesNoZbuffer | 
 				fBoundingVolumes |
@@ -123,7 +120,8 @@ FreyjaRender::FreyjaRender() :
 	mWidth(640),
 	mHeight(480),
 	mTextureId(0),
-	mInitContext(false),
+	mInitContext( false ),
+	mScroll( 0.0f, 0.0f, 0.0f ),
 	mScaleEnv(35.0f), // 40.0f is about too much, Use a larger number for higher res -- 35.0f is default
 	mFar(6000.0f),
 	mNear(0.1f),
@@ -161,13 +159,13 @@ FreyjaRender::FreyjaRender() :
 		mColors[ 6][i] = DARK_YELLOW[i];
 		mColors[ 7][i] = DARK_BLUE[i];
 		mColors[ 8][i] = ORANGE[i];  // FIXME, needs more colors
-		mColors[ 9][i] = YELLOW[i]*0.25;
-		mColors[10][i] = YELLOW[i]*0.50;
-		mColors[11][i] = GREEN[i]*0.25;
-		mColors[12][i] = GREEN[i]*0.50;
-		mColors[13][i] = YELLOW[i]*0.75;
-		mColors[14][i] = GREEN[i]*0.75;
-		mColors[15][i] = PINK[i]*0.50;
+		mColors[ 9][i] = YELLOW[i]*0.25f;
+		mColors[10][i] = YELLOW[i]*0.50f;
+		mColors[11][i] = GREEN[i]*0.25f;
+		mColors[12][i] = GREEN[i]*0.50f;
+		mColors[13][i] = YELLOW[i]*0.75f;
+		mColors[14][i] = GREEN[i]*0.75f;
+		mColors[15][i] = PINK[i]*0.50f;
 	}
 }
 
@@ -353,11 +351,14 @@ void FreyjaRender::DrawCamWindow()
 		glPopAttrib();
 	}
 
-	RenderableIterator it = gScene->GetRenderListIterator();
-	while ( it != it.end() )
+	if ( gScene )
 	{
-		Draw( *it );
-		++it;
+		RenderableIterator it = gScene->GetRenderListIterator();
+		while ( it != it.end() )
+		{
+			Draw( *it );
+			++it;
+		}
 	}
 
 	DrawIcons();
@@ -514,11 +515,14 @@ void FreyjaRender::DrawFreeWindow()
 		glPopAttrib();
 	}
 
-	RenderableIterator it = gScene->GetRenderListIterator();
-	while ( it != it.end() )
+	if ( gScene )
 	{
-		Draw( *it );
-		++it;
+		RenderableIterator it = gScene->GetRenderListIterator();
+		while ( it != it.end() )
+		{
+			Draw( *it );
+			++it;
+		}
 	}
 
 	//glPopMatrix(); // Remove scaling
@@ -867,81 +871,86 @@ void FreyjaRender::ClearFlag(flags_t flag)
 
 void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 {
-	OpenGL::Instance();
-
-	// Due to whacky bullshit we're seriously going to have to use
-	// GL_LESS depth and GL_FRONT culling or the interface will break
-
-	// NOTE: The 'whacky bullshit' is due to various windings and
-	// 'native' formats are allowed, so until that changes don't change this
-
-	// Set up Z buffer
-	glEnable(GL_DEPTH_TEST);
-	//glDepthFunc(GL_LESS);
-	glDepthFunc(GL_LEQUAL);
-	//glClearDepth(1.0f);
-
-	// Stencil
-	//glClearStencil(0);
-
-	// Set up culling
-	//glEnable(GL_CULL_FACE);
-	//glCullFace(GL_FRONT);
-	//glFrontFace(GL_CCW);
-	//glCullFace(GL_BACK);
-
-	// Set background to black
-	glClearColor(BLACK[0], BLACK[1], BLACK[2], BLACK[3]);
-
-	// Setup shading
-	glShadeModel(GL_SMOOTH);
-
-	if (fastCard) 
+	if ( width > 0 && height > 0 )
 	{
-		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-		glHint(GL_FOG_HINT, GL_NICEST);
-		glEnable(GL_DITHER);
+		OpenGL::Instance( );
+
+		// Due to whacky bullshit we're seriously going to have to use
+		// GL_LESS depth and GL_FRONT culling or the interface will break
+
+		// NOTE: The 'whacky bullshit' is due to various windings and
+		// 'native' formats are allowed, so until that changes don't change this
+
+		// Set up Z buffer
+		glEnable(GL_DEPTH_TEST);
+		//glDepthFunc(GL_LESS);
+		glDepthFunc(GL_LEQUAL);
+		//glClearDepth(1.0f);
+
+		// Stencil
+		//glClearStencil(0);
+
+		// Set up culling
+		//glEnable(GL_CULL_FACE);
+		//glCullFace(GL_FRONT);
+		//glFrontFace(GL_CCW);
+		//glCullFace(GL_BACK);
+
+		// Set background to black
+		glClearColor(BLACK[0], BLACK[1], BLACK[2], BLACK[3]);
+
+		// Setup shading
+		glShadeModel(GL_SMOOTH);
+
+		if (fastCard) 
+		{
+			glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+			glHint(GL_FOG_HINT, GL_NICEST);
+			glEnable(GL_DITHER);
 		
-		// AA polygon edges
-		//glEnable(GL_LINE_SMOOTH);
-		//glEnable(GL_POLYGON_SMOOTH);
-		//glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+			// AA polygon edges
+			//glEnable(GL_LINE_SMOOTH);
+			//glEnable(GL_POLYGON_SMOOTH);
+			//glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+		}
+		else
+		{
+			glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+			glHint(GL_FOG_HINT, GL_FASTEST);
+			glDisable(GL_COLOR_MATERIAL);
+			glDisable(GL_DITHER);
+			glDisable(GL_POLYGON_SMOOTH);
+		}
+
+		// Setup some general states
+		glDisable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_2D);
+		glDisable(GL_POINT_SMOOTH);
+		glDisable(GL_LINE_SMOOTH);
+		glDisable(GL_AUTO_NORMAL);
+		glDisable(GL_LOGIC_OP);
+		glDisable(GL_TEXTURE_1D);
+		glDisable(GL_STENCIL_TEST);
+		glDisable(GL_FOG);
+		glDisable(GL_NORMALIZE);
+
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glDisableClientState(GL_NORMAL_ARRAY);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glDisableClientState(GL_EDGE_FLAG_ARRAY);
+		glDisableClientState(GL_COLOR_ARRAY);
+
+		glPolygonMode(GL_FRONT, GL_FILL);
+		glMatrixMode(GL_MODELVIEW);
+
+		SetNearHeight(mScaleEnv);
+
+		mWidth = width;
+		mHeight = height;
+		mInitContext = true;
+
+		ResizeContext( width, height );
 	}
-	else
-	{
-		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-		glHint(GL_FOG_HINT, GL_FASTEST);
-		glDisable(GL_COLOR_MATERIAL);
-		glDisable(GL_DITHER);
-		glDisable(GL_POLYGON_SMOOTH);
-	}
-
-	// Setup some general states
-	glDisable(GL_LIGHTING);
-	glEnable(GL_TEXTURE_2D);
-	glDisable(GL_POINT_SMOOTH);
-	glDisable(GL_LINE_SMOOTH);
-	glDisable(GL_AUTO_NORMAL);
-	glDisable(GL_LOGIC_OP);
-	glDisable(GL_TEXTURE_1D);
-	glDisable(GL_STENCIL_TEST);
-	glDisable(GL_FOG);
-	glDisable(GL_NORMALIZE);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_EDGE_FLAG_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-
-	glPolygonMode(GL_FRONT, GL_FILL);
-	glMatrixMode(GL_MODELVIEW);
-
-	SetNearHeight(mScaleEnv);
-
-	mWidth = width;
-	mHeight = height;
-	mInitContext = true;
 }
 
 
@@ -970,28 +979,21 @@ void FreyjaRender::DisplayByPolling()
 
 void FreyjaRender::Display() 
 { 
-	if (!mInitContext ||
-		(GetMode() & fFPSCap) && mTimer.GetTicks() < 16) // ~60.0 fps cap
+	if ( !mInitContext ||
+		 (GetMode() & fFPSCap) && mTimer.GetTicks() < 16) // ~60.0 fps cap
 	{
 		//freyja_print("%ims since last frame", mTimer.GetTicks());
 		return;
 	}
 
-	// Mongoose 2002.02.02, Cache for use in calls from here
-	hel::Vec3 v = GetSceneTranslation();
-	helCopyVec3(v.mVec, mScroll);
-	
-	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 
-				 1.0);
+	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 1.0);
 	
 	// 2007.05.20 - Removed depth test toggle
 	//glDisable(GL_DEPTH_TEST);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	//glEnable(GL_DEPTH_TEST);
 
-	// Disable lighting and texture here until the color visualizations
-	// are updated
-	//glDisable(GL_TEXTURE_2D);
+	/* Disable lighting here until the color materials are updated. */
 	glDisable(GL_LIGHTING);
 	glLoadIdentity();
 	
@@ -1107,7 +1109,6 @@ void FreyjaRender::Display()
 
 	//CHECK_OPENGL_ERROR( glFlush() );
 	glFlush();
-	mgtk_event_gl_refresh();
 
 	mTimer.Reset();
 }
@@ -1115,7 +1116,7 @@ void FreyjaRender::Display()
 
 void FreyjaRender::ResizeContext(uint32 width, uint32 height) 
 {
-	if (!width || !height)
+	if ( !mInitContext || !width || !height )
 	{
 		return;
 	}
@@ -2791,11 +2792,14 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 	}
 
 	/* Draw model geometry, metadata visualizations, and all that good stuff. */
-	RenderableIterator it = gScene->GetRenderListIterator();
-	while ( it != it.end() )
+	if ( gScene )
 	{
-		Draw( *it );
-		++it;
+		RenderableIterator it = gScene->GetRenderListIterator();
+		while ( it != it.end() )
+		{
+			Draw( *it );
+			++it;
+		}
 	}
 
 	DrawIcons();

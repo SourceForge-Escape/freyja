@@ -39,7 +39,6 @@
 using namespace freyja3d;
 using namespace freyja;
 
-extern freyja::Scene* gScene;
 
 void polymap_update_question()
 {
