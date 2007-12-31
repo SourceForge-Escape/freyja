@@ -1131,7 +1131,8 @@ void mgtk_event_notebook_switch_page(GtkNotebook *notebook,
 
 	if ( emap && emap->count && emap->events[page_num] > -1 )
 	{
-		mgtk_handle_command2i(GPOINTER_TO_INT(event), emap->events[page_num]);
+		mgtk_handle_event1u(GPOINTER_TO_INT(event), emap->events[page_num]);
+		//mgtk_handle_command2i(GPOINTER_TO_INT(event), emap->events[page_num]);
 	}
 }
 
@@ -1177,14 +1178,18 @@ void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
 	memcpy(&e1, buf, sizeof(short));
 	memcpy(&e2, buf+sizeof(short), sizeof(short));
 
-	if (ResourceEvent::listen(e1 - ResourceEvent::eBaseEvent, (unsigned int)e2))
+	mgtk_handle_event1u( e1, e2 );
+
+#if LEGACY
+	if ( ResourceEvent::listen(e1 - ResourceEvent::eBaseEvent, (unsigned int)e2) )
 		return;
 
 	mgtk_handle_command2i(e1, e2);
+#endif
 }
 
 
-const char *mgtk_version()
+const char* mgtk_version()
 {
 	return VERSION;
 }

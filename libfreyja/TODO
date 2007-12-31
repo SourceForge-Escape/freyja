@@ -1,4 +1,9 @@
 
+ TODO
+
+ libfreyja 0.10.0, Kagura alpha ( Development branch )
+ =====================================================================
+
  * Scene
 	- Merge / Select / Delete / Create / Import / Export
 	- Move much of freyja3d::FreyjaControl into Scene.

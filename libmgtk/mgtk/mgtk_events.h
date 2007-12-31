@@ -64,9 +64,9 @@ void mgtk_handle_color(int id, float r, float g, float b, float a);
 
 void mgtk_handle_command(int command);
 
-void mgtk_handle_command2i(int event, int command);
-
 void mgtk_handle_event1u(int event, unsigned int value);
+
+void mgtk_handle_event2u(int event, unsigned int value, unsigned int value2);
 
 void mgtk_handle_event1f(int event, float value);
 

@@ -19,6 +19,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include <mstl/System/IO/GzFile.h>
 #include "Scene.h"
 
 using namespace freyja;
@@ -58,7 +59,7 @@ Scene::~Scene( )
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-bool Scene::Serialize( const char* filename ) const
+bool Scene::Serialize( const char* filename, bool compression ) const
 {
 #if TINYXML_FOUND
 	TiXmlDocument doc;
@@ -77,7 +78,25 @@ bool Scene::Serialize( const char* filename ) const
 	mMetadata.Serialize( container );
 	mSkeletons.Serialize( container );
 
-	return doc.SaveFile(filename);;
+	bool ret = false;
+	if ( compression )
+	{
+		TiXmlPrinter printer;
+		printer.SetIndent( "\t" );
+		doc.Accept( &printer );
+		const char* xml = printer.CStr();
+
+		if ( xml )
+		{
+			ret = mstl::GzFileWrite( filename, xml, strlen(xml) );
+		}
+	}
+	else
+	{
+		ret = doc.SaveFile(filename);
+	}
+
+	return ret;
 #else
 	return false;
 #endif
@@ -87,9 +106,32 @@ bool Scene::Serialize( const char* filename ) const
 bool Scene::Unserialize( const char* filename )
 {
 #if TINYXML_FOUND
-	TiXmlDocument doc(filename);
+
+	TiXmlDocument doc;
+
+#if 0	
+	TiXmlDocument doc( filename );
 
 	if ( !doc.LoadFile() )
+	{
+		printf("XML ERROR: %s, Line %i, Col %i\n", 
+			   doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
+		return false;
+	}
+#endif
+
+	/* Should handle files with and without gz compression. */
+	{
+		char* xml;
+		unsigned int size;
+		mstl::GzFileRead( filename, xml, size );
+		doc.Parse( xml );
+		
+		/* FIXME: GzRead allocator should provide deallocator. */
+		delete xml; 
+	}
+
+	if ( doc.Error() )
 	{
 		printf("XML ERROR: %s, Line %i, Col %i\n", 
 			   doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );

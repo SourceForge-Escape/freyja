@@ -41,7 +41,10 @@
 
 #include "Plugins.h"
 #include "Control.h"
+#include "FreyjaRender.h"
 #include "freyja_events.h"
+
+void freyja3d_misc_events_attach( );
 
 freyja::Scene* gScene = NULL;
 Lua gLuaVM;
@@ -49,7 +52,8 @@ Lua gLuaVM;
 using namespace freyja3d;
 
 
-bool freyja3d_execute_lua_script( const char* filename )
+bool 
+freyja3d_execute_lua_script( const char* filename )
 {
 	bool ret = true;
 
@@ -135,7 +139,112 @@ freyja3d_debug_msg_handler( const char* file,
 }
 
 
-void freyja3d_init_libfreyja( )
+
+void 
+freyja3d_shutdown( )
+{
+#if 0
+	if ( FreyjaControl::GetInstance() )
+	{
+		delete FreyjaControl::GetInstance();
+	}
+#endif
+
+	freyja3d_save_user_preferences( );
+	
+	mgtk_event_shutdown( );
+	freyja_shutdown( );
+
+	freyja_print( "Thanks for using %s", PROGRAM_NAME );
+	freyja_print( "   Build date: %s @ %s", __DATE__, __TIME__ );
+	freyja_print( "   Build host: %s", BUILD_HOST );
+	freyja_print( "   Email addr: %s", EMAIL_ADDRESS );
+	freyja_print( "   Web site  : %s", PROJECT_URL );
+
+	ControlPrinter::StopLogging( );
+}
+
+
+void 
+freyja3d_quit( )
+{
+	// There is some bug with some Gtk+ builds that allow this function
+	// to be called again before this exits.  
+	// Also relates to the Cancel doesn't cancel bug.
+	//FreyjaControl::GetInstance()->Shutdown();
+	bool exiting = true;
+
+	if ( gScene->GetModified( ) && !mgtk::ExecuteConfirmationDialog("ExitWarningDialog") )
+	{
+		exiting = false;
+	}
+
+	if ( exiting )
+	{
+		freyja3d_shutdown( );
+	}
+}
+
+
+void freyja3d_print( const char* format, ...)
+{
+	if ( format && format[0] )
+	{
+		const unsigned int sz = 1024;
+		char buf[sz];
+
+		va_list args;
+		va_start(args, format);
+		int truncated = vsnprintf(buf, sz, format, args);
+		buf[sz-1] = 0;
+		va_end(args);
+
+		/* More than 1k string was needed, so allocate one. */
+		if ( truncated >= (int)sz )
+		{
+			unsigned int len = truncated + 1; // Doesn't include '\0'
+			char* s = new char[ len ];
+
+			va_start( args, format );
+			vsnprintf( s, len, format, args );
+			s[len-1] = '\0';
+			va_end( args );
+
+			ControlPrinter::Print( s );
+			delete [] s;
+		}
+		else
+		{
+			ControlPrinter::Print( buf );
+		}
+	}
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Event callbacks.
+////////////////////////////////////////////////////////////////////////////////
+
+void freyja3d_handle_motion( int x, int y )
+{
+	//if (FreyjaControl::GetInstance())
+	//FreyjaControl::GetInstance()->MotionEvent(x, y);
+}
+
+
+void freyja3d_handle_mouse( int button, int state, int mod, int x, int y )
+{
+	//if (FreyjaControl::GetInstance())
+		//FreyjaControl::GetInstance()->MouseEvent(button, state, mod, x, y);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Library initialization.
+////////////////////////////////////////////////////////////////////////////////
+
+void 
+freyja3d_init_libfreyja( )
 {
 	/* Setup libfreyja. */
 	freyja_set_assert_handler( freyja3d_assert_handler );
@@ -176,27 +285,84 @@ void freyja3d_init_libfreyja( )
 }
 
 
-void freyja3d_init_mgtk( int argc, char* argv[] )
+void 
+freyja3d_resource_init( Resource& r )
+{
+	/* Attach singleton method listeners. */
+	//FreyjaControl::GetInstance()->AttachMethodListeners( );
+	FreyjaRender::GetInstance()->AttachMethodListeners( );
+
+	/* Non-class listeners. */
+	freyja3d_misc_events_attach( );
+
+	/* Bind mlisp script functions to C/C++ functions. */
+	//r.RegisterFunction("funcname", freyja_rc_funcname);
+
+
+	////////////////////////////////////////////////////////////////////
+	// Old style events
+	////////////////////////////////////////////////////////////////////
+
+	/* Mongoose 2002.01.21, 
+	 * Bind some script vars to matching symbol in C/C++ */
+
+	// Event types used for flow control of event ids
+	r.RegisterInt("eMode", eMode);
+	r.RegisterInt("eEvent", eEvent);
+	r.RegisterInt("eNop", eNop);
+	r.RegisterInt("eNone", eNone);
+
+	// Menus
+	r.RegisterInt("ePluginMenu", ePluginMenu);
+	r.RegisterInt("eBlendDestMenu", eBlendDestMenu);
+	r.RegisterInt("eBlendSrcMenu", eBlendSrcMenu);
+	r.RegisterInt("eObjectMenu", eObjectMenu);
+	r.RegisterInt("eViewportModeMenu", eViewportModeMenu);
+	r.RegisterInt("eTransformMenu", eTransformMenu);
+
+	// Colors
+	r.RegisterInt("eColorMaterialAmbient", eColorMaterialAmbient);
+	r.RegisterInt("eColorMaterialDiffuse", eColorMaterialDiffuse);
+	r.RegisterInt("eColorMaterialSpecular", eColorMaterialSpecular);
+	r.RegisterInt("eColorMaterialEmissive", eColorMaterialEmissive);
+	r.RegisterInt("eColorLightAmbient", eColorLightAmbient);
+	r.RegisterInt("eColorLightDiffuse", eColorLightDiffuse);
+	r.RegisterInt("eColorLightSpecular", eColorLightSpecular);
+	r.RegisterInt("eColorBackground", eColorBackground);
+	r.RegisterInt("eColorGrid", eColorGrid);
+	r.RegisterInt("eColorMesh", eColorMesh);
+	r.RegisterInt("eColorVertex", eColorVertex);
+	r.RegisterInt("eColorVertexHighlight", eColorVertexHighlight);
+	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
+	r.RegisterInt("eColorBone", eColorBone);
+	r.RegisterInt("eColorBoneHighlight", eColorBoneHighlight);
+	r.RegisterInt("eColorJoint", eColorJoint);
+	r.RegisterInt("eColorJointHighlight", eColorJointHighlight);
+
+	freyja_print( "%s: Core events {", __func__ );
+
+	ResourceEventCallback::add( "eShutdown", &freyja3d_quit );
+
+	freyja_print( "}" );
+}
+
+
+void 
+freyja3d_init_mgtk( int argc, char* argv[] )
 {
 	/* 'Link' up mgtk library stubs to these implementations */
+	mgtk_link_import( "mgtk_handle_motion", (void*)freyja3d_handle_motion );
+	mgtk_link_import( "mgtk_handle_mouse", (void*)freyja3d_handle_mouse );
+	mgtk_link_import( "mgtk_print", (void*)freyja3d_print );
+
 	mgtk_link_import("mgtk_handle_color", (void*)freyja_handle_color);
-	mgtk_link_import("mgtk_handle_application_window_close", (void*)freyja_handle_application_window_close);
-	mgtk_link_import("mgtk_handle_command", (void*)freyja_handle_command);
-	mgtk_link_import("mgtk_handle_command2i", (void*)freyja_handle_command2i);
-	mgtk_link_import("mgtk_handle_event1u", (void*)freyja_handle_event1u);
-	mgtk_link_import("mgtk_handle_event1f", (void*)freyja_handle_event1f);
+	mgtk_link_import( "mgtk_handle_application_window_close", (void*)freyja3d_quit );
 	mgtk_link_import("mgtk_handle_gldisplay", (void*)freyja_handle_gldisplay);
 	mgtk_link_import("mgtk_handle_glresize", (void*)freyja_handle_glresize);
-	mgtk_link_import("mgtk_handle_key_press", (void*)freyja_handle_key_press);
-	mgtk_link_import("mgtk_handle_motion", (void*)freyja_handle_motion);
-	mgtk_link_import("mgtk_handle_mouse", (void*)freyja_handle_mouse);
-	//mgtk_link_import("mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
 	mgtk_link_import("mgtk_handle_text_array", (void*)freyja_handle_text_array);
-	mgtk_link_import("mgtk_handle_text", (void*)freyja_handle_text);
 	mgtk_link_import("mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
 	mgtk_link_import("mgtk_get_pixmap_filename", (void*)freyja_get_pixmap_filename);
 	mgtk_link_import("mgtk_get_resource_path", (void*)freyja_get_resource_path_callback);
-	mgtk_link_import("mgtk_print", (void*)freyja_print);
 	mgtk_link_import("mgtk_rc_map", (void*)freyja_rc_map);
 
 	mgtk_assert_handler( freyja3d_assert_handler );
@@ -210,6 +376,9 @@ void freyja3d_init_mgtk( int argc, char* argv[] )
 	/* Start the user interface backend. */
 	mgtk_init( argc, argv );
 
+	/* Initialize / hookup events. */
+	freyja3d_resource_init( Control::GetResource() );
+
 	/* Generate user interface from Lua script. */
 	{
 		String s = freyja_rc_map_string( FREYJA_UI_SCRIPT );
@@ -222,6 +391,7 @@ void freyja3d_init_mgtk( int argc, char* argv[] )
 		freyja3d_execute_lua_script( s.c_str() );
 	}
 
+	/* Start the OpenGL context. */
 	freyja_handle_resource_start( );
 
 	/* Start the user interface loop. */
@@ -229,31 +399,8 @@ void freyja3d_init_mgtk( int argc, char* argv[] )
 }
 
 
-void freyja3d_shutdown( )
-{
-#if 0
-	if ( FreyjaControl::GetInstance() )
-	{
-		delete FreyjaControl::GetInstance();
-	}
-#endif
-
-	freyja3d_save_user_preferences( );
-	
-	mgtk_event_shutdown( );
-	freyja_shutdown( );
-
-	freyja_print( "Thanks for using %s", PROGRAM_NAME );
-	freyja_print( "   Build date: %s @ %s", __DATE__, __TIME__ );
-	freyja_print( "   Build host: %s", BUILD_HOST );
-	freyja_print( "   Email addr: %s", EMAIL_ADDRESS );
-	freyja_print( "   Web site  : %s", PROJECT_URL );
-
-	ControlPrinter::StopLogging( );
-}
-
-
-int main(int argc, char *argv[])
+int 
+main(int argc, char *argv[])
 {
 	/* Enable logging. */
 	{

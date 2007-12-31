@@ -915,10 +915,12 @@ void eHelpDialog()
 	freyja_set_dialog_visible("eHelpDialog");
 }
 
+
 void ePreferencesDialog()
 {
-	freyja_set_dialog_visible("ePreferencesDialog");
+	freyja_set_dialog_visible( "ePreferencesDialog" );
 }
+
 
 void eAboutDialog()
 {
@@ -1290,6 +1292,8 @@ void freyja3d_misc_events_attach()
 	ResourceEventCallback2::add("eTranslateUV", &eNoImplementation);
 	ResourceEventCallback2::add("eRotateUV", &eNoImplementation);
 	ResourceEventCallback2::add("eScaleUV", &eNoImplementation);
+
+
 
 }
 

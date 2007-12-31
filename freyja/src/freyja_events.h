@@ -84,6 +84,7 @@ extern freyja::Scene* gScene;
 //////////////////////////////////////////////////////////////////////////////
 
 #define mgtk_event_set_float mgtk_spinbutton_value_set
+#define freyja_print freyja3d_print
 
 #define freyja_event_notify_observer1f mgtk_event_notify_observer1f
 //void freyja_event_notify_observer1f(event_subject_id e, float value);
@@ -290,7 +291,7 @@ void freyja_plugin_generic(const char *symbol, void *something);
  *
  ------------------------------------------------------*/
 
-void freyja_print(char *format, ...);
+void freyja3d_print( const char* format, ... );
 /*------------------------------------------------------
  * Pre  : (<format>, ...) just like printf()  
  * Post : Prints to status bar, and will also print to
@@ -402,21 +403,11 @@ bool freyja3d_save_user_preferences( );
 
 
 void freyja3d_query_callback_handler(unsigned int size, freyja_query_t *array);
-void freyja_handle_application_window_close( );
 void freyja_handle_resource_start( );
-const char* freyja_rc_map( const char* filename );
-void freyja_handle_command(int command);
-void freyja_handle_key_press(int key, int mod);
-void freyja_handle_event1u(int event, unsigned int value);
-void freyja_handle_command2i(int event, int command);
-void freyja_handle_event1f(int event, float value);
 void freyja_handle_gldisplay();
 void freyja_handle_glresize(unsigned int width, unsigned int height);
-void freyja_handle_text(int event, char *text);
 void freyja_handle_text_array(int event, unsigned int count, char **text);
+const char* freyja_rc_map( const char* filename );
 const char *freyja_get_resource_path_callback( );
-void freyja_handle_motion(int x, int y);
-void freyja_handle_mouse(int button, int state, int mod, int x, int y);
-
 
 #endif // GUARD__FREYJA3D_FREYJA_EVENT_H

@@ -48,7 +48,7 @@
 #include "freyja3d_scenegraph.h"
 #include "freyja_events.h"
 
-void freyja3d_misc_events_attach();
+void freyja3d_misc_events_attach( );
 
 
 using namespace freyja3d;
@@ -137,26 +137,6 @@ void freyja3d_query_callback_handler(unsigned int size, freyja_query_t *array)
 				// Not handled
 			}
 		}	
-	}
-}
-
-
-void freyja_handle_application_window_close()
-{
-	// There is some bug with some Gtk+ builds that allow this function
-	// to be called again before this exits.  
-	// Also relates to the Cancel doesn't cancel bug.
-	//FreyjaControl::GetInstance()->Shutdown();
-	bool exiting = true;
-
-	if ( gScene->GetModified( ) && !mgtk::ExecuteConfirmationDialog("ExitWarningDialog") )
-	{
-		exiting = false;
-	}
-
-	if ( exiting )
-	{
-		freyja3d_shutdown( );
 	}
 }
 
@@ -421,83 +401,27 @@ const char *freyja_get_resource_path_callback()
 }
 
 
-// FIXME remove duplicates
-void freyja_handle_key_press(int key, int mod)
-{
-	freyja_print("mgtk_handle_key_press(%d, %d) not handled", key, mod);
-}
-
-
-void freyja_handle_command2i(int event, int command)
-{
-	freyja_event2i(event, command);
-}
-
-
-void freyja_handle_event1u(int event, unsigned int value)
-{
-	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-
-	// Removed legacy uint event codepath, kept old menu event fallback
-	if (!ResourceEvent::listen(event - ePluginEventBase, value))
-	{
-		// Old style 2 ID menu events
-		if (freyja_event2i(eEvent, event) == -1)
-			freyja_print("!Event(%i, %i) dropped.", eEvent, event);
-	}
-}
-
-
-void freyja_handle_event1f(int event, float value)
-{
-	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-
-	//if (!FreyjaControl::mInstance->event(event, value))
-	if (!ResourceEvent::listen(event - ePluginEventBase, value))
-	{
-		if (freyja_event2i(eEvent, event) == -1)
-			freyja_print("   mgtk_handle_event1f spawned previous unhandled event %i:%i", eEvent, event);
-	}
-}
-
-
 void freyja_handle_gldisplay()
 {
-	//FREYJA_ASSERTMSG(FreyjaRender::mInstance, "FreyjaRender Singleton not allocated");
 	FreyjaRender::GetInstance()->Display();
 }
 
 
 void freyja_handle_glresize(unsigned int width, unsigned int height)
 {
-	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaRender Singleton not allocated");
 	FreyjaRender::GetInstance()->ResizeContext(width, height);
 }
 
 
 void freyja_handle_text_array(int event, unsigned int count, char **text)
 {
-	if (count != 2)
+	if ( count != 2 )
 		return;
 
-	if (!ResourceEvent::listen(event - ResourceEvent::eBaseEvent, 
-							   text[0], text[1]))
+	if ( !ResourceEvent::listen( event - ResourceEvent::eBaseEvent, text[0], text[1] ) )
 	{
 		// Not handled
 	}	
-}
-
-
-void freyja_handle_text(int event, char *text)
-{
-	if (text == NULL || text[0] == 0)
-		return;
-
-	if (!ResourceEvent::listen(event - ePluginEventBase, text))
-	{
-		//if (!FreyjaControl::mInstance->handleTextEvent(event, text))
-		freyja_print("%s(%i, '%s'): Unhandled event.", __func__, event, text);
-	}
 }
 
 
@@ -524,74 +448,11 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 }
 
 
-void freyja_handle_command(int command)
-{
-	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaControl singleton not allocated");
-
-	if (!ResourceEvent::listen(command - 10000 /*ePluginEventBase*/))
-		freyja_print("!Event(%d): Unhandled event.", command);
-}
-
 
 void freyja_set_dialog_visible(const char *name)
 {
 	int e = ResourceEvent::GetResourceIdBySymbol((char*)name);
 	mgtk_event_dialog_visible_set(e, 1);	
-}
-
-
-void freyja_handle_resource_init(Resource &r)
-{
-	/* Attach singleton method listeners. */
-	//FreyjaControl::GetInstance()->AttachMethodListeners( );
-	FreyjaRender::AttachMethodListeners( );
-
-	// Non-class listeners
-	freyja3d_misc_events_attach();
-
-	// Bind mlisp script functions to C/C++ functions.
-	//r.RegisterFunction("funcname", freyja_rc_funcname);
-
-
-	////////////////////////////////////////////////////////////////////
-	// Old style events
-	////////////////////////////////////////////////////////////////////
-
-	/* Mongoose 2002.01.21, 
-	 * Bind some script vars to matching symbol in C/C++ */
-
-	// Event types used for flow control of event ids
-	r.RegisterInt("eMode", eMode);
-	r.RegisterInt("eEvent", eEvent);
-	r.RegisterInt("eNop", eNop);
-	r.RegisterInt("eNone", eNone);
-
-	// Menus
-	r.RegisterInt("ePluginMenu", ePluginMenu);
-	r.RegisterInt("eBlendDestMenu", eBlendDestMenu);
-	r.RegisterInt("eBlendSrcMenu", eBlendSrcMenu);
-	r.RegisterInt("eObjectMenu", eObjectMenu);
-	r.RegisterInt("eViewportModeMenu", eViewportModeMenu);
-	r.RegisterInt("eTransformMenu", eTransformMenu);
-
-	// Colors
-	r.RegisterInt("eColorMaterialAmbient", eColorMaterialAmbient);
-	r.RegisterInt("eColorMaterialDiffuse", eColorMaterialDiffuse);
-	r.RegisterInt("eColorMaterialSpecular", eColorMaterialSpecular);
-	r.RegisterInt("eColorMaterialEmissive", eColorMaterialEmissive);
-	r.RegisterInt("eColorLightAmbient", eColorLightAmbient);
-	r.RegisterInt("eColorLightDiffuse", eColorLightDiffuse);
-	r.RegisterInt("eColorLightSpecular", eColorLightSpecular);
-	r.RegisterInt("eColorBackground", eColorBackground);
-	r.RegisterInt("eColorGrid", eColorGrid);
-	r.RegisterInt("eColorMesh", eColorMesh);
-	r.RegisterInt("eColorVertex", eColorVertex);
-	r.RegisterInt("eColorVertexHighlight", eColorVertexHighlight);
-	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
-	r.RegisterInt("eColorBone", eColorBone);
-	r.RegisterInt("eColorBoneHighlight", eColorBoneHighlight);
-	r.RegisterInt("eColorJoint", eColorJoint);
-	r.RegisterInt("eColorJointHighlight", eColorJointHighlight);
 }
 
 
@@ -632,7 +493,7 @@ void freyja_handle_resource_start()
 #endif
 
 
-	freyja_handle_resource_init( Control::GetResource() );
+	//freyja_handle_resource_init( Control::GetResource() );
 
 	/* Start the renderer context with a default size. */
 	FreyjaRender::GetInstance()->InitContext( 1024, 768, true );
@@ -667,14 +528,17 @@ void freyja_handle_resource_start()
 		}
 	}
 
-	/* Load and init application plugins. */
+#if FIXME
+	/* Load application plugins. */
 	{
 		freyja3d_plugin_init();
 		freyja3d_plugin_application_widget_init();
-
 		String dir = freyja_rc_map_string( "plugins" );	
 		freyja3d_plugin_application_init( dir.c_str() );
 	}
+#else
+#   warning FIXME Disabled plugins for now.
+#endif
 
 	/* Setup scenegraph widget(s). */
 	freyja3d_scenegraph_init();
@@ -997,74 +861,6 @@ void freyja_install_user()
 				freyja_print( "cp '%s' '%s'", filename, rc );
 				SystemIO::CopyFileToPath(filename, rc);
 			}
-		}
-	}
-}
-
-
-void freyja_handle_motion(int x, int y)
-{
-	//if (FreyjaControl::GetInstance())
-	
-	//FreyjaControl::GetInstance()->MotionEvent(x, y);
-	
-}
-
-
-void freyja_handle_mouse(int button, int state, int mod, int x, int y)
-{
-
-	//if (FreyjaControl::GetInstance())
-	
-		//FreyjaControl::GetInstance()->MouseEvent(button, state, mod, x, y);
-	
-}
-
-
-int freyja_event2i(int event, int cmd)
-{
-	if ( event != eNop && 
-		 !ResourceEvent::listen(cmd - ePluginEventBase) )
-	{
-		freyja_print("%s(%i, %i): Event has no handler.",
-					 __func__, event, cmd);
-		return -1;
-	}
-
-	return 0;
-}
-
-
-void freyja_print(char *format, ...)
-{
-	if ( format && format[0] )
-	{
-		const unsigned int sz = 1024;
-		char buf[sz];
-
-		va_list args;
-		va_start(args, format);
-		int truncated = vsnprintf(buf, sz, format, args);
-		buf[sz-1] = 0;
-		va_end(args);
-
-		/* More than 1k string was needed, so allocate one. */
-		if ( truncated >= (int)sz )
-		{
-			unsigned int len = truncated + 1; // Doesn't include '\0'
-			char* s = new char[ len ];
-
-			va_start( args, format );
-			vsnprintf( s, len, format, args );
-			s[len-1] = '\0';
-			va_end( args );
-
-			ControlPrinter::Print( s );
-			delete [] s;
-		}
-		else
-		{
-			ControlPrinter::Print( buf );
 		}
 	}
 }
