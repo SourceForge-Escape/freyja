@@ -6,7 +6,8 @@ PROJECT( freyja )
 #set( PLUGIN_DIR plugins/ )
 
 # Recurse into the project subdirectories.
-SUBDIRS( lua tinyxml libhel libfreyja libmgtk freyja plugins )
+SUBDIRS( lua tinyxml libhel libfreyja libmgtk freyja  )
+#plugins
 #SUBDIRS( tools )
 
 #GET_TARGET_PROPERTY(LIB_NAME Foo LOCATION)

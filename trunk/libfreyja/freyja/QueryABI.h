@@ -39,7 +39,7 @@ extern "C" {
 	typedef void (*FreyjaQueryCallback)(unsigned int size, freyja_query_t *array);
 
 
-	void freyjaQuerySetCallback(FreyjaQueryCallback func);
+	void freyja_query_set_callback( FreyjaQueryCallback func );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Set the interactive query handler for user input

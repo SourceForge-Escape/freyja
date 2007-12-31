@@ -36,15 +36,12 @@
 #include <mstl/SystemIO.h>
 
 #include <mgtk/mgtk_events.h>
-//#include <mgtk/mgtk_linker.h>
-//#include <mgtk/mgtk_lua.h>
 #include <mgtk/mgtk_tree.h>
 #include <mgtk/ResourceEvent.h>
 #include <mgtk/ConfirmationDialog.h>
 #include <mgtk/QueryDialog.h>
 
 #include "FreyjaRender.h"
-//#include "FreyjaControl.h"
 #include "Control.h"
 #include "MaterialControl.h"
 #include "Plugins.h"
@@ -75,7 +72,7 @@ void freyja_event_info_dialog( const char* icon, const char* message )
 }
 
 
-void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array)
+void freyja3d_query_callback_handler(unsigned int size, freyja_query_t *array)
 {
 	QueryDialog d;
 	d.mName = "freyjaQueryCallbackHandler"; 
@@ -466,15 +463,15 @@ void freyja_handle_event1f(int event, float value)
 
 void freyja_handle_gldisplay()
 {
-	FREYJA_ASSERTMSG(FreyjaRender::mInstance, "FreyjaRender Singleton not allocated");
-	FreyjaRender::mInstance->Display();
+	//FREYJA_ASSERTMSG(FreyjaRender::mInstance, "FreyjaRender Singleton not allocated");
+	FreyjaRender::GetInstance()->Display();
 }
 
 
 void freyja_handle_glresize(unsigned int width, unsigned int height)
 {
 	//FREYJA_ASSERTMSG(FreyjaControl::mInstance, "FreyjaRender Singleton not allocated");
-	FreyjaRender::mInstance->ResizeContext(width, height);
+	FreyjaRender::GetInstance()->ResizeContext(width, height);
 }
 
 
@@ -600,10 +597,6 @@ void freyja_handle_resource_init(Resource &r)
 
 void freyja_handle_resource_start()
 {
-	/* Mongoose 2002.02.02,  
-	 * This is the backend entry called by the mgtk widget layer.
-	 */
-
 	/* Mongoose 2007.04.07,
 	 * Here all the resources are setup, and the main interface starts. 
 	 */
@@ -614,24 +607,71 @@ void freyja_handle_resource_start()
 
 	/* Attempt to allocate singletons. */
 	//FREYJA_ASSERTMSG(FreyjaControl::GetInstance() != NULL, "FreyjaControl allocation failure.  See '%s' for possible errors.", FREYJA_LOG_FILE );
-	FREYJA_ASSERTMSG( FreyjaRender::GetInstance() != NULL, "FreyjaRender Singleton allocation failure.  See '%s' for possible errors.", FREYJA_LOG_FILE );
-	if ( /*!FreyjaControl::GetInstance() ||*/ !FreyjaRender::GetInstance( ) )
+	//FREYJA_ASSERTMSG( FreyjaRender::GetInstance() != NULL, "FreyjaRender Singleton allocation failure.  See '%s' for possible errors.", FREYJA_LOG_FILE );
+	if ( !FreyjaRender::GetInstance( ) )
 	{
 		SystemIO::Print("See '%s' for possible errors.\n", FREYJA_LOG_FILE );
 		freyja3d_shutdown( );
 		return;
 	}
 
-	//freyja_handle_resource_init(FreyjaControl::GetInstance()->GetResource());
+#if 0
+	/* Restore recent files menus from disk. */
+	mMaterial.InitRecentFilesMenu();
+	mRecentModel.LoadResource();
+	mRecentMesh.LoadResource();
+	mRecentMetadata.LoadResource();
+	mRecentSkeleton.LoadResource();
+	mRecentLua.LoadResource();
+	mRecentPython.LoadResource();
 
-	/* Build the user interface from scripts and load user preferences. */
-	//FreyjaControl::GetInstance()->Init();
-	freyja3d_plugin_init();
-	freyja3d_plugin_application_widget_init();
+	/* Set basic user interface defaults. */
+	SetControlScheme( eScheme_Model );
+	SetZoom(1.0f);
+	mEventMode = aNone;
+#endif
 
+
+	freyja_handle_resource_init( Control::GetResource() );
+
+	/* Start the renderer context with a default size. */
+	FreyjaRender::GetInstance()->InitContext( 1024, 768, true );
+
+	/* Setup OpenGL font renderer. */
+	{
+		/* Load TTF font then setup OpenGLPrinter 
+		   FIXME -- Move this along with mTexture to OpenGL facade. */
+		mstl::String font = "vera.ttf";
+#warning FIXME This should use another lookup method.
+		if ( 1 )//FIXME Control::GetResource().Lookup("FONT", &font) )
+		{
+			const unsigned int pt = 24, dpi = 100;
+			mstl::String s;
+
+			// If this isn't a full path filename look for file in rc_map
+			if ( !SystemIO::File::DoesFileExist( font.c_str() ) )
+			{
+				font = freyja_rc_map_string( font.c_str() );
+			}
+
+			freyja_print( "Loading font '%s'." );			
+
+			if ( !FreyjaRender::GetInstance()->mPrinter.Init( font.c_str(), pt, dpi ) )
+			{
+				FREYJA_ASSERTMSG(false, "Failed to load font '%s' @ %ipt %idpi.", font.c_str(), pt, dpi);
+			}
+		}
+		else
+		{
+			//FREYJA_ASSERTMSG(false, "No FONT symbol found in resource.");
+		}
+	}
 
 	/* Load and init application plugins. */
 	{
+		freyja3d_plugin_init();
+		freyja3d_plugin_application_widget_init();
+
 		String dir = freyja_rc_map_string( "plugins" );	
 		freyja3d_plugin_application_init( dir.c_str() );
 	}
@@ -643,7 +683,7 @@ void freyja_handle_resource_start()
 	MaterialControl::GetInstance()->RefreshInterface();
 
 	/* Setup editor modes and drop-down menus */
-#if 0
+#if FIXME
 	mgtk_option_menu_value_set(eViewportModeMenu, 0);
 	FreyjaControl::GetInstance()->EvModeModel();
 
@@ -1028,9 +1068,6 @@ void freyja_print(char *format, ...)
 		}
 	}
 }
-
-
-
 
 
 String freyja_get_resource_path()

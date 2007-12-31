@@ -345,37 +345,21 @@ class OpenGL
 	// Constructors
 	////////////////////////////////////////////////////////////
 
- protected:
-
-	OpenGL();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of OpenGL
-	 *
-	 ------------------------------------------------------*/
 
  public:
 
-	static OpenGL *Instance();
+	static OpenGL* Instance( )
+	{ return ( mSingleton ? mSingleton : ( mSingleton = new OpenGL() ) ); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of OpenGL if not already 
-	 *        allocated
+	 * Post : Get instace of this singleton.
 	 *
 	 ------------------------------------------------------*/
 
-	static const OpenGL *Singleton() { return mSingleton; }
+	~OpenGL( );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of OpenGL if not already 
-	 *        allocated
-	 *
-	 ------------------------------------------------------*/
-
-	~OpenGL();
-	/*------------------------------------------------------
-	 * Pre  : OpenGL object is allocated
-	 * Post : Deconstructs an object of OpenGL
+	 * Post : Destructor.
 	 *
 	 ------------------------------------------------------*/
 
@@ -575,6 +559,19 @@ class OpenGL
 	static bool arb_vertex_buffer_object;
 	static bool ext_cg_shader;
 
+
+ protected:
+
+	OpenGL();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of OpenGL
+	 *
+	 ------------------------------------------------------*/
+
+	static OpenGL* mSingleton;
+
+
  private:
 
 	////////////////////////////////////////////////////////////
@@ -585,8 +582,6 @@ class OpenGL
 	////////////////////////////////////////////////////////////
 	// Private Mutators
 	////////////////////////////////////////////////////////////
-
-	static OpenGL *mSingleton;
 
 	static uint32 mObjects;     /* Count how many objects we load */
 
@@ -603,7 +598,12 @@ class OpenGL
 	int32 mTextureId;	    	/* Currently bound texture id */
 	
 	int32 mTextureId2;			/* Multitexture Texture Id */
+
 };
+
+
+
+
 
 } // namespace freyja3d
 

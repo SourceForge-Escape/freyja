@@ -64,7 +64,6 @@ using namespace mstl;
 using namespace freyja;
 using namespace freyja3d;
 
-extern freyja::Scene* gScene;
 
 using hel::Vec3;
 

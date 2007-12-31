@@ -26,6 +26,8 @@
  * Mongoose - Created, based on old 2001 midgard codebase.
  ==========================================================================*/
 
+#include <mstl/SystemIO.h>
+
 #ifdef HAVE_OPENGL
 #   include "FreyjaOpenGL.h"
 #   include "Texture.h"
@@ -44,7 +46,8 @@ FT_Library OpenGLPrinter::mLibrary = NULL;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-OpenGLPrinter::OpenGLPrinter()
+OpenGLPrinter::OpenGLPrinter() :
+	mInit( false )
 {
 #ifdef HAVE_FREETYPE2
 	FT_Error error;
@@ -149,6 +152,9 @@ bool OpenGLPrinter::GenerateTexture(const char *filename,
 									unsigned char *image, 
 									const unsigned int image_width)
 {
+	if ( !filename || !filename[0] || !mstl::SystemIO::File::DoesFileExist( filename ) )
+		return false;
+
 #ifdef HAVE_FREETYPE2
 	FT_Face face;
 	FT_Error error;
@@ -433,25 +439,33 @@ bool OpenGLPrinter::SaveTGA(const char *filename,
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-bool OpenGLPrinter::Init(const char *font, 
+bool OpenGLPrinter::Init(const char* font, 
 						 const unsigned int pt, const unsigned int dpi)
 {
-	const unsigned int width = 256;
-	const char *text = GetASCIIString();
-	unsigned char image[width*width*4];
-	glyph_t glyphs[strlen(text)];	
+	mInit = false;
 
-	// Clear pixmap buffer, generate a texture
-	memset(image, 0, sizeof(image));
-	if (!GenerateTexture(font, pt, dpi, text, glyphs, image, width))
-		return false;
+	if ( font && font[0] && mstl::SystemIO::File::DoesFileExist( font ) )
+	{
+		const unsigned int width = 256;
+		const char *text = GetASCIIString();
+		unsigned char image[width*width*4]; // If texture doesn't copy this is a bad idea.
+		glyph_t glyphs[strlen(text)];	
 
-	// Bind texture in OpenGL
+		/* Clear pixmap buffer, generate a texture. */
+		memset(image, 0, sizeof(image));
+
+		if ( GenerateTexture(font, pt, dpi, text, glyphs, image, width) )
+		{
 #ifdef HAVE_OPENGL
-	int id = Texture::mSingleton->loadBuffer(image, width, width, Texture::RGBA, 32);
+			/* Bind texture in OpenGL. */
+			int id = Texture::mSingleton->loadBuffer(image, width, width, Texture::RGBA, 32);
 #endif // HAVE_OPENGL
+		
+			mInit = GenerateFont(mFont, text, glyphs, id, image, width);
+		}
+	}
 
-	return GenerateFont(mFont, text, glyphs, id, image, width);
+	return mInit;
 }
 
 
@@ -483,7 +497,7 @@ void OpenGLPrinter::AddGlyphToTexture32(unsigned char *image,
 }
 
 
-void OpenGLPrinter::RenderString(const char *text)
+void OpenGLPrinter::RenderString( const char* text )
 {
 #ifdef HAVE_OPENGL
 
@@ -501,8 +515,11 @@ void OpenGLPrinter::RenderString(const char *text)
 	 *
 	 *	Also this string must be preprocessed to have glyph offsets
 	 * instead of ASCII text in it and support counts over 256 */
-	glListBase(mFont.mListBase - mFont.mOffset);
-	glCallLists(strlen(text), GL_BYTE, text);
+	if ( mInit && text && text[0] )
+	{
+		glListBase( mFont.mListBase - mFont.mOffset );
+		glCallLists( strlen(text), GL_BYTE, text );
+	}
 #endif // HAVE_OPENGL
 }
 

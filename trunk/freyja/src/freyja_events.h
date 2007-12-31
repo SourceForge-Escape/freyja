@@ -401,6 +401,7 @@ bool freyja3d_save_user_preferences( );
  ------------------------------------------------------*/
 
 
+void freyja3d_query_callback_handler(unsigned int size, freyja_query_t *array);
 void freyja_handle_application_window_close( );
 void freyja_handle_resource_start( );
 const char* freyja_rc_map( const char* filename );

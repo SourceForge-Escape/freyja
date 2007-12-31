@@ -138,7 +138,6 @@ freyja3d_debug_msg_handler( const char* file,
 void freyja3d_init_libfreyja( )
 {
 	/* Setup libfreyja. */
-	ControlPrinter::Log("@ libfreyja: %s", freyja_get_version() );
 	freyja_set_assert_handler( freyja3d_assert_handler );
 	freyja_lua_register_functions( gLuaVM.GetState() );
 	freyja_start( &Control::GetPrinter() );
@@ -163,12 +162,17 @@ void freyja3d_init_libfreyja( )
 	rgba[0] = rgba[1] = rgba[2] = 0.01f;
 	freyjaMaterialSpecular(mIndex, rgba);
 	freyjaMaterialShininess(mIndex, 0.0f);
-	freyjaMaterialSetFlag(mIndex, fFreyjaMaterial_Texture);
+	freyjaMaterialSetFlag( mIndex, fFreyjaMaterial_Texture );
 
 	/* Setup camera0. */
 	freyja_ptr camera0 = freyjaCameraCreate( "camera0" );
 	//freyjaCameraPos3f( camera0, 64.0f, 64.0f, 64.0f );
 	//freyjaCameraTarget3f( camera0, 0.0f, 32.0f, 0.0f );
+
+	gScene = new freyja::Scene( );
+
+	/* Set libfreyja query handler. */
+	freyja_query_set_callback( freyja3d_query_callback_handler );
 }
 
 
@@ -186,7 +190,7 @@ void freyja3d_init_mgtk( int argc, char* argv[] )
 	mgtk_link_import("mgtk_handle_key_press", (void*)freyja_handle_key_press);
 	mgtk_link_import("mgtk_handle_motion", (void*)freyja_handle_motion);
 	mgtk_link_import("mgtk_handle_mouse", (void*)freyja_handle_mouse);
-	mgtk_link_import("mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
+	//mgtk_link_import("mgtk_handle_resource_start", (void*)freyja_handle_resource_start);
 	mgtk_link_import("mgtk_handle_text_array", (void*)freyja_handle_text_array);
 	mgtk_link_import("mgtk_handle_text", (void*)freyja_handle_text);
 	mgtk_link_import("mgtk_callback_get_image_data_rgb24", (void*)freyja_callback_get_image_data_rgb24);
@@ -195,18 +199,16 @@ void freyja3d_init_mgtk( int argc, char* argv[] )
 	mgtk_link_import("mgtk_print", (void*)freyja_print);
 	mgtk_link_import("mgtk_rc_map", (void*)freyja_rc_map);
 
-	ControlPrinter::Log("@ libmgtk: %s", mgtk_version() );
-
 	mgtk_assert_handler( freyja3d_assert_handler );
-
-	/* Export Lua mgtk functions. */ 
-	mgtk_lua_register_functions( gLuaVM );
 
 	/* Hookup legacy resource to legacy event system. */
 	ResourceEvent::setResource( &Control::GetResource() );
 
+	/* Export Lua mgtk functions. */ 
+	mgtk_lua_register_functions( gLuaVM );
+
 	/* Start the user interface backend. */
-	mgtk_init(argc, argv);
+	mgtk_init( argc, argv );
 
 	/* Generate user interface from Lua script. */
 	{
@@ -219,6 +221,8 @@ void freyja3d_init_mgtk( int argc, char* argv[] )
 		String s = freyja_rc_map_string( FREYJA_USER_PREF_FILE );
 		freyja3d_execute_lua_script( s.c_str() );
 	}
+
+	freyja_handle_resource_start( );
 
 	/* Start the user interface loop. */
 	mgtk_start();
@@ -251,15 +255,17 @@ void freyja3d_shutdown( )
 
 int main(int argc, char *argv[])
 {
-	/* Enabled logging */
-	mstl::String s = freyja_rc_map_string(FREYJA_LOG_FILE);
-	ControlPrinter::StartLogging(s.c_str());
+	/* Enable logging. */
+	{
+		mstl::String log = freyja_rc_map_string( FREYJA_LOG_FILE );
+		ControlPrinter::StartLogging( log.c_str() );
 
-	/* Report library versions to log. */	
-	ControlPrinter::Log("@ freyja3d: %s", VERSION);
-	ControlPrinter::Log("@ libhel: %s", helVersionInfo() );
-	ControlPrinter::Log("@ libfreyja: %s", freyja_get_version() );
-	ControlPrinter::Log("@ libmgtk: %s", mgtk_version() );
+		/* Report library versions to log. */	
+		ControlPrinter::Log("@ freyja3d: %s", VERSION);
+		ControlPrinter::Log("@ libhel: %s", helVersionInfo() );
+		ControlPrinter::Log("@ libfreyja: %s", freyja_get_version() );
+		ControlPrinter::Log("@ libmgtk: %s", mgtk_version() );
+	}
 
 	/* User install of scripts, icons, samples, configs, etc */
 	if ( !freyja_is_user_installed_data_old() )
