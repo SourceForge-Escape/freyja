@@ -466,6 +466,18 @@ main(int argc, char *argv[])
 	/* Hookup assert handlers, note freyja assert is also used by this layer */
 	freyjaDebugInfoHandler( freyja3d_debug_msg_handler );
 
+	/* Attempt to allocate singletons. */
+	{
+		FREYJA_ASSERTMSG( FreyjaRender::GetInstance() != NULL, 
+						  "Singleton allocation failure.  See log '%s'.", FREYJA_LOG_FILE );
+		if ( FreyjaRender::GetInstance( ) == NULL )
+		{
+			SystemIO::Print("See '%s' for possible errors.\n", FREYJA_LOG_FILE );
+			freyja3d_shutdown( );
+			return -1;
+		}
+	}
+
 	/* Setup libraries. */
 	freyja3d_init_libfreyja( );
 	freyja3d_init_mgtk( argc, argv );
@@ -476,17 +488,6 @@ main(int argc, char *argv[])
 		freyja3d_plugin_application_widget_init( );
 		String dir = freyja_rc_map_string( "plugins" );	
 		freyja3d_plugin_application_init( dir.c_str() );
-	}
-
-	/* Attempt to allocate singletons. */
-	{
-		FREYJA_ASSERTMSG( FreyjaRender::GetInstance() != NULL, "Singleton allocation failure.  See '%s' for possible errors.", FREYJA_LOG_FILE );
-		if ( FreyjaRender::GetInstance( ) == NULL )
-		{
-			SystemIO::Print("See '%s' for possible errors.\n", FREYJA_LOG_FILE );
-			freyja3d_shutdown( );
-			return -1;
-		}
 	}
 
 	/* Start the OpenGL context. */

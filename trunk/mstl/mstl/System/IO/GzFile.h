@@ -23,7 +23,7 @@
 
 namespace mstl {
 
-bool GzFileRead( const char* filename, char*& buffer, const unsigned int& size );
+bool GzFileRead( const char* filename, char*& buffer, unsigned int& size );
 
 bool GzFileWrite( const char* filename, const char* buffer, const unsigned int size );
 
@@ -51,20 +51,38 @@ bool GzFileWrite( const char* filename, const char* buffer, const unsigned int s
 
 
 inline
-bool GzFileRead( const char* filename, char*& buffer, const unsigned int& size )
+bool GzFileRead( const char* filename, char*& buffer, unsigned int& size )
 {
-	gzFile f = gzopen(filename, "rb");
+	gzFile file = gzopen(filename, "rb");
 
-	if ( f )
+	if ( file )
 	{
+		if ( !buffer )
+		{
+			// FIXME: This is horribly slow.
+			unsigned int sz = 0;
+			char tmp[8];
+			while ( !gzeof( file ) )
+			{
+				++sz;
+				if ( gzread( file, tmp, 1 ) == 0 )
+					break;
+			}
+
+			buffer = new char[ sz + 1 ];
+			size = sz;
+
+			gzrewind( file );
+		}
+
 		bool ret = true;
-		if ( gzread(f, buffer, size) < (int)size )
+		if ( gzread( file, buffer, size ) < (int)size )
 		{
 			//freyjaPrintError("gzread('%s') failed.", filename);
 			ret = false;
 		}
 
-		gzclose(f);
+		gzclose( file );
 		return ret;
 	}
 

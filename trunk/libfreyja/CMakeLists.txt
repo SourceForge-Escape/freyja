@@ -31,10 +31,10 @@ add_definitions(
 add_definitions( -Wall -DENABLE_FREYJA_ASSERTS )
 
 # Debug
-#add_definitions( -DDEBUG -g )
+add_definitions( -DDEBUG -g )
 
 # RELEASE
-add_definitions( -DRELEASE -O2 -finline-functions -fomit-frame-pointer -funroll-loops )
+#add_definitions( -DRELEASE -O2 -finline-functions -fomit-frame-pointer -funroll-loops )
 
 # Lua
 FIND_LIBRARY( LUA_FOUND NAMES lua5.1 lua-5.1 )

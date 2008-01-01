@@ -63,6 +63,32 @@ int freyja3d_misc_vec_compare_func(const void* a, const void* b)
 // Non-object Event Handler Functions
 ////////////////////////////////////////////////////////////
 
+void eOpenFile( )
+{
+	mstl::String path =freyja_rc_map_string( "/snippets/" ); 
+
+	char *filename =
+	mgtk_filechooser_blocking("freyja - Open Model...", 
+							  //mRecentModel.GetPath(), 
+							  path.c_str(), 0,
+							  "Freyja Modeler (*.freyja)", "*.freyja");
+		
+	if ( filename )
+	{
+		if ( gScene && gScene->Unserialize( filename ) )
+		{
+			freyja3d_print( "Imported '%s'.", filename );
+		}
+		else
+		{
+			freyja3d_print( "Failed to imported '%s'.", filename );
+		}
+	}
+	
+	mgtk_filechooser_blocking_free( filename );
+}
+
+
 void eExportKeyAsMesh()
 {
 	Mesh* mesh = gScene->GetCurrentMesh();
@@ -1155,6 +1181,8 @@ void eResetColorsToDefault()
 
 void freyja3d_misc_attach_listeners()
 {
+	mgtk_attach_listener( "eOpenFile", &eOpenFile );
+
 	// Test events
 	mgtk_attach_listener( "eTestAssertMsgBox", &eTestAssertMsgBox);
 	mgtk_attach_listener( "eTestTextView", &eTestTextView);

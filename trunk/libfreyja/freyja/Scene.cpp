@@ -122,7 +122,7 @@ bool Scene::Unserialize( const char* filename )
 
 	/* Should handle files with and without gz compression. */
 	{
-		char* xml;
+		char* xml = NULL;
 		unsigned int size;
 		mstl::GzFileRead( filename, xml, size );
 		doc.Parse( xml );
@@ -151,6 +151,8 @@ bool Scene::Unserialize( const char* filename )
 	{
 		const char* s = child->Value();
 		
+		printf("<%s>\n", s);
+
 		if ( mCameras.GetType() == s )
 		{
 			Camera* node = new Camera( child->Attribute( "name" ) );
