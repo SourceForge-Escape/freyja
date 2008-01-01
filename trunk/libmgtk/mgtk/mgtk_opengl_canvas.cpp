@@ -648,13 +648,35 @@ void mgtk_event_mouse_motion(GtkWidget *widget, GdkEventMotion *event)
 	mgtk_opengl_canvas_state_t *gl_state = 
 	(mgtk_opengl_canvas_state_t*)gtk_object_get_data(GTK_OBJECT(widget), "gl_window_state");
 
+	{
+		mgtk_mouse_event_t e;
+		e.x = x;
+		e.y = y;
+		e.state = MOUSE_BTN_STATE_PRESSED;
+		e.modifiers = 0;
+		if ( event->state & GDK_CONTROL_MASK ) e.modifiers |= KEY_LCTRL;
+		if ( event->state & GDK_SHIFT_MASK ) e.modifiers |= KEY_LSHIFT;
+		e.button = 0;
+		if ( event->state & GDK_BUTTON1_MASK ) e.button |= MOUSE_BTN_LEFT;
+		if ( event->state & GDK_BUTTON2_MASK ) e.button |= MOUSE_BTN_MIDDLE;
+		if ( event->state & GDK_BUTTON3_MASK ) e.button |= MOUSE_BTN_RIGHT; 
+		if ( event->state & GDK_BUTTON4_MASK ) e.button |= MOUSE_BTN_UP;
+		if ( event->state & GDK_BUTTON5_MASK ) e.button |= MOUSE_BTN_DOWN;
+
+		e.x_delta = x - gl_state->mouse_x;
+		e.y_delta = y - gl_state->mouse_y;
+
+		/* Send mgtk motion event. */
+		mgtk_handle_motion( &e );
+		//mgtk_handle_motion( x, y );
+	}
+
 	gl_state->mouse_x = x;
 	gl_state->mouse_y = y;
-	mgtk_handle_motion(x, y);
 
 	/* Request expose events instead of forcing. */
 	gtk_widget_queue_draw( widget );
-	//mgtk_opengl_canvas_refresh(widget);
+	//mgtk_opengl_canvas_refresh( widget );
 }
 
 

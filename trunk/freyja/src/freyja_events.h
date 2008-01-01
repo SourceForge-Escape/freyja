@@ -35,16 +35,8 @@
 
 typedef enum {
 
-	/* Special events */
-	eNone  = 0,           // Event to be ignored.
-	eNop   = 2,           // Event with no action.
-	eMode  = 3,           // These events change modes ( modify states )
-	eEvent = 4,           // These events request handling ( perform actions )
-
-	/* Event ids ( minors ) */
-	
 	// Colors
-	eColorMaterialAmbient,
+	eColorMaterialAmbient = 5,
 	eColorMaterialDiffuse,
 	eColorMaterialSpecular,
 	eColorMaterialEmissive,
@@ -68,10 +60,7 @@ typedef enum {
 	eTransformMenu,
 	eObjectMenu,
 	eBlendDestMenu,
-	eBlendSrcMenu,
-
-	// Special base id for plugins to avoid conflicts
-	ePluginEventBase = 10000
+	eBlendSrcMenu
 
 } event_subject_id;
 
@@ -84,7 +73,6 @@ extern freyja::Scene* gScene;
 //////////////////////////////////////////////////////////////////////////////
 
 #define mgtk_event_set_float mgtk_spinbutton_value_set
-#define freyja_print freyja3d_print
 
 #define freyja_event_notify_observer1f mgtk_event_notify_observer1f
 //void freyja_event_notify_observer1f(event_subject_id e, float value);
@@ -107,13 +95,6 @@ extern freyja::Scene* gScene;
 /*------------------------------------------------------
  * Pre  : <event> is the Id of the menu subject 
  * Post : Removes all submenus and menuitems from menu
- *
- ------------------------------------------------------*/
-
-void freyja_append_eventid(char *symbol, int eventid);
-/*------------------------------------------------------
- * Pre  : 
- * Post : Aliases another <symbol> for existing <eventid>
  *
  ------------------------------------------------------*/
 
@@ -334,27 +315,10 @@ void freyja_swap_buffers();
  *
  ------------------------------------------------------*/
 
-void freyjaQueryCallbackHandler(unsigned int size, freyja_query_t *array);
+void freyja3d_query_callback_handler(unsigned int size, freyja_query_t *array);
 /*------------------------------------------------------
  * Pre  : 
  * Post : Legacy function that handles generated queries.
- *
- ------------------------------------------------------*/
-
-
-// 'freyja3d' 
-
-void freyja3d_scenegraph_init();
-/*------------------------------------------------------
- * Pre  : 
- * Post : Initialize the scenegraph widget(s).
- *
- ------------------------------------------------------*/
-
-void freyja3d_update_scenegraph();
-/*------------------------------------------------------
- * Pre  : 
- * Post : Update the scenegraph widgets.
  *
  ------------------------------------------------------*/
 
@@ -401,9 +365,14 @@ bool freyja3d_save_user_preferences( );
  *
  ------------------------------------------------------*/
 
+void freyja3d_misc_attach_listeners( );
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : 
+ *
+ ------------------------------------------------------*/
 
 void freyja3d_query_callback_handler(unsigned int size, freyja_query_t *array);
-void freyja_handle_resource_start( );
 void freyja_handle_gldisplay();
 void freyja_handle_glresize(unsigned int width, unsigned int height);
 void freyja_handle_text_array(int event, unsigned int count, char **text);

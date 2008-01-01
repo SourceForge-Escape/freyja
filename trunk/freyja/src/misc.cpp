@@ -63,13 +63,6 @@ int freyja3d_misc_vec_compare_func(const void* a, const void* b)
 // Non-object Event Handler Functions
 ////////////////////////////////////////////////////////////
 
-void eNoImplementation(ResourceEvent *e)
-{
-	freyja_print("!'%s' : No longer implemented or disabled.",
-				(e && e->getName()) ? e->getName() : "Unknown event");
-}
-
-
 void eExportKeyAsMesh()
 {
 	Mesh* mesh = gScene->GetCurrentMesh();
@@ -78,7 +71,7 @@ void eExportKeyAsMesh()
 	{	
 		//FIXME Mesh* copy = mesh->CopyWithBlendedVertices();
 		//FIXME copy->AddToPool();
-		freyja_print( "Converted keyframe to mesh." );
+		freyja3d_print( "Converted keyframe to mesh." );
 	}
 }
 
@@ -396,7 +389,7 @@ vec_t gWeight = 1.0f;
 void eWeight(vec_t w)
 {
 	gWeight = w;
-	freyja_print("Weight set to %f", gWeight);
+	freyja3d_print("Weight set to %f", gWeight);
 }
 
 void eAssignWeight()
@@ -840,7 +833,7 @@ void eBoneSelect()
 {
 	//FreyjaControl::GetInstance()->SetObjectMode(FreyjaControl::tBone);
 	//FreyjaControl::GetInstance()->SetActionMode(FreyjaControl::aSelect);
-	freyja_print("Select bone...");
+	freyja3d_print("Select bone...");
 }
 
 
@@ -931,8 +924,7 @@ void eAboutDialog()
 void eAnimationNext()
 {
 	//FreyjaControl::GetInstance()->SetSelectedAnimation(FreyjaControl::GetInstance()->GetSelectedAnimation() + 1);
-	freyja_print("Animation Track[%i].", 
-				 0);//			 FreyjaControl::GetInstance()->GetSelectedAnimation());
+	freyja3d_print("Animation Track[%i].", 0);//			 FreyjaControl::GetInstance()->GetSelectedAnimation());
 }
 
 void eAnimationPrev()
@@ -1132,14 +1124,14 @@ void eMetadataIterator(unsigned int id)
 void eCameraIterator(unsigned int id)
 {
 	//FreyjaControl::GetInstance()->SetSelectedCamera( id );
-	freyja_print( "camera%i selected.", id );
+	freyja3d_print( "camera%i selected.", id );
 }
 
 
 void eLightIterator(unsigned int id)
 {
 	//FreyjaControl::GetInstance()->SetSelectedLight( id );
-	freyja_print( "light%i selected.", id );
+	freyja3d_print( "light%i selected.", id );
 }
 
 
@@ -1161,140 +1153,137 @@ void eResetColorsToDefault()
 }
 
 
-void freyja3d_misc_events_attach()
+void freyja3d_misc_attach_listeners()
 {
-	// Empty menu events
-	ResourceEventCallback2::add("eImportFile", &eNoImplementation);
-	ResourceEventCallback2::add("eExportFile", &eNoImplementation);
-
 	// Test events
-	ResourceEventCallback::add("eTestAssertMsgBox", &eTestAssertMsgBox);
-	ResourceEventCallback::add("eTestTextView", &eTestTextView);
-	ResourceEventCallbackString::add("eTestTextViewText", &eTestTextViewText);
+	mgtk_attach_listener( "eTestAssertMsgBox", &eTestAssertMsgBox);
+	mgtk_attach_listener( "eTestTextView", &eTestTextView);
+	mgtk_attach_listener1s( "eTestTextViewText", &eTestTextViewText);
 
 	// Misc Iterators
-	ResourceEventCallbackUInt::add("eMetadataIterator", &eMetadataIterator);
-	ResourceEventCallbackUInt::add("eCameraIterator", &eCameraIterator);
-	ResourceEventCallbackUInt::add("eLightIterator", &eLightIterator);
+	mgtk_attach_listener1u(  "eMetadataIterator", &eMetadataIterator);
+	mgtk_attach_listener1u(  "eCameraIterator", &eCameraIterator);
+	mgtk_attach_listener1u(  "eLightIterator", &eLightIterator);
 
 	// Misc events
-	ResourceEventCallback::add("eResetColorsToDefault", &eResetColorsToDefault);
-	ResourceEventCallbackString::add("eBoneKeyFrameMetadataText", &eBoneKeyFrameMetadataText);
-	ResourceEventCallback::add("eBoneKeyFrameMetaData", &eBoneKeyFrameMetadata);
-	ResourceEventCallback::add("eBoneRefreshBindPose", &eBoneRefreshBindPose);
-	ResourceEventCallbackString::add("eBoneMetadataText", &eBoneMetadataText);
-	ResourceEventCallback::add("eBoneMetaData", &eBoneMetadata);
-	ResourceEventCallback::add("eBoneNew", &eBoneNew);
-	ResourceEventCallback::add("eBoneSelect", &eBoneSelect);
+	mgtk_attach_listener( "eResetColorsToDefault", &eResetColorsToDefault);
+	mgtk_attach_listener1s( "eBoneKeyFrameMetadataText", &eBoneKeyFrameMetadataText);
+	mgtk_attach_listener( "eBoneKeyFrameMetaData", &eBoneKeyFrameMetadata);
+	mgtk_attach_listener( "eBoneRefreshBindPose", &eBoneRefreshBindPose);
+	mgtk_attach_listener1s( "eBoneMetadataText", &eBoneMetadataText);
+	mgtk_attach_listener( "eBoneMetaData", &eBoneMetadata);
+	mgtk_attach_listener( "eBoneNew", &eBoneNew);
+	mgtk_attach_listener( "eBoneSelect", &eBoneSelect);
 
-	ResourceEventCallback::add("eMoveObject", &eMoveObject);
-	ResourceEventCallback::add("eRotateObject", &eRotateObject);
-	ResourceEventCallback::add("eScaleObject", &eScaleObject);
-	ResourceEventCallback::add("eSelect", &eSelect);
-	ResourceEventCallback::add("eUnselect", &eUnselect);
+	mgtk_attach_listener( "eMoveObject", &eMoveObject);
+	mgtk_attach_listener( "eRotateObject", &eRotateObject);
+	mgtk_attach_listener( "eScaleObject", &eScaleObject);
+	mgtk_attach_listener( "eSelect", &eSelect);
+	mgtk_attach_listener( "eUnselect", &eUnselect);
 
-	ResourceEventCallback::add("eGenerateRing", &eGenerateRing);
-	ResourceEventCallback::add("eGenerateCircle", &eGenerateCircle);
-	ResourceEventCallback::add("eGeneratePlane", &eGeneratePlane);
-	ResourceEventCallback::add("eGenerateCube", &eGenerateCube);
-	ResourceEventCallback::add("eGenerateSphere", &eGenerateSphere);
-	ResourceEventCallback::add("eGenerateTube", &eGenerateTube);
-	ResourceEventCallback::add("eGenerateCylinder", &eGenerateCylinder);
-	ResourceEventCallback::add("eGenerateCone", &eGenerateCone);
+	mgtk_attach_listener( "eGenerateRing", &eGenerateRing);
+	mgtk_attach_listener( "eGenerateCircle", &eGenerateCircle);
+	mgtk_attach_listener( "eGeneratePlane", &eGeneratePlane);
+	mgtk_attach_listener( "eGenerateCube", &eGenerateCube);
+	mgtk_attach_listener( "eGenerateSphere", &eGenerateSphere);
+	mgtk_attach_listener( "eGenerateTube", &eGenerateTube);
+	mgtk_attach_listener( "eGenerateCylinder", &eGenerateCylinder);
+	mgtk_attach_listener( "eGenerateCone", &eGenerateCone);
 
-	ResourceEventCallbackVec::add("eSnapWeldVertsDist", &eSnapWeldVertsDist);
+	mgtk_attach_listener1f(  "eSnapWeldVertsDist", &eSnapWeldVertsDist);
 
-	ResourceEventCallback::add("eSetSelectedFacesAlpha", &eSetSelectedFacesAlpha);
-	ResourceEventCallback::add("eClearSelectedFacesAlpha", &eClearSelectedFacesAlpha);
+	mgtk_attach_listener( "eSetSelectedFacesAlpha", &eSetSelectedFacesAlpha);
+	mgtk_attach_listener( "eClearSelectedFacesAlpha", &eClearSelectedFacesAlpha);
 
-	ResourceEventCallback::add("eAssignWeight", &eAssignWeight);
-	ResourceEventCallback::add("eClearWeight", &eClearWeight);
-	ResourceEventCallbackVec::add("eWeight", &eWeight);
+	mgtk_attach_listener( "eAssignWeight", &eAssignWeight);
+	mgtk_attach_listener( "eClearWeight", &eClearWeight);
+	mgtk_attach_listener1f(  "eWeight", &eWeight);
 
-	ResourceEventCallback::add("eMirrorFacesX", &eMirrorFacesX);
-	ResourceEventCallback::add("eMirrorFacesY", &eMirrorFacesY);
-	ResourceEventCallback::add("eMirrorFacesZ", &eMirrorFacesZ);
+	mgtk_attach_listener( "eMirrorFacesX", &eMirrorFacesX);
+	mgtk_attach_listener( "eMirrorFacesY", &eMirrorFacesY);
+	mgtk_attach_listener( "eMirrorFacesZ", &eMirrorFacesZ);
 
-	ResourceEventCallback::add("eMeshTesselate", &eMeshTesselate);
-	ResourceEventCallback::add("eMeshTexcoordSpherical", &eMeshTexcoordSpherical);
-	ResourceEventCallback::add("eMeshTexcoordCylindrical", &eMeshTexcoordCylindrical);
-	ResourceEventCallback::add("eMeshGenerateNormals", &eMeshGenerateNormals);
-	ResourceEventCallback::add("eMeshTexcoordPlaneProj", &eMeshTexcoordPlaneProj);
-	ResourceEventCallback::add("eMirrorMeshX", &eMirrorMeshX);
-	ResourceEventCallback::add("eMirrorMeshY", &eMirrorMeshY);
-	ResourceEventCallback::add("eMirrorMeshZ", &eMirrorMeshZ);
+	mgtk_attach_listener( "eMeshTesselate", &eMeshTesselate);
+	mgtk_attach_listener( "eMeshTexcoordSpherical", &eMeshTexcoordSpherical);
+	mgtk_attach_listener( "eMeshTexcoordCylindrical", &eMeshTexcoordCylindrical);
+	mgtk_attach_listener( "eMeshGenerateNormals", &eMeshGenerateNormals);
+	mgtk_attach_listener( "eMeshTexcoordPlaneProj", &eMeshTexcoordPlaneProj);
+	mgtk_attach_listener( "eMirrorMeshX", &eMirrorMeshX);
+	mgtk_attach_listener( "eMirrorMeshY", &eMirrorMeshY);
+	mgtk_attach_listener( "eMirrorMeshZ", &eMirrorMeshZ);
 
-	ResourceEventCallback::add("eCleanupVertices", eCleanupVertices);
-	ResourceEventCallback::add("eSnapWeldVerts", &eSnapWeldVerts);
+	mgtk_attach_listener( "eCleanupVertices", eCleanupVertices);
+	mgtk_attach_listener( "eSnapWeldVerts", &eSnapWeldVerts);
 
-	ResourceEventCallback::add("eGroupClear", &eGroupClear);
-	ResourceEventCallback::add("eGroupAssign", &eGroupAssign);
+	mgtk_attach_listener( "eGroupClear", &eGroupClear);
+	mgtk_attach_listener( "eGroupAssign", &eGroupAssign);
 
-	ResourceEventCallback::add("eSmoothingGroupsDialog", eSmoothingGroupsDialog);
-	ResourceEventCallbackUInt2::add("eSmooth", &eSmooth);
+	mgtk_attach_listener( "eSmoothingGroupsDialog", eSmoothingGroupsDialog);
+	mgtk_attach_listener2u( "eSmooth", &eSmooth);
 
-	ResourceEventCallback::add("eSelectedFacesFlipNormals", &eSelectedFacesFlipNormals);
-	ResourceEventCallback::add("eSelectedFacesGenerateNormals", &eSelectedFacesGenerateNormals);
-	ResourceEventCallback::add("eSelectedFacesDelete", &eSelectedFacesDelete);
-	ResourceEventCallback::add("eMeshUnselectFaces", &eMeshUnselectFaces);
-	ResourceEventCallback::add("eMeshUnselectVertices", &eMeshUnselectVertices);
+	mgtk_attach_listener( "eSelectedFacesFlipNormals", &eSelectedFacesFlipNormals);
+	mgtk_attach_listener( "eSelectedFacesGenerateNormals", &eSelectedFacesGenerateNormals);
+	mgtk_attach_listener( "eSelectedFacesDelete", &eSelectedFacesDelete);
+	mgtk_attach_listener( "eMeshUnselectFaces", &eMeshUnselectFaces);
+	mgtk_attach_listener( "eMeshUnselectVertices", &eMeshUnselectVertices);
 
-	ResourceEventCallbackUInt::add("eSetSelectedViewport", &eSetSelectedViewport);
-	ResourceEventCallbackUInt::add("ePolygonSize", &ePolygonSize);
+	mgtk_attach_listener1u(  "eSetSelectedViewport", &eSetSelectedViewport);
+	mgtk_attach_listener1u(  "ePolygonSize", &ePolygonSize);
 
 	// FIXME, These light events don't appear to trigger
-	ResourceEventCallbackVec::add("eLightPosX", &eLightPosX);
-	ResourceEventCallbackVec::add("eLightPosY", &eLightPosY);
-	ResourceEventCallbackVec::add("eLightPosZ", &eLightPosZ);
+	mgtk_attach_listener1f(  "eLightPosX", &eLightPosX);
+	mgtk_attach_listener1f(  "eLightPosY", &eLightPosY);
+	mgtk_attach_listener1f(  "eLightPosZ", &eLightPosZ);
 
-	ResourceEventCallback::add("eAnimationNext", &eAnimationNext);
-	ResourceEventCallback::add("eAnimationPrev", &eAnimationPrev);
+	mgtk_attach_listener( "eAnimationNext", &eAnimationNext);
+	mgtk_attach_listener( "eAnimationPrev", &eAnimationPrev);
 
-	ResourceEventCallback::add("eMeshFlipNormals", &eMeshFlipNormals);
-	ResourceEventCallback::add("eHelpDialog", &eHelpDialog);
-	ResourceEventCallback::add("ePreferencesDialog", &ePreferencesDialog);
-	ResourceEventCallback::add("eAboutDialog", &eAboutDialog);
+	mgtk_attach_listener( "eMeshFlipNormals", &eMeshFlipNormals);
+	mgtk_attach_listener( "eHelpDialog", &eHelpDialog);
+	mgtk_attach_listener( "ePreferencesDialog", &ePreferencesDialog);
+	mgtk_attach_listener( "eAboutDialog", &eAboutDialog);
 
-	ResourceEventCallback::add("eExtrude", &eExtrude);
+	mgtk_attach_listener( "eExtrude", &eExtrude);
 
-	ResourceEventCallback::add( "eExportKeyAsMesh", &eExportKeyAsMesh );
-	ResourceEventCallback::add( "eConvertSkelToMeshAnim", &eConvertSkelToMeshAnim );
+	mgtk_attach_listener(  "eExportKeyAsMesh", &eExportKeyAsMesh );
+	mgtk_attach_listener(  "eConvertSkelToMeshAnim", &eConvertSkelToMeshAnim );
 
-	// Not implemented or removed misc events
-	ResourceEventCallback2::add("eBezierPolygonPatch", &eNoImplementation);
-	ResourceEventCallback2::add("eShaderSlotLoad", &eNoImplementation);
-	ResourceEventCallback2::add("eOpenFileTextureB", &eNoImplementation);
-	ResourceEventCallback2::add("eCollapseFace", &eNoImplementation);
-	ResourceEventCallback2::add("eSetMaterialTextureB", &eNoImplementation);
-	ResourceEventCallback2::add("eEnableMaterialFragment", &eNoImplementation);
-	ResourceEventCallback2::add("eUVPickRadius", &eNoImplementation);
-	ResourceEventCallback2::add("eVertexPickRadius", &eNoImplementation);
-	ResourceEventCallback2::add("eAnimationStop", &eNoImplementation);
-	ResourceEventCallback2::add("eAnimationPlay", &eNoImplementation);
-	ResourceEventCallback2::add("eBoneLinkChild", &eNoImplementation);
-	ResourceEventCallback2::add("eBoneUnLinkChild", &eNoImplementation);
-	ResourceEventCallback2::add("eAppendFile", &eNoImplementation);
-	ResourceEventCallback2::add("eBoneDelete", &eNoImplementation);
+	/* Not implemented, removed, or 'dummy' events. */
+	mgtk_attach_listener_nop( "eBezierPolygonPatch" );
+	mgtk_attach_listener_nop( "eShaderSlotLoad" );
+	mgtk_attach_listener_nop( "eOpenFileTextureB" );
+	mgtk_attach_listener_nop( "eCollapseFace" );
+	mgtk_attach_listener_nop( "eSetMaterialTextureB" );
+	mgtk_attach_listener_nop( "eEnableMaterialFragment" );
+	mgtk_attach_listener_nop( "eUVPickRadius" );
+	mgtk_attach_listener_nop( "eVertexPickRadius" );
+	mgtk_attach_listener_nop( "eAnimationStop" );
+	mgtk_attach_listener_nop( "eAnimationPlay" );
+	mgtk_attach_listener_nop( "eBoneLinkChild" );
+	mgtk_attach_listener_nop( "eBoneUnLinkChild" );
+	mgtk_attach_listener_nop( "eAppendFile" );
+	mgtk_attach_listener_nop( "eBoneDelete" );
 
-	ResourceEventCallback2::add("eVertexNew", &eNoImplementation);
-	ResourceEventCallback2::add("eVertexDelete", &eNoImplementation);
+	mgtk_attach_listener_nop( "eVertexNew" );
+	mgtk_attach_listener_nop( "eVertexDelete" );
 
-	ResourceEventCallback2::add("ePolygonNew", &eNoImplementation);
-	ResourceEventCallback2::add("ePolygonDelete", &eNoImplementation);
-	ResourceEventCallback2::add("ePolygonSelect", &eNoImplementation);
+	mgtk_attach_listener_nop( "ePolygonNew" );
+	mgtk_attach_listener_nop( "ePolygonDelete" );
+	mgtk_attach_listener_nop( "ePolygonSelect" );
 
-	ResourceEventCallback2::add("eRenderShadow", &eNoImplementation);
-	ResourceEventCallback2::add("ePolyMapTexturePolygon", &eNoImplementation);
-	ResourceEventCallback2::add("eUVMapCreate", &eNoImplementation);
-	ResourceEventCallback2::add("eUVMapDelete", &eNoImplementation);
-	ResourceEventCallback2::add("eMirrorUV_X", &eNoImplementation);
-	ResourceEventCallback2::add("eMirrorUV_Y", &eNoImplementation);
-	ResourceEventCallback2::add("eTranslateUV", &eNoImplementation);
-	ResourceEventCallback2::add("eRotateUV", &eNoImplementation);
-	ResourceEventCallback2::add("eScaleUV", &eNoImplementation);
+	mgtk_attach_listener_nop( "eRenderShadow" );
+	mgtk_attach_listener_nop( "ePolyMapTexturePolygon" );
+	mgtk_attach_listener_nop( "eUVMapCreate" );
+	mgtk_attach_listener_nop( "eUVMapDelete" );
+	mgtk_attach_listener_nop( "eMirrorUV_X" );
+	mgtk_attach_listener_nop( "eMirrorUV_Y" );
+	mgtk_attach_listener_nop( "eTranslateUV" );
+	mgtk_attach_listener_nop( "eRotateUV" );
+	mgtk_attach_listener_nop( "eScaleUV" );
 
-
-
+	/* Empty 'dummy' menu events. */
+	mgtk_attach_listener_nop( "eImportFile" );
+	mgtk_attach_listener_nop( "eExportFile" );
 }
 
 

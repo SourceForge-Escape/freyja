@@ -1117,22 +1117,18 @@ void mgtk_event_spinbutton_float(GtkSpinButton* spin, gpointer event_id)
 }
 
 
-void mgtk_event_notebook_switch_page(GtkNotebook *notebook,
-									 GtkNotebookPage *page,
-									 gint page_num, gpointer event)
+void 
+mgtk_event_notebook_switch_page( GtkNotebook* notebook,
+								 GtkNotebookPage* page,
+								 gint page_num, 
+								 gpointer event )
 {
-	mgtk_notebook_eventmap_t *emap;
-
-	//mgtk_print("notebook_switch_page_event> %i:%i", 
-	//			page_num, GPOINTER_TO_INT(event));
-
-	emap = (mgtk_notebook_eventmap_t*)gtk_object_get_data(GTK_OBJECT(notebook), 
-														  "notebook_eventmap");
+	mgtk_notebook_eventmap_t* emap = 
+	(mgtk_notebook_eventmap_t*)gtk_object_get_data(GTK_OBJECT(notebook), "notebook_eventmap");
 
 	if ( emap && emap->count && emap->events[page_num] > -1 )
 	{
-		mgtk_handle_event1u(GPOINTER_TO_INT(event), emap->events[page_num]);
-		//mgtk_handle_command2i(GPOINTER_TO_INT(event), emap->events[page_num]);
+		mgtk_handle_command( emap->events[page_num] );
 	}
 }
 
@@ -1186,6 +1182,48 @@ void mgtk_event_command_2_for_1(GtkWidget *widget, gpointer user_data)
 
 	mgtk_handle_command2i(e1, e2);
 #endif
+}
+
+
+void mgtk_listener_nop( ResourceEvent* e )
+{
+	mgtk_print( "!'%s' : Nop.", (e && e->getName()) ? e->getName() : "Unknown event" );
+}
+
+
+void mgtk_attach_listener_nop( const char* symbol )
+{
+	ResourceEventCallback2::add( symbol, mgtk_listener_nop );
+}
+
+
+void mgtk_attach_listener( const char* symbol, MgtkListener function )
+{
+	ResourceEventCallback::add( symbol, function );
+}
+
+
+void mgtk_attach_listener1u( const char* symbol, MgtkListener1u function )
+{
+	ResourceEventCallbackUInt::add( symbol, function );
+}
+
+
+void mgtk_attach_listener2u( const char* symbol, MgtkListener2u function )
+{
+	ResourceEventCallbackUInt2::add( symbol, function );
+}
+
+
+void mgtk_attach_listener1f( const char* symbol, MgtkListener1f function )
+{
+	ResourceEventCallbackVec::add( symbol, function );
+}
+
+
+void mgtk_attach_listener1s( const char* symbol, MgtkListener1s function )
+{
+	ResourceEventCallbackString::add( symbol, function );
 }
 
 

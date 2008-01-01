@@ -1,9 +1,9 @@
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
 
-  File     : TODO
-  Author   : Terry 'Mongoose' Hendrix II
-  Project  : libmgtk
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+ TODO
 
- General
-	o Add generic tree widgets
+ libmgtk 0.2.2, Kagura alpha ( Development branch )
+ =====================================================================
+
+ 20071228 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ * Handle color events internally.
+

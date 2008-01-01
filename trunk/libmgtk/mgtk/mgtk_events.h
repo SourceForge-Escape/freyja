@@ -26,7 +26,7 @@
 #ifndef GUARD__MGTK_EVENT_H_
 #define GUARD__MGTK_EVENT_H_
 
-#define ACCEL_SUPPORT_ON
+#define ACCEL_SUPPORT_ON 1
 
 // Arg list types for Resource use
 #define ARG_GTK_WIDGET           64
@@ -44,6 +44,21 @@ if (!(expr)) mgtk_assert(__FILE__, __LINE__, __func__, #expr, false, format, ##_
 #endif
 
 extern "C" {
+
+typedef struct {
+	//unsigned char type;       /* Click = 1, Motion = 2, Reserved */
+
+	int button;      /* mgtk_mouse_key_t */
+	int state;       /* mgtk_mouse_key_state_t */
+	int modifiers;   /* mgtk_key_modifers_t */
+	int x;           /* Click */
+	int y;
+
+	int x_delta;     /* Motion */
+	int y_delta;
+
+} mgtk_mouse_event_t;
+
 
 /* ==========================================================================
  * Callbacks
@@ -76,7 +91,8 @@ void mgtk_handle_glresize(unsigned int width, unsigned int height);
 
 void mgtk_handle_key_press(int key, int mod);
 
-void mgtk_handle_motion(int x_delta, int y_delta);
+void mgtk_handle_motion( mgtk_mouse_event_t* event );
+//void mgtk_handle_motion(int x_delta, int y_delta);
 
 void mgtk_handle_mouse(int button, int state, int mod, int x, int y);
 
@@ -113,6 +129,7 @@ typedef int (*MgtkAssertCallback)(const char *file, unsigned int line,
 								  const char *function,
 								  const char *expression,
 								  const char *message);
+
 
 int mgtk_init(int argc, char *argv[]);
 /*------------------------------------------------------
@@ -250,6 +267,30 @@ int mgtk_create_confirm_dialog(const char *dialog_icon,
  *
  ------------------------------------------------------*/
 
+
+void mgtk_attach_listener_nop( const char* symbol );
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Assign symbol a null listener.
+ * Notes: Mostly for debugging and dummy events.
+ *
+ ------------------------------------------------------*/
+
+typedef void (*MgtkListener)( );
+typedef void (*MgtkListener1u)( unsigned int );
+typedef void (*MgtkListener2u)( unsigned int, unsigned int );
+typedef void (*MgtkListener1f)( float );
+typedef void (*MgtkListener1s)( char* );
+void mgtk_attach_listener( const char* symbol, MgtkListener function );
+void mgtk_attach_listener1u( const char* symbol, MgtkListener1u function );
+void mgtk_attach_listener2u( const char* symbol, MgtkListener2u function );
+void mgtk_attach_listener1f( const char* symbol, MgtkListener1f function );
+void mgtk_attach_listener1s( const char* symbol, MgtkListener1s function );
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Attach listener functions via facade.
+ *
+ ------------------------------------------------------*/
 
 
 /* File dialog events, now sends handle_text events */
@@ -454,22 +495,7 @@ void mgtk_draw_point3f(float x, float y, float z);
  * Post : OpenGL draw test functions.
  ------------------------------------------------------*/
 
-typedef struct mgtk_mouse_event_s
-{
-	unsigned char type;       /* Click = 1, Motion = 2, Reserved */
 
-	// Clicked
-	int button;      /* mgtk_mouse_key_t */
-	int state;       /* mgtk_mouse_key_state_t */
-	int modifiers;   /* mgtk_key_modifers_t */
-	int x;
-	int y;
-
-	// Motion
-	int x_delta;
-	int y_delta;
-
-} mgtk_mouse_event_t;
 
 
 } // extern "C"

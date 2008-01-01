@@ -50,7 +50,7 @@ void (*mgtk_link_handle_file_dialog_selection)(int, char *) = NULL;
 void (*mgtk_link_handle_gldisplay)() = NULL;
 void (*mgtk_link_handle_glresize)(unsigned int, unsigned int) = NULL;
 void (*mgtk_link_handle_key_press)(int, int) = NULL;
-void (*mgtk_link_handle_motion)(int, int) = NULL;
+void (*mgtk_link_handle_motion)( mgtk_mouse_event_t* ) = NULL;
 void (*mgtk_link_handle_mouse)(int, int, int, int, int) = NULL;
 void (*mgtk_link_handle_resource_start)() = NULL;
 void (*mgtk_link_handle_text_array)(int, unsigned int, char **) = NULL;
@@ -113,7 +113,7 @@ int mgtk_link_import(const char *symbol, void *func)
 	}
 	else if (strncmp("mgtk_handle_motion", symbol, 25) == 0)
 	{
-		mgtk_link_handle_motion = (void (*)(int,int))func;
+		mgtk_link_handle_motion = (void (*)(mgtk_mouse_event_t*))func;
 	}
 	else if (strncmp("mgtk_handle_mouse", symbol, 24) == 0)
 	{
@@ -290,11 +290,11 @@ void mgtk_handle_key_press(int key, int mod)
 }
 
 
-void mgtk_handle_motion(int x_delta, int y_delta)
+void mgtk_handle_motion( mgtk_mouse_event_t* event )
 {
-	if (mgtk_link_handle_motion != NULL)
+	if ( mgtk_link_handle_motion != NULL )
 	{
-		(*mgtk_link_handle_motion)(x_delta, y_delta);
+		(*mgtk_link_handle_motion)( event );
 	}
 }
 

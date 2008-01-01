@@ -28,8 +28,8 @@
 
 namespace freyja3d {
 
-//String s = freyja_rc_map_string(FREYJA_LOG_FILE);
-class ControlPrinter : public freyja::Printer
+class ControlPrinter : 
+		public freyja::Printer
 {
 public:
 
@@ -103,6 +103,13 @@ public:
 
 	virtual void MessageArgs(char *format, va_list *args)
 	{ PrintArgs(format, args); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void PrintArgs( const char* format, va_list *args);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

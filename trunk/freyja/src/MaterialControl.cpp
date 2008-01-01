@@ -52,9 +52,6 @@ MaterialControl::MaterialControl() :
 }
 
 
-MaterialControl::~MaterialControl()
-{
-}
 
 
 ////////////////////////////////////////////////////////////
@@ -760,7 +757,7 @@ void MaterialControl::EvSelect(uint32 value)
 		if (value != freyjaGetCurrentMaterial())
 		{
 			freyjaCurrentMaterial(value);
-			freyja_print("Selected material[%i] = '%s'.", value,
+			freyja3d_print("Selected material[%i] = '%s'.", value,
 						 freyjaGetMaterialName(value));
 			RefreshInterface();
 			RefreshContext();
@@ -860,7 +857,7 @@ void MaterialControl::EvBlendSrc(uint32 value)
 		break;
 
 	default:
-		freyja_print("Unknown Blend Source event %i.", value);
+		freyja3d_print("Unknown Blend Source event %i.", value);
 	}
 		
 	mgtk_event_gl_refresh();
@@ -934,7 +931,7 @@ void MaterialControl::EvBlendDest(uint32 value)
 		break;
 
 	default:
-		freyja_print("Unknown Blend Dest event %i.", value);
+		freyja3d_print("Unknown Blend Dest event %i.", value);
 	}
 
 	mgtk_event_gl_refresh();
@@ -953,7 +950,7 @@ void MaterialControl::EvEnableDetailTexture(uint32 value)
 		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
 								fFreyjaMaterial_DetailTexture);
 	}
-	freyja_print("Material detail texturing is [%s]", value ? "ON" : "OFF");
+	freyja3d_print("Material detail texturing is [%s]", value ? "ON" : "OFF");
 	mgtk_event_gl_refresh();
 }
 
@@ -971,7 +968,7 @@ void MaterialControl::EvEnableNormalize(uint32 value)
 								fFreyjaMaterial_Normalize);
 	}
 
-	freyja_print("Material normalization is [%s]", value ? "ON" : "OFF");
+	freyja3d_print("Material normalization is [%s]", value ? "ON" : "OFF");
 	mgtk_event_gl_refresh();
 }
 
@@ -989,7 +986,7 @@ void MaterialControl::EvEnableBlending(uint32 value)
 								fFreyjaMaterial_Blending);
 	}
 
-	freyja_print("Material blending [%s]", value ? "ON" : "OFF");
+	freyja3d_print("Material blending [%s]", value ? "ON" : "OFF");
 	mgtk_event_gl_refresh();
 }
 
@@ -1007,7 +1004,7 @@ void MaterialControl::EvEnableTexture(uint32 value)
 								fFreyjaMaterial_Texture);
 	}
 
-	freyja_print("Material texture usage is [%s]", value ? "ON" : "OFF");
+	freyja3d_print("Material texture usage is [%s]", value ? "ON" : "OFF");
 	mgtk_event_gl_refresh();
 }
 
@@ -1015,7 +1012,7 @@ void MaterialControl::EvEnableTexture(uint32 value)
 void MaterialControl::EvNewMaterial()
 {
 	index_t i = freyjaMaterialCreate();
-	freyja_print("New material [%i] created.", i);
+	freyja3d_print("New material [%i] created.", i);
 }
 
 
@@ -1303,7 +1300,7 @@ int freyja3d_load_texture(const char* filename)
 		id = MaterialControl::GetInstance()->GetTextureId()-1;
 	}
 
-	freyja_print("! Texture callback %i : '%s'...", id, filename);
+	freyja3d_print("! Texture callback %i : '%s'...", id, filename);
 
 	return id;
 }

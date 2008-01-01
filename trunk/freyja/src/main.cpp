@@ -42,9 +42,10 @@
 #include "Plugins.h"
 #include "Control.h"
 #include "FreyjaRender.h"
+#include "MaterialControl.h"
 #include "freyja_events.h"
+#include "freyja3d_scenegraph.h"
 
-void freyja3d_misc_events_attach( );
 
 freyja::Scene* gScene = NULL;
 Lua gLuaVM;
@@ -139,27 +140,25 @@ freyja3d_debug_msg_handler( const char* file,
 }
 
 
-
 void 
 freyja3d_shutdown( )
 {
-#if 0
-	if ( FreyjaControl::GetInstance() )
-	{
-		delete FreyjaControl::GetInstance();
-	}
-#endif
-
+	/* Save preferences. */
 	freyja3d_save_user_preferences( );
-	
+
+	/* Deallocate singletons. */
+	delete FreyjaRender::GetInstance( );
+	delete MaterialControl::GetInstance( );
+
+	/* Shutdown libraries. */	
 	mgtk_event_shutdown( );
 	freyja_shutdown( );
 
-	freyja_print( "Thanks for using %s", PROGRAM_NAME );
-	freyja_print( "   Build date: %s @ %s", __DATE__, __TIME__ );
-	freyja_print( "   Build host: %s", BUILD_HOST );
-	freyja_print( "   Email addr: %s", EMAIL_ADDRESS );
-	freyja_print( "   Web site  : %s", PROJECT_URL );
+	freyja3d_print( "Thanks for using %s", PROGRAM_NAME );
+	freyja3d_print( "   Build date: %s @ %s", __DATE__, __TIME__ );
+	freyja3d_print( "   Build host: %s", BUILD_HOST );
+	freyja3d_print( "   Email addr: %s", EMAIL_ADDRESS );
+	freyja3d_print( "   Web site  : %s", PROJECT_URL );
 
 	ControlPrinter::StopLogging( );
 }
@@ -225,10 +224,9 @@ void freyja3d_print( const char* format, ...)
 // Event callbacks.
 ////////////////////////////////////////////////////////////////////////////////
 
-void freyja3d_handle_motion( int x, int y )
+void freyja3d_handle_motion( mgtk_mouse_event_t* event ) // int x, int y )
 {
-	//if (FreyjaControl::GetInstance())
-	//FreyjaControl::GetInstance()->MotionEvent(x, y);
+	FreyjaRender::GetInstance()->HandleMotion( event );
 }
 
 
@@ -236,6 +234,81 @@ void freyja3d_handle_mouse( int button, int state, int mod, int x, int y )
 {
 	//if (FreyjaControl::GetInstance())
 		//FreyjaControl::GetInstance()->MouseEvent(button, state, mod, x, y);
+}
+
+
+void 
+freyja3d_attach_observers( Resource& r )
+{
+	/* Attach singleton method listeners. */
+	FreyjaRender::GetInstance()->AttachMethodListeners( );
+
+	/* Non-class listeners. */
+	freyja3d_misc_attach_listeners( );
+	mgtk_attach_listener_nop( "eNone" );
+	mgtk_attach_listener( "eShutdown", &freyja3d_quit );
+	
+	/* Mongoose 2002.01.21, 
+	 * Bind some script vars to matching symbols in C/C++. */
+
+	// Menus
+	r.RegisterInt( "ePluginMenu", ePluginMenu );
+	r.RegisterInt( "eBlendDestMenu", eBlendDestMenu );
+	r.RegisterInt( "eBlendSrcMenu", eBlendSrcMenu );
+	r.RegisterInt( "eObjectMenu", eObjectMenu );
+	r.RegisterInt( "eViewportModeMenu", eViewportModeMenu );
+	r.RegisterInt( "eTransformMenu", eTransformMenu );
+
+	// Colors
+	r.RegisterInt("eColorMaterialAmbient", eColorMaterialAmbient);
+	r.RegisterInt("eColorMaterialDiffuse", eColorMaterialDiffuse);
+	r.RegisterInt("eColorMaterialSpecular", eColorMaterialSpecular);
+	r.RegisterInt("eColorMaterialEmissive", eColorMaterialEmissive);
+	r.RegisterInt("eColorLightAmbient", eColorLightAmbient);
+	r.RegisterInt("eColorLightDiffuse", eColorLightDiffuse);
+	r.RegisterInt("eColorLightSpecular", eColorLightSpecular);
+	r.RegisterInt("eColorBackground", eColorBackground);
+	r.RegisterInt("eColorGrid", eColorGrid);
+	r.RegisterInt("eColorMesh", eColorMesh);
+	r.RegisterInt("eColorVertex", eColorVertex);
+	r.RegisterInt("eColorVertexHighlight", eColorVertexHighlight);
+	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
+	r.RegisterInt("eColorBone", eColorBone);
+	r.RegisterInt("eColorBoneHighlight", eColorBoneHighlight);
+	r.RegisterInt("eColorJoint", eColorJoint);
+	r.RegisterInt("eColorJointHighlight", eColorJointHighlight);
+}
+
+
+void 
+freyja3d_initialize_canvas( )
+{
+	/* Start the renderer context with a default size. */
+	FreyjaRender::GetInstance()->InitContext( 1024, 768, true );
+
+	/* Setup OpenGL font renderer. */
+	{
+#warning FIXME Move this into OpenGL facade.
+		/* Load user perferred TTF font. */ 
+		const char* s = Control::GetResource().LookupString( "FONT" );
+		mstl::String font = (s) ? s : "vera.ttf";
+		const unsigned int pt = 24, dpi = 100;
+
+		/* The given font likely isn't a likely to be a full path filename. */
+		if ( !SystemIO::File::DoesFileExist( font.c_str() ) )
+		{
+			font = freyja_rc_map_string( font.c_str() );
+		}
+
+		freyja3d_print( "Loading font '%s'.", font.c_str() );
+
+		if ( !FreyjaRender::GetInstance()->mPrinter.Init( font.c_str(), pt, dpi ) )
+		{
+			FREYJA_ASSERTMSG(false, "Failed to load font '%s' @ %ipt %idpi.", font.c_str(), pt, dpi);
+		}
+	}
+
+	mgtk_event_gl_refresh();
 }
 
 
@@ -286,68 +359,6 @@ freyja3d_init_libfreyja( )
 
 
 void 
-freyja3d_resource_init( Resource& r )
-{
-	/* Attach singleton method listeners. */
-	//FreyjaControl::GetInstance()->AttachMethodListeners( );
-	FreyjaRender::GetInstance()->AttachMethodListeners( );
-
-	/* Non-class listeners. */
-	freyja3d_misc_events_attach( );
-
-	/* Bind mlisp script functions to C/C++ functions. */
-	//r.RegisterFunction("funcname", freyja_rc_funcname);
-
-
-	////////////////////////////////////////////////////////////////////
-	// Old style events
-	////////////////////////////////////////////////////////////////////
-
-	/* Mongoose 2002.01.21, 
-	 * Bind some script vars to matching symbol in C/C++ */
-
-	// Event types used for flow control of event ids
-	r.RegisterInt("eMode", eMode);
-	r.RegisterInt("eEvent", eEvent);
-	r.RegisterInt("eNop", eNop);
-	r.RegisterInt("eNone", eNone);
-
-	// Menus
-	r.RegisterInt("ePluginMenu", ePluginMenu);
-	r.RegisterInt("eBlendDestMenu", eBlendDestMenu);
-	r.RegisterInt("eBlendSrcMenu", eBlendSrcMenu);
-	r.RegisterInt("eObjectMenu", eObjectMenu);
-	r.RegisterInt("eViewportModeMenu", eViewportModeMenu);
-	r.RegisterInt("eTransformMenu", eTransformMenu);
-
-	// Colors
-	r.RegisterInt("eColorMaterialAmbient", eColorMaterialAmbient);
-	r.RegisterInt("eColorMaterialDiffuse", eColorMaterialDiffuse);
-	r.RegisterInt("eColorMaterialSpecular", eColorMaterialSpecular);
-	r.RegisterInt("eColorMaterialEmissive", eColorMaterialEmissive);
-	r.RegisterInt("eColorLightAmbient", eColorLightAmbient);
-	r.RegisterInt("eColorLightDiffuse", eColorLightDiffuse);
-	r.RegisterInt("eColorLightSpecular", eColorLightSpecular);
-	r.RegisterInt("eColorBackground", eColorBackground);
-	r.RegisterInt("eColorGrid", eColorGrid);
-	r.RegisterInt("eColorMesh", eColorMesh);
-	r.RegisterInt("eColorVertex", eColorVertex);
-	r.RegisterInt("eColorVertexHighlight", eColorVertexHighlight);
-	r.RegisterInt("eColorMeshHighlight", eColorMeshHighlight);
-	r.RegisterInt("eColorBone", eColorBone);
-	r.RegisterInt("eColorBoneHighlight", eColorBoneHighlight);
-	r.RegisterInt("eColorJoint", eColorJoint);
-	r.RegisterInt("eColorJointHighlight", eColorJointHighlight);
-
-	freyja_print( "%s: Core events {", __func__ );
-
-	ResourceEventCallback::add( "eShutdown", &freyja3d_quit );
-
-	freyja_print( "}" );
-}
-
-
-void 
 freyja3d_init_mgtk( int argc, char* argv[] )
 {
 	/* 'Link' up mgtk library stubs to these implementations */
@@ -355,8 +366,9 @@ freyja3d_init_mgtk( int argc, char* argv[] )
 	mgtk_link_import( "mgtk_handle_mouse", (void*)freyja3d_handle_mouse );
 	mgtk_link_import( "mgtk_print", (void*)freyja3d_print );
 
-	mgtk_link_import("mgtk_handle_color", (void*)freyja_handle_color);
+	mgtk_link_import( "mgtk_handle_color", (void*)freyja_handle_color );
 	mgtk_link_import( "mgtk_handle_application_window_close", (void*)freyja3d_quit );
+
 	mgtk_link_import("mgtk_handle_gldisplay", (void*)freyja_handle_gldisplay);
 	mgtk_link_import("mgtk_handle_glresize", (void*)freyja_handle_glresize);
 	mgtk_link_import("mgtk_handle_text_array", (void*)freyja_handle_text_array);
@@ -377,7 +389,7 @@ freyja3d_init_mgtk( int argc, char* argv[] )
 	mgtk_init( argc, argv );
 
 	/* Initialize / hookup events. */
-	freyja3d_resource_init( Control::GetResource() );
+	freyja3d_attach_observers( Control::GetResource() );
 
 	/* Generate user interface from Lua script. */
 	{
@@ -391,17 +403,48 @@ freyja3d_init_mgtk( int argc, char* argv[] )
 		freyja3d_execute_lua_script( s.c_str() );
 	}
 
-	/* Start the OpenGL context. */
-	freyja_handle_resource_start( );
+	/* Setup scenegraph widget. */
+	freyja3d_scenegraph_init( );
 
-	/* Start the user interface loop. */
-	mgtk_start();
+	/* Setup material interface. */
+	MaterialControl::GetInstance()->InitRecentFilesMenu( );
+	MaterialControl::GetInstance()->RefreshInterface( );
+
+	/* Setup editor modes and drop-down menus */
+	mgtk_option_menu_value_set( eViewportModeMenu, 0 );
+	//SetEditMode( tModel );
+	mgtk_option_menu_value_set( eTransformMenu, 1 );
+	//SetObjectMode( tMesh );
+	mgtk_option_menu_value_set( eObjectMenu, 0 );
+	//SetActionMode( aSelect );
+
+#if FIXME
+	/* Restore recent files menus from disk. */
+	mRecentModel.LoadResource();
+	mRecentMesh.LoadResource();
+	mRecentMetadata.LoadResource();
+	mRecentSkeleton.LoadResource();
+	mRecentLua.LoadResource();
+	mRecentPython.LoadResource();
+
+	/* Set basic user interface defaults. */
+	SetControlScheme( eScheme_Model );
+	SetZoom(1.0f);
+	mEventMode = aNone;
+#endif
+
+	/* Set main window title and send 'welcome' notice. */
+	mgtk_application_window_title( BUILD_NAME );
+	freyja3d_print( "Welcome to Freyja %s, %s", VERSION, __DATE__ );
 }
 
 
 int 
 main(int argc, char *argv[])
 {
+	/* Handle exit() calls. */
+	//atexit( freyja3d_shutdown );
+
 	/* Enable logging. */
 	{
 		mstl::String log = freyja_rc_map_string( FREYJA_LOG_FILE );
@@ -426,6 +469,31 @@ main(int argc, char *argv[])
 	/* Setup libraries. */
 	freyja3d_init_libfreyja( );
 	freyja3d_init_mgtk( argc, argv );
+
+	/* Load application plugins. */
+	{
+		freyja3d_plugin_init( );
+		freyja3d_plugin_application_widget_init( );
+		String dir = freyja_rc_map_string( "plugins" );	
+		freyja3d_plugin_application_init( dir.c_str() );
+	}
+
+	/* Attempt to allocate singletons. */
+	{
+		FREYJA_ASSERTMSG( FreyjaRender::GetInstance() != NULL, "Singleton allocation failure.  See '%s' for possible errors.", FREYJA_LOG_FILE );
+		if ( FreyjaRender::GetInstance( ) == NULL )
+		{
+			SystemIO::Print("See '%s' for possible errors.\n", FREYJA_LOG_FILE );
+			freyja3d_shutdown( );
+			return -1;
+		}
+	}
+
+	/* Start the OpenGL context. */
+	freyja3d_initialize_canvas( );
+	
+	/* Start the user interface loop. */
+	mgtk_start();
 
 	return 0;
 }

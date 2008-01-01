@@ -396,6 +396,7 @@ class Resource
 	bool Lookup(const char *symbol, float *f);
 	bool Lookup(const char *symbol, int *i);
 	bool Lookup(const char *symbol, char **s);
+	const char* LookupString( const char *symbol );
   /*------------------------------------------------------
    * Pre  : 
 	*

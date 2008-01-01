@@ -1342,6 +1342,30 @@ bool Resource::Lookup(const char *symbol, arg_list_t **adt)
 }
 
 
+const char* Resource::LookupString( const char *symbol )
+{
+	if (!symbol || !symbol[0])
+		return false;
+
+	arg_list_t* sym_tab = _sym_tab;
+
+	while (sym_tab)
+	{
+		if (sym_tab->type == CSTRING)
+		{
+			if (strcmp(symbol, sym_tab->symbol) == 0)
+			{
+				return get_string(sym_tab);
+			}
+		}
+
+		sym_tab = sym_tab->next;
+	}
+
+	return NULL;
+}
+
+
 bool Resource::Lookup(const char *symbol, char **s)
 {
 	*s = NULL;
