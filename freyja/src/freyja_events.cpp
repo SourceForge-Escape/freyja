@@ -45,11 +45,7 @@
 #include "Control.h"
 #include "MaterialControl.h"
 #include "Plugins.h"
-#include "freyja3d_scenegraph.h"
 #include "freyja_events.h"
-
-void freyja3d_misc_events_attach( );
-
 
 using namespace freyja3d;
 
@@ -146,7 +142,7 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 	vec4_t color = { r, g, b, a };
 
 	/* Color event listener */
-	if (ResourceEvent::listen(id - ePluginEventBase, color, 4))
+	if ( ResourceEvent::listen(id - ResourceEvent::eBaseEvent, color, 4) )
 		return;
 
 	switch (id)
@@ -342,11 +338,9 @@ bool freyja3d_save_user_preferences( )
 	{
 		w.Print("-- Custom boolean values\n");
 		FreyjaRender* render = FreyjaRender::GetInstance( );
-
-
 		const char* format = "mgtk_boolean_set( \"%s\", %i )\n";
 		int n = (render->GetFlags() & FreyjaRender::fGrid) ? 1 : 0;
-		w.Print(format, "eRenderGrid",n);
+		w.Print(format, "eRenderGrid", n);
 
 		n = (render->GetFlags() & FreyjaRender::fFace) ? 1 : 0;
 		w.Print(format, "eRenderFace", n);
@@ -393,7 +387,7 @@ bool freyja3d_save_user_preferences( )
 // Freyja wrappers
 ///////////////////////////////////////////////////////////////////////
 
-const char *freyja_get_resource_path_callback()
+const char* freyja_get_resource_path_callback()
 {
 	static String s;
 	s = freyja_get_resource_path(); // In case it's changed refresh here.
@@ -453,124 +447,6 @@ void freyja_set_dialog_visible(const char *name)
 {
 	int e = ResourceEvent::GetResourceIdBySymbol((char*)name);
 	mgtk_event_dialog_visible_set(e, 1);	
-}
-
-
-void freyja_handle_resource_start()
-{
-	/* Mongoose 2007.04.07,
-	 * Here all the resources are setup, and the main interface starts. 
-	 */
-
-#warning FIXME Replace all the FreyjaControl usage.
-
-	freyja_print("!@Freyja started...");
-
-	/* Attempt to allocate singletons. */
-	//FREYJA_ASSERTMSG(FreyjaControl::GetInstance() != NULL, "FreyjaControl allocation failure.  See '%s' for possible errors.", FREYJA_LOG_FILE );
-	//FREYJA_ASSERTMSG( FreyjaRender::GetInstance() != NULL, "FreyjaRender Singleton allocation failure.  See '%s' for possible errors.", FREYJA_LOG_FILE );
-	if ( !FreyjaRender::GetInstance( ) )
-	{
-		SystemIO::Print("See '%s' for possible errors.\n", FREYJA_LOG_FILE );
-		freyja3d_shutdown( );
-		return;
-	}
-
-#if 0
-	/* Restore recent files menus from disk. */
-	mMaterial.InitRecentFilesMenu();
-	mRecentModel.LoadResource();
-	mRecentMesh.LoadResource();
-	mRecentMetadata.LoadResource();
-	mRecentSkeleton.LoadResource();
-	mRecentLua.LoadResource();
-	mRecentPython.LoadResource();
-
-	/* Set basic user interface defaults. */
-	SetControlScheme( eScheme_Model );
-	SetZoom(1.0f);
-	mEventMode = aNone;
-#endif
-
-
-	//freyja_handle_resource_init( Control::GetResource() );
-
-	/* Start the renderer context with a default size. */
-	FreyjaRender::GetInstance()->InitContext( 1024, 768, true );
-
-	/* Setup OpenGL font renderer. */
-	{
-		/* Load TTF font then setup OpenGLPrinter 
-		   FIXME -- Move this along with mTexture to OpenGL facade. */
-		mstl::String font = "vera.ttf";
-#warning FIXME This should use another lookup method.
-		if ( 1 )//FIXME Control::GetResource().Lookup("FONT", &font) )
-		{
-			const unsigned int pt = 24, dpi = 100;
-			mstl::String s;
-
-			// If this isn't a full path filename look for file in rc_map
-			if ( !SystemIO::File::DoesFileExist( font.c_str() ) )
-			{
-				font = freyja_rc_map_string( font.c_str() );
-			}
-
-			freyja_print( "Loading font '%s'." );			
-
-			if ( !FreyjaRender::GetInstance()->mPrinter.Init( font.c_str(), pt, dpi ) )
-			{
-				FREYJA_ASSERTMSG(false, "Failed to load font '%s' @ %ipt %idpi.", font.c_str(), pt, dpi);
-			}
-		}
-		else
-		{
-			//FREYJA_ASSERTMSG(false, "No FONT symbol found in resource.");
-		}
-	}
-
-#if FIXME
-	/* Load application plugins. */
-	{
-		freyja3d_plugin_init();
-		freyja3d_plugin_application_widget_init();
-		String dir = freyja_rc_map_string( "plugins" );	
-		freyja3d_plugin_application_init( dir.c_str() );
-	}
-#else
-#   warning FIXME Disabled plugins for now.
-#endif
-
-	/* Setup scenegraph widget(s). */
-	freyja3d_scenegraph_init();
-
-	/* Setup material interface */
-	MaterialControl::GetInstance()->RefreshInterface();
-
-	/* Setup editor modes and drop-down menus */
-#if FIXME
-	mgtk_option_menu_value_set(eViewportModeMenu, 0);
-	FreyjaControl::GetInstance()->EvModeModel();
-
-	mgtk_option_menu_value_set(eTransformMenu, 1);
-	FreyjaControl::GetInstance()->SetObjectMode(FreyjaControl::tMesh);
-
-	mgtk_option_menu_value_set(eObjectMenu, 0);
-	FreyjaControl::GetInstance()->SetActionMode(FreyjaControl::aSelect);
-#endif
-
-	/* Set init window title, log welcome, and refresh OpenGL context */
-	mgtk_application_window_title( BUILD_NAME );
-	freyja_print("Welcome to Freyja %s, %s", VERSION, __DATE__);
-	mgtk_event_gl_refresh();
-
-	/* Mongoose 2002.02.23, Hook for exit() calls */
-	//atexit( freyja3d_shutdown );
-}
-
-
-void freyja_append_eventid(char *symbol, int eventid)
-{
-	//FreyjaControl::GetInstance()->GetResource().RegisterInt(symbol, eventid);
 }
 
 
@@ -714,7 +590,7 @@ char freyja_is_user_installed_data_old()
 	unsigned int version2 = r.ParseInteger();
 	r.Close();
 
-	freyja_print( "Data version %i, %i", version, version2 );
+	freyja3d_print( "Data version %i, %i", version, version2 );
 
 	return ( version < version2 ) ? 0 : 1;
 #endif
@@ -746,7 +622,7 @@ void freyja_install_user()
 				if ( r.IsDirectory(filename) )
 					continue;
 				
-				freyja_print( "cp '%s' '%s'", filename, backup );
+				freyja3d_print( "cp '%s' '%s'", filename, backup );
 				SystemIO::CopyFileToPath( filename, backup );
 			}
 		}	
@@ -767,7 +643,7 @@ void freyja_install_user()
 			if (r.IsDirectory(filename))
 				continue;
 
-			freyja_print( "cp '%s' '%s'", filename, rc );
+			freyja3d_print( "cp '%s' '%s'", filename, rc );
 			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
@@ -784,7 +660,7 @@ void freyja_install_user()
 			if (r.IsDirectory(filename))
 				continue;
 
-			freyja_print( "cp '%s' '%s'", filename, rc );
+			freyja3d_print( "cp '%s' '%s'", filename, rc );
 			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
@@ -819,7 +695,7 @@ void freyja_install_user()
 			if (r.IsDirectory(filename))
 				continue;
 
-			freyja_print( "cp '%s' '%s'", filename, rc );
+			freyja3d_print( "cp '%s' '%s'", filename, rc );
 			SystemIO::CopyFileToPath(filename, rc);
 		}
 	}
@@ -852,13 +728,13 @@ void freyja_install_user()
 				// Recurse one level and copy as well.
 				while ( (filename = r.GetNextDirectoryListing()) )
 				{
-					freyja_print( "cp '%s' '%s'", filename, rc );
+					freyja3d_print( "cp '%s' '%s'", filename, rc );
 					SystemIO::CopyFileToPath(filename, rc);					
 				}
 			}
 			else
 			{
-				freyja_print( "cp '%s' '%s'", filename, rc );
+				freyja3d_print( "cp '%s' '%s'", filename, rc );
 				SystemIO::CopyFileToPath(filename, rc);
 			}
 		}

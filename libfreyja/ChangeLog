@@ -5,8 +5,7 @@
  =====================================================================
 
  Kagura alpha, 0.10.0.0
-
- * 
+ 
  * Gzipped xml support directly in Scene.
  * Mesh design changes.
  * Various implementation updates.

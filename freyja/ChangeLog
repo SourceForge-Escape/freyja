@@ -6,6 +6,19 @@
 
  Kagura alpha, 0.10.0.0
 
+ TODO
+ 
+ * Pick ray support.
+ * 3d cursor support.
+ * Edit mode support.
+ * Viewport separation support for mouse events.
+
+
+ 20071231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ * Various tracer patches for finishing up basic events in UI.
+ * Tab events.
+ * Implementing temporary code to replace old mouse event handlers.
+
  20071226 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  * Various minor fixes and obsolete code removal.
  * FreyjaControl removed from build.

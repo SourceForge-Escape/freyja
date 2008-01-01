@@ -127,20 +127,20 @@ OpenGL::OpenGL() :
 	mTextureId2(-1)
 {
 	/* Log OpenGL driver support information */
-	freyja_print("[GL Driver Info]");
-	freyja_print("\tVendor     : %s", glGetString(GL_VENDOR));
-	freyja_print("\tRenderer   : %s", glGetString(GL_RENDERER));
-	freyja_print("\tVersion    : %s", glGetString(GL_VERSION));
-	freyja_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
+	freyja3d_print("[GL Driver Info]");
+	freyja3d_print("\tVendor     : %s", glGetString(GL_VENDOR));
+	freyja3d_print("\tRenderer   : %s", glGetString(GL_RENDERER));
+	freyja3d_print("\tVersion    : %s", glGetString(GL_VERSION));
+	freyja3d_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
 
 	FREYJA_ASSERTMSG(glGetString(GL_RENDERER) != NULL, "OpenGL Context creation failed");
 
 	// Get hardware info
 	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &mTextureUnitCount);
-	freyja_print("\tGL_MAX_TEXTURE_UNITS_ARB \t\t[%i]", mTextureUnitCount);
+	freyja3d_print("\tGL_MAX_TEXTURE_UNITS_ARB \t\t[%i]", mTextureUnitCount);
 
 	glGetIntegerv(GL_MAX_LIGHTS, &mMaxLightsCount);
-	freyja_print("\tGL_MAX_LIGHTS            \t\t[%i]", mMaxLightsCount);
+	freyja3d_print("\tGL_MAX_LIGHTS            \t\t[%i]", mMaxLightsCount);
 
 	arb_multitexture = mglHardwareExtTest("GL_ARB_multitexture");
 	arb_texture_env_combine = mglHardwareExtTest("GL_ARB_texture_env_combine");
@@ -160,7 +160,7 @@ OpenGL::OpenGL() :
 
 	GLint stencil;
 	glGetIntegerv(GL_STENCIL_BITS, &stencil);
-	freyja_print("\tGL_STENCIL_BITS            \t\t[%i]", stencil);
+	freyja3d_print("\tGL_STENCIL_BITS            \t\t[%i]", stencil);
 
 	// Hook up functions
 #if USING_OPENGL_EXT
@@ -270,7 +270,7 @@ void OpenGL::TakeScreenShot(const char *base, uint32 width, uint32 height)
 {
 	if (!width || !height)
 	{
-		freyja_print("OpenGL::TakeScreenShot() ERROR: Invalid image size!\n");
+		freyja3d_print("OpenGL::TakeScreenShot() ERROR: Invalid image size!\n");
 		return;
 	}
 
@@ -290,7 +290,7 @@ void OpenGL::TakeScreenShot(const char *base, uint32 width, uint32 height)
 
 	if (!f)
 	{
-		freyja_print("OpenGL::TakeScreenShot() ERROR: Couldn't write screenshot.\n");
+		freyja3d_print("OpenGL::TakeScreenShot() ERROR: Couldn't write screenshot.\n");
 		perror("OpenGL::TakeScreenShot() ERROR: ");
 		return;
 	}
@@ -356,7 +356,7 @@ void OpenGL::TakeScreenShot(const char *base, uint32 width, uint32 height)
 	// Write image data
 	if (fwrite(image, size, 1, f) < 1)
 	{
-		freyja_print("OpenGL::TakeScreenShot()  Disk write failed.\n");
+		freyja3d_print("OpenGL::TakeScreenShot()  Disk write failed.\n");
 		perror("OpenGL::TakeScreenShot() \n");
 		fclose(f);
 		return;
@@ -366,7 +366,7 @@ void OpenGL::TakeScreenShot(const char *base, uint32 width, uint32 height)
 
 	delete [] image;
 
-	freyja_print("Took screenshot '%s'.\n", filename);
+	freyja3d_print("Took screenshot '%s'.\n", filename);
 }
 
 
@@ -403,7 +403,7 @@ bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 	}
 	else
 	{
-		freyja_print("!Failed to open fragment from disk.");
+		freyja3d_print("!Failed to open fragment from disk.");
 		return false;
 	}
 
@@ -412,7 +412,7 @@ bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 	if (!h_glGenProgramsARB || !h_glBindProgramARB || !h_glProgramStringARB ||
 		!h_glGetProgramivARB)
 	{
-		freyja_print("!Failed to aquire fragment functions from OpenGL.");
+		freyja3d_print("!Failed to aquire fragment functions from OpenGL.");
 		return false;
 	}
 
@@ -422,7 +422,7 @@ bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 	
 	if (id == 0)
 	{
-		freyja_print("!Failed to get fragment Id from OpenGL.\n");
+		freyja3d_print("!Failed to get fragment Id from OpenGL.\n");
 		return false;
 	}
 
@@ -439,7 +439,7 @@ bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 
 	if ( program_error_pos != -1 || program_limits != 1 )
 	{
-		freyja_print("!Failed to load fragment in OpenGL: %s%s",
+		freyja3d_print("!Failed to load fragment in OpenGL: %s%s",
 					 (!program_limits) ? "Exceeded native limit, " : "",
 					 (char*)glGetString(GL_PROGRAM_ERROR_STRING_ARB));
 
@@ -453,7 +453,7 @@ bool OpenGL::LoadFragmentARB(const char *filename,uint32 &fragmentId)
 
 	return true;
 #else
-	freyja_print("!OpenGL extensions are disabled.");
+	freyja3d_print("!OpenGL extensions are disabled.");
 	return false;
 #endif
 }
@@ -482,7 +482,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 
 	if (mstl::SystemIO::File::CompareFilenameExtention(filename, ".frag"))
 	{
-		freyja_print("!Not a .frag file.");
+		freyja3d_print("!Not a .frag file.");
 		return false;
 	}
 
@@ -499,7 +499,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 	}
 	else
 	{
-		freyja_print("!Failed to open .frag from disk.");
+		freyja3d_print("!Failed to open .frag from disk.");
 		return false;
 	}
 
@@ -530,7 +530,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 	}
 	else
 	{
-		freyja_print("!Failed to open .vert '%s' from disk.", s.c_str());
+		freyja3d_print("!Failed to open .vert '%s' from disk.", s.c_str());
 		return false;
 	}
 
@@ -538,7 +538,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 	if (!h_glCreateProgramObjectARB || !h_glCreateShaderObjectARB ||
 		!h_glCompileShaderARB || !h_glLinkProgramARB || !h_glGetObjectParameterivARB || !h_glUseProgramObjectARB)
 	{
-		freyja_print("!Failed to aquire shader functions from OpenGL.");
+		freyja3d_print("!Failed to aquire shader functions from OpenGL.");
 		return false;
 	}
 
@@ -658,7 +658,7 @@ void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 		//return;
 	}
 
-	freyja_print("! %s%s", comment, buffer);
+	freyja3d_print("! %s%s", comment, buffer);
 
 	mstl::String s = comment;
 
@@ -709,11 +709,11 @@ byte *OpenGL::GenerateColorTexture(byte rgba[4], uint32 width, uint32 height)
 void OpenGLContext::Init(uint32 width, uint32 height)
 {
 	/* Log OpenGL driver support information */
-	freyja_print("[GL Driver Info]");
-	freyja_print("\tVendor     : %s", glGetString(GL_VENDOR));
-	freyja_print("\tRenderer   : %s", glGetString(GL_RENDERER));
-	freyja_print("\tVersion    : %s", glGetString(GL_VERSION));
-	freyja_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
+	freyja3d_print("[GL Driver Info]");
+	freyja3d_print("\tVendor     : %s", glGetString(GL_VENDOR));
+	freyja3d_print("\tRenderer   : %s", glGetString(GL_RENDERER));
+	freyja3d_print("\tVersion    : %s", glGetString(GL_VERSION));
+	freyja3d_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
 
 	/* Test for extentions */
 	if (mglHardwareExtTest("GL_ARB_multitexture"))
@@ -857,7 +857,7 @@ bool mglHardwareExtTest(const char *ext)
 	l = (l < 32) ? 32 - l : 2;
 	strncpy(pretty, "                                ", l);
 	pretty[l] = 0;
-	freyja_print("\t%s%s\t[%s]", ext, pretty, ret ? "YES" : "NO");
+	freyja3d_print("\t%s%s\t[%s]", ext, pretty, ret ? "YES" : "NO");
 	
 	return ret;
 }
@@ -1809,7 +1809,7 @@ int freyja3d_load_shader(const char *filename)
 {
 	uint32 id = 0;
 
-	freyja_print("! Shader callback %i : '%s'...", id, filename);
+	freyja3d_print("! Shader callback %i : '%s'...", id, filename);
 
 	if (!freyja3d::OpenGL::LoadFragmentGLSL(filename, id))
 		return 0;

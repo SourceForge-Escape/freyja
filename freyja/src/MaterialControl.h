@@ -48,7 +48,7 @@ class MaterialControl : public Control
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	static MaterialControl* GetInstance() 
+	static MaterialControl* GetInstance( ) 
 	{ return mInstance ? mInstance : ( mInstance = new MaterialControl() ); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -56,7 +56,8 @@ class MaterialControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	~MaterialControl();
+	~MaterialControl( )
+	{ mInstance = NULL; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Deconstructor for MaterialControl.

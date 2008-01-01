@@ -39,8 +39,18 @@ class Control
 {
 public:
 	Control() {}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	~Control() {}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	static int GetEventIdByName(const char *symbol)
 	{ return GetResource().GetEventIdByName(symbol); }

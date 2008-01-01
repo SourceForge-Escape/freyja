@@ -92,6 +92,8 @@ vec_t FreyjaRender::mDefaultPointSize = 3.5;
 vec_t FreyjaRender::mDefaultLineWidth = 1.0;
 vec_t FreyjaRender::mVertexPointSize = 3.5f;
 
+int FreyjaRender::EvModeAutoKeyframeId = -1;
+
 matrix_t gModelViewMatrix;
 
 freyja3d::Cursor gCursor;
@@ -104,14 +106,10 @@ index_t GetSelectedCamera()
 index_t GetSelectedMaterial()
 { return 0; }
 
-#warning FIXME View locked.
-freyja_plane_t GetSelectedView()
-{ return PLANE_FREE; }
-
  
 FreyjaRender::FreyjaRender() :
 	mTimer(),
-	mViewMode( VIEWMODE_MODEL_VIEW ),
+	mViewMode( VIEWMODE_MODEL_EDIT ),
 	mRenderMode(fBoundingVolSelection | 
 				fBonesNoZbuffer | 
 				fBoundingVolumes |
@@ -121,12 +119,14 @@ FreyjaRender::FreyjaRender() :
 	mHeight(480),
 	mTextureId(0),
 	mInitContext( false ),
-	mScroll( 0.0f, 0.0f, 0.0f ),
+	mScroll( 0.0f, -18.0f, 0.0f ),
 	mScaleEnv(35.0f), // 40.0f is about too much, Use a larger number for higher res -- 35.0f is default
 	mFar(6000.0f),
 	mNear(0.1f),
 	mFovY(40.0f),
-	mNearHeight(20.0f)
+	mNearHeight(20.0f),
+	mSelectedView( PLANE_FREE ),
+	mSelectedViewport( 0 )
 {
 	mAngles[0] = 18.0f;
 	mAngles[1] = 42.0f;
@@ -170,21 +170,9 @@ FreyjaRender::FreyjaRender() :
 }
 
 
-FreyjaRender::~FreyjaRender()
-{
-}
-
-
 ////////////////////////////////////////////////////////////
 // Public Accessors
 ////////////////////////////////////////////////////////////
-
-void FreyjaRender::GetRotation(vec3_t v)
-{
-	v[0] = mAngles[0];
-	v[1] = mAngles[1];
-	v[2] = mAngles[2];
-}
 
 
 /* Mongoose 2004.03.26, 
@@ -225,9 +213,6 @@ void FreyjaRender::Draw( freyja::Renderable* renderable )
 
 void FreyjaRender::DrawCamWindow()
 {
-	// Very hacky quick test for camera 'cursor'
-	Cursor &cursor = GetCursor( );
-
 	hel::Vec3 pos, target;
 	hel::Vec3 up(0.0f, 1.0f, 0.0f);
 
@@ -246,7 +231,6 @@ void FreyjaRender::DrawCamWindow()
 	gluLookAt(pos.mX, pos.mY, pos.mZ,
 			  target.mX, target.mY,target.mZ,
 			  up.mX, up.mY, up.mZ);
-
 	
 	glMatrixMode(GL_MODELVIEW);
 
@@ -779,7 +763,25 @@ void FreyjaRender::AttachMethodListeners()
 	CreateListener("ePolyMeshBone", &FreyjaRender::ePolyMeshBone);
 	CreateListener("eLineBone", &FreyjaRender::eLineBone);
 
+
+	CreateListener("eViewportBack", &FreyjaRender::EvViewportBack);
+	CreateListener("eViewportBottom", &FreyjaRender::EvViewportBottom);
+	CreateListener("eViewportRight", &FreyjaRender::EvViewportRight);
+	CreateListener("eViewportFront", &FreyjaRender::EvViewportFront);
+	CreateListener("eViewportTop", &FreyjaRender::EvViewportTop);
+	CreateListener("eViewportLeft", &FreyjaRender::EvViewportLeft);
+	CreateListener("eViewportOrbit", &FreyjaRender::EvViewportOrbit);
+	CreateListener("eViewportUV", &FreyjaRender::EvViewportUV);
+	CreateListener("eViewportCurve", &FreyjaRender::EvViewportCurve);
+	CreateListener("eViewportCamera", &FreyjaRender::EvViewportCamera);
+	CreateListener("eViewportMaterial", &FreyjaRender::EvViewportMaterial);
 	//CreateListener("", &FreyjaRender::);
+
+	// Mode events
+	EvModeAutoKeyframeId = CreateListener("eModeAnim", &FreyjaRender::EvModeAutoKeyframe);
+	CreateListener("eModeUV", &FreyjaRender::EvModeUV);
+	CreateListener("eModeModel", &FreyjaRender::EvModeModel);
+	CreateListener("eModeMaterial", &FreyjaRender::EvModeMaterial);
 }
 
 ////////////////////////////////////////////////////////////
@@ -980,7 +982,7 @@ void FreyjaRender::DisplayByPolling()
 void FreyjaRender::Display() 
 { 
 	if ( !mInitContext ||
-		 (GetMode() & fFPSCap) && mTimer.GetTicks() < 16) // ~60.0 fps cap
+		 (GetMode() & fFPSCap) && mTimer.GetTicks() < 16 ) // ~60.0 fps cap
 	{
 		//freyja_print("%ims since last frame", mTimer.GetTicks());
 		return;
@@ -1006,7 +1008,7 @@ void FreyjaRender::Display()
 		break;
 
 	case VIEWMODE_MODEL_EDIT:
-		if (mRenderMode & fViewports)
+		if ( mRenderMode & fViewports )
 		{
 			// Get viewport size info
 			GLint vp[4];
@@ -1081,7 +1083,7 @@ void FreyjaRender::Display()
 		else
 		{
 			glPushMatrix();
-			DrawWindow( GetSelectedView());
+			DrawWindow( GetSelectedView( ) );
 			glPopMatrix();
 		}
 		break;
@@ -1179,11 +1181,6 @@ void FreyjaRender::SetFlag(flags_t flag)
 	mRenderMode |= flag;
 }
 
-
-void FreyjaRender::SetViewMode(int mode)
-{
-	mViewMode = mode;
-}
 
 
 ////////////////////////////////////////////////////////////
@@ -2643,7 +2640,7 @@ void FreyjaRender::DrawGrid(freyja_plane_t plane, int w, int h, int size)
 }
 
 
-void FreyjaRender::DrawWindow(freyja_plane_t plane)
+void FreyjaRender::DrawWindow( freyja_plane_t plane )
 {
 	switch (plane)
 	{
@@ -2956,4 +2953,99 @@ void FreyjaRender::EvScreenShot()
 }
 
 
+void FreyjaRender::HandleMotion( mgtk_mouse_event_t* event )
+{
+	switch (event->button)
+	{
+	case MOUSE_BTN_MIDDLE:
+		{
+			const float treshold = 1.0f;
+			hel::Vec3 xyz;
+			bool xd = true;
+			bool yd = true;
 
+			if ( event->x_delta > treshold )
+			{
+				xyz[0] = 1.0f;
+			}
+			else if ( event->x_delta < -treshold )
+			{
+				xyz[0] = -1.0f;
+			}
+			else
+			{
+				xd = false;
+			}
+
+			if ( event->y_delta > treshold )
+			{
+				xyz[1] = -1.0f;
+			}
+			else if ( event->y_delta < -treshold )
+			{
+				xyz[1] = 1.0f;
+			}
+			else
+			{
+				yd = false;
+			}
+
+			if ( !xd && !yd )
+			{
+				return;
+			}
+
+			switch ( GetSelectedView( ) )
+			{
+			case PLANE_BACK:
+				mScroll += hel::Vec3(xyz[0], xyz[1], xyz[2]);
+				break;
+				
+			case PLANE_BOTTOM:
+				mScroll += hel::Vec3(xyz[0], xyz[2], xyz[1]);
+				break;
+				
+			case PLANE_RIGHT:
+				mScroll += hel::Vec3(xyz[2], xyz[1], xyz[0]);
+				break;
+				
+			case PLANE_FRONT: // front, xy
+				mScroll += hel::Vec3(xyz[0], xyz[1], xyz[2]);
+				break;
+				
+			case PLANE_TOP: // top, xz
+				mScroll += hel::Vec3(xyz[0], xyz[2], xyz[1]);
+				break;
+				
+			case PLANE_LEFT: // left, zy
+				mScroll += hel::Vec3(xyz[2], xyz[1], xyz[0]);
+				break;
+				
+			default:
+				;
+			}
+		}
+		break;
+
+
+	case MOUSE_BTN_RIGHT: 
+		if ( GetSelectedView() == PLANE_FREE )
+		{
+			const float treshold = 1.0f;
+
+			if (event->x_delta > treshold)
+				Rotate(Y_F, -1.0f);
+			else if (event->x_delta < -treshold)
+				Rotate(Y_F, 1.0f);
+			
+			if ( event->y_delta > treshold)
+				Rotate(X_F, -1.0f);
+			else if (event->y_delta < -treshold)
+				Rotate(X_F, 1.0f);
+		}
+		break;
+
+	default:
+		;
+	}
+}

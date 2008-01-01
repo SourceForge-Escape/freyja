@@ -32,6 +32,7 @@
 #include <mgtk/ResourceEventDelegate.h>
 #include <freyja/Scene.h>
 #include "OpenGLPrinter.h"
+#include "Control.h"
 #include "freyja_events.h"
 
 namespace freyja3d {
@@ -88,7 +89,8 @@ public:
 };
 
 
-class FreyjaRender
+class FreyjaRender :
+	public Control
 {
 public:
 
@@ -122,14 +124,15 @@ public:
 
 
 	static FreyjaRender* GetInstance( ) 
-	{ return ( mInstance ? mInstance : ( mInstance = new FreyjaRender() ) ); }
+	{ return ( mInstance ? mInstance : ( mInstance = new FreyjaRender( ) ) ); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns instance of FreyjaRender singleton.
 	 *
 	 ------------------------------------------------------*/
 
-	~FreyjaRender();
+	~FreyjaRender()
+	{ mInstance = NULL; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Deconstructor.
@@ -151,11 +154,12 @@ public:
 	 * Post : Hooks up MethodDelegates to the event system.
 	 ------------------------------------------------------*/
 
-	static void CreateListener(const char *name, MethodPtr ptr)
+	static int CreateListener(const char *name, MethodPtr ptr)
 	{
 		MethodDelegate *d = 
 		new MethodDelegateArg0<FreyjaRender>(mInstance, ptr);
 		ResourceEventDelegate::add(name, d);
+		return GetEventIdByName(name);
 	}
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -164,11 +168,12 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	static void CreateListener(const char *name, MethodPtr1u ptr)
+	static int CreateListener(const char *name, MethodPtr1u ptr)
 	{
 		MethodDelegate *d = 
 		new MethodDelegateArg1<FreyjaRender, unsigned int>(mInstance, ptr);
 		ResourceEventDelegate::add(name, d);
+		return GetEventIdByName(name);
 	}
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -409,14 +414,6 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void GetRotation(vec3_t v);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 *
-	 * Post : Return present rotation angles in Euler 
-	 *
-	 ------------------------------------------------------*/
-
 	void RenderMeshShadowVolumeSurfaces(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -452,14 +449,16 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	unsigned int GetMode() { return mRenderMode; }
+	unsigned int GetMode() 
+	{ return mRenderMode; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	unsigned int GetViewMode() { return mRenderMode; }
+	unsigned int GetViewMode()
+	{ return mRenderMode; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -469,28 +468,28 @@ public:
 	const vec_t &GetNearHeight() { return mScaleEnv; } 
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Get GL context window height
+	 * Post : GL context window height
 	 *
 	 ------------------------------------------------------*/
 
 	const unsigned int &GetWindowWidth() { return mWidth; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Get GL context window width 
+	 * Post : GL context window width 
 	 *
 	 ------------------------------------------------------*/
 
 	const unsigned int &GetWindowHeight() { return mHeight; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Get GL context window height
+	 * Post : GL context window height
 	 *
 	 ------------------------------------------------------*/
 
 	const vec_t &GetZoom() { return mZoom; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Get current zoom factor for the scene
+	 * Post : Current zoom factor for the scene
 	 *
 	 ------------------------------------------------------*/
 
@@ -554,7 +553,7 @@ public:
 	void SetRenderFlag(flags_t flag, bool t, const char *s)
 	{
 		Flag(flag, t);
-		freyja_print("%s is [%s]", s, t ? "ON" : "OFF");
+		freyja3d_print("%s is [%s]", s, t ? "ON" : "OFF");
 		mgtk_event_gl_refresh();
 	}
 	/*------------------------------------------------------
@@ -563,7 +562,31 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void SetViewMode(int mode);
+	void HandleMotion( mgtk_mouse_event_t* event );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	freyja_plane_t GetSelectedView( ) const
+	{ return mSelectedView; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void SetSelectedView( freyja_plane_t view )
+	{ mSelectedView = view; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void SetViewMode(int mode)
+	{ mViewMode = mode; }
 	/*------------------------------------------------------
 	 * Pre  : Mode are valid view_mode(s)
 	 * Post : Sets viewing options
@@ -578,7 +601,8 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void SetZoom(vec_t zoom) { mZoom = zoom; }
+	void SetZoom(vec_t zoom) 
+	{ mZoom = zoom; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Set current zoom factor for the scene
@@ -592,6 +616,135 @@ public:
 	 * Post : Rotate on axis n degrees
 	 *
 	 ------------------------------------------------------*/
+
+	void SetViewport( freyja_plane_t mode )
+	{
+		SetSelectedView( mode );
+		if ( GetFlags( ) & FreyjaRender::fViewports )
+		{
+			mViewports[mSelectedViewport].plane = mode;
+			mViewports[mSelectedViewport].camera = 0;//GetSelectedCamera();
+		}
+		RefreshContext( );
+	}
+
+	void EvViewportBack( )
+	{
+		Print("Back view");
+		SetViewport(PLANE_BACK);
+	}
+
+	void EvViewportBottom( )
+	{
+		Print("Bottom view");  
+		SetViewport(PLANE_BOTTOM);
+	}
+
+	void EvViewportRight()
+	{
+		Print("Right view");
+		SetViewport(PLANE_RIGHT);
+	}
+
+	void EvViewportFront()
+	{
+		Print("Front view");
+		SetViewport(PLANE_FRONT);
+	}
+
+	void EvViewportTop()
+	{
+		Print("Top view");  
+		SetViewport(PLANE_TOP);
+	}
+
+	void EvViewportLeft()
+	{
+		Print("Left view");
+		SetViewport(PLANE_LEFT);
+	}
+
+	void EvViewportOrbit()
+	{
+		Print("Orbital view");
+		SetViewport(PLANE_FREE);
+	}
+
+	void EvViewportUV()
+	{
+		Print("UV Editor view");
+		SetViewport(DRAW_UV);
+	}
+
+	void EvViewportCurve()
+	{
+		Print("Curve editor view");
+		SetViewport(DRAW_CURVE);
+	}
+
+	void EvViewportCamera()
+	{
+		Print("Curve editor view");
+		SetViewport(DRAW_CURVE);
+	}
+
+	void EvViewportMaterial()
+	{
+		Print("Material preview");
+		SetSelectedView(DRAW_MATERIAL);
+	}
+
+	void EvModeAutoKeyframe(unsigned int value)
+	{
+		if (value)
+		{
+			SetViewMode(VIEWMODE_MODEL_EDIT);
+			SetFlag(FreyjaRender::fKeyFrameAnimation);
+			//		SetControlScheme(eScheme_Animation);
+			Print("Animation Scheme selected.");
+			RefreshContext();
+		}
+		else
+		{
+			// If you disable auto keyframe you must set a new major mode
+			SetViewMode(VIEWMODE_MODEL_EDIT);
+			ClearFlag(FreyjaRender::fKeyFrameAnimation);
+			//	SetControlScheme(eScheme_Model);
+			Print("Model Editor Scheme selected.");
+			RefreshContext();
+		}
+	}
+
+
+	void EvModeUV()
+	{
+		SetViewMode(VIEWMODE_TEXTURE_EDIT);
+		RefreshContext();
+		Print("UV Editor Scheme");
+		//SetControlScheme(eScheme_UV);
+	}
+
+
+	void EvModeModel()
+	{
+		// Radio button like func for multiple widgets on same event
+		mgtk_toggle_value_set(EvModeAutoKeyframeId, 0);
+
+		SetViewMode(VIEWMODE_MODEL_EDIT);
+		RefreshContext();
+		Print("Model Editor Scheme");
+		//SetControlScheme(eScheme_Model);
+	}
+
+
+	void EvModeMaterial()
+	{
+		SetViewMode(VIEWMODE_MATERIAL_EDIT);
+		RefreshContext();
+		Print("Material Editor Scheme");
+		//SetControlScheme(eScheme_Material);
+	}
+
 
 	static vec4_t mColorBackground;
 	static vec4_t mColorGridLine;
@@ -629,8 +782,6 @@ public:
 	uint32 mViewportsCount;                    /* How many viewports are used */
 
 	Viewport mViewports[4];                    /* Viewports information */
-
-
 
 protected:
 
@@ -829,6 +980,12 @@ private:
 	vec2_t mUpperLeftText;
 
 	bool mScrollingUV_X;
+
+	freyja_plane_t mSelectedView;
+
+	uint32 mSelectedViewport;
+
+	static int EvModeAutoKeyframeId;
 };
 
 

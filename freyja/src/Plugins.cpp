@@ -59,7 +59,7 @@ void freyja3d_plugin_application_init(const char* dir)
 
 	if (!reader.OpenDir(dir))
 	{
-		freyja_print("!Couldn't access application plugin directory.");
+		freyja3d_print("!Couldn't access application plugin directory.");
 		return;
 	}
 
@@ -542,7 +542,7 @@ void ePluginImport(ResourceEvent *e)
 				}
 			}
 
-			freyja_print("! Importing: '%s'\n", filename);
+			freyja3d_print("! Importing: '%s'\n", filename);
 
 			if (!freyjaImportModelByModule(filename, 
 										   plugin->mFilename.c_str()))
@@ -560,7 +560,7 @@ void ePluginImport(ResourceEvent *e)
 				else
 				{
 					freyja3d_record_saved_model(filename);
-					freyja_print("! Imported: '%s'\n", filename);
+					freyja3d_print("! Imported: '%s'\n", filename);
 
 #if FIXME
 					// Update skeletal UI
@@ -575,7 +575,7 @@ void ePluginImport(ResourceEvent *e)
 			}
 			else
 			{
-				freyja_print("! Failed to import: '%s'\n", filename);
+				freyja3d_print("! Failed to import: '%s'\n", filename);
 			}
 
 			mgtk_filechooser_blocking_free(filename);
@@ -680,17 +680,17 @@ void ePluginExport(ResourceEvent *e)
 				}
 			}
 #endif
-			freyja_print("! Exporting: '%s'\n", filename);
+			freyja3d_print("! Exporting: '%s'\n", filename);
 				
 			if (!freyjaExportModelByModule(filename, 
 										   plugin->mFilename.c_str()))
 			{				   
 				freyja3d_record_saved_model(filename);
-				freyja_print("! Exported: '%s'\n", filename);
+				freyja3d_print("! Exported: '%s'\n", filename);
 			}
 			else
 			{
-				freyja_print("! Failed to export: '%s'\n", filename);
+				freyja3d_print("! Failed to export: '%s'\n", filename);
 			}
 
 			mgtk_filechooser_blocking_free(filename);
