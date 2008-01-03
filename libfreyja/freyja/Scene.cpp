@@ -204,7 +204,7 @@ bool Scene::Add( freyja::Node* node )
 		if ( resource )
 		{
 			bool found = false;
-			for ( NodeIterator it = resource->GetList().begin(); *it; it++ )
+			for ( NodeIterator it = resource->GetIterator(), end = it.end(); it != end; it++ )
 			{
 				if ( *it == node )
 				{
@@ -217,8 +217,7 @@ bool Scene::Add( freyja::Node* node )
 			{					
 				// FIXME: Check for name collision!
 				
-				resource->GetList().push_back( node );					
-				//resource->GetList().unique();
+				resource->GetList().push_back( node );
 				key = node->GetName();
 				resource->GetDictionary().insert( key, node );
 			}

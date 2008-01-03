@@ -33,21 +33,36 @@ public:
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Plane( const vec_t a, const vec_t b, const vec_t c, const vec_t d );
+	Plane( const vec3_t a, const vec3_t b, const vec3_t c );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	Plane();
+	Plane( );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	~Plane();
+	Plane( const Plane& plane );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	Plane& operator =( const Plane& plane );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	~Plane( )
+	{ }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post :
@@ -61,14 +76,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void Append( const vec3_t a, const vec3_t b, const vec3_t c );
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	bool PointTest( uint32 flag, vec3_t p );
+	bool PointTest( const uint32 flag, const vec3_t point );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 
@@ -78,38 +86,55 @@ public:
 	byte mVisible;        /* Lit 2^(light) bitflag */
 
 	vec_t mA, mB, mC, mD; /* Eq of the plane. */
-
-	Plane* mNext; 		  /* In case we have quad or polygon */
 };
 
 
-inline
-Plane::Plane( const vec_t a, const vec_t b, const vec_t c, const vec_t d ) :
-	mVisible(0x0),
-	mA(0.0f), 
-	mB(0.0f),
-	mC(0.0f),
-	mD(0.0f),
-	mNext(NULL) 
-{ }
-
+////////////////////////////////////////////////////////////
+// Inline methods.
+////////////////////////////////////////////////////////////
 
 inline
-Plane::Plane() : 
+Plane::Plane( const vec3_t a, const vec3_t b, const vec3_t c ) :
 	mVisible(0x0),
 	mA(0.0f),
 	mB(0.0f),
 	mC(0.0f),
-	mD(0.0f),
-	mNext(NULL) 
+	mD(0.0f)
+{
+	Calculate( a, b, c );
+}
+
+
+inline
+Plane::Plane( ) : 
+	mVisible(0x0),
+	mA(0.0f),
+	mB(0.0f),
+	mC(0.0f),
+	mD(0.0f)
 { }
 
 
 inline
-Plane::~Plane()
+Plane::Plane( const Plane& plane ) :
+	mVisible( plane.mVisible ),
+	mA( plane.mA),
+	mB( plane.mB ),
+	mC( plane.mC ),
+	mD( plane.mD )
+{ }
+
+
+inline
+Plane& Plane::operator =( const Plane& plane )
 {
-	Plane *cur = mNext, *tmp;
-	while (cur) { tmp = cur; cur = cur->mNext; delete tmp; }
+	mVisible = plane.mVisible;
+	mA = plane.mA;
+	mB = plane.mB;
+	mC = plane.mC;
+	mD = plane.mD;
+
+	return *this;
 }
 
 
@@ -132,53 +157,14 @@ void Plane::Calculate( const vec3_t a, const vec3_t b, const vec3_t c )
 
 
 inline
-void Plane::Append( const vec3_t a, const vec3_t b, const vec3_t c )
+bool Plane::PointTest( const uint32 flag, const vec3_t point )
 {
-	Plane *ins = new Plane();
-	ins->Calculate(a, b, c);
-
-	if (!mNext)
-	{
-		mNext = ins;
-	}
-	else
-	{
-		Plane *cur = mNext;
-
-		while (cur)
-		{
-			if (!cur->mNext)
-			{
-				cur = cur->mNext = ins;
-			}
-			
-			cur = cur->mNext;
-		}
-	}
-	
-	//return ins;
-}
-
-
-
-inline
-bool Plane::PointTest( uint32 flag, vec3_t p )
-{
-	Plane *cur = this;
 	mVisible &= ~flag;
+	const vec_t side = ( mA * point[0] + mB * point[1] + mC * point[2] + mD );
 
-	while (cur)
+	if ( side > 0 )
 	{
-		vec_t side = ( cur->mA * p[0] + cur->mB * p[1] + 
-					   cur->mC * p[2] + cur->mD );
-
-		if (side > 0)
-		{
-			mVisible |= flag;
-			break;
-		}
-
-		cur = cur->mNext;
+		mVisible |= flag;
 	}
 
 	return ( mVisible & flag );

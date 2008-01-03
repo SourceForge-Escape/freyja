@@ -60,21 +60,33 @@ freyja::Node* Node::GetChild( const char* name ) const
 }
 
 
-void Node::CopyNodeMembers( freyja::Node* node ) const
-{ 
-	/* We don't duplicate children in this method. */
-	if ( node )
-	{
-		node->mMuted = mMuted;
-		node->mName = "Copy of " + mName;
-		node->mMetadata = mMetadata;
-		node->mPosition = mPosition;
-		node->mOrientation = mOrientation;
-		node->mScale = mScale;
-		node->mLocalTransform = mLocalTransform;
-		node->mParent = mParent;
-	}
+hel::Quat Node::GetDerivedOrientation( ) const
+{
+#warning FIXME Clearly this is filler code for testing. 
+	hel::Quat q = GetOrientation( );
+	if ( mParent )
+		q = q * mParent->GetDerivedOrientation( );
+
+	return q;
 }
+
+
+hel::Vec3 Node::GetDerivedPosition( ) const
+{
+#warning FIXME Clearly this is filler code for testing.  
+	hel::Vec3 v = GetPosition( );
+	if ( mParent )
+		v += mParent->GetDerivedPosition( );
+
+	return v;
+}
+
+
+RenderableIterator Node::GetRenderableIterator( )
+{
+	return mRenderables.begin( );
+}
+
 
 
 ////////////////////////////////////////////////////////////
@@ -177,7 +189,7 @@ void Node::Translate( const hel::Vec3& v, TransformSpace about )
 		{
 			// FIXME: Use derived instead of world transform -- which might be based on animation.
 			//        Likely going to retain the 'overlay' of animation transforms like older freyja.
-			hel::Vec3 u = v - GetWorldPosition();
+			hel::Vec3 u = v - GetDerivedPosition( );
 			mPosition.mX += u.mX;
 			mPosition.mY += u.mY;
 			mPosition.mZ += u.mZ;
@@ -233,6 +245,23 @@ void Node::AddChild( freyja::Node* child )
 	}
 
 	child->mParent = this;
+}
+
+
+void Node::CopyNodeMembers( freyja::Node* node ) const
+{ 
+	/* We don't duplicate children in this method. */
+	if ( node )
+	{
+		node->mMuted = mMuted;
+		node->mName = "Copy of " + mName;
+		node->mMetadata = mMetadata;
+		node->mPosition = mPosition;
+		node->mOrientation = mOrientation;
+		node->mScale = mScale;
+		node->mLocalTransform = mLocalTransform;
+		node->mParent = mParent;
+	}
 }
 
 

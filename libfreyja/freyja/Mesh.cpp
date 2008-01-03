@@ -35,10 +35,10 @@ using namespace hel;
 Mesh::Mesh( const char* name ) :
 	SceneNode( name ),
 	mMeshOptions(0),
-	mVertexArray(),
-	mColorArray(),
-	mNormalArray(),
-	mTexcoordArray(),
+	mVertexArray( 0, 3 ),
+	mColorArray( 0, 3 ),
+	mNormalArray( 0, 3 ),
+	mTexcoordArray( 0, 2 ),
 	mGaps(),
 	mSelectedVertices(),
 	mSelectedFaces(),
@@ -47,6 +47,7 @@ Mesh::Mesh( const char* name ) :
 	mVertices(),
 	mEdges()
 { 
+	mSubMeshes.push_back( new MeshRenderable( this, NULL ) );
 }
 
 
@@ -66,6 +67,7 @@ Mesh::Mesh(const Mesh &mesh) :
 	mEdges( mesh.mEdges )
 {
 	mesh.CopyNodeMembers( this );
+	mSubMeshes.push_back( new MeshRenderable( this, NULL ) ); // FIXME: Need to copy over renderables.
 }
 
 
@@ -155,6 +157,7 @@ XMLSerializerNode Mesh::CreateXMLSerializerNode( ) const
 
 bool Mesh::Serialize( XMLSerializerNode parent ) const
 {
+#if FIXME
 	byte mMeshOptions;                     /* Options bitmap. */
 
 	freyja::FloatArray mVertexArray;       /* Arrays to define geometry. */
@@ -171,9 +174,7 @@ bool Mesh::Serialize( XMLSerializerNode parent ) const
 	mstl::Vector<freyja::Plane*> mPlanes;
 
 	mstl::Vector<freyja::Edge*> mEdges;
-
-
-
+#endif
 	return true;
 }
 
@@ -191,25 +192,35 @@ mstl::String Mesh::GetInfo() const
 }
 
 
-const hel::Quat& Mesh::GetWorldOrientation() const
-{
-#warning FIXME
-	return mOrientation;
-}
-
-
-const hel::Vec3& Mesh::GetWorldPosition() const
-{
-#warning FIXME
-	return mPosition;
-}
-
-
 void Mesh::DuplicateChildren( freyja::Node* parent, bool recurse )
 {
 #warning FIXME
 }
 
+
+void Mesh::AddVertexToFace( freyja::Face* face, freyja::Vertex* vertex )
+{
+}
+
+
+freyja::Face* Mesh::CreateFace( )
+{
+	mstl::list<MeshRenderable*>::iterator it = mSubMeshes.begin( );
+	freyja::Face* face = new freyja::Face( this, *it );
+	return face;
+}
+
+
+freyja::Vertex* Mesh::CreateVertex( const hel::Vec3 pos )
+{
+	hel::Vec3 tmp( 0.0f, 0.0f, 0.0f );
+	index_t idx = mVertexArray.AppendElement( pos.mVec );
+	mNormalArray.AppendElement( tmp.mVec );
+	mTexcoordArray.AppendElement( tmp.mVec );
+
+	freyja::Vertex* vertex = new freyja::Vertex( idx );
+	return vertex;
+}
 
 
 ////////////////////////////////////////////////////////////

@@ -81,7 +81,7 @@ void eOpenFile( )
 		}
 		else
 		{
-			freyja3d_print( "Failed to imported '%s'.", filename );
+			freyja3d_print( "Failed to import '%s'.", filename );
 		}
 	}
 	

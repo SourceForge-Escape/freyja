@@ -184,26 +184,6 @@ bool Bone::Unserialize( XMLSerializerNode xml_bone )
 }
 
 
-const hel::Quat& Bone::GetWorldOrientation() const
-{
-#warning FIXME
-	return mOrientation;
-}
-
-
-const hel::Vec3& Bone::GetWorldPosition() const
-{
-#warning FIXME
-	return mPosition;
-}
-
-
-freyja::Material* Bone::GetMaterial() const
-{
-#warning FIXME
-	return NULL;
-}
-
 
 ////////////////////////////////////////////////////////////
 // Public Mutators
@@ -223,7 +203,7 @@ freyja::Node* Bone::Duplicate() const
 	bone->mLocalTransform = mLocalTransform;
 	bone->mBindPose = mBindPose;
 	bone->mBindToWorld = mBindToWorld;
-	bone->mRenderFlags = GetRenderFlags();
+	//FIXME bone->mRenderFlags = GetRenderFlags();
 
 	return bone;
 }

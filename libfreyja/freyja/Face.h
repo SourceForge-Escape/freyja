@@ -25,6 +25,8 @@
 #include "Vertex.h"
 #include "Edge.h"
 #include "Plane.h"
+#include "MeshRenderable.h"
+
 
 namespace freyja {
 
@@ -34,7 +36,7 @@ class Face
 {
 public:
 
-	Face( freyja::Mesh* owner, index_t offset );
+	Face( freyja::Mesh* owner, freyja::MeshRenderable* renderable );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -71,17 +73,20 @@ public:
 
 	freyja::Mesh* mOwner;           /* Mesh that owns this face. ( Mostly for ABI use. ) */
 
-	index_t mListOffset;            /* Offset into the face index array */
-	
+	freyja::MeshRenderable* mRenderable; /* Index array, Material, etc storage. */
+
 	hel::Vec3 mNormal;              /* Assumes co-planar vertices. */
+
+	mstl::list<index_t> mTriangles; /* Indices of Index Triangles. */
 
 	mstl::list<Vertex*> mVertices;  /* Vertices that comprise this face. */
 
 	mstl::list<Edge*> mEdges;       /* Edges that comprise this face. */
 
-	mstl::list<Face*> mNeighbours;  /* Faces that share an edge with this face. */
+	// Just generate this from mEdges.
+	//mstl::list<Face*> mNeighbours;  /* Faces that share an edge with this face. */
 
-	mstl::list<Plane*> mPlanes;     /* Planes are now Face members. */
+	mstl::list<Plane> mPlanes;     /* Planes are now Face composite members. */
 };
 
 
@@ -90,22 +95,22 @@ public:
 ////////////////////////////////////////////////////////////
 
 inline
-Face::Face( Mesh* owner, index_t offset ) :
+Face::Face( freyja::Mesh* owner, freyja::MeshRenderable* renderable ) :
 	mOwner( owner ),
-	mListOffset( offset ),
-	mNormal(0.0f, 1.0f, 0.0f),
-	mVertices(),
-	mEdges(),
-	mNeighbours(),
-	mPlanes()
-{ }
+	mRenderable( renderable ),
+	mNormal( 0.0f, 1.0f, 0.0f ),
+	mTriangles( ),
+	mVertices( ),
+	mEdges( ),
+	mPlanes( )
+{
+	mTriangles.push_back( renderable->ReserveIndexTriangle( ) );
+}
 
 
 inline
 Face::~Face()
-{
-	// FIXME: Delete planes.
-}
+{ }
 
 
 inline
@@ -115,7 +120,9 @@ void Face::AddVertex( freyja::Vertex* vertex )
 	{
 		mVertices.push_back( vertex );
 
-		// FIXME: Now you should append this Face's id to the vertex's polyref
+		/* Append this Face to the Vertex face reference list. */
+		vertex->AddFaceReference( this );
+
 		// FIXME: Might want to cache edge map too
 	}
 }

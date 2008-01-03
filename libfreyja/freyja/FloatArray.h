@@ -16,7 +16,7 @@
  * Mongoose - Created, split from Mesh.h
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_FLOATXARRAY_H_
+#ifndef GUARD__FREYJA_FLOATARRAY_H_
 #define GUARD__FREYJA_FLOATARRAY_H_
 
 #include <hel/math.h>

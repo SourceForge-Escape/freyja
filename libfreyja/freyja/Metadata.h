@@ -111,13 +111,6 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	FREYJA_RENDERABLE_INTERFACE
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Renderable implementation.
-	 *
-	 ------------------------------------------------------*/
-
 
  private:
 
@@ -171,27 +164,11 @@ uint32 Metadata::GetVersion() const
 
 
 inline
-freyja::Material* Metadata::GetMaterial() const
-{ return mMaterial; }
-
-
-inline
 mstl::String Metadata::GetInfo() const
 {
 	return mstl::String( "Metadata" );
 }
 
-inline
-const hel::Quat& Metadata::GetWorldOrientation() const
-{
-	return mOrientation;
-}
-
-inline
-const hel::Vec3& Metadata::GetWorldPosition() const
-{
-	return mPosition;
-}
 
 inline
 freyja::Node* Metadata::Duplicate( ) const

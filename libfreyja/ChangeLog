@@ -6,6 +6,11 @@
 
  Kagura alpha, 0.10.0.0
  
+ 20080102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ * 
+ * Design change for Node : Renderable.
+
+ 20071231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  * Gzipped xml support directly in Scene.
  * Mesh design changes.
  * Various implementation updates.
