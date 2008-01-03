@@ -100,6 +100,7 @@ set(Objs
 	freyja/Material
 	freyja/MaterialABI
 	freyja/Mesh
+	freyja/MeshRenderable
 	freyja/MeshABI
 	freyja/Metadata
 	freyja/Node

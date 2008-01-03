@@ -30,6 +30,8 @@
 #endif
 
 #include <math.h>
+#include <sys/types.h>  // OS X is either stdint.h or inttypes.h
+#include <inttypes.h>
 
 #ifdef sincosf
 #   define helSinCosf sincosf
@@ -60,10 +62,10 @@ extern "C" {
 
 // FIXME: Should be using ISO types for true correct size.
 typedef unsigned char byte;
-typedef short int int16;
-typedef unsigned short int uint16;
-typedef int int32;
-typedef unsigned int uint32;
+typedef int16_t int16;
+typedef uint16_t uint16;
+typedef int32_t int32;
+typedef uint32_t uint32;
 typedef float vec_t;
 typedef float vec2_t[2];
 typedef float vec3_t[3];

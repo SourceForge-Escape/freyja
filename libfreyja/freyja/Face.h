@@ -31,6 +31,7 @@
 namespace freyja {
 
 class Mesh;
+class MeshRenderable;
 
 class Face
 {
@@ -103,9 +104,7 @@ Face::Face( freyja::Mesh* owner, freyja::MeshRenderable* renderable ) :
 	mVertices( ),
 	mEdges( ),
 	mPlanes( )
-{
-	mTriangles.push_back( renderable->ReserveIndexTriangle( ) );
-}
+{ }
 
 
 inline
@@ -122,6 +121,9 @@ void Face::AddVertex( freyja::Vertex* vertex )
 
 		/* Append this Face to the Vertex face reference list. */
 		vertex->AddFaceReference( this );
+
+		//#warning FIXME Generate index triangles as needed.
+		//mTriangles.push_back( renderable->ReserveIndexTriangle( a, b, c ) );
 
 		// FIXME: Might want to cache edge map too
 	}

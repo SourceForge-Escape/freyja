@@ -19,6 +19,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include "MeshRenderable.h"
 #include "Mesh.h"
 
 
@@ -47,7 +48,7 @@ Mesh::Mesh( const char* name ) :
 	mVertices(),
 	mEdges()
 { 
-	mSubMeshes.push_back( new MeshRenderable( this, NULL ) );
+	mRenderables.push_back( new MeshRenderable( this, NULL ) );
 }
 
 
@@ -67,7 +68,7 @@ Mesh::Mesh(const Mesh &mesh) :
 	mEdges( mesh.mEdges )
 {
 	mesh.CopyNodeMembers( this );
-	mSubMeshes.push_back( new MeshRenderable( this, NULL ) ); // FIXME: Need to copy over renderables.
+	mRenderables.push_back( new MeshRenderable( this, NULL ) ); // FIXME: Need to copy over renderables.
 }
 
 
@@ -205,8 +206,8 @@ void Mesh::AddVertexToFace( freyja::Face* face, freyja::Vertex* vertex )
 
 freyja::Face* Mesh::CreateFace( )
 {
-	mstl::list<MeshRenderable*>::iterator it = mSubMeshes.begin( );
-	freyja::Face* face = new freyja::Face( this, *it );
+	RenderableIterator it = mRenderables.begin( );
+	freyja::Face* face = new freyja::Face( this, ((MeshRenderable*)(*it) ) );
 	return face;
 }
 

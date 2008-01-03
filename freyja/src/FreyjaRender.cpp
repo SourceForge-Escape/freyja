@@ -117,6 +117,7 @@ FreyjaRender::FreyjaRender() :
 				fGroupColors),
 	mWidth(640),
 	mHeight(480),
+	mZoom(1.0f),
 	mTextureId(0),
 	mInitContext( false ),
 	mScroll( 0.0f, -18.0f, 0.0f ),
@@ -205,9 +206,106 @@ void FreyjaRender::Rotate(int flags, float n)
 }
 
 
+void OpenGLRenderableStrategy::DrawTriangles(  )
+{
+#warning FIXME: Test rendering implementation in tracer.
+
+	// NOTE: Once we switch to more advanced arrays we have to
+	//       start locking the dynamic reallocation.
+	//glPushClientAttrib(GL_NORMAL_ARRAY);
+	//glEnableClientState(GL_NORMAL_ARRAY);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
+	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
+
+	// Load vertex array
+	if ( mVertexArrayPtr )
+	{
+		glVertexPointer( mVertexWidth, GL_FLOAT, sizeof(vec_t) * mVertexWidth, mVertexArrayPtr );
+	}
+
+	if ( mIndexArrayPtr )
+	{
+		glDrawElements( GL_TRIANGLES, mIndexArraySize, GL_UNSIGNED_INT, mIndexArrayPtr );
+	}
+
+	// TEST
+	if ( mVertexArrayPtr )
+	{
+		glPointSize(2.0);
+		glBegin( GL_POINTS );
+
+		for ( uint32 i = 0; i < mVertexArraySize; )
+		{
+			glVertex3f( mVertexArrayPtr[i++], mVertexArrayPtr[i++], mVertexArrayPtr[i++] );
+		}
+
+		glEnd( );
+	}
+}
+
+
+void FreyjaRender::DrawScene( freyja::Scene* scene )
+{
+	if ( scene )
+	{
+		glPushAttrib( GL_ENABLE_BIT );
+		glDisable(GL_LIGHTING);
+		glDisable(GL_BLEND);
+		glPointSize(mVertexPointSize);
+		glColor3fv( WHITE );
+		BindColorTexture( );
+
+		mLastMaterial = NULL;
+
+		for ( RenderableIterator it = scene->GetRenderListIterator( ), end = it.end();
+			  it != end; it++ )
+		{
+			glPushMatrix( );
+
+			/* Translate. */
+			{
+				const hel::Vec3& pos = (*it)->GetWorldPosition( );
+				glTranslatef( pos.mX, pos.mY, pos.mZ );
+			}
+
+			/* Rotate. */
+			{
+				const hel::Quat& q = (*it)->GetWorldOrientation( );
+				vec_t theta;
+				hel::Vec3 v;
+				q.GetAxisAngles( theta, v );
+				glRotatef( theta, v.mX, v.mY, v.mZ );
+			}
+
+			/* Scale. */
+			{
+				hel::Vec3 v = (*it)->GetScale( );
+				glScalef( v.mX, v.mY, v.mZ );
+			}
+
+			if ( (*it)->GetMaterial( ) != mLastMaterial )
+			{
+				// FIXME: Set new material / shader here or use a renderable to set it inline for sorted renderlist.
+				//ApplyMaterial( renderable->GetMaterial( ) );
+				//mLastMaterial = renderable->GetMaterial( );
+			}
+
+			OpenGLRenderableStrategy strategeryizeification;
+			(*it)->Draw( &strategeryizeification );
+
+			glPopMatrix( );
+		}
+
+		glPopAttrib( );
+	}
+}
+
+
 void FreyjaRender::Draw( freyja::Renderable* renderable )
 {
-#warning FIXME: No rendering implementation in tracer yet.
+	//#warning FIXME: Test rendering implementation in tracer.
+	//	Print( "r %p", renderable );
 }
 
 
@@ -335,15 +433,7 @@ void FreyjaRender::DrawCamWindow()
 		glPopAttrib();
 	}
 
-	if ( gScene )
-	{
-		RenderableIterator it = gScene->GetRenderListIterator();
-		while ( it != it.end() )
-		{
-			Draw( *it );
-			++it;
-		}
-	}
+	DrawScene( gScene );
 
 	DrawIcons();
 
@@ -499,15 +589,7 @@ void FreyjaRender::DrawFreeWindow()
 		glPopAttrib();
 	}
 
-	if ( gScene )
-	{
-		RenderableIterator it = gScene->GetRenderListIterator();
-		while ( it != it.end() )
-		{
-			Draw( *it );
-			++it;
-		}
-	}
+	DrawScene ( gScene );
 
 	//glPopMatrix(); // Remove scaling
 
@@ -2789,15 +2871,7 @@ void FreyjaRender::DrawWindow( freyja_plane_t plane )
 	}
 
 	/* Draw model geometry, metadata visualizations, and all that good stuff. */
-	if ( gScene )
-	{
-		RenderableIterator it = gScene->GetRenderListIterator();
-		while ( it != it.end() )
-		{
-			Draw( *it );
-			++it;
-		}
-	}
+	DrawScene ( gScene );
 
 	DrawIcons();
 

@@ -18,15 +18,9 @@
 #ifndef GUARD__FREYJA_MESHRENDERABLE_H__
 #define GUARD__FREYJA_MESHRENDERABLE_H__
 
-#include <hel/Ray.h>
-#include "Weight.h"
-#include "Vertex.h"
-#include "Face.h"
-#include "Edge.h"
-#include "Plane.h"
+#include <mstl/Vector.h>
+#include "Renderable.h"
 
-#include "SceneNode.h"
-#include "FloatArray.h"
 
 namespace freyja {
 
@@ -44,7 +38,10 @@ public:
 	MeshRenderable( freyja::Mesh* mesh, freyja::Material* material ) :
 		mOwner( mesh ),
 		mMaterial( material ),
-		mIndices( )
+		mIndices( ),
+		mPosition( ),
+		mOrientation( ),
+		mScale( 1.0f, 1.0f, 1.0f )
 	{ }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -60,7 +57,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	index_t ReserveIndexTriangle( );
+	index_t ReserveIndexTriangle( index_t a, index_t b, index_t c );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns offset in Index array.
@@ -104,18 +101,9 @@ protected:
 	hel::Vec3 mPosition;            /* Offset of this renderable in world coordinates. */
 
 	hel::Quat mOrientation;         /* Orientation relative to world. */
+
+	hel::Vec3 mScale;                /* Instanced scaling. */
 };
-
-
-inline
-index_t MeshRenderable::ReserveIndexTriangle( )
-{
-	index_t off = mIndices.size();
-	mIndices.push_back( 0 );
-	mIndices.push_back( 0 );
-	mIndices.push_back( 0 );
-	return off;
-}
 
 
 inline
@@ -129,6 +117,13 @@ inline
 const hel::Vec3& MeshRenderable::GetWorldPosition() const
 {
 	return mPosition;
+}
+
+
+inline
+const hel::Vec3& MeshRenderable::GetScale( ) const
+{
+	return mScale;
 }
 
 

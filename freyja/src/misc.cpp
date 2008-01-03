@@ -690,12 +690,12 @@ void eGenerateCube()
 		float size = mgtk_get_query_dialog_float(dialog, "size");
 
 		hel::Vec3 v(size * -0.5f, 0.0f, size * -0.5f);
-		freyja::Mesh* mesh = (freyja::Mesh*)freyjaMeshCreateCube(v.mVec, size);
+		freyja::Mesh* mesh = (freyja::Mesh*)freyjaMeshCreateCube( v.mVec, size );
 		gScene->Add( mesh );
 		gScene->SetCurrentMesh( mesh );
 		//FreyjaControl::GetInstance()->Dirty();
 
-		freyja3d_scenegraph_update();
+		freyja3d_scenegraph_update(); // FIXME: Should be updated via observer model.
 	}
 }
 

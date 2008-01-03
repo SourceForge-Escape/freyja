@@ -13,6 +13,8 @@
  * Edit mode support.
  * Viewport separation support for mouse events.
 
+ 20080102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ * New render path tracer/skeleton.
 
  20071231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  * Various tracer patches for finishing up basic events in UI.

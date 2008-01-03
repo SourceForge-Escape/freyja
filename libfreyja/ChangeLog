@@ -7,7 +7,8 @@
  Kagura alpha, 0.10.0.0
  
  20080102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
- * 
+ * New render path tracer/skeleton.
+ * Scene renderable setup design change.
  * Design change for Node : Renderable.
 
  20071231 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>

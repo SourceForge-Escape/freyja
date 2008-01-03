@@ -24,11 +24,11 @@
 #ifndef GUARD__FREYJA_RENDERABLE_H_
 #define GUARD__FREYJA_RENDERABLE_H_
 
-#include <hel/math.h>
 #include <hel/Quat.h>
 #include <hel/Vec3.h>
 
 #include "Material.h"
+#include "RenderableStrategy.h"
 #include "freyja.h"
 
 
@@ -148,6 +148,20 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	virtual const hel::Vec3& GetScale( ) const = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void Draw( freyja::RenderableStrategy* strategy ) = 0;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	virtual freyja::Material* GetMaterial( ) const
 	{ return mMaterial; }
 	/*------------------------------------------------------
@@ -178,6 +192,8 @@ protected:
 
 #   define FREYJA_RENDERABLE_INTERFACE \
 	virtual const hel::Quat& GetWorldOrientation() const; \
-	virtual const hel::Vec3& GetWorldPosition() const;
+	virtual const hel::Vec3& GetWorldPosition() const; \
+	virtual const hel::Vec3& GetScale( ) const; \
+	virtual void Draw( freyja::RenderableStrategy* strategy );
 
 #endif // GUARD__FREYJA_RENDERABLE_H_

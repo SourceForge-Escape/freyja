@@ -62,14 +62,16 @@ class Quat
 	 *
 	 ------------------------------------------------------*/
 
-	Quat(const vec4_t wxyz) { memcpy(mVec, wxyz, sizeof(vec4_t)); }
+	Quat(const vec4_t wxyz)
+	{ memcpy(mVec, wxyz, sizeof(vec4_t)); }
 	/*------------------------------------------------------
 	 * Pre  : v { w, x, y, z }
 	 * Post : Constructs an object of Quaternion
 	 *
 	 ------------------------------------------------------*/
 
-	~Quat() { }
+	~Quat() 
+	{ }
 	/*------------------------------------------------------
 	 * Pre  : Quaternion object is allocated
 	 * Post : Deconstructs an object of Quaternion
@@ -82,6 +84,7 @@ class Quat
 	////////////////////////////////////////////////////////////
 
 	void GetAxisAngles(vec4_t axyz) const;
+	void GetAxisAngles( vec_t& theta, hel::Vec3& v ) const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Axis angles are returned in *radians*.

@@ -192,6 +192,28 @@ bool Scene::Unserialize( const char* filename )
 }
 
 
+bool Scene::AddRenderable( freyja::Renderable* renderable )
+{
+	if ( renderable )
+	{
+		mRenderList.push_back( renderable );
+	}
+
+	return true;
+}
+
+
+bool Scene::RemoveRenderable( freyja::Renderable* renderable )
+{
+	if ( renderable )
+	{
+		mRenderList.remove( renderable );
+	}
+
+	return true;
+}
+
+
 bool Scene::Add( freyja::Node* node )
 {
 	bool ret = false;
@@ -216,7 +238,7 @@ bool Scene::Add( freyja::Node* node )
 			if ( !found )
 			{					
 				// FIXME: Check for name collision!
-				
+				node->SetScene( this );
 				resource->GetList().push_back( node );
 				key = node->GetName();
 				resource->GetDictionary().insert( key, node );
