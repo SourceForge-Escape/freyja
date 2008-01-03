@@ -42,22 +42,19 @@ typedef mstl::list<freyja::Node*>::iterator NodeIterator;
 typedef mstl::avl_tree<mstl::String, freyja::Node*> NodeDictionary;
 typedef mstl::avl_tree<mstl::String, NodeList*> NodeListDictionary;
 
+typedef enum {	
+	tLocal = 1,
+	tParent,
+	tWorld
+
+} TransformSpace;
+
 
 class Node : 
 		public mstl::ObserverSubject, 
-		public XMLSerializer,
-		public Renderable
+		public XMLSerializer
 {
 public:
-
-	typedef enum {
-
-		tLocal = 1,
-		tParent,
-		tWorld
-
-	} TransformSpace;
-
 
 	////////////////////////////////////////////////////////////
 	// Constructors
@@ -147,6 +144,20 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	hel::Quat GetDerivedOrientation( ) const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get orientation derived from root of hierarchy.
+	 *
+	 ------------------------------------------------------*/
+
+	hel::Vec3 GetDerivedPosition( ) const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get position derived from root of hierarchy.
+	 *
+	 ------------------------------------------------------*/
+
 	virtual mstl::String GetInfo() const = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -162,7 +173,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool GetMute() const
+	bool GetMute( ) const
 	{ return mMuted; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -171,7 +182,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	const char* GetName() const
+	const char* GetName( ) const
 	{ return mName.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  :  
@@ -179,7 +190,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual freyja::Node* GetParent() const
+	virtual freyja::Node* GetParent( ) const
 	{ return mParent; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -200,6 +211,13 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get orientation property.
+	 *
+	 ------------------------------------------------------*/
+
+	RenderableIterator GetRenderableIterator( );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get scale property.
 	 *
 	 ------------------------------------------------------*/
 
@@ -380,9 +398,6 @@ protected:
 	 *
 	 ------------------------------------------------------*/
 
-
-	//byte mFlags;                            /* State flags. */
-
 	bool mMuted;                              /* Determines if editing is allowed. */
 
 	mstl::String mName;                       /* String name. */
@@ -401,6 +416,8 @@ protected:
  
 	NodeList mChildren;                       /* Node children. */
 	NodeDictionary mChildDictionary;
+
+	RenderableList mRenderables;              /* Renderables based on this node. */
 };
 
 
@@ -418,7 +435,6 @@ public:
 
 inline
 Node::Node( ) :
-	//mFlags( 0 ),
 	mMuted( false ),
 	mName( "" ),
 	mMetadata( "" ),
@@ -427,13 +443,13 @@ Node::Node( ) :
 	mScale( 1.0f, 1.0f, 1.0f ),
 	mLocalTransform( ),
 	mParent( NULL ),
-	mChildren( )
+	mChildren( ),
+	mRenderables( )
 { }
 
 
 inline
 Node::Node( const char* name ) :
-	//mFlags( 0 ),
 	mMuted( false ),
 	mName( name ),
 	mMetadata( "" ),
@@ -442,7 +458,8 @@ Node::Node( const char* name ) :
 	mScale( 1.0f, 1.0f, 1.0f ),
 	mLocalTransform( ),
 	mParent( NULL ),
-	mChildren( )
+	mChildren( ),
+	mRenderables( )
 { }
 
 

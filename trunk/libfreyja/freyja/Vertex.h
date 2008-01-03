@@ -33,16 +33,64 @@ typedef mstl::list<freyja::Vertex*> VertexList;
 typedef mstl::list<freyja::Vertex*>::iterator VertexIterator;
 typedef mstl::list<index_t>::iterator VertexIndexIterator;
 
+class Face;
+
 class Vertex
 {
 public:
 
-	Vertex();
+	Vertex( index_t idx ) : 
+		mMainIndex( idx ),
+		mIndices( ),
+		mFaces( )
+	{ }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
+
+	~Vertex( )
+	{ }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool AddFaceReference( freyja::Face* face );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Access the Face References list.
+	 *
+	 ------------------------------------------------------*/
+
+	VertexIndexIterator GetIndexIterator( ) const
+	{ return mIndices.begin(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Access the Face references.
+	 *
+	 ------------------------------------------------------*/
+
+	mstl::list<index_t>& GetIndices( ) 
+	{ return mIndices; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Access the Indices list.
+	 *
+	 ------------------------------------------------------*/
+
+	mstl::list<Face*>& GetFaces( ) 
+	{ return mFaces; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Access the Face References list.
+	 *
+	 ------------------------------------------------------*/
+	
+
+protected:
 
 	Vertex( const Vertex& v );
 	/*------------------------------------------------------
@@ -51,37 +99,35 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	~Vertex();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	VertexIndexIterator GetIndexIterator() const
-	{ return mIndices.begin(); }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Access the Face references.
-	 *
-	 ------------------------------------------------------*/
-
-	mstl::list<index_t>& GetFaceRefs() 
-	{ return mFaceRefs; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Access the Face references.
-	 *
-	 ------------------------------------------------------*/
-
-	
-
-protected:
+	index_t mMainIndex;
 
 	mstl::list<index_t> mIndices;   /* Buffer indices this Vertex object controls. */
 
-	mstl::list<index_t> mFaceRefs;  /* Face references */
+	mstl::list<Face*> mFaces;       /* Face references */
 };
+
+
+inline
+bool Vertex::AddFaceReference( freyja::Face* face )
+{
+	bool found = false;
+	for ( mstl::list<Face*>::iterator it = GetFaces().begin( ); *it; it++ )
+	{
+		if ( *it == face )
+		{
+			found = true;
+			break;
+		}
+	}
+
+	if ( !found )
+	{
+		mFaces.push_back( face );
+	}
+
+	return (!found);
+}
+
 
 } // End namespace freyja
 

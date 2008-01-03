@@ -55,6 +55,7 @@ extern "C" {
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns pointer to Vertex with UID or NULL.
+	 * Notes: Obsolete, marked for removal.
 	 ------------------------------------------------------*/
 
     freyja_ptr freyjaMeshGetFace( freyja_ptr mesh, freyja_id face ); 

@@ -83,6 +83,8 @@ bool Metadata::Serialize(XMLSerializerNode container) const
 		metadata->LinkEndChild( data );
 	}
 
+#warning FIXME Need to serialize face:material relationships via MeshRenderables.
+#if FIXME
 	if ( GetMaterial() )
 	{
 		TiXmlElement *data = new TiXmlElement("material");
@@ -91,6 +93,7 @@ bool Metadata::Serialize(XMLSerializerNode container) const
 		data->LinkEndChild( text );
 		metadata->LinkEndChild( data );
 	}
+#endif
 
 	if ( GetModel() )
 	{

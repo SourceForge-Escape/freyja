@@ -102,7 +102,7 @@ public:
 	// Properties
 	////////////////////////////////////////////////////////////
 
-	//virtual NodeAnimationTrack* CreateNodeAnimationTrack( Animation* animation );
+	//virtual TransformTrack* CreateTransformTrack( Animation* animation );
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : 

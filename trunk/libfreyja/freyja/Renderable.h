@@ -62,6 +62,7 @@ public:
 	////////////////////////////////////////////////////////////
 
 	Renderable( ) :
+		mMaterial( NULL ),
 		mRenderFlags( fNone )
 	{ }
 	/*------------------------------------------------------
@@ -107,7 +108,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool GetShadowCaster() const
+	bool GetShadowCaster( ) const
 	{ return ( mRenderFlags & fShadowCaster ); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -115,7 +116,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	bool GetShadowReceiver() const
+	bool GetShadowReceiver( ) const
 	{ return ( mRenderFlags & fShadowReceiver ); }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -123,21 +124,32 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual const hel::Quat& GetWorldOrientation() const = 0;
+	virtual const RenderableList* GetSubList( )
+	{ return NULL; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renderables aren't always atomic in freyja.
+	 *        This allows for an extra optimization to the
+	 *        render list sorting for composite objects.
+	 *
+	 ------------------------------------------------------*/
+
+	virtual const hel::Quat& GetWorldOrientation( ) const = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get the final world orientation of this renderable.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual const hel::Vec3& GetWorldPosition() const = 0;
+	virtual const hel::Vec3& GetWorldPosition( ) const = 0;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get the final world position of this renderable.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual freyja::Material* GetMaterial() const = 0;
+	virtual freyja::Material* GetMaterial( ) const
+	{ return mMaterial; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Get the Material pointer for this renderable.
@@ -145,8 +157,18 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	virtual void SetMaterial( freyja::Material* material )
+	{ mMaterial = material; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get the Material pointer for this renderable.
+	 *        This can be NULL.
+	 *
+	 ------------------------------------------------------*/
 
 protected:
+
+	freyja::Material* mMaterial;
 
 	byte mRenderFlags;
 };
@@ -156,7 +178,6 @@ protected:
 
 #   define FREYJA_RENDERABLE_INTERFACE \
 	virtual const hel::Quat& GetWorldOrientation() const; \
-	virtual const hel::Vec3& GetWorldPosition() const; \
-	virtual freyja::Material* GetMaterial() const; 
+	virtual const hel::Vec3& GetWorldPosition() const;
 
 #endif // GUARD__FREYJA_RENDERABLE_H_

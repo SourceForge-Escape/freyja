@@ -110,7 +110,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	freyja::Vertex* CreateVertex( const vec3_t pos );
+	freyja::Vertex* CreateVertex( const hel::Vec3 pos );
 	/*------------------------------------------------------
 	 * Pre  : <pos> is the XYZ coordinates of the vertex.
 	 *
@@ -798,13 +798,6 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	FREYJA_RENDERABLE_INTERFACE
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Renderable implementation.
-	 *
-	 ------------------------------------------------------*/
-
 
 protected:
 
@@ -827,6 +820,8 @@ protected:
 
 	mstl::list<Edge*> mSelectedEdges;      /* List of selected edges. */
 
+	mstl::list<MeshRenderable*> mSubMeshes;
+
 	mstl::Vector<freyja::Face*> mFaces;
 
 	mstl::Vector<freyja::Vertex*> mVertices;
@@ -847,12 +842,8 @@ uint32 Mesh::GetVersion() const
 
 inline
 freyja::Node* Mesh::Duplicate() const
-{ return new Mesh(*this); }
+{ return new Mesh( *this ); }
 
-
-inline
-freyja::Material* Mesh::GetMaterial() const
-{ return NULL; }
 
 } // namespace freyja
 

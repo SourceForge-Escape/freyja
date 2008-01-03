@@ -100,14 +100,6 @@ class Light :
 	 *
 	 ------------------------------------------------------*/
 
-	FREYJA_RENDERABLE_INTERFACE
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Renderable implementation.
-	 *
-	 ------------------------------------------------------*/
-
-
 private:
 
 	////////////////////////////////////////////////////////////
@@ -155,11 +147,6 @@ freyja::Node* Light::Duplicate() const
 
 
 inline
-freyja::Material* Light::GetMaterial() const
-{ return NULL; }
-
-
-inline
 bool Light::Serialize( XMLSerializerNode parent ) const
 {
 	return false;
@@ -177,17 +164,6 @@ mstl::String Light::GetInfo() const
 	return mstl::String( "Light" );
 }
 
-inline
-const hel::Quat& Light::GetWorldOrientation() const
-{
-	return mOrientation;
-}
-
-inline
-const hel::Vec3& Light::GetWorldPosition() const
-{
-	return mPosition;
-}
 
 inline
 void Light::DuplicateChildren( freyja::Node* parent, bool recurse )

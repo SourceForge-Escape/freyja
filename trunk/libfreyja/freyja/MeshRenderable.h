@@ -30,8 +30,10 @@
 
 namespace freyja {
 
+class Mesh;
+
 class MeshRenderable : 
-		public SceneNode
+		public Renderable
 {
 public:	
 
@@ -39,24 +41,50 @@ public:
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	MeshRenderable( const char* name );
+	MeshRenderable( freyja::Mesh* mesh, freyja::Material* material ) :
+		mOwner( mesh ),
+		mMaterial( material ),
+		mIndices( )
+	{ }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructor.
 	 *
 	 ------------------------------------------------------*/
 
-	MeshRenderable( const Mesh& mesh );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Copy constructor.
-	 *
-	 ------------------------------------------------------*/
-
-	~MeshRenderable( );
+	~MeshRenderable( )
+	{ }
 	/*------------------------------------------------------
 	 * Pre  : Mesh object is allocated
 	 * Post : Deconstructs an object of Mesh
+	 *
+	 ------------------------------------------------------*/
+
+	index_t ReserveIndexTriangle( );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns offset in Index array.
+	 *
+	 ------------------------------------------------------*/
+
+	//void SwapIndexTriangles( index_t a, index_t b );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	//void TruncateIndexTriangles( uint32_t count );
+	/*------------------------------------------------------
+	 * Pre  : count is number of triangles to effectively 'remove'.
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_RENDERABLE_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Renderable implementation.
 	 *
 	 ------------------------------------------------------*/
 
@@ -71,8 +99,38 @@ protected:
 
 	freyja::Material* mMaterial;    /* All faces in this list use this material. */
 
-	mstl::Vector<uint32> mIndices;  /* Triangle list. */
+	mstl::Vector<index_t> mIndices; /* Triangle list. */
+
+	hel::Vec3 mPosition;            /* Offset of this renderable in world coordinates. */
+
+	hel::Quat mOrientation;         /* Orientation relative to world. */
 };
+
+
+inline
+index_t MeshRenderable::ReserveIndexTriangle( )
+{
+	index_t off = mIndices.size();
+	mIndices.push_back( 0 );
+	mIndices.push_back( 0 );
+	mIndices.push_back( 0 );
+	return off;
+}
+
+
+inline
+const hel::Quat& MeshRenderable::GetWorldOrientation() const
+{
+	return mOrientation;
+}
+
+
+inline
+const hel::Vec3& MeshRenderable::GetWorldPosition() const
+{
+	return mPosition;
+}
+
 
 } // namespace freyja
 

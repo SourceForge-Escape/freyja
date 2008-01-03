@@ -136,11 +136,71 @@ freyjaMeshCreateLattice(vec3_t origin,
 
 
 freyja_ptr 
-freyjaMeshCreateCube(vec3_t origin, 
-					 vec_t size)
+freyjaMeshCreateCube( vec3_t origin, 
+					  vec_t size )
 {
-#warning FIXME
-	return NULL;
+	Mesh* cube = new Mesh( "Cube" );
+	const vec_t half = size * 0.5f;
+	Vertex* a = cube->CreateVertex( hel::Vec3( half, half, half ) );
+	Vertex* b = cube->CreateVertex( hel::Vec3( half, half, -half ) );
+	Vertex* c = cube->CreateVertex( hel::Vec3( half, -half, -half ) );
+	Vertex* d = cube->CreateVertex( hel::Vec3( half, -half, half ) );
+
+	Vertex* e = cube->CreateVertex( hel::Vec3( -half, half, half ) );
+	Vertex* f = cube->CreateVertex( hel::Vec3( -half, half, -half ) );
+	Vertex* g = cube->CreateVertex( hel::Vec3( -half, -half, -half ) );
+	Vertex* h = cube->CreateVertex( hel::Vec3( -half, -half, half ) );
+
+	{
+		Face* face = cube->CreateFace( );
+		cube->AddVertexToFace( face, a );
+		cube->AddVertexToFace( face, b );
+		cube->AddVertexToFace( face, c );
+		cube->AddVertexToFace( face, d );
+	}
+
+	{
+		Face* face = cube->CreateFace( );
+		cube->AddVertexToFace( face, e );
+		cube->AddVertexToFace( face, f );
+		cube->AddVertexToFace( face, g );
+		cube->AddVertexToFace( face, h );
+	}
+
+	{
+		Face* face = cube->CreateFace( );
+		cube->AddVertexToFace( face, a );
+		cube->AddVertexToFace( face, e );
+		cube->AddVertexToFace( face, f );
+		cube->AddVertexToFace( face, b );
+	}
+
+	{
+		Face* face = cube->CreateFace( );
+		cube->AddVertexToFace( face, b );
+		cube->AddVertexToFace( face, f );
+		cube->AddVertexToFace( face, g );
+		cube->AddVertexToFace( face, c );
+	}
+
+	{
+		Face* face = cube->CreateFace( );
+		cube->AddVertexToFace( face, e );
+		cube->AddVertexToFace( face, a );
+		cube->AddVertexToFace( face, d );
+		cube->AddVertexToFace( face, h );
+	}
+
+	{
+		Face* face = cube->CreateFace( );
+		cube->AddVertexToFace( face, g );
+		cube->AddVertexToFace( face, c );
+		cube->AddVertexToFace( face, d );
+		cube->AddVertexToFace( face, h );
+	}
+
+	cube->Translate( hel::Vec3( origin ) );
+	return cube->GetUID( );
 }
 
 

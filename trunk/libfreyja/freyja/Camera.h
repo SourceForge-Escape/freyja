@@ -163,13 +163,6 @@ class Camera :
 	 *
 	 ------------------------------------------------------*/
 
-	FREYJA_RENDERABLE_INTERFACE
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Renderable implementation.
-	 *
-	 ------------------------------------------------------*/
-
 
 	////////////////////////////////////////////////////////////
 	// Protected  
@@ -305,11 +298,6 @@ freyja::Node* Camera::Duplicate() const
 
 
 inline
-freyja::Material* Camera::GetMaterial() const
-{ return NULL; }
-
-
-inline
 bool Camera::Serialize( XMLSerializerNode parent ) const
 {
 	return false;
@@ -327,17 +315,6 @@ mstl::String Camera::GetInfo() const
 	return mstl::String( "Camera" );
 }
 
-inline
-const hel::Quat& Camera::GetWorldOrientation() const
-{
-	return mOrientation;
-}
-
-inline
-const hel::Vec3& Camera::GetWorldPosition() const
-{
-	return mPosition;
-}
 
 inline
 void Camera::DuplicateChildren( freyja::Node* parent, bool recurse )

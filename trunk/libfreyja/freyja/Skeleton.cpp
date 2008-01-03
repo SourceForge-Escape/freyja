@@ -108,13 +108,6 @@ freyja::Node* Skeleton::Duplicate() const
 }
 
 
-freyja::Material* Skeleton::GetMaterial() const
-{
-#warning FIXME
-	return NULL; 
-}
-
-
 void Skeleton::DuplicateChildren( freyja::Node* parent, bool recurse )
 {
 #warning FIXME
@@ -139,18 +132,4 @@ mstl::String Skeleton::GetInfo() const
 {
 #warning FIXME
 	return mstl::String( "Skeleton" );
-}
-
-
-const hel::Quat& Skeleton::GetWorldOrientation() const
-{
-#warning FIXME
-	return mOrientation;
-}
-
-
-const hel::Vec3& Skeleton::GetWorldPosition() const
-{
-#warning FIXME
-	return mPosition;
 }
