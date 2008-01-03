@@ -40,14 +40,13 @@
 #define GUARD__FREYJA_MESH_H__
 
 #include <hel/Ray.h>
-#include "Weight.h"
+// Not in BC Mesh, but DC SkeletalMesh #include "Weight.h"
 #include "Vertex.h"
 #include "Face.h"
 #include "Edge.h"
-#include "Plane.h"
-
 #include "SceneNode.h"
 #include "FloatArray.h"
+
 
 namespace freyja {
 
@@ -223,10 +222,18 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	const vec_t* GetVertexArray() const;
+	const vec_t* GetVertexArray() //const
+	{ mVertexArray.GetArray(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns vertex array.
+	 ------------------------------------------------------*/
+
+	uint32 GetVertexArrayCount() const
+	{ return mVertexArray.GetSize(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	const vec_t* GetNormalArray() const;
@@ -239,12 +246,6 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns texcoord array.
-	 ------------------------------------------------------*/
-
-	uint32 GetVertexArrayCount() const;
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
 	 ------------------------------------------------------*/
 
 
@@ -600,7 +601,6 @@ public:
 	 * Post : Extrudes <face> along vector <displacement>
 	 ------------------------------------------------------*/
 
-
 	bool WeldTexCoords(index_t replace, index_t texcoord);
 	/*------------------------------------------------------
 	 * Pre  :  
@@ -819,8 +819,6 @@ protected:
 	mstl::list<Face*> mSelectedFaces;      /* List of selected faces. */
 
 	mstl::list<Edge*> mSelectedEdges;      /* List of selected edges. */
-
-	mstl::list<MeshRenderable*> mSubMeshes;
 
 	mstl::Vector<freyja::Face*> mFaces;
 

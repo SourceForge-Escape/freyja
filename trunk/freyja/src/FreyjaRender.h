@@ -31,6 +31,7 @@
 #include <mstl/SystemIO.h>
 #include <mgtk/ResourceEventDelegate.h>
 #include <freyja/Scene.h>
+#include <freyja/RenderableStrategy.h>
 #include "OpenGLPrinter.h"
 #include "Control.h"
 #include "freyja_events.h"
@@ -872,6 +873,13 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	void DrawScene( freyja::Scene* scene );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	void DrawShadowCasters(bool depthMapPass);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -986,6 +994,46 @@ private:
 	uint32 mSelectedViewport;
 
 	static int EvModeAutoKeyframeId;
+
+	freyja::Material* mLastMaterial;
+};
+
+
+class OpenGLRenderableStrategy :
+		public freyja::RenderableStrategy
+{
+public:
+
+	OpenGLRenderableStrategy()
+	{ }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	virtual ~OpenGLRenderableStrategy()
+	{ }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void DrawIcon( const char* name  )
+	{ }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void DrawTriangles(  );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 };
 
 

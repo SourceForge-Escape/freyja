@@ -40,6 +40,16 @@ void Quat::GetAxisAngles(vec4_t axyz) const
 }
 
 
+void Quat::GetAxisAngles( vec_t& theta, hel::Vec3& v ) const
+{
+	theta = acosf( mW ) * 2.0;
+	const vec_t invScale = 1.0f / sinf( theta * 0.5f ); //theta / 2.0f );
+	v.mX = mX * invScale;
+	v.mY = mY * invScale;
+	v.mZ = mZ * invScale;
+}
+
+
 void Quat::GetEulerAngles(vec3_t xyz) const
 {
 	GetEulerAngles(xyz[0], xyz[1], xyz[2]);

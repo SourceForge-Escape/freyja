@@ -36,6 +36,7 @@ namespace freyja {
 
 class Node;
 class NodeObserver;
+class Scene;
 
 typedef mstl::list<freyja::Node*> NodeList;
 typedef mstl::list<freyja::Node*>::iterator NodeIterator;
@@ -229,6 +230,14 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	const freyja::Scene* GetScene( )
+	{ return mScene; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get scene property.
+	 *
+	 ------------------------------------------------------*/
+
 	freyja_ptr GetUID() const
 	{ return (freyja_ptr)this; }
 	/*------------------------------------------------------
@@ -315,6 +324,17 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	void SetScene( freyja::Scene* scene )
+	{ 
+		mScene = scene; 
+		NotifyOnSceneChange( ); 
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Set scene property.
+	 *
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Transforms
@@ -377,17 +397,24 @@ protected:
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void NotifyOnDelete() const;
+	virtual void NotifyOnDelete( ) const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Notify observers that this node is being removed.
 	 *
 	 ------------------------------------------------------*/
 
-	virtual void NotifyOnParentChange() const;
+	virtual void NotifyOnParentChange( ) const;
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Notify observers that this node is being reparented.
+	 *
+	 ------------------------------------------------------*/
+
+	virtual void NotifyOnSceneChange( );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
@@ -411,6 +438,8 @@ protected:
 	hel::Vec3 mScale;                         /* Absolute scaling. */
 
 	hel::Mat44 mLocalTransform;               /* Might as well cache local transform. */
+
+	freyja::Scene* mScene;                    /* Scene that contains this node (can be NULL). */
 
 	freyja::Node* mParent;                    /* Node parent. */
  
@@ -442,6 +471,7 @@ Node::Node( ) :
 	mOrientation( ),
 	mScale( 1.0f, 1.0f, 1.0f ),
 	mLocalTransform( ),
+	mScene( NULL ),
 	mParent( NULL ),
 	mChildren( ),
 	mRenderables( )
@@ -457,6 +487,7 @@ Node::Node( const char* name ) :
 	mOrientation( ),
 	mScale( 1.0f, 1.0f, 1.0f ),
 	mLocalTransform( ),
+	mScene( NULL ),
 	mParent( NULL ),
 	mChildren( ),
 	mRenderables( )

@@ -16,6 +16,7 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#include "Scene.h"
 #include "Node.h"
 
 using namespace freyja;
@@ -283,6 +284,19 @@ void Node::NotifyOnParentChange() const
 	{
 		((NodeObserver*)(*it))->NotifyParentChange( this );
 		++it;
+	}
+}
+
+
+void Node::NotifyOnSceneChange( )
+{
+	// FIXME: Shouldn't really just append to scene here, but this is for testing.
+	if ( mScene )
+	{
+		for ( RenderableIterator it = mRenderables.begin( ), end = it.end(); it != end; it++ )
+		{
+			mScene->AddRenderable( *it );
+		}
 	}
 }
 

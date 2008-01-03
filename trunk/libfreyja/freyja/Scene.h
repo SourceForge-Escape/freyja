@@ -140,6 +140,21 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	bool AddRenderable( freyja::Renderable* renderable );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Appends to renderable list.
+	 *
+	 ------------------------------------------------------*/
+
+	bool RemoveRenderable( freyja::Renderable* renderable );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Appends to renderable list.
+	 *
+	 ------------------------------------------------------*/
+
+
 	bool Add( freyja::Node* node );
 	/*------------------------------------------------------
 	 * Pre  :  
