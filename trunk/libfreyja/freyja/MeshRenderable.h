@@ -96,13 +96,13 @@ protected:
 
 	freyja::Material* mMaterial;    /* All faces in this list use this material. */
 
-	mstl::Vector<index_t> mIndices; /* Triangle list. */
+	mstl::Vector<unsigned int> mIndices; /* Triangle list. */
 
 	hel::Vec3 mPosition;            /* Offset of this renderable in world coordinates. */
 
 	hel::Quat mOrientation;         /* Orientation relative to world. */
 
-	hel::Vec3 mScale;                /* Instanced scaling. */
+	hel::Vec3 mScale;               /* Instanced scaling. */
 };
 
 

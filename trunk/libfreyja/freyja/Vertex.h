@@ -89,6 +89,14 @@ public:
 	 *
 	 ------------------------------------------------------*/
 	
+	const index_t& GetIndex( ) 
+	{ return mMainIndex; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get the offset in the FA VertexArray.
+	 *
+	 ------------------------------------------------------*/
+
 
 protected:
 
@@ -111,7 +119,7 @@ inline
 bool Vertex::AddFaceReference( freyja::Face* face )
 {
 	bool found = false;
-	for ( mstl::list<Face*>::iterator it = GetFaces().begin( ); *it; it++ )
+	for ( mstl::list<Face*>::iterator it = GetFaces().begin( ); it != it.end(); it++ )
 	{
 		if ( *it == face )
 		{

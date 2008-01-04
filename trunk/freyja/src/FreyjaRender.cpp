@@ -219,20 +219,18 @@ void OpenGLRenderableStrategy::DrawTriangles(  )
 	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
 
 	// Load vertex array
-	if ( mVertexArrayPtr )
+	if ( mVertexArrayPtr && mIndexArrayPtr )
 	{
-		glVertexPointer( mVertexWidth, GL_FLOAT, sizeof(vec_t) * mVertexWidth, mVertexArrayPtr );
-	}
-
-	if ( mIndexArrayPtr )
-	{
-		glDrawElements( GL_TRIANGLES, mIndexArraySize, GL_UNSIGNED_INT, mIndexArrayPtr );
+		uint16 triangleCount = ( mIndexArraySize / 3 );
+		glVertexPointer( mVertexWidth, GL_FLOAT, 0, mVertexArrayPtr );
+		glDrawElements( GL_TRIANGLES, triangleCount, GL_UNSIGNED_INT, mIndexArrayPtr );
 	}
 
 	// TEST
 	if ( mVertexArrayPtr )
 	{
-		glPointSize(2.0);
+		glColor3fv( GREEN );
+#if 1
 		glBegin( GL_POINTS );
 
 		for ( uint32 i = 0; i < mVertexArraySize; )
@@ -241,6 +239,50 @@ void OpenGLRenderableStrategy::DrawTriangles(  )
 		}
 
 		glEnd( );
+#else
+		glDrawElements( GL_POINTS, mIndexArraySize, GL_UNSIGNED_INT, mIndexArrayPtr );
+#endif
+	}
+
+	// TEST
+	if ( mIndexArrayPtr )
+	{
+
+		glColor3fv( PINK );
+		for ( uint32 i = 0; i < mIndexArraySize; )
+		{
+			glBegin( GL_TRIANGLES );
+			index_t idx = mIndexArrayPtr[i++];
+			glVertex3fv( mVertexArrayPtr+idx );
+			idx = mIndexArrayPtr[i++];
+			glVertex3fv( mVertexArrayPtr+idx );
+			idx = mIndexArrayPtr[i++];
+			glVertex3fv( mVertexArrayPtr+idx );
+			glEnd( );
+		}
+
+#if 0
+		if ( Texture::mInstance )
+		{
+			//Texture::mInstance->Bind( GL_TEXTURE0, 2 );
+			//Texture::mInstance->Bind( GL_TEXTURE1, 3 );
+			//Texture::mInstance->Bind( GL_TEXTURE2, 4 );
+		}
+#endif
+
+		glColor3fv( RED );
+		for ( uint32 i = 0; i < mIndexArraySize; )
+		{
+			glBegin( GL_LINE_LOOP );
+			index_t idx = mIndexArrayPtr[i++];
+			glVertex3fv( mVertexArrayPtr+idx );
+			idx = mIndexArrayPtr[i++];
+			glVertex3fv( mVertexArrayPtr+idx );
+			idx = mIndexArrayPtr[i++];
+			glVertex3fv( mVertexArrayPtr+idx );
+			glEnd( );
+		}
+
 	}
 }
 
@@ -253,8 +295,11 @@ void FreyjaRender::DrawScene( freyja::Scene* scene )
 		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
 		glPointSize(mVertexPointSize);
+		//glColor3fv( WHITE );
+		//BindColorTexture( );
+
+		glDisable(GL_TEXTURE_2D);
 		glColor3fv( WHITE );
-		BindColorTexture( );
 
 		mLastMaterial = NULL;
 
@@ -299,13 +344,6 @@ void FreyjaRender::DrawScene( freyja::Scene* scene )
 
 		glPopAttrib( );
 	}
-}
-
-
-void FreyjaRender::Draw( freyja::Renderable* renderable )
-{
-	//#warning FIXME: Test rendering implementation in tracer.
-	//	Print( "r %p", renderable );
 }
 
 
@@ -2934,14 +2972,14 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glEnable(GL_LIGHT0);
 	glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
-	vec4_t color;
-	freyjaGetLightAmbient(freyjaGetCurrentLight(), color);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, color);
-	freyjaLightDiffuse(freyjaGetCurrentLight(), color);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, color);
-	freyjaGetLightSpecular(freyjaGetCurrentLight(), color);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, color);
-
+	{
+		vec4_t ambient = { 0.2, 0.2, 0.2, 1.0f };
+		vec4_t diffuse = { 0.8, 0.8, 0.8, 1.0f };
+		vec4_t specular = { 0.2, 0.2, 0.2, 1.0f };
+		glLightfv( GL_LIGHT0, GL_AMBIENT, ambient );
+		glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse );
+		glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
+	}
 
 	/* Cast light on sphere colored/detailed by material */
 	static vec_t dy = 0.0f;
@@ -2951,6 +2989,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 	glRotatef(dy, 0, 1, 0);
 	mglApplyMaterial(freyjaGetCurrentMaterial());
 
+	// FIXME: Add support for swapping out material mesh.
 #if USE_TORUS_TEST
 	mglDrawTorus(3.0, 10.0);
 #else

@@ -28,7 +28,7 @@
 
 #include <hel/math.h>
 
-#define FREYJA_API_VERSION   "Freyja 0.9.5"
+#define FREYJA_API_VERSION   "Freyja 0.10.0"
 
 /* index_t invalid state is equal to UINT_MAX 32bit */
 #define INDEX_INVALID      4294967295U

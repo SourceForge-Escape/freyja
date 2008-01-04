@@ -21,10 +21,15 @@
  * Mongoose - Created. [Image class]
  ==========================================================================*/
 
+#include <mstl/SystemIO.h>
+#include <mstl/Vector.h>
 #include "PixelBuffer.h"
 
 using namespace mstl;
 using namespace freyja;
+
+mstl::list<mstl::String> PixelBuffer::mPluginDirectories;
+
 
 PixelBuffer::PixelBuffer() :
 	mName(),               
@@ -32,7 +37,8 @@ PixelBuffer::PixelBuffer() :
 	mPixelFormat(RGB_24bpp),
 	mImage(NULL),
 	mWidth(0),
-	mHeight(0)
+	mHeight(0),
+	mTextureId(-1)
 {
 }
 
@@ -47,7 +53,7 @@ PixelBuffer*
 PixelBuffer::Create( byte* pixmap,
 				     uint16 width, 
 				     uint16 height,
-				     Format format )
+				     PixelFormat format )
 {
 	uint32 size = width * height * GetBytesPerPixel( format );
 	freyja::PixelBuffer* texture = NULL;
@@ -66,7 +72,7 @@ PixelBuffer::Create( byte* pixmap,
 }
 
 
-bool PixelBuffer::ConvertPixelFormat( Format mode )
+bool PixelBuffer::ConvertPixelFormat( PixelFormat mode )
 {
 	if ( !mImage || mWidth < 1 || mHeight < 1 )
 		return false;
@@ -238,7 +244,7 @@ bool PixelBuffer::ConvertPixelFormat( Format mode )
 }
 
 
-bool PixelBuffer::ConvertPixelFormat( PixelBuffer::Format format, byte* palette, uint16 size )
+bool PixelBuffer::ConvertPixelFormat( PixelFormat format, byte* palette, uint16 size )
 {
 	if ( mPixelFormat != Indexed_8bpp || !palette || !size )
 		return false;
@@ -309,7 +315,7 @@ bool PixelBuffer::ConvertPixelFormat( PixelBuffer::Format format, byte* palette,
 }
 
 
-bool PixelBuffer::BrightenPalette( Format format, byte* palette, uint32 size, float weight )
+bool PixelBuffer::BrightenPalette( PixelFormat format, byte* palette, uint32 size, float weight )
 {
 	if ( !palette || !size || weight <= 0.0f || weight > 0.9999f )
 	{
@@ -386,12 +392,11 @@ PixelBuffer* PixelBuffer::Create( const char* filename )
 		return NULL;
 	}
 
-	unsigned int i;
-	foreach (mPluginDirectories, i)
+	for ( mstl::list<mstl::String>::iterator it = mPluginDirectories.begin(); it != it.end(); it++ )
 	{
-		if (!reader.OpenDir(gImagePluginDirectories[i].c_str()))
+		if ( !reader.OpenDir( (*it).c_str() ) )
 		{
-			printError("Couldn't access image plugin directory");
+			freyjaPrintMessage( "Couldn't access image plugin directory" );
 			continue;
 		}
 
@@ -446,7 +451,7 @@ PixelBuffer* PixelBuffer::Create( const char* filename )
 						buf->mImage = image;
 						buf->mWidth = width;
 						buf->mHeight = height;
-						buf->mFormat = 
+						buf->mPixelFormat = 
 							( bpp == 32 ) ? RGBA_32bpp :
 							( bpp == 24 ) ? RGB_24bpp : Indexed_8bpp;
 
@@ -487,12 +492,12 @@ bool PixelBuffer::Export( const char* filename, const char* module_name ) const
 	void *handle;
 
 
-	print("[Image plugin system invoked]");
+	freyjaPrintMessage("[Image plugin system invoked]");
 
-	unsigned int i;
-	foreach (gImagePluginDirectories, i)
+
+	for ( mstl::list<mstl::String>::iterator it = mPluginDirectories.begin(); it != it.end(); it++ )
 	{
-		if (!reader.OpenDir(gImagePluginDirectories[i].c_str()))
+		if (!reader.OpenDir( (*it).c_str() ) )
 		{
 			//printError("Couldn't access image plugin directory '%s'",
 			//		   gImagePluginDirectories[i].c_str());
@@ -510,7 +515,7 @@ bool PixelBuffer::Export( const char* filename, const char* module_name ) const
 		}
 		else
 		{
-			print("Module '%s' opened.", module_filename);
+			freyjaPrintMessage("Module '%s' opened.", module_filename);
 
 			snprintf(symbol, 256, "freyja_image_export__%s", module_name);
 
@@ -524,10 +529,8 @@ bool PixelBuffer::Export( const char* filename, const char* module_name ) const
 				continue;
 			}
 			
-			done = !(*export_img)((char*)filename, 
-								  _image, _width, _height, 
-								  ((_color_mode == RGBA_32) ? 4 :
-								   (_color_mode == RGB_24) ? 3 : 1));
+			done = 
+			!(*export_img)((char*)filename, mImage, mWidth, mHeight, GetBytesPerPixel( mPixelFormat ) );
 
 			freyjaModuleUnload(handle);
 		}
@@ -537,7 +540,7 @@ bool PixelBuffer::Export( const char* filename, const char* module_name ) const
 
 	}
 
-	print("[FreyjaPlugin module loader sleeps now]\n");
+	freyjaPrintMessage("[FreyjaPlugin module loader sleeps now]\n");
 
 	if (done)
 		return true;
@@ -750,6 +753,46 @@ uint16 PixelBuffer::GetNextPowerOfTwo( const uint16 seed ) const
 
 	return i;
 }
+
+
+#if DISABLED
+byte* PixelBuffer::GenerateCheckerBoard(byte bg[4], byte fg[4],
+										uint32 width, uint32 height,
+										uint32 runlen )
+{
+	byte* image = new byte[height*width*4];
+	bool swap = true;
+
+	for (uint32 i = 0, l = 0; i < width; ++i, ++l)
+	{
+		for (uint32 j = 0; j < height; ) // 2px black border
+		{
+			byte *&rgba = (swap) ? bg : fg;			
+
+			for (uint32 k = 0; k < runlen; ++k, ++j)
+			{
+				uint32 idx = ( height * i + j ) * 4;
+
+				/* RBGA */
+				image[idx]   = rgba[0];
+				image[idx+1] = rgba[1];
+				image[idx+2] = rgba[2];
+				image[idx+3] = rgba[3];
+			}
+
+			swap = !swap;
+		}
+
+		if ( l >= runlen )
+		{
+			l = 0;
+			swap = !swap;	
+		}
+	}
+
+	return image;
+}
+#endif
 
 
 ////////////////////////////////////////////////////////////

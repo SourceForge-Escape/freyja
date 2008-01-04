@@ -230,6 +230,18 @@ void Texture::bindMultiTexture(int texture0, int texture1)
 }
 
 
+void Texture::Bind( GLenum texture_unit, uint16 id )
+{
+#if USING_OPENGL_EXT 
+	if (h_glActiveTextureARB)
+	{
+		h_glActiveTextureARB( texture_unit );
+		glBindTexture( GL_TEXTURE_2D, mTextureIds[id] );
+	}
+#endif
+}
+
+
 void Texture::setMaxTextureCount(unsigned int n)
 {
 	mTextureLimit = n;

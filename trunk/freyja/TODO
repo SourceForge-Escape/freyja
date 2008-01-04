@@ -1,75 +1,14 @@
 
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
+ TODO 
 
-  File     : TODO ( 2005.02.02 last update )
-  Author   : Terry 'Mongoose' Hendrix II
-  Project  : Freyja 0.3.x
+ freyja3d 0.10.0, Kagura alpha ( Development branch )
+ =====================================================================
 
- ---------------------------------------------------------------
-	Design by contract ( DBC )
-	Do no Repeat Yourself ( DRY )
+ Kagura alpha, 0.10.0.0
 
-     1. Remove duplicate functionality ( DRY )
-     2. Enforce assertions, when assertions are made ( DBC )
-     3. Audit memory managment code regularly
-     4. Unit testing
+ * Pick ray support.
+ * 3d cursor support.
+ * Edit mode support.
+ * Viewport separation support for mouse events.
+ * Hook texture loading in UI back up.
 
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=
-
-  General
-	o 'Viewport' editing
-	o Face object/texcoord transforms 
-	o Allow faces/vertex buffer selections to use seperate texcoord maps, etc
-	o Use new skeletal system backend w/ matrix palette skinning
-	o Polygon winding support
-	o Make system for plugins seperate from libfreyja's
-	o IK solver
-	o Smoothing groups tools
-	o Catmull-Clark for subdiv
-	o Viewportbackground 'diagram' for mesh creation
-	o Deform skelmesh in bone transform
-	o Proper vertex extrude with quad faces
-	o 3d Mesh polygon/edge/etc selection and editing ( request ) 
-	o Advanced Subdivision/Tesselation tools
-	o Multi window editing using python via calls to FreyjaRender
-	o Deform vertices render option ( Should disable mesh editing when on )
-	o Skeletal Ref -> Skeletal Keyframe ( dup | edit ) -> Skel Keyframe |
-	  vertex morph frame 
-	o Bounding box vertex selector for bones
-	o GRN edit / export; fix GRN animation import ( request )
-	o Tightening up import / export -- if it's not 100% or close
-	  it's going to get disabled or feature locked till it is
-	o Propagate import / export list up to Freyja to make menus
-	o OO event system may need to come online right after release
-	o Python extention to mgtk/Freyja for interactive plugins
-	o Perlin volume texture plugin
-	o Animation save doesn't warn on overwrite -- do that
-	o Curved surfaces in backend, remove patch test
-	o Face selection and grouping for operations like normal generation
-	o Relative/Ray based light movement with mouse in animator tab
-	o Full MDL(HL), GRN, PSK import/export support
-	o Make Egg/Freyja backend's plugins ABI compatible and merge them
-	  into a shared branch
-	o Make plugin to load Egg 8.12 models independent of backend
-	o Vertex morphing animation as extension ( was removed during fork )
-	o Remove all unused/obsolete events, functions, and cmds
-	o Object Copy/Cut/Paste for more than just meshes
-	o Undo system
-	o Recently used files list
-	o Instead of 'mCleared' events focus on 'mModified' events in Control
-	o Light editing mode backport
-	o Mouse interface needs to replace purely plane based editing
-
-
-  Interface
-	o Make tree labels updatable w/o reloading the entire tree
-	o Animation playback
-	o Make new mesh for new polygon when none exist?
-	  ( could be bad or good, perhaps allow a freyja.mlisp toggle for it )
-	o Generated Spheres use duplicate vertex rings toggle for solid?
-	  ( unexpected by users? )
-	o Arcball for mouse rotation
-	o Use event timer for idle rotation and animation display
-	o Add multiwindow modeling support back?
-
- =-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-==-=

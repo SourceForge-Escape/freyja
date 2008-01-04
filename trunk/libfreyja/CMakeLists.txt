@@ -28,7 +28,7 @@ add_definitions(
 )
 
 # Common
-add_definitions( -Wall -DENABLE_FREYJA_ASSERTS )
+add_definitions( -Wall -DENABLE_FREYJA_ASSERTS -DIMAGE_PLUGINS )
 
 # Debug
 add_definitions( -DDEBUG -g )
