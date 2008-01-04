@@ -67,6 +67,8 @@ PFNGLGETINFOLOGARBPROC h_glGetInfoLogARB = NULL;
 PFNGLDELETEOBJECTARBPROC h_glDeleteObjectARB = NULL;
 PFNGLGETOBJECTPARAMETERIVARBPROC h_glGetObjectParameterivARB = NULL;
 PFNGLGETUNIFORMLOCATIONARBPROC h_glGetUniformLocationARB = NULL;
+PFNGLUNIFORM1IARBPROC h_glUniform1iARB = NULL;
+
 #else
 void *h_glMultiTexCoord1fARB = NULL;
 void *h_glMultiTexCoord2fARB = NULL;
@@ -91,6 +93,7 @@ void *h_glGetInfoLogARB = NULL;
 void *h_glDeleteObjectARB = NULL;
 void *h_glGetObjectParameterivARB = NULL;
 void *h_glGetUniformLocationARB = NULL;
+void *h_glUniform1iARB = NULL;
 #endif
 
 using namespace freyja3d;
@@ -167,7 +170,7 @@ OpenGL::OpenGL() :
 #   if defined(__APPLE__)
 	// No function pointer mapping needed iirc... but I don't have a test machine or even up-to-date AGL documentation.
 
-#   else
+#   else // defined(__APPLE__)
 	h_glMultiTexCoord1fARB = (PFNGLMULTITEXCOORD1FARBPROC)mglGetProcAddress("glMultiTexCoord1fARB");
 	h_glMultiTexCoord2fARB = (PFNGLMULTITEXCOORD2FARBPROC)mglGetProcAddress("glMultiTexCoord2fARB");
 	h_glMultiTexCoord3fARB = (PFNGLMULTITEXCOORD3FARBPROC)mglGetProcAddress("glMultiTexCoord3fARB");
@@ -191,6 +194,7 @@ OpenGL::OpenGL() :
 	h_glDeleteObjectARB = (PFNGLDELETEOBJECTARBPROC)mglGetProcAddress("glDeleteObjectARB");
 	h_glGetObjectParameterivARB = (PFNGLGETOBJECTPARAMETERIVARBPROC)mglGetProcAddress("glGetObjectParameterivARB");
 	h_glGetUniformLocationARB = (PFNGLGETUNIFORMLOCATIONARBPROC)mglGetProcAddress("glGetUniformLocationARB");
+	h_glUniform1iARB = (PFNGLUNIFORM1IARBPROC)mglGetProcAddress("glUniform1iARB");
 #   endif // defined(__APPLE__)
 #endif
 
@@ -599,6 +603,13 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 			mObjects = program;
 	}
 
+	// FIXME: Testing new setup with barrowed vert/frag program, which needs these uniforms.
+	Uniform1i( fragmentId, "decalMap",   0 );
+	Uniform1i( fragmentId, "glossMap",   1 );
+	Uniform1i( fragmentId, "normalMap",  2 );
+	Uniform1i( fragmentId, "heightMap",  3 );
+	Uniform1i( fragmentId, "parallaxMapping", 0 );
+
 	r.Close();
 	r2.Close();
 	return !failure;
@@ -606,6 +617,18 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 	r.Close();
 	r2.Close();
 	return false;
+#endif
+}
+
+
+void OpenGL::Uniform1i( int32 programId, const char* symbol, uint32 value )
+{
+#if USING_OPENGL_EXT
+	if ( h_glUniform1iARB && h_glGetUniformLocationARB )
+	{
+		GLhandleARB program = programId;
+		h_glUniform1iARB( h_glGetUniformLocationARB( program, symbol ), value );
+	}
 #endif
 }
 

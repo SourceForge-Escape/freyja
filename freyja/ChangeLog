@@ -6,12 +6,11 @@
 
  Kagura alpha, 0.10.0.0
 
- TODO
- 
- * Pick ray support.
- * 3d cursor support.
- * Edit mode support.
- * Viewport separation support for mouse events.
+
+ * 
+ * Lighting support in modeler indepedent of backend in material editor.
+ * Additional shader support.
+ * New rendering path for prototype.
 
  20080102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  * New render path tracer/skeleton.

@@ -168,6 +168,7 @@ extern	PFNGLGETINFOLOGARBPROC h_glGetInfoLogARB;
 extern  PFNGLDELETEOBJECTARBPROC h_glDeleteObjectARB;
 extern  PFNGLGETOBJECTPARAMETERIVARBPROC h_glGetObjectParameterivARB;
 extern  PFNGLGETUNIFORMLOCATIONARBPROC h_glGetUniformLocationARB;
+extern  PFNGLUNIFORM1IARBPROC h_glUniform1iARB;
 
 #elif defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT) && defined(__APPLE__)
 
@@ -194,6 +195,7 @@ extern  PFNGLGETUNIFORMLOCATIONARBPROC h_glGetUniformLocationARB;
 #   define h_glDeleteObjectARB glDeleteObjectARB
 #   define h_glGetObjectParameterivARB glGetObjectParameterivARB
 #   define h_glGetUniformLocationARB glGetUniformLocationARB
+#   define h_glUniform1iARB glUniform1iARB
 
 
 #else
@@ -220,7 +222,7 @@ extern	void *h_glGetInfoLogARB;
 extern  void *h_glDeleteObjectARB;
 extern  void *h_glGetObjectParameterivARB;
 extern  void *h_glGetUniformLocationARB;
-
+extern  void *h_glUniform1iARB;
 #endif
 
 #include <hel/math.h>
@@ -532,6 +534,20 @@ class OpenGL
 	 ------------------------------------------------------*/
 
 	static bool LoadVertexGLSL(const char *filename, uint32 &vertexId);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+	
+	static void Uniform1i( int32 programId, const char* symbol, uint32 value );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	static void Bind( int32 programId, const char* symbol, uint32 value );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

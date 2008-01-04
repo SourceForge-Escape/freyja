@@ -17,7 +17,11 @@
 
  * Optionally pass allocator / dealloc functions to libfreyja on init.
 
- * Replace MetadataRenderable with new MeshRenderable.
+ * RenderableStrategy
+	- Add DrawQuads( ) method.
+	- Add DrawPoints( ) method.
+	- Have the concrete Renderable in libfreyja choose what to render based
+	  on flag settings.
 
  * Resource.
 	- 'Cache' system for Material / Mesh / Skeleton / etc.

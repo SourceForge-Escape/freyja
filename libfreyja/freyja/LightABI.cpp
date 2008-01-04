@@ -32,34 +32,34 @@ using namespace mstl;
 
 index_t freyjaLightCreate()
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 	return 0;	
 }
 
 
 void freyjaLightDelete(index_t lightIndex)
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 }
 
 
 uint32 freyjaGetLightCount()
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 	return 0;
 }
 
 
 index_t freyjaGetCurrentLight()
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 	return 0;
 }
 
 
 void freyjaCurrentLight(uint32 lightIndex)
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 }
 
 
@@ -73,19 +73,19 @@ void freyjaLightPosition4v(uint32 lightIndex, vec4_t position)
 
 void freyjaLightAmbient(uint32 lightIndex, vec4_t ambient)
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 }
 
 
 void freyjaLightDiffuse(uint32 lightIndex, vec4_t diffuse)
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 }
 
 
 void freyjaLightSpecular(uint32 lightIndex, vec4_t specular)
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 }
 
 
@@ -93,23 +93,23 @@ void freyjaLightSpecular(uint32 lightIndex, vec4_t specular)
 
 void freyjaGetLightPosition4v(uint32 lightIndex, vec4_t position)
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 }
 
 
 void freyjaGetLightAmbient(uint32 lightIndex, vec4_t ambient)
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 }
 
 
 void freyjaGetLightDiffuse(uint32 lightIndex, vec4_t diffuse)
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 }
 
 
 void freyjaGetLightSpecular(uint32 lightIndex, vec4_t specular)
 {
-	MSTL_MSG("Called stub function...");
+	//MSTL_MSG("Called stub function...");
 }

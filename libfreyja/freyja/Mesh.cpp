@@ -201,6 +201,50 @@ void Mesh::DuplicateChildren( freyja::Node* parent, bool recurse )
 
 void Mesh::AddVertexToFace( freyja::Face* face, freyja::Vertex* vertex )
 {
+	if ( !face || !vertex )
+		return;
+
+	face->AddVertex( vertex );
+
+	if ( face->mVertices.size( ) == 3 )
+	{
+		uint32 i = 0, n = face->mVertices.size( ) - 3;
+		for ( VertexIterator it = face->mVertices.begin(); it != it.end(); it++, ++i )
+		{
+			if ( i == n )
+			{
+				index_t a = (*it)->GetIndex();
+				it++;
+				index_t b = (*it)->GetIndex();
+				it++;
+				index_t c = (*it)->GetIndex();
+				face->mTriangles.push_back( face->mRenderable->ReserveIndexTriangle( a, b, c ) );
+				break;
+			}
+		}
+	}
+	else if ( face->mVertices.size( ) > 3 )
+	{
+		/* Fans -> polygons... */
+		uint32 i = 0, n = face->mVertices.size( ) - 2;
+		index_t a;
+		for ( VertexIterator it = face->mVertices.begin(); it != it.end(); it++, ++i )
+		{
+			if ( !i )
+			{
+				a = (*it)->GetIndex();
+			}
+			else if ( i == n )
+			{
+				index_t c = (*it)->GetIndex();
+				it++;
+				index_t d = (*it)->GetIndex();
+				face->mTriangles.push_back( face->mRenderable->ReserveIndexTriangle( a, c, d ) );
+				break;
+			}
+		}
+		
+	}
 }
 
 

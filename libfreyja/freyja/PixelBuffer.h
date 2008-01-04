@@ -32,19 +32,20 @@
 
 namespace freyja {
 
+enum PixelFormat {
+	Indexed_8bpp,
+	RGB_24bpp,
+	RGBA_32bpp
+};
+
+
 class PixelBuffer
 {
  public:
 
-	enum Format {
-		Indexed_8bpp,
-		RGB_24bpp,
-		RGBA_32bpp
-	};
-
 	static PixelBuffer* Create( byte* pixmap,
 								uint16 width, uint16 height, 
-								Format format );
+								PixelFormat format );
 	/*------------------------------------------------------
 	 * Pre  : Pixmap must be allocated and have deminsion.
 	 *
@@ -69,7 +70,7 @@ class PixelBuffer
 	 *
 	 ------------------------------------------------------*/
 
-	bool ConvertPixelFormat( PixelBuffer::Format format );
+	bool ConvertPixelFormat( PixelFormat format );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Converts image to format and returns true.
@@ -77,7 +78,7 @@ class PixelBuffer
 	 *
 	 ------------------------------------------------------*/
 
-	bool ConvertPixelFormat( PixelBuffer::Format format, byte* palette, uint16 size );
+	bool ConvertPixelFormat( PixelFormat format, byte* palette, uint16 size );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Converts Index_8bpp image to format and returns true.
@@ -138,7 +139,7 @@ class PixelBuffer
 	 *
 	 ------------------------------------------------------*/
 
-	PixelBuffer::Format GetPixelFormat( ) const
+	PixelFormat GetPixelFormat( ) const
 	{ return mPixelFormat; }
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -146,14 +147,14 @@ class PixelBuffer
 	 *
 	 ------------------------------------------------------*/
 
-	static uint16 GetBytesPerPixel( const PixelBuffer::Format format );
+	static uint16 GetBytesPerPixel( const PixelFormat format );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns bytes per pixel given format.
 	 *
 	 ------------------------------------------------------*/
 
-	bool BrightenPalette( Format format, byte* palette, uint32 size, float weight );
+	bool BrightenPalette( PixelFormat format, byte* palette, uint32 size, float weight );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -183,6 +184,30 @@ class PixelBuffer
 	 ------------------------------------------------------*/
 
 	byte* CopyPixmap( );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	const int16 GetTextureId( ) const
+	{ return mTextureId; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void SetTextureId( const int16 id )
+	{ mTextureId = id; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	const byte* GetImage( )
+	{ return mImage; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -229,13 +254,15 @@ class PixelBuffer
 	
 	mstl::String mFilename;            /* Filename of image. */
 
-	Format mPixelFormat;
+	PixelFormat mPixelFormat;
 
 	byte* mImage;
 
 	uint16 mWidth;
 
 	uint16 mHeight;
+
+	int16 mTextureId;
 };
 
 
@@ -250,11 +277,12 @@ void PixelBuffer::Clear( )
 	mImage = NULL;
 	mWidth = mHeight = 0;
 	mName = mFilename = "";
+	mTextureId = -1;
 }
 
 
 inline
-uint16 PixelBuffer::GetBytesPerPixel( const PixelBuffer::Format format )
+uint16 PixelBuffer::GetBytesPerPixel( const PixelFormat format )
 { 
 	return ( (format == Indexed_8bpp) ? 1 :
 			 (format == RGB_24bpp) ? 3 :

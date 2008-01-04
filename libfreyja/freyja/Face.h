@@ -134,7 +134,7 @@ inline
 bool Face::ContainsVertex( freyja::Vertex* vertex ) const
 {
 	bool found = false;
-	for ( VertexIterator it = mVertices.begin(); *it; it++ )
+	for ( VertexIterator it = mVertices.begin(), end = it.end(); it != end; it++ )
 	{
 		if ( (*it) == vertex )
 		{
@@ -150,7 +150,7 @@ bool Face::ContainsVertex( freyja::Vertex* vertex ) const
 inline
 void Face::ReplaceVertex( freyja::Vertex* replace, freyja::Vertex* vertex )
 {
-	for ( VertexIterator it = mVertices.begin(); *it; it++ )
+	for ( VertexIterator it = mVertices.begin(), end = it.end(); it != end; it++ )
 	{
 		if ( (*it) == vertex )
 		{

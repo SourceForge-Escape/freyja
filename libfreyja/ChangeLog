@@ -5,6 +5,9 @@
  =====================================================================
 
  Kagura alpha, 0.10.0.0
+
+ * 
+ * 9.x image plugin support for 10.x.
  
  20080102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
  * New render path tracer/skeleton.
