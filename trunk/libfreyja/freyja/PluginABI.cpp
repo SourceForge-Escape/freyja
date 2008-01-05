@@ -474,15 +474,15 @@ int freyjaExportScene(const char* filename)
 	// Materials
 	TiXmlElement* materials = new TiXmlElement("materials");
 	root->LinkEndChild( materials );
-	for (uint32 i = 0, n = freyjaGetMaterialCount(); i < n; ++i)
-	{
+	//for (uint32 i = 0, n = freyjaGetMaterialCount(); i < n; ++i)
+	//{
 		//FIXME freyja::Material *mat = freyjaGetMaterialClass( i );
 		//
 		//if (mat)
 		//{
 		//	mat->Serialize( materials );
 		//}
-	}
+	//}
 
 	// Scene
 	TiXmlElement* scene = new TiXmlElement("scene");

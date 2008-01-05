@@ -229,6 +229,18 @@ src/OpenGLPrinter.s:
 	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/OpenGLPrinter.s
 
 # target to build an object file
+src/OpenGLRenderableStrategy.o:
+	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/OpenGLRenderableStrategy.o
+
+# target to preprocess a source file
+src/OpenGLRenderableStrategy.i:
+	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/OpenGLRenderableStrategy.i
+
+# target to generate assembly for a file
+src/OpenGLRenderableStrategy.s:
+	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/OpenGLRenderableStrategy.s
+
+# target to build an object file
 src/Plugins.o:
 	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Plugins.o
 
@@ -347,6 +359,9 @@ help::
 	@echo "... src/OpenGLPrinter.o"
 	@echo "... src/OpenGLPrinter.i"
 	@echo "... src/OpenGLPrinter.s"
+	@echo "... src/OpenGLRenderableStrategy.o"
+	@echo "... src/OpenGLRenderableStrategy.i"
+	@echo "... src/OpenGLRenderableStrategy.s"
 	@echo "... src/Plugins.o"
 	@echo "... src/Plugins.i"
 	@echo "... src/Plugins.s"

@@ -998,46 +998,6 @@ private:
 	freyja::Material* mLastMaterial;
 };
 
-
-class OpenGLRenderableStrategy :
-		public freyja::RenderableStrategy
-{
-public:
-
-	OpenGLRenderableStrategy()
-	{ }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual ~OpenGLRenderableStrategy()
-	{ }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual void DrawIcon( const char* name  )
-	{ }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	virtual void DrawTriangles(  );
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-};
-
-
 } /* End namespace freyja3d */
-
 
 #endif

@@ -23,8 +23,8 @@
  * Mongoose - Created, based on old Material class
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MATERIAL_H_
-#define GUARD__FREYJA_MATERIAL_H_
+#ifndef GUARD__FREYJA_MATERIAL__H_
+#define GUARD__FREYJA_MATERIAL__H_
 
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
@@ -35,14 +35,10 @@
 
 namespace freyja {
 
-class Material
+class Material :
+		public XMLSerializer
 {
  public:
-
-	typedef enum {
-		fMaterial_DetailTexure = 1,		
-	} Flags;
-
 
 	////////////////////////////////////////////////////////////
 	// Constructors
@@ -51,25 +47,29 @@ class Material
 	Material();
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of FreyjaMaterial
+	 * Post : Constructor.
+	 *
 	 ------------------------------------------------------*/
 
-	Material(const Material& material);
+	Material( const Material& material );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of FreyjaMaterial
+	 * Post : Copy constructor.
+	 *
 	 ------------------------------------------------------*/
 
 	Material &operator=(const Material& material);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Assignment operator. 
+	 *
 	 ------------------------------------------------------*/
 
 	virtual ~Material();
 	/*------------------------------------------------------
-	 * Pre  : FreyjaMaterial object is allocated
-	 * Post : Deconstructs an object of FreyjaMaterial
+	 * Pre  : 
+	 * Post : Destructor.
+	 *
 	 ------------------------------------------------------*/
 
 
@@ -80,62 +80,42 @@ class Material
 	bool operator < ( const Material& material ) const;
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Sorting is used to automatically order
+	 * Post : Sorting is used to automatically order a
 	 *        RenderList.  For example 'alpha' render pass is
 	 *        always after 'solid'.
 	 *
-	 ------------------------------------------------------*/
-
-	static int32 GetBlendIndex(int blend);
-	/*------------------------------------------------------
-	 * Pre  : Pass blend value, Built with HAVE_GL
-	 * Post : Returns -1 if not used, or index if used
-	 ------------------------------------------------------*/
-
-	static uint32 GetCount();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns number of unique materials
-	 ------------------------------------------------------*/
-
-	uint32 GetFlags() const;
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get currently set flags
-	 ------------------------------------------------------*/
-
-	uint32 GetId() const;
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns unique material id ( 1..N, or 0 if invalid )
 	 ------------------------------------------------------*/
 
 	const char* GetMetadata() const
 	{ return mMetadata.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Sets metadata
+	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	const char* GetName() const
 	{ return mName.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns Material's name or NULL
+	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 	const char* GetShaderFilename() const
 	{ return mShaderFilename.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Gets Material's shader filename or NULL
+	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
-	const char* GetTextureFilename() const
-	{ return mTextureFilename.c_str(); }
+	const char* GetFilename() const
+	{ return mFilename.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Gets Material's texture filename or NULL
+	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
 
@@ -143,34 +123,8 @@ class Material
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void ClearFlag(Flags flag)
-	{ mFlags &= ~flag; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Unsets passed flag
-	 ------------------------------------------------------*/
-
-	bool Serialize(XMLSerializerNode container);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	bool Unserialize(XMLSerializerNode container);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	void SetFlag(Flags flag) { mFlags |= flag; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets passed flag
-	 ------------------------------------------------------*/
-
-	void SetName(const char* name);
+	void SetName(const char* name)
+	{ mName = name; }
 	/*------------------------------------------------------
 	 * Pre  : Name is valid string
 	 * Post : Sets Material's name
@@ -183,53 +137,152 @@ class Material
 	 * Post : Sets metadata
 	 ------------------------------------------------------*/
 
-	void SetShaderFilename(const char *name);
+	void SetShaderFilename(const char *filename)
+	{ mShaderFilename = filename; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Gets Material's shader filename or NULL
+	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
-	void SetTextureFilename(const char *name);
+	void SetFilename(const char *filename)
+	{ mFilename = filename; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Gets Material's texture filename or NULL
+	 * Post : 
+	 *
 	 ------------------------------------------------------*/
 
-	int32 mId;                  /* Unique identifier */
+	static void (*LoadTextureCallback)( const char* filename ); //PixelBuffer* pixbuf );
+	/*------------------------------------------------------
+	 * Pre  : eg int load_texture(const char* filename)
+	 *        must be implemented in caller.
+	 *
+	 * Post : Callback will return texture id assigned to
+	 *        
+	 *
+	 ------------------------------------------------------*/
 
-	uint32 mFlags;              /* Bit flags */
+	static int (*LoadShaderCallback)( const char* filename );
+	/*------------------------------------------------------
+	 * Pre  : eg int load_shader(const char* filename)
+	 *        must be implemented in caller.
+	 *
+	 * Post : Callback will return program id assigned to
+	 *        shader.  FIXME replace with Shader class!
+	 *
+	 ------------------------------------------------------*/
 
-	int32 mParent;              /* Linked material id, for shader use */
+	FREYJA_XMLSERIALIZER_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer implementation.
+	 *
+	 ------------------------------------------------------*/
 
-	vec4_t mAmbient;            /* Ambient color */
+	static freyja::Material* Cast( freyja_ptr ptr )
+	{ return (freyja::Material*)ptr; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : FIXME Add RTTI check.
+	 *
+	 ------------------------------------------------------*/
 
-	vec4_t mDiffuse;            /* Diffuse color */
+	int16 GetDecalMapId( ) const
+	{ return GetPixelBufferId( mDecalMap ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
 
-	vec4_t mSpecular;           /* Specular color */
+	int16 GetSpecularMapId( ) const
+	{ return GetPixelBufferId( mSpecularMap ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+ 	
+	int16 GetNormalMapId( ) const
+	{ return GetPixelBufferId( mNormalMap ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+ 	
+	int16 GetHeightMapId( ) const
+	{ return GetPixelBufferId( mHeightMap ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+ 
+	int16 GetEmissiveMapId( ) const
+	{ return GetPixelBufferId( mEmissiveMap ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
 
-	vec4_t mEmissive;           /* Emissive color */
+	int16 GetShaderId( ) const
+	{ return mShaderId; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
 
-	vec_t mShininess;           /* Specular exponent */
+ 	const vec4_t& GetAmbientColor() const
+	{ return mAmbient; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns RGBA ambient color value.
+	 *
+	 ------------------------------------------------------*/
 
-	vec_t mTransparency;        /* Alpha 0.0 - 1.0 */
+ 	const vec4_t& GetDiffuseColor() const
+	{ return mDiffuse; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns RGBA diffuse color value.
+	 *
+	 ------------------------------------------------------*/
 
-	vec4_t mColor;              /* Solid color */
+ 	const vec4_t& GetSpecularColor() const
+	{ return mSpecular; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns RGBA specular color value.
+	 *
+	 ------------------------------------------------------*/
 
-	uint32 mBlendSrc;    		/* Blend source factor */
+ 	const vec4_t& GetEmissiveColor() const
+	{ return mEmissive; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns RGBA emissive color value.
+	 *
+	 ------------------------------------------------------*/
 
-	uint32 mBlendDest;		   	/* Blend destination factor */
+ 	const vec_t GetShininess() const
+	{ return mShininess; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns specular exponent.
+	 *
+	 ------------------------------------------------------*/
 
-	int32 mTexture;             /* TextureData index */
-
-	int32 mShaderId;            /* Shader index */
-
-	bool mHasAlphaChannel;      /* For depth sorting use */
-
-	// int load_texture(const char *filename)
-	static int (*mLoadTextureFunc)(const char *filename);
-
-	// int load_shader(const char *filename)
-	static int (*mLoadShaderFunc)(const char *filename);
+ 	const vec_t GetTransparency() const
+	{ return mTransparency; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns alpha ( 0.0f to 1.0f ).
+	 *
+	 ------------------------------------------------------*/
 
 
  protected:
@@ -238,36 +291,66 @@ class Material
 	// Protected
 	////////////////////////////////////////////////////////////
 
-	const static uint32 mVersion = 4; /* Material version. */
+	int16 GetPixelBufferId( PixelBuffer* pb ) const
+	{ return (pb) ? pb->GetTextureId( ) : -1; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+
+
+	//const static uint32 mVersion = 4; /* Material version. */
 
 	mstl::String mName;               /* Material name */
 
 	mstl::String mFilename;           /* Material filename or NULL/empty string. */
 
+	mstl::String mShaderFilename;     /* GLSL / ARB / etc shader filename. */
+
+	bool mAlpha;                      /* Mostly for depth sorting use. */
+
+	int32 mShaderId;                  /* Shader program index. */
+
 	mstl::String mMetadata;           /* Useful for additional plugin material data. */
 
 	mstl::String mShader;             /* Generated shader. */
 
-	PixelBuffer* mDiffuseMap;            /* Various texture maps. */
-	PixelBuffer* mEmissiveMap;
-	PixelBuffer* mSpecularMap;
-	PixelBuffer* mNormalMap;
-	PixelBuffer* mHeightMap;
+	mstl::String mBlendSrc;           /* Blending source string. */
+
+	mstl::String mBlendDest;          /* Blending destination string. */
+
+	vec4_t mAmbient;                  /* Ambient color. */
+
+	vec4_t mDiffuse;                  /* Diffuse color. */
+
+	vec4_t mSpecular;                 /* Specular color. */
+
+	vec4_t mEmissive;                 /* Emissive color. */
+
+	vec_t mShininess;                 /* Specular exponent. */
+
+	vec_t mTransparency;              /* Alpha 0.0f to 1.0f. */
+
+	PixelBuffer* mDiffuseMap;         /* Various specific texture maps. */
 	PixelBuffer* mDecalMap;
-
-
-	// 0.9.5 API
-
-	mstl::String mBlendSrcString;     /* Blending source human readable string */
-
-	mstl::String mBlendDestString;    /* Blending source human readable string */
-
-	mstl::String mTextureFilename;    /* This is used for file I/O to map classes */
-
-	mstl::String mShaderFilename;     /* This is used for file I/O to map classes */
+	PixelBuffer* mEmissiveMap;
+	PixelBuffer* mHeightMap;
+	PixelBuffer* mNormalMap;
+	PixelBuffer* mSpecularMap;
 };
 
 
-} // End namespace freyja
+inline
+const char* Material::GetType() const
+{ return "Material"; }
 
-#endif
+ 
+inline
+uint32 Material::GetVersion() const
+{ return 10; }
+
+
+} // namespace freyja
+
+#endif // GUARD__FREYJA_MATERIAL__H_

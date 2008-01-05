@@ -298,7 +298,7 @@ void mglGetOpenGLModelviewMatrix16fv(matrix_t modelview);
 
 void mglGetOpenGLProjectionMatrix16fv(matrix_t projection);
 
-void mglApplyMaterial(uint32 materialIndex);
+//void mglApplyMaterial(uint32 materialIndex);
 
 
 
@@ -547,13 +547,12 @@ class OpenGL
 	 *
 	 ------------------------------------------------------*/
 
-	static void Bind( int32 programId, const char* symbol, uint32 value );
+	static void Bind( GLenum texture_unit, uint16 id );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
-
 
 	////////////////////////////////////////////////////////////
 	// Public attributes

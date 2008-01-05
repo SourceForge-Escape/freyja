@@ -6,7 +6,8 @@
 
  Kagura alpha, 0.10.0.0
 
- * 
+ * New material implementation with stubbed ABI.
+ * ResourceManager checked in.
  * 9.x image plugin support for 10.x.
  
  20080102 Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>

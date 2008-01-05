@@ -40,6 +40,7 @@ public:
 	// FIXME: Convert these members to method wrappers!
 
 	RenderableStrategy( ) :	
+		mTriangleCount( 0 ),
 		mIndexArraySize( 0 ),
 		mIndexArrayPtr ( NULL ),
 		mVertexWidth( 3 ),
@@ -78,6 +79,8 @@ public:
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
+
+	uint32 mTriangleCount;
 
 	uint32 mIndexArraySize;
 	uint32* mIndexArrayPtr;

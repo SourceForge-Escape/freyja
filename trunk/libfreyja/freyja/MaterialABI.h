@@ -19,209 +19,199 @@
  * Mongoose - Created, moved from other headers
  ==========================================================================*/
 
-#ifndef GUARD__FREYJA_MATERIALABI_H_
-#define GUARD__FREYJA_MATERIALABI_H_
+#ifndef GUARD__FREYJA_MATERIALABI__H_
+#define GUARD__FREYJA_MATERIALABI__H_
 
 #include "freyja.h"
 
 extern "C" {
 
 	///////////////////////////////////////////////////////////////////////
-	// Material ABI 0.9.3 - 0.9.5
+	// Material ABI 
+	//
 	///////////////////////////////////////////////////////////////////////
 
-	index_t freyjaMaterialCreate();
+	freyja_ptr freyjaMaterialCreate( const char* name );
+	/*------------------------------------------------------
+	 * Pre  : Pass NULL for name to have Resource generate 
+	 *        a unique name.
+	 *
+	 * Post : Returns new Material with name or NULL 
+	 *        if there is a name collision in Resource.
+	 *
+	 ------------------------------------------------------*/
+
+	freyja_ptr freyjaMaterialCreateFromFile( const char *filename );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Creates a new Freyja Material object
-	 *        Returns the new Material's index or -1 on error
+	 * Post : Material is unserialized.
+	 *        Returns material or NULL on error.
+	 *        Valid materials will be inserted in Resource.
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialClearAll();
+	void freyjaMaterialDestroy( freyja_ptr material );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Flush all allocated materials.
-	 *
-	 *        Materials are typically overwritten instead of
-	 *        deallocated.  A rare exception to the rule.
+	 * Post : Deallocates material and removes from Resource.
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetCurrentMaterial();
+	freyja_ptr freyjaMaterialFind( const char* name );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns Material with name or NULL 
+	 *        if there is no match in Resource.
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaCurrentMaterial(index_t material);
+	uint32 freyjaMaterialGetCount( );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : 
+	 * Post : Returns the number of Materials being managed.
 	 *
 	 ------------------------------------------------------*/
 
-
-	/* Material Accessors */
-
-	uint32 freyjaGetMaterialCount();
+	const char* freyjaMaterialGetName( freyja_ptr material );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns the number of Materials being managed
+	 * Post : Returns a pointer to name string.
+	 *        Returns NULL on error.
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetMaterialIndex(index_t material, uint32 element);
+	const char* freyjaMaterialGetFilename( freyja_ptr material );
 	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Returns the gobal object index ( from the local
-	 *        Material element index ) or INDEX_INVALID
+	 * Pre  : 
+	 * Post : Returns a pointer to filename string.
+	 *        Returns NULL if invalid.
 	 *
 	 ------------------------------------------------------*/
 
-	const char *freyjaGetMaterialName(index_t material);
+	int16 freyjaMaterialGetShaderId( freyja_ptr material );
 	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 *        Don't alter the returned string
-	 *
-	 * Post : Returns a pointer to NULL terminated name string
-	 *        Returns 0x0 on error
+	 * Pre  : 
+	 * Post : Returns program id or -1 if none.
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetMaterialFlags(index_t material);
+	freyja_ptr freyjaMaterialGetDecalMap( freyja_ptr material );
 	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Returns flags or -1 on error
+	 * Pre  : 
+	 * Post : Returns PixelBuffer or NULL if none.
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetMaterialShader(index_t material);
+	freyja_ptr freyjaMaterialGetDiffuseMap( freyja_ptr material );
 	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Returns shader index or 0 for error or no shader
+	 * Pre  : 
+	 * Post : Returns PixelBuffer or NULL if none.
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaGetMaterialTexture(index_t material);
+	freyja_ptr freyjaMaterialGetEmissiveMap( freyja_ptr material );
 	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Returns texture index or -1 for error or no texture
+	 * Pre  : 
+	 * Post : Returns PixelBuffer or NULL if none.
 	 *
 	 ------------------------------------------------------*/
 
-	const char *freyjaGetMaterialShaderName(index_t material);
+	freyja_ptr freyjaMaterialGetHeightMap( freyja_ptr material );
 	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : 
+	 * Pre  : 
+	 * Post : Returns PixelBuffer or NULL if none.
 	 *
 	 ------------------------------------------------------*/
 
-	const char *freyjaGetMaterialTextureName(index_t material);
+	freyja_ptr freyjaMaterialGetNormalMap( freyja_ptr material );
 	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : 
+	 * Pre  : 
+	 * Post : Returns PixelBuffer or NULL if none.
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaGetMaterialAmbient(index_t material, vec4_t ambient);
+	freyja_ptr freyjaMaterialGetSpecularMap( freyja_ptr material );
 	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Returns <ambient> color
+	 * Pre  : 
+	 * Post : Returns PixelBuffer or NULL if none.
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaGetMaterialDiffuse(index_t material, vec4_t diffuse);
+	const char* freyjaMaterialGetShaderFilename( freyja_ptr material );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns filename of shader used by this material or NULL.
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialGetAmbientColor( freyja_ptr material, vec4_t ambient );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns <ambient> color.
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialGetDiffuseColor(freyja_ptr material, vec4_t diffuse);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Returns <diffuse> color
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaGetMaterialSpecular(index_t material, vec4_t specular);
+	void freyjaMaterialGetSpecularColor(freyja_ptr material, vec4_t specular);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Returns <specular> color
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaGetMaterialEmissive(index_t material, vec4_t emissive);
+	void freyjaMaterialGetEmissiveColor(freyja_ptr material, vec4_t emissive);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Returns <emissive> color
 	 *
 	 ------------------------------------------------------*/
 
-	vec_t freyjaGetMaterialShininess(index_t material);
+	vec_t freyjaMaterialGetShininess(freyja_ptr material);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Returns specular exponent or -1.0 on error
 	 *
 	 ------------------------------------------------------*/
 
-	vec_t freyjaGetMaterialTransparency(index_t material);
+	vec_t freyjaMaterialGetTransparency(freyja_ptr material);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Returns transparency or -1.0 on error
 	 *
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetMaterialBlendSource(index_t material);
+	const char* freyjaMaterialGetBlendSource(freyja_ptr material);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
-	 * Post : Returns blend source factor or -1 on error
+	 * Post : Returns blend source factor or NULL on error
 	 *
 	 ------------------------------------------------------*/
 
-	int32 freyjaGetMaterialBlendDestination(index_t material);
+	const char* freyjaMaterialGetBlendDestination(freyja_ptr material);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
-	 * Post : Returns blend destination factor or -1 on error
+	 * Post : Returns blend destination factor or NULL on error
 	 *
 	 ------------------------------------------------------*/
 
 
 	/* Material Mutators */
 
-	int32 freyjaLoadMaterialASCII(index_t material, const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Material is reset by loaded disk file
-	 *
-	 ------------------------------------------------------*/
 
-	void freyjaMaterialName(index_t material, const char *name);
+	void freyjaMaterialSetName(freyja_ptr material, const char *name);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's <name> id is set
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialClearFlag(index_t material, uint32 flag);
-	void freyjaMaterialSetFlag(index_t material, uint32 flag);
-	void freyjaMaterialFlags(index_t material, uint32 flags);
-	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Material's bit <flags> are set
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialShaderName(index_t material, const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Material shader <filename> is set
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialTextureName(index_t material, const char *name);
-	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Material textures's <name> id is set
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaMaterialShader(index_t material, index_t shader);
+	void freyjaMaterialSetShaderFilename(freyja_ptr material, const char* filename);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's <shader> index is set
@@ -229,49 +219,92 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialTexture(index_t material, index_t texture);
+	void freyjaMaterialSetShaderId(freyja_ptr material, int16 shader);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
-	 * Post : Material's <texture> index is set
+	 * Post : Material's <shader> index is set
+	 *        0 will disable shading
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialAmbient(index_t material, const vec4_t ambient);
+	void freyjaMaterialSetDecalMap( freyja_ptr material, freyja_ptr pixelbuffer );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialSetDiffuseMap( freyja_ptr material, freyja_ptr pixelbuffer );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialSetEmissiveMap( freyja_ptr material, freyja_ptr pixelbuffer );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialSetHeightMap( freyja_ptr material, freyja_ptr pixelbuffer );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialSetNormalMap( freyja_ptr material, freyja_ptr pixelbuffer );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialSetSpecularMap( freyja_ptr material, freyja_ptr pixelbuffer );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaMaterialSetAmbientColor(freyja_ptr material, const vec4_t ambient);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's <ambient> color is set
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialDiffuse(index_t material, const vec4_t diffuse);
+	void freyjaMaterialSetDiffuseColor(freyja_ptr material, const vec4_t diffuse);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's <diffuse> color is set
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialSpecular(index_t material, const vec4_t specular);
+	void freyjaMaterialSetSpecularColor(freyja_ptr material, const vec4_t specular);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's <specular> color is set
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialEmissive(index_t material, const vec4_t emissive);
+	void freyjaMaterialSetEmissiveColor(freyja_ptr material, const vec4_t emissive);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's <emissive> color is set
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialShininess(index_t material, vec_t exponent);
+	void freyjaMaterialSetShininess(freyja_ptr material, vec_t exponent);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's Specular <exponent> is set
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialTransparency(index_t material, vec_t transparency);
+	void freyjaMaterialSetTransparency(freyja_ptr material, vec_t transparency);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 *        <transparency> is a value from 0.0 to 1.0
@@ -280,14 +313,14 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialBlendSource(index_t material, uint32 factor);
+	void freyjaMaterialSetBlendSource(freyja_ptr material, const char* factor);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's blend source <factor> is set
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaMaterialBlendDestination(index_t material, uint32 factor);
+	void freyjaMaterialSetBlendDestination(freyja_ptr material, const char* factor);
 	/*------------------------------------------------------
 	 * Pre  : Material <material> exists
 	 * Post : Material's blend destination <factor> is set
@@ -296,4 +329,4 @@ extern "C" {
 
 } // extern "C"
 
-#endif // GUARD__FREYJA_MATERIALABI_H_
+#endif // GUARD__FREYJA_MATERIALABI__H_

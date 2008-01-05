@@ -223,7 +223,7 @@ public:
 	 ------------------------------------------------------*/
 
 	const vec_t* GetVertexArray() //const
-	{ mVertexArray.GetArray(); }
+	{ return mVertexArray.GetArray(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns vertex array.
