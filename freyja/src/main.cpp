@@ -330,21 +330,23 @@ freyja3d_init_libfreyja( )
 	freyjaLightPosition4v(freyjaGetCurrentLight(), lightPos);
 
 	/* Spawn 0th material, set the iterator, and make a default material */
-	freyja::Material::mLoadTextureFunc = freyja3d_load_texture;
-	freyja::Material::mLoadShaderFunc = freyja3d_load_shader;
-	int32 mIndex = freyjaMaterialCreate();
-	vec4_t rgba = { 0.0f, 0.0f, 0.0f, 1.0f };
-	freyjaCurrentMaterial(mIndex);
-	freyjaMaterialName(mIndex, "Boring default");
-	freyjaMaterialEmissive(mIndex, rgba);
-	rgba[0] = rgba[1] = rgba[2] = 0.79f;
-	freyjaMaterialDiffuse(mIndex, rgba);
-	rgba[0] = rgba[1] = rgba[2] = 0.2f;
-	freyjaMaterialAmbient(mIndex, rgba);
-	rgba[0] = rgba[1] = rgba[2] = 0.01f;
-	freyjaMaterialSpecular(mIndex, rgba);
-	freyjaMaterialShininess(mIndex, 0.0f);
-	freyjaMaterialSetFlag( mIndex, fFreyjaMaterial_Texture );
+	{
+#warning FIXME Remember to add callback support for backend shader/texture loads.
+		//freyja::Material::mLoadTextureFunc = freyja3d_load_texture;
+		//freyja::Material::mLoadShaderFunc = freyja3d_load_shader;
+		freyja_ptr material0 = freyjaMaterialCreate( "Boring default" );
+		vec4_t rgba = { 0.0f, 0.0f, 0.0f, 1.0f };
+		freyjaMaterialSetEmissiveColor(material0, rgba);
+		rgba[0] = rgba[1] = rgba[2] = 0.79f;
+		freyjaMaterialSetDiffuseColor(material0, rgba);
+		rgba[0] = rgba[1] = rgba[2] = 0.2f;
+		freyjaMaterialSetAmbientColor(material0, rgba);
+		rgba[0] = rgba[1] = rgba[2] = 0.01f;
+		freyjaMaterialSetSpecularColor( material0, rgba);
+		freyjaMaterialSetShininess( material0, 0.0f);
+		//freyjaMaterialSetFlag( mIndex, fFreyjaMaterial_Texture );
+		MaterialControl::GetInstance()->SetCurrentMaterial( freyja::Material::Cast( material0 ) );
+	}
 
 	/* Setup camera0. */
 	freyja_ptr camera0 = freyjaCameraCreate( "camera0" );

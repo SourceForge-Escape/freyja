@@ -50,6 +50,8 @@
 #include "Plugins.h"
 #include "Control.h"
 #include "Cursor.h"
+#include "MaterialControl.h"
+#include "OpenGLRenderableStrategy.h"
 
 #include "FreyjaRender.h"
 
@@ -103,8 +105,8 @@ freyja3d::Cursor& GetCursor()
 index_t GetSelectedCamera()
 { return 0; }
 
-index_t GetSelectedMaterial()
-{ return 0; }
+freyja::Material* GetSelectedMaterial()
+{ return MaterialControl::GetInstance()->GetCurrentMaterial(); }
 
  
 FreyjaRender::FreyjaRender() :
@@ -206,87 +208,6 @@ void FreyjaRender::Rotate(int flags, float n)
 }
 
 
-void OpenGLRenderableStrategy::DrawTriangles(  )
-{
-#warning FIXME: Test rendering implementation in tracer.
-
-	// NOTE: Once we switch to more advanced arrays we have to
-	//       start locking the dynamic reallocation.
-	//glPushClientAttrib(GL_NORMAL_ARRAY);
-	//glEnableClientState(GL_NORMAL_ARRAY);
-	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	//glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
-	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
-
-	// Load vertex array
-	if ( mVertexArrayPtr && mIndexArrayPtr )
-	{
-		uint16 triangleCount = ( mIndexArraySize / 3 );
-		glVertexPointer( mVertexWidth, GL_FLOAT, 0, mVertexArrayPtr );
-		glDrawElements( GL_TRIANGLES, triangleCount, GL_UNSIGNED_INT, mIndexArrayPtr );
-	}
-
-	// TEST
-	if ( mVertexArrayPtr )
-	{
-		glColor3fv( GREEN );
-#if 1
-		glBegin( GL_POINTS );
-
-		for ( uint32 i = 0; i < mVertexArraySize; )
-		{
-			glVertex3f( mVertexArrayPtr[i++], mVertexArrayPtr[i++], mVertexArrayPtr[i++] );
-		}
-
-		glEnd( );
-#else
-		glDrawElements( GL_POINTS, mIndexArraySize, GL_UNSIGNED_INT, mIndexArrayPtr );
-#endif
-	}
-
-	// TEST
-	if ( mIndexArrayPtr )
-	{
-
-		glColor3fv( PINK );
-		for ( uint32 i = 0; i < mIndexArraySize; )
-		{
-			glBegin( GL_TRIANGLES );
-			index_t idx = mIndexArrayPtr[i++];
-			glVertex3fv( mVertexArrayPtr+idx );
-			idx = mIndexArrayPtr[i++];
-			glVertex3fv( mVertexArrayPtr+idx );
-			idx = mIndexArrayPtr[i++];
-			glVertex3fv( mVertexArrayPtr+idx );
-			glEnd( );
-		}
-
-#if 0
-		if ( Texture::mInstance )
-		{
-			//Texture::mInstance->Bind( GL_TEXTURE0, 2 );
-			//Texture::mInstance->Bind( GL_TEXTURE1, 3 );
-			//Texture::mInstance->Bind( GL_TEXTURE2, 4 );
-		}
-#endif
-
-		glColor3fv( RED );
-		for ( uint32 i = 0; i < mIndexArraySize; )
-		{
-			glBegin( GL_LINE_LOOP );
-			index_t idx = mIndexArrayPtr[i++];
-			glVertex3fv( mVertexArrayPtr+idx );
-			idx = mIndexArrayPtr[i++];
-			glVertex3fv( mVertexArrayPtr+idx );
-			idx = mIndexArrayPtr[i++];
-			glVertex3fv( mVertexArrayPtr+idx );
-			glEnd( );
-		}
-
-	}
-}
-
-
 void FreyjaRender::DrawScene( freyja::Scene* scene )
 {
 	if ( scene )
@@ -301,7 +222,7 @@ void FreyjaRender::DrawScene( freyja::Scene* scene )
 		glDisable(GL_TEXTURE_2D);
 		glColor3fv( WHITE );
 
-		mLastMaterial = NULL;
+		freyja::Material* last_material = NULL;
 
 		for ( RenderableIterator it = scene->GetRenderListIterator( ), end = it.end();
 			  it != end; it++ )
@@ -329,11 +250,11 @@ void FreyjaRender::DrawScene( freyja::Scene* scene )
 				glScalef( v.mX, v.mY, v.mZ );
 			}
 
-			if ( (*it)->GetMaterial( ) != mLastMaterial )
+			if ( (*it)->GetMaterial( ) != last_material )
 			{
 				// FIXME: Set new material / shader here or use a renderable to set it inline for sorted renderlist.
 				//ApplyMaterial( renderable->GetMaterial( ) );
-				//mLastMaterial = renderable->GetMaterial( );
+				//last_material = renderable->GetMaterial( );
 			}
 
 			OpenGLRenderableStrategy strategeryizeification;
@@ -378,7 +299,7 @@ void FreyjaRender::DrawCamWindow()
 		glEnable(GL_LIGHTING);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(GetSelectedMaterial());
+		OpenGLRenderableStrategy::ApplyMaterial(GetSelectedMaterial());
 		mglDrawPlane(50.0f, 2.0f, 1.0f);
 		glPopAttrib();
 	}
@@ -521,7 +442,7 @@ void FreyjaRender::DrawFreeWindow()
 		glEnable(GL_LIGHTING);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(GetSelectedMaterial());
+		OpenGLRenderableStrategy::ApplyMaterial(GetSelectedMaterial());
 		mglDrawPlane(50.0f, 2.0f, 1.0f);
 		glPopAttrib();
 	}
@@ -963,7 +884,7 @@ void FreyjaRender::DrawQuad(float x, float y, float w, float h)
 		glPushAttrib(GL_ENABLE_BIT);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		mglApplyMaterial(GetSelectedMaterial());
+		OpenGLRenderableStrategy::ApplyMaterial(GetSelectedMaterial());
 
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0, 1.0);
@@ -2987,7 +2908,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 	if (dy > 360.0f) dy = 0.0f;
 	glPushMatrix();
 	glRotatef(dy, 0, 1, 0);
-	mglApplyMaterial(freyjaGetCurrentMaterial());
+	OpenGLRenderableStrategy::ApplyMaterial( GetSelectedMaterial() );
 
 	// FIXME: Add support for swapping out material mesh.
 #if USE_TORUS_TEST
@@ -3029,7 +2950,7 @@ void FreyjaRender::DrawMaterialEditWindow()
 	vec_t xCD = xAB + 1.0f;
 
 	glColor3fv(WHITE);
-	mglApplyMaterial(freyjaGetCurrentMaterial());
+	OpenGLRenderableStrategy::ApplyMaterial( MaterialControl::GetInstance()->GetCurrentMaterial() ); //freyjaGetCurrentMaterial());
 	glBegin(GL_QUADS);
 	//glTexCoord2f(0.0, 1.0);
 	glTexCoord2f(xAB, 1.0f);

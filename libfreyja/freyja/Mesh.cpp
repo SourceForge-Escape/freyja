@@ -218,7 +218,7 @@ void Mesh::AddVertexToFace( freyja::Face* face, freyja::Vertex* vertex )
 				index_t b = (*it)->GetIndex();
 				it++;
 				index_t c = (*it)->GetIndex();
-				face->mTriangles.push_back( face->mRenderable->ReserveIndexTriangle( a, b, c ) );
+				face->mTriangles.push_back( face->mRenderable->ReserveIndexTriangle( a/3, b/3, c/3 ) );
 				break;
 			}
 		}
@@ -239,7 +239,7 @@ void Mesh::AddVertexToFace( freyja::Face* face, freyja::Vertex* vertex )
 				index_t c = (*it)->GetIndex();
 				it++;
 				index_t d = (*it)->GetIndex();
-				face->mTriangles.push_back( face->mRenderable->ReserveIndexTriangle( a, c, d ) );
+				face->mTriangles.push_back( face->mRenderable->ReserveIndexTriangle( a/3, c/3, d/3 ) );
 				break;
 			}
 		}

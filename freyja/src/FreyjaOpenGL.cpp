@@ -603,7 +603,7 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 			mObjects = program;
 	}
 
-	// FIXME: Testing new setup with barrowed vert/frag program, which needs these uniforms.
+	// FIXME: Testing new setup with hardcoded uniforms for a specific series of vert/frag programs.
 	Uniform1i( fragmentId, "decalMap",   0 );
 	Uniform1i( fragmentId, "glossMap",   1 );
 	Uniform1i( fragmentId, "normalMap",  2 );
@@ -834,6 +834,10 @@ void OpenGLContext::Resize(uint32 width, uint32 height)
 }
 
 
+void OpenGL::Bind( GLenum texture_unit, uint16 id )
+{
+	gTexture.Bind( texture_unit, id );
+}
 
 ////////////////////////////////////////////////////////////
 // Unit Test code
@@ -1716,6 +1720,7 @@ void mglGetOpenGLProjectionMatrix16fv(matrix_t projection)
 
 void mglApplyMaterial(uint32 materialIndex)
 {
+#if 0
 	if (materialIndex > freyjaGetMaterialCount())
 	{
 		materialIndex = 0;
@@ -1783,6 +1788,7 @@ void mglApplyMaterial(uint32 materialIndex)
 	{
 		glDisable(GL_BLEND);
 	}
+#endif
 }
 
 

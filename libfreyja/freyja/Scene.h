@@ -28,6 +28,7 @@
 #include <hel/Quat.h>
 #include <mstl/Vector.h>
 #include <mstl/String.h>
+#include <mstl/map.h>
 
 #include "Node.h"
 #include "Camera.h"
@@ -43,7 +44,7 @@ namespace freyja {
 //class SceneManager;
 
 class SceneResource;
-typedef mstl::avl_tree<mstl::String, SceneResource*> SceneResourceDictionary;
+typedef mstl::map<mstl::String, SceneResource*> SceneResourceDictionary;
 
 class SceneResource
 {

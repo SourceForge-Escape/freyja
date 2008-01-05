@@ -61,6 +61,10 @@ MaterialControl::MaterialControl() :
 // Replace 'freyja' Material format with 'libfreyja' Material format + metadata
 bool MaterialControl::LoadMaterial(const char *filename)
 {
+#warning FIXME This is now obsolete.
+	return false;
+
+#if 0
 	if (!filename || !filename[0])
 	{
 		return false;
@@ -321,12 +325,16 @@ bool MaterialControl::LoadMaterial(const char *filename)
 	mRecent.AddFilename( filename );
 
 	return true;
+#endif
 }
 
 
 // Replace 'freyja' Material format with 'libfreyja' Material format + metadata
 bool MaterialControl::SaveMaterial(const char *filename)
 {
+#warning FIXME This is now obsolete.
+	return false;
+#if 0
 	if (!filename || !filename[0])
 	{
 		return false;
@@ -416,81 +424,61 @@ bool MaterialControl::SaveMaterial(const char *filename)
 	w.Close();
 
 	return true;
+#endif
 }
 
 
 void MaterialControl::RefreshInterface()
 {
-	uint32 mIndex = freyjaGetCurrentMaterial();
+	freyja::Material* mat = GetCurrentMaterial( );
+
+	if ( !mat )
+		return;
 
 	{
-		const char* s = freyjaGetMaterialName( mIndex );
+		const char* s = mat->GetName();
 		mgtk_textentry_value_set( EvSetNameId, (s != NULL) ? s : " " );
 	}
 	
-	mgtk_spinbutton_value_set(EvSetShaderId, freyjaGetMaterialShader(mIndex));
+	mgtk_spinbutton_value_set(EvSetShaderId, mat->GetShaderId() );
 
 	{
-		const char* s = freyjaGetMaterialShaderName(mIndex);
+		const char* s = mat->GetShaderFilename();
 		mgtk_textentry_value_set(EvSetShaderFilenameId, (s != NULL) ? s : " " );
 	}
 	
-	mgtk_spinbutton_value_set(EvSetTextureId,
-							  freyjaGetMaterialTexture(mIndex));
+#warning FIXME UI does not support new multitexture yet.
+	mgtk_spinbutton_value_set(EvSetTextureId, mat->GetDecalMapId() );
 
 	{
-		const char* s = freyjaGetMaterialTextureName(mIndex);
-		mgtk_textentry_value_set(EvSetTextureNameId, (s != NULL) ? s : " " );
+		//const char* s = mat->GetDecalMap()->GetFilename();
+		//mgtk_textentry_value_set(EvSetTextureNameId, (s != NULL) ? s : " " );
 	}
 	
-	vec4_t ambient;
-	freyjaGetMaterialAmbient(mIndex, ambient);
-	mgtk_event_set_color(eColorMaterialAmbient, 
-						 ambient[0], ambient[1], ambient[2], ambient[3]);
-	for (uint32 i = 0; i < 4; ++i)
+	//vec4_t ambient;
+	//mgtk_event_set_color(eColorMaterialAmbient, 
+	//					 ambient[0], ambient[1], ambient[2], ambient[3]);
+	for ( uint32 i = 0; i < 4; ++i )
 	{
-		mgtk_spinbutton_value_set(EvAmbientId[i], ambient[i]);	
+		mgtk_spinbutton_value_set(EvAmbientId[i], mat->GetAmbientColor()[i]);	
+
+		mgtk_spinbutton_value_set(EvDiffuseId[i], mat->GetDiffuseColor()[i]);
+
+		mgtk_spinbutton_value_set(EvSpecularId[i], mat->GetSpecularColor()[i]);
+
+		mgtk_spinbutton_value_set(EvEmissiveId[i], mat->GetEmissiveColor()[i]);
 	}
 
+	mgtk_spinbutton_value_set(EvShineId, mat->GetShininess() );
 
-	vec4_t diffuse;
-	freyjaGetMaterialDiffuse(mIndex, diffuse);
-	mgtk_event_set_color(eColorMaterialDiffuse, 
-						 diffuse[0], diffuse[1], diffuse[2], diffuse[3]);
-	for (uint32 i = 0; i < 4; ++i)
-	{
-		mgtk_spinbutton_value_set(EvDiffuseId[i], diffuse[i]);
-	}
-
-
-	vec4_t specular;
-	freyjaGetMaterialSpecular(mIndex, specular);
-	mgtk_event_set_color(eColorMaterialSpecular, 
-						 specular[0], specular[1], specular[2], specular[3]);
-	for (uint32 i = 0; i < 4; ++i)
-	{
-		mgtk_spinbutton_value_set(EvSpecularId[i], specular[i]);
-	}
-
-
-	vec4_t emissive;
-	freyjaGetMaterialEmissive(mIndex, emissive);
-	mgtk_event_set_color(eColorMaterialEmissive, 
-						   emissive[0], emissive[1], emissive[2], emissive[3]);
-	for (uint32 i = 0; i < 4; ++i)
-	{
-		mgtk_spinbutton_value_set(EvEmissiveId[i], emissive[i]);
-	}
-
-	vec_t shininess = freyjaGetMaterialShininess(mIndex);
-	mgtk_spinbutton_value_set(EvShineId, shininess);
-
-	uint32 src = freyjaGetMaterialBlendSource(mIndex);
+#warning FIXME UI does not support new blending backend yet.
+	uint32 src = 0;// freyjaGetMaterialBlendSource(mIndex);
 	mgtk_option_menu_value_set(eBlendSrcMenu, src);
 
-	uint32 dest = freyjaGetMaterialBlendDestination(mIndex);
+	uint32 dest = 0;//freyjaGetMaterialBlendDestination(mIndex);
 	mgtk_option_menu_value_set(eBlendDestMenu, dest);
 
+	/*
 	uint32 flags = freyjaGetMaterialFlags(mIndex);
 
 	mgtk_togglebutton_value_set(EvEnableBlendingId, 
@@ -498,10 +486,11 @@ void MaterialControl::RefreshInterface()
 
 	mgtk_togglebutton_value_set(EvEnableTextureId, 
 								(flags & fFreyjaMaterial_Texture));
+	*/
 
 	// Just go ahead and render a new frame in case the function calling
 	// this fails to do so.
-	RefreshContext();
+	RefreshContext( );
 }
 
 
@@ -579,6 +568,8 @@ void MaterialControl::AttachMethodListeners()
 
 bool MaterialControl::LoadTexture(const char *filename)
 {
+#warning FIXME This method is obsolete.
+
 	int err = -1;
 
 	// Mongoose 2002.01.10, Evil...
@@ -650,9 +641,9 @@ bool MaterialControl::LoadTexture(const char *filename)
 
 			if (err >= 0)
 			{
-				freyjaMaterialTexture(freyjaGetCurrentMaterial(), err);
-				freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
-				Print("Material[%i].texture = { %i }", freyjaGetCurrentMaterial(), err);
+				//freyjaMaterialTexture(freyjaGetCurrentMaterial(), err);
+				//freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+				//Print("Material[%i].texture = { %i }", freyjaGetCurrentMaterial(), err);
 				RefreshInterface();
 			}
 
@@ -707,41 +698,30 @@ bool MaterialControl::LoadTextureBuffer(byte *image, uint32 width, uint32 height
 
 void MaterialControl::SetAmbient(uint32 i, vec_t value)
 {
-	vec4_t color;
-	freyjaGetMaterialAmbient(freyjaGetCurrentMaterial(), color);
-	color[i] = value;
-	freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
-	mgtk_event_gl_refresh();	
+#warning FIXME This method is obsolete.
+	//vec4_t color;
+	//freyjaGetMaterialAmbient(freyjaGetCurrentMaterial(), color);
+	//color[i] = value;
+	//freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
+	//mgtk_event_gl_refresh();	
 }
 
 
 void MaterialControl::SetDiffuse(uint32 i, vec_t value)
 {
-	vec4_t color;
-	freyjaGetMaterialDiffuse(freyjaGetCurrentMaterial(), color);
-	color[i] = value;
-	freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
-	mgtk_event_gl_refresh();
+#warning FIXME This method is obsolete.
 }
 
 
 void MaterialControl::SetSpecular(uint32 i, vec_t value)
 {
-	vec4_t color;
-	freyjaGetMaterialSpecular(freyjaGetCurrentMaterial(), color);
-	color[i] = value;
-	freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
-	mgtk_event_gl_refresh();
+#warning FIXME This method is obsolete.
 }
 
 
 void MaterialControl::SetEmissive(uint32 i, vec_t value)
 {
-	vec4_t color;
-	freyjaGetMaterialEmissive(freyjaGetCurrentMaterial(), color);
-	color[i] = value;
-	freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
-	mgtk_event_gl_refresh();
+#warning FIXME This method is obsolete.
 }
 
 
@@ -751,6 +731,8 @@ void MaterialControl::SetEmissive(uint32 i, vec_t value)
 
 void MaterialControl::EvSelect(uint32 value)
 {
+#warning FIXME This method is obsolete.
+#if 0
 	if (!mgtk_event_set_range(EvSelectId, value, 
 								0, freyjaGetMaterialCount()-1))
 	{
@@ -771,13 +753,15 @@ void MaterialControl::EvSelect(uint32 value)
 			RefreshContext();
 		}
 	}
+#endif
 }
 
 
 void MaterialControl::EvShine(vec_t value)
 {	
-	freyjaMaterialShininess(freyjaGetCurrentMaterial(), value);
-	mgtk_event_gl_refresh();
+#warning FIXME This method is obsolete.
+	//freyjaMaterialShininess(freyjaGetCurrentMaterial(), value);
+	//mgtk_event_gl_refresh();
 }
 
 
@@ -785,13 +769,16 @@ void MaterialControl::EvSetName(char *text)
 {
 	if (text && text[0])
 	{
-		freyjaMaterialName(freyjaGetCurrentMaterial(), text);
+#warning FIXME This method is obsolete.
+		//freyjaMaterialName(freyjaGetCurrentMaterial(), text);
 	}
 }
 
 
 void MaterialControl::EvBlendSrc(uint32 value)
 {
+#warning FIXME This method is obsolete.
+#if 0
 	index_t material = freyjaGetCurrentMaterial();
 
 	switch (value)
@@ -861,11 +848,14 @@ void MaterialControl::EvBlendSrc(uint32 value)
 	}
 		
 	mgtk_event_gl_refresh();
+#endif
 }
 
 
 void MaterialControl::EvBlendDest(uint32 value)
 {
+#warning FIXME This method is obsolete.
+#if 0
 	index_t material = freyjaGetCurrentMaterial();
 
 	switch (value)
@@ -935,11 +925,14 @@ void MaterialControl::EvBlendDest(uint32 value)
 	}
 
 	mgtk_event_gl_refresh();
+#endif
 }
 
 
 void MaterialControl::EvEnableDetailTexture(uint32 value)
 {
+#warning FIXME This method is obsolete.
+#if 0
 	if (value)
 	{
 		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
@@ -952,11 +945,14 @@ void MaterialControl::EvEnableDetailTexture(uint32 value)
 	}
 	freyja3d_print("Material detail texturing is [%s]", value ? "ON" : "OFF");
 	mgtk_event_gl_refresh();
+#endif
 }
 
 
 void MaterialControl::EvEnableNormalize(uint32 value)
 {
+#warning FIXME This method is obsolete.
+#if 0
 	if (value)
 	{
 		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
@@ -970,11 +966,14 @@ void MaterialControl::EvEnableNormalize(uint32 value)
 
 	freyja3d_print("Material normalization is [%s]", value ? "ON" : "OFF");
 	mgtk_event_gl_refresh();
+#endif
 }
 
 
 void MaterialControl::EvEnableBlending(uint32 value)
 {
+#warning FIXME This method is obsolete.
+#if 0
 	if (value)
 	{
 		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
@@ -988,11 +987,14 @@ void MaterialControl::EvEnableBlending(uint32 value)
 
 	freyja3d_print("Material blending [%s]", value ? "ON" : "OFF");
 	mgtk_event_gl_refresh();
+#endif
 }
 
 
 void MaterialControl::EvEnableTexture(uint32 value)
 {
+#warning FIXME This method is obsolete.
+#if 0
 	if (value)
 	{
 		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
@@ -1006,13 +1008,17 @@ void MaterialControl::EvEnableTexture(uint32 value)
 
 	freyja3d_print("Material texture usage is [%s]", value ? "ON" : "OFF");
 	mgtk_event_gl_refresh();
+#endif
 }
 
 
 void MaterialControl::EvNewMaterial()
 {
+#warning FIXME This method is obsolete.
+#if 0
 	index_t i = freyjaMaterialCreate();
 	freyja3d_print("New material [%i] created.", i);
+#endif
 }
 
 
@@ -1055,12 +1061,13 @@ void MaterialControl::EvSaveMaterial()
 
 void MaterialControl::EvSetTextureName(char *text)
 {
+#warning FIXME This method is obsolete.
 	static bool haltTexture = false;
 
 	if (!haltTexture)
 	{
 		haltTexture = true;
-		freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
+		//freyjaMaterialTextureName(freyjaGetCurrentMaterial(), text);
 		haltTexture = false;
 	}
 }
@@ -1068,15 +1075,17 @@ void MaterialControl::EvSetTextureName(char *text)
 
 void MaterialControl::EvSetShader(uint32 value)
 {
-	freyjaMaterialShader(freyjaGetCurrentMaterial(), value);
+#warning FIXME This method is obsolete.
+	//freyjaMaterialShader(freyjaGetCurrentMaterial(), value);
 	mgtk_event_gl_refresh();
 }
 
 
 void MaterialControl::EvSetTexture(uint32 value)
 {
+#warning FIXME This method is obsolete.
 	SetSelected(value);
-	freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
+	//freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
 	RefreshContext();
 }
 
@@ -1116,6 +1125,8 @@ void MaterialControl::EvTextureUpload(uint32 id)
 
 void MaterialControl::EvOpenTexture(char *text)
 {
+#warning FIXME This method is obsolete.
+#if 0
 	if (text == NULL || text[0] == 0) 
 		return;
 
@@ -1136,6 +1147,7 @@ void MaterialControl::EvOpenTexture(char *text)
 	}
 
 	Print("%s %s", text, loaded ? "loaded" : "failed to load");
+#endif
 }
 
 
@@ -1167,8 +1179,9 @@ void MaterialControl::EvOpenShader(char *text)
 		//uint32 texture = mTextureId - 1;
 		mgtk_textentry_value_set(e, text);
 		
+#warning FIXME This method is obsolete.
+#if 0
 		// Propagate to material backend
-#if 1
 		uint32 mat = freyjaGetCurrentMaterial();
 		//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
 		mgtk_spinbutton_value_set(EvSetShaderId, fragmentId);

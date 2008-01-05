@@ -23,6 +23,7 @@
 #include <hel/math.h>
 #include <hel/Ray.h>
 #include <mstl/stack.h>
+#include <freyja/Material.h>
 
 #include "Control.h"
 #include "RecentFiles.h"
@@ -428,10 +429,34 @@ class MaterialControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
+	freyja_ptr GetCurrentMaterialPtr( ) const 
+	{ return (mCurrentMaterial) ? (freyja_ptr)mCurrentMaterial : NULL; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
- //protected:  // This isn't going to be a 'real' Singleton yet.
+	freyja::Material* GetCurrentMaterial( ) const 
+	{ return mCurrentMaterial; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
-	MaterialControl();
+	void SetCurrentMaterial( freyja::Material* material ) 
+	{ mCurrentMaterial = material; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+
+protected:
+
+	MaterialControl( );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructor for MaterialControl.
@@ -495,6 +520,8 @@ class MaterialControl : public Control
 	 ------------------------------------------------------*/
 
 	static MaterialControl *mInstance;  /* "Singleton" instance. */
+
+	freyja::Material* mCurrentMaterial;
 
 	uint32 mFlags;                      /* Options for this class */
 

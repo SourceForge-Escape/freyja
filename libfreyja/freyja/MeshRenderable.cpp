@@ -36,6 +36,7 @@ index_t MeshRenderable::ReserveIndexTriangle( index_t a, index_t b, index_t c )
 
 void MeshRenderable::Draw( freyja::RenderableStrategy* strategy )
 {
+	strategy->mTriangleCount = mIndices.size( ) / 3;
 	strategy->mIndexArraySize = mIndices.size( );
 	strategy->mIndexArrayPtr = mIndices.get_array( );
 

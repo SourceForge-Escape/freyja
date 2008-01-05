@@ -145,25 +145,27 @@ void freyja_handle_color(int id, float r, float g, float b, float a)
 	if ( ResourceEvent::listen(id - ResourceEvent::eBaseEvent, color, 4) )
 		return;
 
+	freyja_ptr material = MaterialControl::GetInstance()->GetCurrentMaterialPtr( );
+
 	switch (id)
 	{
 	case eColorMaterialAmbient: 
-		freyjaMaterialAmbient(freyjaGetCurrentMaterial(), color);
+		freyjaMaterialSetAmbientColor(material, color);
 		MaterialControl::GetInstance()->RefreshInterface();
 		break;
 
 	case eColorMaterialDiffuse:
-		freyjaMaterialDiffuse(freyjaGetCurrentMaterial(), color);
+		freyjaMaterialSetDiffuseColor(material, color);
 		MaterialControl::GetInstance()->RefreshInterface();
 		break;
 
 	case eColorMaterialSpecular:
-		freyjaMaterialSpecular(freyjaGetCurrentMaterial(), color);
+		freyjaMaterialSetSpecularColor(material, color);
 		MaterialControl::GetInstance()->RefreshInterface();
 		break;
 
 	case eColorMaterialEmissive:
-		freyjaMaterialEmissive(freyjaGetCurrentMaterial(), color);
+		freyjaMaterialSetEmissiveColor(material, color);
 		MaterialControl::GetInstance()->RefreshInterface();
 		break;
 

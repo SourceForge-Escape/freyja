@@ -1,9 +1,9 @@
 # freyja
 set(Name freyja)
 set(Major 0)
-set(Minor 9)
-set(Micro 5)
-set(Revision 17)
+set(Minor 10)
+set(Micro 0)
+set(Revision 2)
 set(Email mongooseichiban@gmail.com)
 set(Website http://icculus.org/freyja)
 set(BuildHost `uname -n -m -s`)
@@ -105,6 +105,7 @@ set(Objs
 	src/FreyjaOpenGL
 	src/MaterialControl
 	src/OpenGLPrinter
+	src/OpenGLRenderableStrategy
 	src/Plugins
 	src/RecentFiles
 	src/Texture
