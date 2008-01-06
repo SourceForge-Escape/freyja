@@ -26,6 +26,8 @@ using namespace freyja;
 
 void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 {
+#warning FIXME: Implementation in tracer not finalized.
+
 	if ( !mat )
 	{
 		/* Default to 'color' texture. */
@@ -47,9 +49,9 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 	glMaterialf(GL_FRONT, GL_SHININESS, mat->GetShininess() );
 
 	/* Texture maps. */
-	if ( mat->GetDecalMapId() != -1 )
+	if ( mat->GetTexture0Id() != -1 )
 	{
-		freyja3d::OpenGL::Bind( GL_TEXTURE0, mat->GetDecalMapId() );
+		freyja3d::OpenGL::Bind( GL_TEXTURE0, mat->GetTexture0Id() );
 	}
 	else if ( 0 ) // flags & fTextured )
 	{
@@ -63,6 +65,10 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 	}
 
 	/* Multitexture, Normal maps, etc... */
+#if 0
+	if ( mat->GetDecalMapId() != -1 )
+		freyja3d::OpenGL::Bind( GL_TEXTURE1, mat->GetDecalMapId() );
+
 	if ( mat->GetSpecularMapId() != -1 )
 		freyja3d::OpenGL::Bind( GL_TEXTURE1, mat->GetSpecularMapId() );
 	
@@ -74,8 +80,19 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 	
 	if ( mat->GetEmissiveMapId() != -1 )
 		freyja3d::OpenGL::Bind( GL_TEXTURE4, mat->GetEmissiveMapId() );
-
-#warning FIXME: Test rendering implementation in tracer.
+#else
+	if ( mat->GetTexture1Id() != -1 )
+		freyja3d::OpenGL::Bind( GL_TEXTURE1, mat->GetTexture1Id() );
+	
+	if ( mat->GetTexture2Id() != -1 )
+		freyja3d::OpenGL::Bind( GL_TEXTURE2, mat->GetTexture2Id() );
+	
+	if ( mat->GetTexture3Id() != -1 )
+		freyja3d::OpenGL::Bind( GL_TEXTURE3, mat->GetTexture3Id() );
+	
+	if ( mat->GetTexture4Id() != -1 )
+		freyja3d::OpenGL::Bind( GL_TEXTURE4, mat->GetTexture4Id() );
+#endif
 
 	if ( mat->IsBlendingEnabled() )
 	{

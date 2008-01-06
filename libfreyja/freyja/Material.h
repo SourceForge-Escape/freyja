@@ -186,7 +186,7 @@ class Material :
 	 ------------------------------------------------------*/
 
 	int16 GetDecalMapId( ) const
-	{ return GetPixelBufferId( mDecalMap, mDecalMapId ); }
+	{ return GetPixelBufferId( mDecalMap ); }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns id or -1.
@@ -225,11 +225,83 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
-	void SetDecalMapId( int16 id )
-	{ mDecalMapId = id; }
+	int16 GetTexture0Id( ) const
+	{ return mTexture0Id; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetTexture0Id( int16 id )
+	{ mTexture0Id = id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set to -1 to disable.
+	 *
+	 ------------------------------------------------------*/
+
+	int16 GetTexture1Id( ) const
+	{ return mTexture1Id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetTexture1Id( int16 id )
+	{ mTexture1Id = id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set to -1 to disable.
+	 *
+	 ------------------------------------------------------*/
+
+	int16 GetTexture2Id( ) const
+	{ return mTexture2Id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetTexture2Id( int16 id )
+	{ mTexture2Id = id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set to -1 to disable.
+	 *
+	 ------------------------------------------------------*/
+
+	int16 GetTexture3Id( ) const
+	{ return mTexture3Id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetTexture3Id( int16 id )
+	{ mTexture3Id = id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set to -1 to disable.
+	 *
+	 ------------------------------------------------------*/
+
+	int16 GetTexture4Id( ) const
+	{ return mTexture4Id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetTexture4Id( int16 id )
+	{ mTexture4Id = id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Set to -1 to disable.
 	 *
 	 ------------------------------------------------------*/
 
@@ -468,7 +540,11 @@ class Material :
 	PixelBuffer* mNormalMap;
 	PixelBuffer* mSpecularMap;
 
-	int16 mDecalMapId;                /* For use of generated textures. */
+	int16 mTexture0Id;                /* For use of generated textures. */
+	int16 mTexture1Id;
+	int16 mTexture2Id;
+	int16 mTexture3Id;
+	int16 mTexture4Id;
 };
 
 
