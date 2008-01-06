@@ -351,18 +351,16 @@ class MaterialControl : public Control
 	void EvSetTexture(uint32 value);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Handle event for active texture change.
+	 * Post : Set the current texel unit to assign texture maps 
+	 *        to for the current material.
 	 *
 	 ------------------------------------------------------*/
 
-	void EvTextureSlotLoad(uint32 i)
-	{
-		SetFlag(fLoadTextureInSlot, i);
-		Print("Texture load into current slot [%s]", i ? "on" : "off");
-	}
+	void EvTextureSlotLoad(uint32 i);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Handle event for active texture change.
+	 * Post : If i == 0, disable the current texel unit in 
+	 *        the current material.
 	 *
 	 ------------------------------------------------------*/
 
