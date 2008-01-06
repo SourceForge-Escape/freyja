@@ -216,8 +216,6 @@ void FreyjaRender::DrawScene( freyja::Scene* scene )
 		glDisable(GL_LIGHTING);
 		glDisable(GL_BLEND);
 		glPointSize(mVertexPointSize);
-		//glColor3fv( WHITE );
-		//BindColorTexture( );
 
 		glDisable(GL_TEXTURE_2D);
 		glColor3fv( WHITE );

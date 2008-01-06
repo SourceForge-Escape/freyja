@@ -388,7 +388,7 @@ PixelBuffer* PixelBuffer::Create( const char* filename )
 
 	if ( !reader.DoesFileExist( filename ) )
 	{
-		//print("File '%s' couldn't be accessed.", filename);
+		//freyja_print( "File '%s' couldn't be accessed.", filename );
 		return NULL;
 	}
 
@@ -396,7 +396,7 @@ PixelBuffer* PixelBuffer::Create( const char* filename )
 	{
 		if ( !reader.OpenDir( (*it).c_str() ) )
 		{
-			freyjaPrintMessage( "Couldn't access image plugin directory" );
+			freyja_print( "Couldn't access image plugin directory" );
 			continue;
 		}
 
@@ -434,14 +434,13 @@ PixelBuffer* PixelBuffer::Create( const char* filename )
 					continue;
 				}
 
-				unsigned char *image = 0x0;
+				byte* image = NULL;
 				unsigned int width = 0, height = 0;
 				char type = 0;
 
 				if ( !(*importf)((char*)filename, &image, &width, &height, &type) )
 				{
 					const uint16 bpp = type * 8;
-
 					if ( image && width > 0 && height > 0 && 
 					     bpp == 32 || bpp == 24 || bpp == 8 )
 					{
@@ -456,7 +455,6 @@ PixelBuffer* PixelBuffer::Create( const char* filename )
 							( bpp == 24 ) ? RGB_24bpp : Indexed_8bpp;
 
 						freyjaModuleUnload( handle );
-
 						return buf;
 					}
 					else if ( image )

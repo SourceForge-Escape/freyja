@@ -44,7 +44,7 @@ class Material :
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-	Material();
+	Material( const char* name );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructor.
@@ -118,6 +118,22 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
+	const char* GetBlendDest( )
+	{ return mBlendDest.c_str(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	const char* GetBlendSrc( )
+	{ return mBlendSrc.c_str(); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 
 	////////////////////////////////////////////////////////////
 	// Public Mutators
@@ -153,43 +169,24 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
-	static void (*LoadTextureCallback)( const char* filename ); //PixelBuffer* pixbuf );
+	void SetBlendDest( const char* factor )
+	{ mBlendDest = factor; }
 	/*------------------------------------------------------
-	 * Pre  : eg int load_texture(const char* filename)
-	 *        must be implemented in caller.
-	 *
-	 * Post : Callback will return texture id assigned to
-	 *        
+	 * Pre  : 
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	static int (*LoadShaderCallback)( const char* filename );
+	void SetBlendSrc( const char* factor )
+	{ mBlendSrc = factor; }
 	/*------------------------------------------------------
-	 * Pre  : eg int load_shader(const char* filename)
-	 *        must be implemented in caller.
-	 *
-	 * Post : Callback will return program id assigned to
-	 *        shader.  FIXME replace with Shader class!
-	 *
-	 ------------------------------------------------------*/
-
-	FREYJA_XMLSERIALIZER_INTERFACE
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : XmlSerializer implementation.
-	 *
-	 ------------------------------------------------------*/
-
-	static freyja::Material* Cast( freyja_ptr ptr )
-	{ return (freyja::Material*)ptr; }
-	/*------------------------------------------------------
-	 * Pre  :  
-	 * Post : FIXME Add RTTI check.
+	 * Pre  : 
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
 	int16 GetDecalMapId( ) const
-	{ return GetPixelBufferId( mDecalMap ); }
+	{ return GetPixelBufferId( mDecalMap, mDecalMapId ); }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns id or -1.
@@ -228,11 +225,27 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
+	void SetDecalMapId( int16 id )
+	{ mDecalMapId = id; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+
 	int16 GetShaderId( ) const
 	{ return mShaderId; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns id or -1.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetShaderId( int16 id )
+	{ mShaderId = id; }
+	/*------------------------------------------------------
+	 * Pre  : Set to -1 if no shader is assigned. 
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
@@ -244,11 +257,27 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
+ 	void SetAmbientColor( const vec4_t color )
+	{ helCopyVec4( color, mAmbient ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
  	const vec4_t& GetDiffuseColor() const
 	{ return mDiffuse; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns RGBA diffuse color value.
+	 *
+	 ------------------------------------------------------*/
+
+ 	void SetDiffuseColor( const vec4_t color )
+	{ helCopyVec4( color, mDiffuse ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
@@ -260,11 +289,27 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
+ 	void SetSpecularColor( const vec4_t color )
+	{ helCopyVec4( color, mSpecular ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
  	const vec4_t& GetEmissiveColor() const
 	{ return mEmissive; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns RGBA emissive color value.
+	 *
+	 ------------------------------------------------------*/
+
+ 	void SetEmissiveColor( const vec4_t color )
+	{ helCopyVec4( color, mEmissive ); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
@@ -276,6 +321,14 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
+ 	void SetShininess( const vec_t exp )
+	{ mShininess = exp; }
+	/*------------------------------------------------------
+	 * Pre  : Specular exponent. 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
  	const vec_t GetTransparency() const
 	{ return mTransparency; }
 	/*------------------------------------------------------
@@ -284,6 +337,80 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
+ 	void SetTransparency( const vec_t transparency )
+	{ mTransparency = transparency; }
+	/*------------------------------------------------------
+	 * Pre  : Alpha ( 0.0f to 1.0f ).
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void EnableBlending( const bool t )
+	{ mBlending = t; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	const bool IsBlendingEnabled( ) const
+	{ return mBlending; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	static void (*LoadTextureCallback)( const char* filename ); //PixelBuffer* pixbuf );
+	/*------------------------------------------------------
+	 * Pre  : eg int load_texture(const char* filename)
+	 *        must be implemented in caller.
+	 *
+	 * Post : Callback will return texture id assigned to
+	 *        
+	 *
+	 ------------------------------------------------------*/
+
+	static int (*LoadShaderCallback)( const char* filename );
+	/*------------------------------------------------------
+	 * Pre  : eg int load_shader(const char* filename)
+	 *        must be implemented in caller.
+	 *
+	 * Post : Callback will return program id assigned to
+	 *        shader.  FIXME replace with Shader class!
+	 *
+	 ------------------------------------------------------*/
+
+	FREYJA_XMLSERIALIZER_INTERFACE
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : XmlSerializer implementation.
+	 *
+	 ------------------------------------------------------*/
+
+	freyja_ptr ToPtr( )
+	{ return (freyja_ptr)this; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : FIXME Add RTTI check.
+	 *
+	 ------------------------------------------------------*/
+
+	static freyja::Material* Cast( freyja_ptr ptr )
+	{ return (freyja::Material*)ptr; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : FIXME Add RTTI check.
+	 *
+	 ------------------------------------------------------*/
+
+	static freyja::Material* Import( const char* filename );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Import material from file.
+	 *
+	 ------------------------------------------------------*/
+	
 
  protected:
 
@@ -291,8 +418,8 @@ class Material :
 	// Protected
 	////////////////////////////////////////////////////////////
 
-	int16 GetPixelBufferId( PixelBuffer* pb ) const
-	{ return (pb) ? pb->GetTextureId( ) : -1; }
+	int16 GetPixelBufferId( PixelBuffer* pb, int16 id = -1 ) const
+	{ return (pb) ? pb->GetTextureId( ) : id; }
 	/*------------------------------------------------------
 	 * Pre  :  
 	 * Post : Returns id or -1.
@@ -309,6 +436,8 @@ class Material :
 	mstl::String mShaderFilename;     /* GLSL / ARB / etc shader filename. */
 
 	bool mAlpha;                      /* Mostly for depth sorting use. */
+
+	bool mBlending;
 
 	int32 mShaderId;                  /* Shader program index. */
 
@@ -338,6 +467,8 @@ class Material :
 	PixelBuffer* mHeightMap;
 	PixelBuffer* mNormalMap;
 	PixelBuffer* mSpecularMap;
+
+	int16 mDecalMapId;                /* For use of generated textures. */
 };
 
 

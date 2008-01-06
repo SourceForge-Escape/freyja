@@ -15,7 +15,9 @@
  * Mesh
 	- Smoothing groups as lists, and pointers in Face back to group.
 
- * Optionally pass allocator / dealloc functions to libfreyja on init.
+ * Remove all use of INDEX_INVALID error condition, since 10.x is all freyja_ptr.
+
+ * Optionally pass allocator / dealloc functions to libfreyja for external management.
 
  * RenderableStrategy
 	- Add DrawQuads( ) method.
@@ -67,8 +69,6 @@
 	- Mutable mode ( readonly ) edit state support.
 	- Hidden property support to make object not rendered.
 	- Break up source files with many classes.
-
- * Library deallocator callbacks.
 
  * Finish up new AnimationControl, Track, Keyframe, Bone, and Mesh API.
 	- KeyframeInterface.

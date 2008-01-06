@@ -17,7 +17,7 @@
 
 #define TEST_OGL_STRATEGY 0
 
-#include "FreyjaOpenGL.h" // Includes windows.h, so avoid header interaction
+#include "FreyjaOpenGL.h" /* Includes windows.h, so avoid header interaction. */
 #include "OpenGLRenderableStrategy.h"
 
 using namespace freyja3d;
@@ -27,7 +27,12 @@ using namespace freyja;
 void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 {
 	if ( !mat )
+	{
+		/* Default to 'color' texture. */
+		glColor3fv( WHITE );
+		glBindTexture( GL_TEXTURE_2D, 0 );
 		return;
+	}
 
 	{
 		// Id 0 disables ( no weird index scheme here )
@@ -46,17 +51,18 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 	{
 		freyja3d::OpenGL::Bind( GL_TEXTURE0, mat->GetDecalMapId() );
 	}
-	else if ( 0 ) // flags & fTextured ) // Non-colored is ( id + 1)
+	else if ( 0 ) // flags & fTextured )
 	{
+		/* Texture mapped ( 1 unit ), ids are always ( id + 1). */
 		//glBindTexture(GL_TEXTURE_2D, texture_id + 1);
 	}
-	else // Colored, first texture is a generated WHITE 32x32
+	else
 	{
-		glBindTexture(GL_TEXTURE_2D, 0);
+		/* Colored, first texture is a generated WHITE 32x32. */
+		glBindTexture( GL_TEXTURE_2D, 0 );
 	}
 
 	/* Multitexture, Normal maps, etc... */
-
 	if ( mat->GetSpecularMapId() != -1 )
 		freyja3d::OpenGL::Bind( GL_TEXTURE1, mat->GetSpecularMapId() );
 	
@@ -71,19 +77,17 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 
 #warning FIXME: Test rendering implementation in tracer.
 
-#if 0
-	if (flags & fFreyjaMaterial_Blending)
+	if ( mat->IsBlendingEnabled() )
 	{
-		uint32 blendSrc = freyjaGetMaterialBlendSource(materialIndex);
-		uint32 blendDest = freyjaGetMaterialBlendDestination(materialIndex);
-		glBlendFunc(blendSrc, blendDest);
-		glEnable(GL_BLEND);
+		uint32 blendSrc = OpenGL::BlendStringToInt( mat->GetBlendSrc() );
+		uint32 blendDest = OpenGL::BlendStringToInt( mat->GetBlendDest() );
+		glBlendFunc( blendSrc, blendDest );
+		glEnable( GL_BLEND );
 	}
 	else
 	{
-		glDisable(GL_BLEND);
+		glDisable( GL_BLEND );
 	}
-#endif
 }
 
 
@@ -110,31 +114,21 @@ void OpenGLRenderableStrategy::DrawTriangles(  )
 		glEnd( );
 	}
 
-	if ( mIndexArrayPtr )
+	if ( mVertexArrayPtr && mIndexArrayPtr )
 	{
 		// Faces ( fill )
 		glColor3fv( PINK );
 		for ( uint32 i = 0; i < mIndexArraySize; )
 		{
 			glBegin( GL_TRIANGLES );
-			index_t idx = mIndexArrayPtr[i++];
+			index_t idx = mIndexArrayPtr[i++] * 3;
 			glVertex3fv( mVertexArrayPtr+idx );
-			idx = mIndexArrayPtr[i++];
+			idx = mIndexArrayPtr[i++] * 3;
 			glVertex3fv( mVertexArrayPtr+idx );
-			idx = mIndexArrayPtr[i++];
+			idx = mIndexArrayPtr[i++] * 3;
 			glVertex3fv( mVertexArrayPtr+idx );
 			glEnd( );
 		}
-
-		// GLSL shaders.
-#if 0
-		if ( Texture::mInstance )
-		{
-			//Texture::mInstance->Bind( GL_TEXTURE0, 2 );
-			//Texture::mInstance->Bind( GL_TEXTURE1, 3 );
-			//Texture::mInstance->Bind( GL_TEXTURE2, 4 );
-		}
-#endif
 
 		// Faces ( 'wireframe' )
 		glColor3fv( RED );
@@ -175,6 +169,11 @@ void OpenGLRenderableStrategy::DrawTriangles(  )
 
 		glColor3fv( WHITE );
 		glDrawElements( GL_TRIANGLES, mIndexArraySize, GL_UNSIGNED_INT, mIndexArrayPtr );
+
+		glColor3fv( BLUE );
+		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+		glDrawElements( GL_TRIANGLES, mIndexArraySize, GL_UNSIGNED_INT, mIndexArrayPtr );
+		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
 		glColor3fv( YELLOW );
 		glDrawElements( GL_POINTS, mIndexArraySize, GL_UNSIGNED_INT, mIndexArrayPtr );

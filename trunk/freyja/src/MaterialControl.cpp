@@ -433,7 +433,10 @@ void MaterialControl::RefreshInterface()
 	freyja::Material* mat = GetCurrentMaterial( );
 
 	if ( !mat )
+	{
+		//mgtk_textentry_value_set( EvSetNameId, "Invalid material." );
 		return;
+	}
 
 	{
 		const char* s = mat->GetName();
@@ -455,9 +458,20 @@ void MaterialControl::RefreshInterface()
 		//mgtk_textentry_value_set(EvSetTextureNameId, (s != NULL) ? s : " " );
 	}
 	
-	//vec4_t ambient;
-	//mgtk_event_set_color(eColorMaterialAmbient, 
-	//					 ambient[0], ambient[1], ambient[2], ambient[3]);
+	/* Color buttons. */
+	{
+		vec4_t color;
+		freyjaMaterialGetAmbientColor( mat->ToPtr(), color );
+		mgtk_event_set_color(eColorMaterialAmbient, color[0], color[1], color[2], color[3]);
+		freyjaMaterialGetDiffuseColor( mat->ToPtr(), color );
+		mgtk_event_set_color(eColorMaterialDiffuse, color[0], color[1], color[2], color[3]);
+		freyjaMaterialGetSpecularColor( mat->ToPtr(), color );
+		mgtk_event_set_color(eColorMaterialSpecular, color[0], color[1], color[2], color[3]);
+		freyjaMaterialGetEmissiveColor( mat->ToPtr(), color );
+		mgtk_event_set_color(eColorMaterialEmissive, color[0], color[1], color[2], color[3]);
+	}
+
+	/* Color component spinbuttons. */
 	for ( uint32 i = 0; i < 4; ++i )
 	{
 		mgtk_spinbutton_value_set(EvAmbientId[i], mat->GetAmbientColor()[i]);	
@@ -471,25 +485,15 @@ void MaterialControl::RefreshInterface()
 
 	mgtk_spinbutton_value_set(EvShineId, mat->GetShininess() );
 
-#warning FIXME UI does not support new blending backend yet.
-	uint32 src = 0;// freyjaGetMaterialBlendSource(mIndex);
-	mgtk_option_menu_value_set(eBlendSrcMenu, src);
+	/* Blend factor. */
+	mgtk_option_menu_value_set( eBlendSrcMenu, GetBlendId( mat->GetBlendSrc() ) );
+	mgtk_option_menu_value_set( eBlendDestMenu, GetBlendId( mat->GetBlendDest() ) );
 
-	uint32 dest = 0;//freyjaGetMaterialBlendDestination(mIndex);
-	mgtk_option_menu_value_set(eBlendDestMenu, dest);
+	// No flags in new material.
+	//uint32 flags = freyjaGetMaterialFlags(mIndex);
+	//mgtk_togglebutton_value_set(EvEnableBlendingId, (flags & fFreyjaMaterial_Blending));
+	//mgtk_togglebutton_value_set(EvEnableTextureId, (flags & fFreyjaMaterial_Texture));
 
-	/*
-	uint32 flags = freyjaGetMaterialFlags(mIndex);
-
-	mgtk_togglebutton_value_set(EvEnableBlendingId, 
-								(flags & fFreyjaMaterial_Blending));
-
-	mgtk_togglebutton_value_set(EvEnableTextureId, 
-								(flags & fFreyjaMaterial_Texture));
-	*/
-
-	// Just go ahead and render a new frame in case the function calling
-	// this fails to do so.
 	RefreshContext( );
 }
 
@@ -522,14 +526,10 @@ void MaterialControl::AttachMethodListeners()
 	EvEmissiveId[2] = CreateListener1f("eMaterialEmissive2", &MaterialControl::EvEmissive2);
 	EvEmissiveId[3] = CreateListener1f("eMaterialEmissive3", &MaterialControl::EvEmissive3);
 	EvShineId = CreateListener1f("eMaterialShine", &MaterialControl::EvShine);
-	EvSetNameId = CreateListener1s("eSetMaterialName", &MaterialControl::EvSetName);
-	EvSetShaderId =CreateListener1u("eSetMaterialShader", &MaterialControl::EvSetShader);
+	EvSetShaderId = CreateListener1u("eSetMaterialShader", &MaterialControl::EvSetShader);
 
 	EvSetTextureId = 
 	CreateListener1u("eSetMaterialTexture", &MaterialControl::EvSetTexture);
-
-	EvSetTextureNameId = 
-	CreateListener1s("eSetTextureNameA", &MaterialControl::EvSetTextureName);
 
 	CreateListener("eNewMaterial", &MaterialControl::EvNewMaterial);
 	CreateListener("eOpenMaterial", &MaterialControl::EvOpenMaterial);
@@ -554,76 +554,30 @@ void MaterialControl::AttachMethodListeners()
 	EvARBFragmentModeId = 
 	CreateListener1u("eARBFragmentMode", &MaterialControl::EvARBFragmentMode);
 
-	CreateListener1s("eOpenShader", &MaterialControl::EvOpenShader);
-	CreateListener1s("eOpenTexture", &MaterialControl::EvOpenTexture);
-
 	CreateListener1u("eBlendSrc", &MaterialControl::EvBlendSrc);
 	CreateListener1u("eBlendDest", &MaterialControl::EvBlendDest);
 
 	CreateListener1u("eTextureUpload", &MaterialControl::EvTextureUpload);
 
-	//CreateListener("", &MaterialControl::);
+	/* Strings. */
+	CreateListener1s( "eOpenShader", &MaterialControl::EvOpenShader );
+	CreateListener1s( "eOpenTexture", &MaterialControl::EvOpenTexture );
+	EvSetNameId = CreateListener1s( "eSetMaterialName", &MaterialControl::EvSetName );
+	EvSetTextureNameId = CreateListener1s( "eSetTextureNameA", &MaterialControl::EvSetTextureName );
 }
 
 
-bool MaterialControl::LoadTexture(const char *filename)
+bool MaterialControl::LoadTexture( const char* filename )
 {
-#warning FIXME This method is obsolete.
-
 	int err = -1;
 
-	// Mongoose 2002.01.10, Evil...
-	if (SystemIO::File::CompareFilenameExtention(filename, ".lst") == 0)
-	{
-		FILE *f = fopen(filename, "r");
-		
-		if (!f)
-		{
-			perror(filename);
-			return false;
-		}
-
-		const unsigned int bufferSize = 256;
-		unsigned int i = 0;
-		char buffer[bufferSize];
-		char c;
-
-		while (fscanf(f, "%c", &c) != EOF)
-		{
-			switch (c)
-			{
-			case ' ':
-			case '\t':
-			case '\n':
-				break;
-			case ';':
-				Print("Loading texture from list '%s'\n", buffer);
-				LoadTexture(buffer);
-				
-				i = 0;
-				buffer[0] = 0;
-				break;
-			default:
-				if (i > bufferSize-1)
-					i = bufferSize-1;
-				
-				buffer[i++] = c;
-				buffer[i] = 0;
-			}
-		} 
-		
-		fclose(f);
-
-		return true;
-	}
-	
-	Print("[FreyjaModel::loadTexture]\n");
+	Print("[MaterialControl::LoadTexture]\n");
 	Print(" Loading texture '%s'\n", filename);
 
 	PixelBuffer* img = PixelBuffer::Create( filename );
 	if ( img )
 	{
-		byte *image = img->CopyPixmap();
+		byte* image = img->CopyPixmap();
 		uint32 w = img->GetWidth();
 		uint32 h = img->GetHeight();
 		uint16 components = PixelBuffer::GetBytesPerPixel( img->GetPixelFormat() );
@@ -767,165 +721,137 @@ void MaterialControl::EvShine(vec_t value)
 
 void MaterialControl::EvSetName(char *text)
 {
-	if (text && text[0])
+	if ( text && text[0] )
 	{
-#warning FIXME This method is obsolete.
-		//freyjaMaterialName(freyjaGetCurrentMaterial(), text);
+		freyjaMaterialSetName( GetCurrentMaterialPtr(), text);
 	}
+}
+
+
+int16 MaterialControl::GetBlendId( const char* name ) 
+{
+	mstl::String s(name);
+	int16 id = -1;
+
+	if ( s == "GL_ZERO" )
+		id = 0;
+	else if ( s == "GL_ONE")
+		id = 1;
+	else if ( s == "GL_SRC_COLOR")
+		id = 2;
+	else if ( s == "GL_ONE_MINUS_SRC_COLOR")
+		id = 3;
+	else if ( s == "GL_DST_COLOR")
+		id = 4;
+	else if ( s == "GL_ONE_MINUS_DST_COLOR")
+		id = 5;
+	else if ( s == "GL_SRC_ALPHA")
+		id = 6;
+	else if ( s == "GL_ONE_MINUS_SRC_ALPHA")
+		id = 7;
+	else if ( s == "GL_DST_ALPHA")
+		id = 8;
+	else if ( s == "GL_ONE_MINUS_DST_ALPHA")
+		id = 9;
+	else if ( s == "GL_SRC_ALPHA_SATURATE")
+		id = 10;
+	else if ( s == "GL_CONSTANT_COLOR")
+		id = 11;
+	else if ( s == "GL_ONE_MINUS_CONSTANT_COLOR")
+		id = 12;
+	else if ( s == "GL_CONSTANT_ALPHA")
+		id = 13;
+	else if ( s == "GL_ONE_MINUS_CONSTANT_ALPHA")
+		id = 14;
+
+	return id;
+}
+
+const char* MaterialControl::GetBlendString( uint32 value ) 
+{
+	const char* s = NULL;
+
+	switch (value)
+	{
+	case 0:
+		s = "GL_ZERO";
+		break;
+
+	case 1:
+		s = "GL_ONE";
+		break;
+
+	case 2:
+		s = "GL_SRC_COLOR";
+		break;
+
+	case 3:
+		s = "GL_ONE_MINUS_SRC_COLOR";
+		break;
+
+	case 4:
+		s = "GL_DST_COLOR";
+		break;
+
+	case 5:
+		s = "GL_ONE_MINUS_DST_COLOR";
+		break;
+
+	case 6:
+		s = "GL_SRC_ALPHA";
+		break;
+
+	case 7:
+		s = "GL_ONE_MINUS_SRC_ALPHA";
+		break;
+
+	case 8:
+		s = "GL_DST_ALPHA";
+		break;
+
+	case 9:
+		s = "GL_ONE_MINUS_DST_ALPHA";
+		break;
+
+	case 10:
+		s = "GL_SRC_ALPHA_SATURATE";
+		break;
+
+	case 11:
+		s = "GL_CONSTANT_COLOR";
+		break;
+
+	case 12:
+		s = "GL_ONE_MINUS_CONSTANT_COLOR";
+		break;
+
+	case 13:
+		s = "GL_CONSTANT_ALPHA";
+		break;
+
+	case 14:
+		s = "GL_ONE_MINUS_CONSTANT_ALPHA";
+		break;
+
+	default:
+		;
+	}
+
+	return s;
 }
 
 
 void MaterialControl::EvBlendSrc(uint32 value)
 {
-#warning FIXME This method is obsolete.
-#if 0
-	index_t material = freyjaGetCurrentMaterial();
-
-	switch (value)
-	{
-	case 0:
-		freyjaMaterialBlendSource(material, GL_ZERO);
-		break;
-
-	case 1:
-		freyjaMaterialBlendSource(material, GL_ONE);
-		break;
-
-	case 2:
-		freyjaMaterialBlendSource(material, GL_SRC_COLOR);
-		break;
-
-	case 3:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_SRC_COLOR);
-		break;
-
-	case 4:
-		freyjaMaterialBlendSource(material, GL_DST_COLOR);
-		break;
-
-	case 5:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_DST_COLOR);
-		break;
-
-	case 6:
-		freyjaMaterialBlendSource(material, GL_SRC_ALPHA);
-		break;
-
-	case 7:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_SRC_ALPHA);
-		break;
-
-	case 8:
-		freyjaMaterialBlendSource(material, GL_DST_ALPHA);
-		break;
-
-	case 9:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_DST_ALPHA);
-		break;
-
-	case 10:
-		freyjaMaterialBlendSource(material, GL_SRC_ALPHA_SATURATE);
-		break;
-
-	case 11:
-		freyjaMaterialBlendSource(material, GL_CONSTANT_COLOR);
-		break;
-
-	case 12:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_CONSTANT_COLOR);
-		break;
-
-	case 13:
-		freyjaMaterialBlendSource(material, GL_CONSTANT_ALPHA);
-		break;
-
-	case 14:
-		freyjaMaterialBlendSource(material, GL_ONE_MINUS_CONSTANT_ALPHA);
-		break;
-
-	default:
-		freyja3d_print("Unknown Blend Source event %i.", value);
-	}
-		
+	freyjaMaterialSetBlendSource( GetCurrentMaterialPtr(), GetBlendString( value ) );		
 	mgtk_event_gl_refresh();
-#endif
 }
 
 
 void MaterialControl::EvBlendDest(uint32 value)
 {
-#warning FIXME This method is obsolete.
-#if 0
-	index_t material = freyjaGetCurrentMaterial();
-
-	switch (value)
-	{
-	case 0:
-		freyjaMaterialBlendDestination(material, GL_ZERO);
-		break;
-
-	case 1:
-		freyjaMaterialBlendDestination(material, GL_ONE);
-		break;
-
-	case 2:
-		freyjaMaterialBlendDestination(material, GL_SRC_COLOR);
-		break;
-
-	case 3:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_SRC_COLOR);
-		break;
-
-	case 4:
-		freyjaMaterialBlendDestination(material, GL_DST_COLOR);
-		break;
-
-	case 5:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_DST_COLOR);
-		break;
-
-	case 6:
-		freyjaMaterialBlendDestination(material, GL_SRC_ALPHA);
-		break;
-
-	case 7:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_SRC_ALPHA);
-		break;
-
-	case 8:
-		freyjaMaterialBlendDestination(material, GL_DST_ALPHA);
-		break;
-
-	case 9:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_DST_ALPHA);
-		break;
-
-	case 10:
-		freyjaMaterialBlendDestination(material, GL_SRC_ALPHA_SATURATE);
-		break;
-
-	case 11:
-		freyjaMaterialBlendDestination(material, GL_CONSTANT_COLOR);
-		break;
-
-	case 12:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_CONSTANT_COLOR);
-		break;
-
-	case 13:
-		freyjaMaterialBlendDestination(material, GL_CONSTANT_ALPHA);
-		break;
-
-	case 14:
-		freyjaMaterialBlendDestination(material, GL_ONE_MINUS_CONSTANT_ALPHA);
-		break;
-
-	default:
-		freyja3d_print("Unknown Blend Dest event %i.", value);
-	}
-
+	freyjaMaterialSetBlendDestination( GetCurrentMaterialPtr(), GetBlendString( value ) );		
 	mgtk_event_gl_refresh();
-#endif
 }
 
 
@@ -972,22 +898,12 @@ void MaterialControl::EvEnableNormalize(uint32 value)
 
 void MaterialControl::EvEnableBlending(uint32 value)
 {
-#warning FIXME This method is obsolete.
-#if 0
-	if (value)
+	if ( GetCurrentMaterial() )
 	{
-		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-							  fFreyjaMaterial_Blending);
+		GetCurrentMaterial()->EnableBlending( value );
+		freyja3d_print( "Material blending [%s]", value ? "ON" : "OFF" );
+		RefreshContext( );
 	}
-	else
-	{
-		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-								fFreyjaMaterial_Blending);
-	}
-
-	freyja3d_print("Material blending [%s]", value ? "ON" : "OFF");
-	mgtk_event_gl_refresh();
-#endif
 }
 
 
@@ -1123,31 +1039,51 @@ void MaterialControl::EvTextureUpload(uint32 id)
 }
 
 
-void MaterialControl::EvOpenTexture(char *text)
+void MaterialControl::EvOpenTexture( char *text )
 {
-#warning FIXME This method is obsolete.
-#if 0
-	if (text == NULL || text[0] == 0) 
+	if ( text == NULL || text[0] == 0 ) 
 		return;
 
-	bool loaded = LoadTexture(text);
-	if (loaded)
+	PixelBuffer* img = PixelBuffer::Create( text );
+	bool loaded = false;
+
+	if ( img )
 	{
-		uint32 e = resourceGetEventId1s("eSetTextureNameA");
-		uint32 texture = mTextureId - 1;
-		uint32 mat = freyjaGetCurrentMaterial();
+		byte* image = img->CopyPixmap();
+		uint32 w = img->GetWidth();
+		uint32 h = img->GetHeight();
+		uint16 components = PixelBuffer::GetBytesPerPixel( img->GetPixelFormat() );
 
-		mgtk_textentry_value_set(e, text);
-		freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
-		mgtk_spinbutton_value_set(EvSetTextureId, texture);
-		freyjaMaterialTexture(mat, texture);
-		freyjaMaterialTextureName(mat, text);
+		if ( image && components )
+		{
+			int err = LoadTextureBuffer( image, w, h, components*8, components );
+			uint32 e = resourceGetEventId1s("eSetTextureNameA");
+			uint32 texture = mTextureId - 1;
+			freyja::Material* mat = GetCurrentMaterial();
 
-		RefreshContext(); //Dirty();
+			if ( mat )
+			{
+				mgtk_textentry_value_set(e, text);
+				mgtk_spinbutton_value_set(EvSetTextureId, texture);
+
+				mat->SetDecalMapId( texture );
+				//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
+				//mat->SetTextureId( texture );
+				//freyjaMaterialTextureName(mat, text);
+
+				RefreshContext(); 
+			}
+
+			loaded = true; // In OpenGL at least.
+		}
+
+		if ( image )
+			delete [] image;
+
+		delete img;
 	}
 
-	Print("%s %s", text, loaded ? "loaded" : "failed to load");
-#endif
+	Print( "%s %s", text, loaded ? "loaded" : "failed to load" );
 }
 
 

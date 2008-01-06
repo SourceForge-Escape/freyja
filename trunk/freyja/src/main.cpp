@@ -185,7 +185,8 @@ freyja3d_quit( )
 }
 
 
-void freyja3d_print( const char* format, ...)
+void 
+freyja3d_print( const char* format, ...)
 {
 	if ( format && format[0] )
 	{
@@ -242,6 +243,7 @@ freyja3d_attach_observers( Resource& r )
 {
 	/* Attach singleton method listeners. */
 	FreyjaRender::GetInstance()->AttachMethodListeners( );
+	MaterialControl::GetInstance()->AttachMethodListeners( );
 
 	/* Non-class listeners. */
 	freyja3d_misc_attach_listeners( );

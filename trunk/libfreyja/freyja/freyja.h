@@ -33,14 +33,18 @@
 /* index_t invalid state is equal to UINT_MAX 32bit */
 #define INDEX_INVALID      4294967295U
 
-/* Special messages visible in all builds */
-#define BUG_ME freyjaPrintMessage("\n[%s] %s:%i, %s() file bug with %s", FREYJA_API_VERSION, __FILE__, __LINE__, __func__, EMAIL_ADDRESS); freyjaPrintMessage   
 
-#define MARK_MSG(msg) freyjaPrintMessage("[%s] %s:%i, %s() %s", FREYJA_API_VERSION, __FILE__, __LINE__, __func__, msg)
+/* Transistion wrapper defines. */
+#define freyja_print freyjaPrintMessage
+#define MARK_MSG FREYJA_MSG
 
-#define MARK_MSGF freyjaPrintMessage("\n[%s] %s:%i, %s() ", FREYJA_API_VERSION, __FILE__, __LINE__, __func__); freyjaPrintMessage
 
-#define OBS_CALL(...) freyjaPrintMessage("[%s] %s:%i, %s() Obsolete ABI call", FREYJA_API_VERSION, __FILE__, __LINE__, __func__)
+/* Special messages visible in all builds. */
+#define BUG_ME freyja_print("\n[%s] %s:%i, %s() file bug with %s", FREYJA_API_VERSION, __FILE__, __LINE__, __func__, EMAIL_ADDRESS); freyja_print  
+
+//#define MARK_MSG(msg) freyja_print("[%s] %s:%i, %s() %s", FREYJA_API_VERSION, __FILE__, __LINE__, __func__, msg)
+
+#define FREYJA_MSG freyja_print("[%s] %s:%i, %s() ", FREYJA_API_VERSION, __FILE__, __LINE__, __func__); freyja_print
 
 
 #if ENABLE_FREYJA_ASSERTS

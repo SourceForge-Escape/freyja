@@ -19,6 +19,9 @@
  * Mongoose - Created
  ==========================================================================*/
 
+#define COMPRESSED_XML 1
+
+
 #include <mstl/System/IO/GzFile.h>
 #include "Scene.h"
 
@@ -107,9 +110,7 @@ bool Scene::Unserialize( const char* filename )
 {
 #if TINYXML_FOUND
 
-	TiXmlDocument doc;
-
-#if 0	
+#if COMPRESSED_XML	
 	TiXmlDocument doc( filename );
 
 	if ( !doc.LoadFile() )
@@ -118,7 +119,8 @@ bool Scene::Unserialize( const char* filename )
 			   doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
 		return false;
 	}
-#endif
+#else
+	TiXmlDocument doc;
 
 	/* Should handle files with and without gz compression. */
 	{
@@ -130,6 +132,7 @@ bool Scene::Unserialize( const char* filename )
 		/* FIXME: GzRead allocator should provide deallocator. */
 		delete xml; 
 	}
+#endif
 
 	if ( doc.Error() )
 	{
