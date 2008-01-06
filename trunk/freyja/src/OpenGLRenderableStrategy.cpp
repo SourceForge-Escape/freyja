@@ -31,8 +31,11 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 	if ( !mat )
 	{
 		/* Default to 'color' texture. */
+		glDisable( GL_BLEND );
 		glColor3fv( WHITE );
-		glBindTexture( GL_TEXTURE_2D, 0 );
+		//glBindTexture( GL_TEXTURE_2D, 0 );
+		freyja3d::OpenGL::Bind( GL_TEXTURE0, 0 );
+		freyja3d::OpenGL::BindFragmentGLSL( 0 );
 		return;
 	}
 

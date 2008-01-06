@@ -1222,6 +1222,42 @@ byte *MaterialControl::GenerateTextureCheckerBoard(byte bg[4], byte fg[4],
 }
 
 
+void MaterialControl::EvTextureSlotLoad(uint32 i)
+{
+	if ( i )
+		return;
+
+	freyja::Material* mat = GetCurrentMaterial();
+	
+	if ( !mat )
+		return;
+	
+	switch ( mTextureMap )
+	{
+	case 1:
+		mat->SetTexture1Id( -1 );
+		break;
+			
+	case 2:
+		mat->SetTexture2Id( -1 );
+		break;
+			
+	case 3:
+		mat->SetTexture3Id( -1 );
+		break;
+			
+	case 4:
+		mat->SetTexture4Id( -1 );
+		break;
+			
+	default:
+		mat->SetTexture0Id( -1 );
+	}
+	
+	Print( "Texture unit %i disabled.", mTextureMap );
+}
+
+
 ////////////////////////////////////////////////////////////
 // Private Accessors
 ////////////////////////////////////////////////////////////
