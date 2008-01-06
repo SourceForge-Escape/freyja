@@ -541,6 +541,8 @@ protected:
 
 	int32 mTextureId;                   /* Currently active texture slot. */
 
+	int32 mTextureMap;
+
 	RecentFiles mRecent;                /* Recent material files lists. */
 };
 

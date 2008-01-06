@@ -6,8 +6,9 @@
 
  Kagura alpha, 0.10.0.0
 
-
  * 
+ * Material's texture spinbutton now sets texel unit instead of tid.
+ * Material UI update.
  * Lighting support in modeler indepedent of backend in material editor.
  * Additional shader support.
  * New rendering path for prototype.

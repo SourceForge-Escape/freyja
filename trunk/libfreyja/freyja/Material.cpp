@@ -48,7 +48,11 @@ Material::Material( const char* name ) :
 	mHeightMap( NULL ),
 	mNormalMap( NULL ),
 	mSpecularMap( NULL ),
-	mDecalMapId( -1 )
+	mTexture0Id( -1 ),
+	mTexture1Id( -1 ),
+	mTexture2Id( -1 ),
+	mTexture3Id( -1 ),
+	mTexture4Id( -1 )
 {
 	mAmbient[0]  = mAmbient[1]  = mAmbient[2]  = 0.2f;
 	mAmbient[3]  = 1.0f;

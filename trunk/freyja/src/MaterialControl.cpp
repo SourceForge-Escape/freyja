@@ -38,9 +38,13 @@ MaterialControl *MaterialControl::mInstance = NULL;
 ////////////////////////////////////////////////////////////
 
 MaterialControl::MaterialControl() : 
-	EvSelectId(0), EvShineId(0), EvSetNameId(0), 
-	EvSetTextureNameId(0), mFlags(fNone),
-	mRecent("freyja-dev-recent-material", "eRecentMaterial")
+	EvSelectId(0), 
+	EvShineId(0), 
+	EvSetNameId(0), 
+	EvSetTextureNameId(0),
+	mFlags(fNone),
+	mRecent("freyja-dev-recent-material", "eRecentMaterial"),
+	mTextureMap( 0 )
 {
 	// We move to class based index_t later instead integer ids
 	for (uint32 i = 0; i < 4; ++i)
@@ -451,7 +455,7 @@ void MaterialControl::RefreshInterface()
 	}
 	
 #warning FIXME UI does not support new multitexture yet.
-	mgtk_spinbutton_value_set(EvSetTextureId, mat->GetDecalMapId() );
+	mgtk_spinbutton_value_set(EvSetTextureId, mTextureMap ); //mat->GetDecalMapId() );
 
 	{
 		//const char* s = mat->GetDecalMap()->GetFilename();
@@ -1001,6 +1005,7 @@ void MaterialControl::EvSetTexture(uint32 value)
 {
 #warning FIXME This method is obsolete.
 	SetSelected(value);
+	mTextureMap = value;
 	//freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
 	RefreshContext();
 }
@@ -1064,9 +1069,32 @@ void MaterialControl::EvOpenTexture( char *text )
 			if ( mat )
 			{
 				mgtk_textentry_value_set(e, text);
-				mgtk_spinbutton_value_set(EvSetTextureId, texture);
 
-				mat->SetDecalMapId( texture );
+				/* Now the spin button sets the texel unit instead of the texture id. */
+				mgtk_spinbutton_value_set( EvSetTextureId, mTextureMap ); //texture);
+
+				switch ( mTextureMap )
+				{
+				case 1:
+					mat->SetTexture1Id( texture );
+					break;
+
+				case 2:
+					mat->SetTexture2Id( texture );
+					break;
+
+				case 3:
+					mat->SetTexture3Id( texture );
+					break;
+
+				case 4:
+					mat->SetTexture4Id( texture );
+					break;
+
+				default:
+					mat->SetTexture0Id( texture );
+				}
+
 				//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
 				//mat->SetTextureId( texture );
 				//freyjaMaterialTextureName(mat, text);
@@ -1114,16 +1142,20 @@ void MaterialControl::EvOpenShader(char *text)
 		
 		//uint32 texture = mTextureId - 1;
 		mgtk_textentry_value_set(e, text);
-		
-#warning FIXME This method is obsolete.
-#if 0
-		// Propagate to material backend
-		uint32 mat = freyjaGetCurrentMaterial();
-		//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
 		mgtk_spinbutton_value_set(EvSetShaderId, fragmentId);
-		freyjaMaterialShader(mat, fragmentId);
-		freyjaMaterialShaderName(mat, text);
-#endif
+
+		/* Propagate to material backend. */
+		if ( GetCurrentMaterial() )
+		{
+			GetCurrentMaterial()->SetShaderId( fragmentId );
+			GetCurrentMaterial()->SetShaderFilename( text );
+		}
+		
+		//uint32 mat = freyjaGetCurrentMaterial();
+		//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
+		//freyjaMaterialShader(mat, fragmentId);
+		//freyjaMaterialShaderName(mat, text);
+
 		Print("Loaded fragment program %i", fragmentId);
 		RefreshContext();
 	}
