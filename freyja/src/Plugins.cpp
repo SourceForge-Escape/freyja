@@ -24,6 +24,7 @@
 #include <mstl/String.h>
 #include <mstl/SystemIO.h>
 
+#include <freyja/PixelBuffer.h>
 #include <freyja/Plugin.h>
 #include <freyja/PluginABI.h>
 #include <freyja/SkeletonABI.h>
@@ -162,6 +163,11 @@ void freyja3d_plugin_init()
 	/* Add extra paths for freyja plugins. */
 	String sPluginDir = freyja_rc_map_string("plugins/");
 	//freyjaPluginAddDirectory( sPluginDir.c_str() );
+
+	{
+		String sImagePluginDir = freyja_rc_map_string("plugins/image/");
+		freyja::PixelBuffer::AddPluginPath( sImagePluginDir.c_str() );
+	}
 
 	/* Query for external plugins and rebuild the 'database'. */
 	freyjaPluginsInit();

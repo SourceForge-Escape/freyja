@@ -430,7 +430,7 @@ class MaterialControl : public Control
 	 ------------------------------------------------------*/
 
 	freyja_ptr GetCurrentMaterialPtr( ) const 
-	{ return (mCurrentMaterial) ? (freyja_ptr)mCurrentMaterial : NULL; }
+	{ return (mCurrentMaterial) ? mCurrentMaterial->ToPtr() : NULL; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
@@ -447,6 +447,20 @@ class MaterialControl : public Control
 
 	void SetCurrentMaterial( freyja::Material* material ) 
 	{ mCurrentMaterial = material; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	int16 GetBlendId( const char* name );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	const char* GetBlendString( uint32 value );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 

@@ -57,6 +57,7 @@
 
 #define helCopyVec3(src, dest) memcpy(dest, src, sizeof(vec3_t))
 
+#define helCopyVec4(src, dest) memcpy(dest, src, sizeof(vec4_t))
 
 extern "C" {
 

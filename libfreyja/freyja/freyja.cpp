@@ -26,6 +26,8 @@
 #include <mstl/String.h>
 #include "Printer.h"
 #include "PluginABI.h"
+#include "Material.h"
+#include "ResourceManager.h"
 #include "freyja.h"
 
 using namespace mstl;
@@ -38,6 +40,10 @@ uint32 gFreyjaMemoryNews = 0;
 uint32 gFreyjaMemoryDeletes = 0;
 FreyjaAssertCallback gFreyjaAssertHandler = NULL;
 FreyjaAssertCallback gFreyjaDebugInfoHandler = NULL;
+
+/* Singletons. */
+template <typename Type>
+ResourceManager<Type>* ResourceManager<Type>::mInstance = NULL;
 
 
 ///////////////////////////////////////////////////////////////////////
@@ -94,7 +100,9 @@ void freyja_start( freyja_ptr printer )
 	static bool init = false;
 
 	if ( !init )
-	{
+	{	
+		ResourceManager<Material>::GetInstance();
+
 		/* Setup basic default stdout printer */
 		if ( printer )
 		{
@@ -121,6 +129,9 @@ void freyja_start( freyja_ptr printer )
 
 void freyja_shutdown( )
 {
+	ResourceManager<Material>::GetInstance()->UnregisterAll( true );
+	ResourceManager<Material>::DestroyInstance();
+
 	freyjaPluginShutdown();
 
 	freyjaPrintMessage("\nfreyjaFree(): libfreyja plugins shutdown.");

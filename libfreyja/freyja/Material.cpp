@@ -29,11 +29,12 @@ using namespace freyja;
 // Constructors
 ////////////////////////////////////////////////////////////
 
-Material::Material() :
-	mName( ),
+Material::Material( const char* name ) :
+	mName( name ),
 	mFilename( ),
 	mShaderFilename( ),
 	mAlpha( false ),
+	mBlending( false ),
 	mShaderId( -1 ),
 	mMetadata( ),
 	mShader( ),
@@ -46,7 +47,8 @@ Material::Material() :
 	mEmissiveMap( NULL ),
 	mHeightMap( NULL ),
 	mNormalMap( NULL ),
-	mSpecularMap( NULL )
+	mSpecularMap( NULL ),
+	mDecalMapId( -1 )
 {
 	mAmbient[0]  = mAmbient[1]  = mAmbient[2]  = 0.2f;
 	mAmbient[3]  = 1.0f;
@@ -262,6 +264,68 @@ bool Material::Unserialize(XMLSerializerNode mat)
 #endif	
 }
 
+
+freyja::Material* Material::Import( const char* filename )
+{
+#if TINYXML_FOUND
+
+
+#if COMPRESSED_XML
+	TiXmlDocument doc;
+
+	/* Should handle files with and without gz compression. */
+	{
+		char* xml = NULL;
+		unsigned int size;
+		mstl::GzFileRead( filename, xml, size );
+		doc.Parse( xml );
+		
+		/* FIXME: GzRead allocator should provide deallocator. */
+		delete xml; 
+	}
+#else
+	TiXmlDocument doc( filename );
+
+	if ( !doc.LoadFile() )
+	{
+		printf("XML ERROR: %s, Line %i, Col %i\n", 
+			   doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
+		return false;
+	}
+#endif
+
+	if ( doc.Error() )
+	{
+		printf("XML ERROR: %s, Line %i, Col %i\n", 
+			   doc.ErrorDesc(), doc.ErrorRow(), doc.ErrorCol() );
+		return false;
+	}
+
+	TiXmlElement* root = doc.RootElement(); 
+
+	if (!root) 
+	{
+		printf("Couldn't find document root!\n");
+		return false;
+	}
+
+	Material* mat = new Material( "?" );
+	if ( !mat->Unserialize( root ) )
+	{
+		delete mat;
+		mat = NULL;
+	}
+
+	return mat;
+
+	//TiXmlElement* child = root->FirstChildElement();
+	//for( ; child; child = child->NextSiblingElement() )
+	//{
+	//}
+#else
+	return NULL;
+#endif
+}
 
 
 ////////////////////////////////////////////////////////////

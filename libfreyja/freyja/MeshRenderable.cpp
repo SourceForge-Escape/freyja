@@ -28,7 +28,7 @@ index_t MeshRenderable::ReserveIndexTriangle( index_t a, index_t b, index_t c )
 	mIndices.push_back( b );
 	mIndices.push_back( c );
 
-	MARK_MSGF( "%i <- %i %i %i", off, a, b, c );
+	FREYJA_MSG( "%i <- %i %i %i", off, a, b, c );
 
 	return off;
 }

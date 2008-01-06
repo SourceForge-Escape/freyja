@@ -33,7 +33,7 @@
 namespace freyja {
 
 enum PixelFormat {
-	Indexed_8bpp,
+	Indexed_8bpp = 1,
 	RGB_24bpp,
 	RGBA_32bpp
 };
@@ -214,6 +214,13 @@ class PixelBuffer
 	 *
 	 ------------------------------------------------------*/
 
+	static void AddPluginPath( const char* path )
+	{ mPluginDirectories.push_back( mstl::String( path ) ); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
  protected:
 
