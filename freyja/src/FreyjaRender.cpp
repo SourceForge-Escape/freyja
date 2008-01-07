@@ -129,7 +129,8 @@ FreyjaRender::FreyjaRender() :
 	mFovY(40.0f),
 	mNearHeight(20.0f),
 	mSelectedView( PLANE_FREE ),
-	mSelectedViewport( 0 )
+	mSelectedViewport( 0 ),
+	mMaterialYAngle( 0.0f )
 {
 	mAngles[0] = 18.0f;
 	mAngles[1] = 42.0f;
@@ -275,11 +276,14 @@ void FreyjaRender::DrawCamWindow()
 	hel::Vec3 pos, target;
 	hel::Vec3 up(0.0f, 1.0f, 0.0f);
 
+#warning FIXME Update to 10.x API.
+#if FIXME
 	// FIXME: Use viewport's selected camera.
-	index_t camera = GetSelectedCamera( );
-	freyjaGetCameraPos3fv(camera, pos.mVec);
-	freyjaGetCameraTarget3fv(camera, target.mVec);
-	freyjaGetCameraUp3fv(camera, up.mVec);
+	freyja_ptr camera = GetSelectedCamera( );
+	freyjaNodeGetPosition(camera, pos.mVec);
+	freyjaCameraGetTarget3fv(camera, target.mVec);
+	freyjaCameraGetUp3fv(camera, up.mVec);
+#endif
 	
 	//glLoadIdentity();
 
@@ -524,10 +528,13 @@ void FreyjaRender::DrawFreeWindow()
 
 		{	
 			hel::Vec3 pos, target;
+
+#warning FIXME Update to 10.x API.
+#if FIXME
 			index_t camera = GetSelectedCamera();
 			freyjaGetCameraPos3fv(camera, pos.mVec);
-			freyjaGetCameraTarget3fv(camera, target.mVec);
-
+			freyjaCameraGetTarget3fv(camera, target.mVec);
+#endif
 			//glBegin(GL_POINTS);	
 			glColor3fv(BLUE);	
 			//glVertex3fv(pos.mVec);
@@ -818,7 +825,7 @@ void FreyjaRender::AttachMethodListeners()
 	CreateListener("eViewportCurve", &FreyjaRender::EvViewportCurve);
 	CreateListener("eViewportCamera", &FreyjaRender::EvViewportCamera);
 	CreateListener("eViewportMaterial", &FreyjaRender::EvViewportMaterial);
-	//CreateListener("", &FreyjaRender::);
+
 
 	// Mode events
 	EvModeAutoKeyframeId = CreateListener("eModeAnim", &FreyjaRender::EvModeAutoKeyframe);
@@ -2938,12 +2945,9 @@ void FreyjaRender::DrawMaterialEditWindow()
 		glLightfv( GL_LIGHT0, GL_SPECULAR, specular );
 	}
 
-	/* Rotate mesh. */
-	static vec_t dy = 0.0f;
-	dy += 0.5f;
-	if (dy > 360.0f) dy = 0.0f;
 	glPushMatrix();
-	glRotatef(dy, 0, 1, 0);
+	/* Rotate mesh. */
+	glRotatef( mMaterialYAngle, 0, 1, 0 );
 
 	/* Apply material to mesh. */
 	glEnable( GL_TEXTURE_2D );
@@ -3115,7 +3119,24 @@ void FreyjaRender::HandleMotion( mgtk_mouse_event_t* event )
 		break;
 
 
+	case MOUSE_BTN_LEFT:
+		if ( mViewMode == VIEWMODE_MATERIAL_EDIT )
+		{
+			const float treshold = 1.0f, inc = 2.0f;
+			if ( event->x_delta > treshold )
+				mMaterialYAngle += inc;
+			else if (event->x_delta < -treshold)
+				mMaterialYAngle -= inc;
+
+			if ( mMaterialYAngle > 360.0f ||
+				 mMaterialYAngle < -360.0f )
+				mMaterialYAngle = 0.0f;
+		}
+		break;
+
+
 	case MOUSE_BTN_RIGHT: 
+
 		if ( GetSelectedView() == PLANE_FREE )
 		{
 			const float treshold = 1.0f;

@@ -6,6 +6,8 @@
 
  Kagura alpha, 0.10.0.0
 
+ * 
+ * Material preview rotation now controlled directly by mouse drag.
  * Material's slot togglebutton now enables/disables texel units.
  * Material's texture spinbutton now sets texel unit instead of tid.
  * Material UI update.

@@ -200,7 +200,7 @@ freyjaMeshCreateCube( vec3_t origin,
 	}
 
 	cube->Translate( hel::Vec3( origin ) );
-	return cube->GetUID( );
+	return cube->ToPtr( );
 }
 
 

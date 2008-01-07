@@ -28,6 +28,7 @@
 
 #include <hel/ViewVolume.h>
 #include <hel/Ray.h>
+#include <hel/Quat.h>
 #include <mstl/SystemIO.h>
 #include <mgtk/ResourceEventDelegate.h>
 #include <freyja/Scene.h>
@@ -408,7 +409,8 @@ public:
 	// Public Accessors
 	////////////////////////////////////////////////////////////
 
-	unsigned int GetFlags() { return mRenderMode; }
+	unsigned int GetFlags() 
+	{ return mRenderMode; }
 	/*------------------------------------------------------
 	 * Pre  :
 	 * Post : Returns options flags for view
@@ -996,6 +998,8 @@ private:
 	static int EvModeAutoKeyframeId;
 
 	freyja::Material* mLastMaterial;
+
+	vec_t mMaterialYAngle;
 };
 
 } /* End namespace freyja3d */

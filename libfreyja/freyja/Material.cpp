@@ -83,10 +83,10 @@ bool Material::Serialize(XMLSerializerNode container) const
 	if (!container)
 		return false;	
 		
-	TiXmlElement *mat = new TiXmlElement("material");
+	TiXmlElement *mat = new TiXmlElement( GetType() );
 
-	mat->SetAttribute("version", 3);
-	mat->SetAttribute("name", mName.c_str() );
+	mat->SetAttribute( "version", GetVersion() );
+	mat->SetAttribute( "name", GetName() );
 	//mat->SetAttribute("flags", mFlags);
 
 	//if (mTextureFilename.c_str() != 0x0)
@@ -96,7 +96,7 @@ bool Material::Serialize(XMLSerializerNode container) const
 	//	mat->LinkEndChild(element);
 	//}
 
-	if (mShaderFilename.c_str() != 0x0)
+	if ( mShaderFilename.c_str() != 0x0 )
 	{
 		TiXmlElement *element = new TiXmlElement("shader");
 		element->SetAttribute("glsl", mShaderFilename.c_str() );
