@@ -238,7 +238,7 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	freyja_ptr GetUID() const
+	freyja_ptr ToPtr() const
 	{ return (freyja_ptr)this; }
 	/*------------------------------------------------------
 	 * Pre  :  

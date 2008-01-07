@@ -67,10 +67,18 @@ class Camera :
 	 *
 	 ------------------------------------------------------*/
 
-	~Camera();
+	~Camera( );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Destructor.
+	 *
+	 ------------------------------------------------------*/
+
+	static freyja::Camera* Cast( freyja_ptr ptr )
+	{ return (freyja::Camera*)ptr; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : FIXME Add RTTI checking.
 	 *
 	 ------------------------------------------------------*/
 
@@ -95,22 +103,6 @@ class Camera :
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Camera dir position property.
-	 *
-	 ------------------------------------------------------*/
-
-	const hel::Vec3& GetPos();
-	void SetPos(const hel::Vec3& pos);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Camera position property.
-	 *
-	 ------------------------------------------------------*/
-
-	const hel::Quat& GetRot();
-	void SetRot(const hel::Quat& q);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Camera orientation property.
 	 *
 	 ------------------------------------------------------*/
 
@@ -177,45 +169,27 @@ class Camera :
 	 *
 	 ------------------------------------------------------*/
 
-	//unsigned int mId;           /* Unquie id */
-
-	//mode_t mMode;               /* Camera mode */
-
-	mstl::String mName;         /* Name of this camera */
-
-	mstl::String mMetadata;     /* XML metadata. */
-
-	hel::Ray mView;             /* 'Eye' pos+dir */
+	hel::Ray mView;             /* 'Eye' pos+dir, 	mView.SetOrigin( mPosition ); */
 	
 	hel::Vec3 mTarget;          /* Postition we're looking at  */
 	
 	hel::Vec3 mUp;              /* Up vector  */
 	
 	hel::Vec3 mSide;            /* Side vector  */
-
-	hel::Quat mRot;             /* Quaternion for rotation */
-	
-	//vec_t mViewDistance;        /* Distance from target */
-	
-	//bool mUpdate;               /* Check to see if view needs updating */
-
-	//mstl::Vector<> mTracks;     /* Camera view animation tracks. */
-	
-	//mstl::Vector<> mUpTracks;   /* Camera up vector animation tracks. */
 };
 
 
 ////////////////////////////////////////////////////////////
 // Inline Methods. 
 ////////////////////////////////////////////////////////////
+
 inline
 Camera::Camera( const char* name ) :
 	Node( name ),
-	mView(),
-	mTarget(),
+	mView( ),
+	mTarget( ),
 	mUp(0.0f, 1.0f, 0.0f),
-	mSide(0.0f, 0.0f, 1.0f),
-	mRot()
+	mSide(0.0f, 0.0f, 1.0f)
 { }
 
 
@@ -232,34 +206,6 @@ const hel::Vec3& Camera::GetDir()
 inline
 void Camera::SetDir(const hel::Vec3& dir)
 { mView.SetDir( dir ); }
-
-
-inline
-const hel::Vec3& Camera::GetPos()
-{ return mView.GetOrigin(); }
-
-
-inline
-void Camera::SetPos(const hel::Vec3& pos)
-{
-	// Do we want to maintain same up vector or force other side to update?
-	//mUp += pos - mView.mOrigin;
-	//mUp.Norm();
-
-	mView.SetOrigin( pos );
-}
-
-//////
-
-
-inline
-const hel::Quat& Camera::GetRot()
-{ return mRot; }
-
-
-inline
-void Camera::SetRot(const hel::Quat& q)
-{ mRot = q;	}
 
 
 inline

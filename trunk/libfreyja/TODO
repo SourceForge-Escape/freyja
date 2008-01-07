@@ -12,6 +12,13 @@
 	- Pick by Ray and type.
 	- Move Camera, Light, etc to 10.0 ABI.
 
+ * Camera, Light
+	- New implementations.
+	- New ABI.
+
+ * Material
+	- Update serialization methods.
+
  * Mesh
 	- Smoothing groups as lists, and pointers in Face back to group.
 
@@ -32,7 +39,7 @@
 	- Provide binary file I/O wrapper.
 
  * Compute weight normals/tangents/etc
-	- SkeletalMeshRenderable will need tangent and normal FloatArray's.
+	- SkeletalMeshRenderable will need transformed vertex, tangent, and normal FloatArray's.
 
  * Modules 10.x ABI
 	- JA Import Module.

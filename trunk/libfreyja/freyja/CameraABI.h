@@ -34,58 +34,44 @@ extern "C" {
 	 *        
 	 ------------------------------------------------------*/
 
-	void freyjaCameraDelete( freyja_ptr camera );
+	void freyjaCameraDestroy( freyja_ptr camera );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaGetCameraPos3fv(index_t cameraIndex, vec3_t xyz);
-	void freyjaCameraPos3f(index_t cameraIndex, vec_t x, vec_t y, vec_t z);
-	void freyjaCameraPos3fv(index_t cameraIndex, const vec3_t xyz);
+	void freyjaCameraGetTarget3f( freyja_ptr camera_ptr, vec3_t xyz );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Set camera world position.
+	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaGetCameraTarget3fv(index_t cameraIndex, vec3_t xyz);
-	void freyjaCameraTarget3f(index_t cameraIndex, vec_t x, vec_t y, vec_t z);
-	void freyjaCameraTarget3fv(index_t cameraIndex, const vec3_t xyz);
+	void freyjaGetCameraUp3fv( freyja_ptr camera_ptr, vec3_t xyz );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void freyjaCameraSetTarget3f( freyja_ptr camera_ptr, vec_t x, vec_t y, vec_t z );
+	void freyjaCameraSetTarget3fv( freyja_ptr camera_ptr, const vec3_t xyz );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Set camera's target world position directly.
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaGetCameraUp3fv(index_t cameraIndex, vec3_t xyz);
-	void freyjaCameraUp3f(index_t cameraIndex, vec_t x, vec_t y, vec_t z);
-	void freyjaCameraUp3fv(index_t cameraIndex, const vec3_t xyz);
+	void freyjaCameraSetUp3f( freyja_ptr camera_ptr, vec_t x, vec_t y, vec_t z );
+	void freyjaCameraSetUp3fv( freyja_ptr camera_ptr, const vec3_t xyz );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Set camera's up vector directly.
 	 *
 	 ------------------------------------------------------*/
 
-	void freyjaCameraRotQuat4f(index_t cameraIndex,
-							   vec_t w, vec_t x, vec_t y, vec_t z);
-	void freyjaCameraRotQuat4fv(index_t cameraIndex, vec4_t wxyz);
-	/*------------------------------------------------------
-	 * Pre  : Remember freyja uses { W X Y Z } quaternions to match 0.9.3 ABI.
-	 * Post : Set camera orientation.
-	 *
-	 ------------------------------------------------------*/
-
-	void freyjaGetCameraRotQuat4fv(index_t cameraIndex, vec4_t wxyz);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Gets camera[index]'s orientation as a Quaternion
-	 *        Returns FREYJA_PLUGIN_ERROR on error
-	 ------------------------------------------------------*/
-
-
-}
+} // extern "C"
 
 
 #endif // GUARD__FREYJA_CAMERAABI_H_

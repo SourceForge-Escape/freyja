@@ -1068,7 +1068,19 @@ void MaterialControl::EvOpenTexture( char *text )
 
 			if ( mat )
 			{
-				mgtk_textentry_value_set(e, text);
+				mstl::String basename = text;
+#if WIN32
+				const char sep = '\\';
+#else
+				const char sep = '/';
+#endif
+				int i = basename.find_last_of( sep );
+				if ( i > 0 )
+				{
+					basename = ( basename.c_str()+i+1 );
+				}
+
+				mgtk_textentry_value_set( e, basename.c_str() );
 
 				/* Now the spin button sets the texel unit instead of the texture id. */
 				mgtk_spinbutton_value_set( EvSetTextureId, mTextureMap ); //texture);
@@ -1141,7 +1153,22 @@ void MaterialControl::EvOpenShader(char *text)
 		ResourceEvent::GetResourceIdBySymbol("eSetMaterialShaderFilename");
 		
 		//uint32 texture = mTextureId - 1;
-		mgtk_textentry_value_set(e, text);
+
+		{
+			mstl::String basename = text;
+#if WIN32
+			const char sep = '\\';
+#else
+			const char sep = '/';
+#endif
+			int i = basename.find_last_of( sep );
+			if ( i > 0 )
+			{
+				basename = ( basename.c_str()+i+1 );
+			}
+			mgtk_textentry_value_set(e, basename.c_str() );
+		}
+
 		mgtk_spinbutton_value_set(EvSetShaderId, fragmentId);
 
 		/* Propagate to material backend. */

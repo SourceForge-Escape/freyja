@@ -10,5 +10,9 @@
  * 3d cursor support.
  * Edit mode support.
  * Viewport separation support for mouse events.
- * Hook texture loading in UI back up.
+
+ * Camera support.
+
+ * Arcball implementation to remove legacy vector angles.
+
 

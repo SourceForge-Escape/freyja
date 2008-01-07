@@ -498,9 +498,6 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
-
-	//const static uint32 mVersion = 4; /* Material version. */
-
 	mstl::String mName;               /* Material name */
 
 	mstl::String mFilename;           /* Material filename or NULL/empty string. */
