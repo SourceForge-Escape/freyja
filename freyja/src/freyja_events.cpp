@@ -432,12 +432,11 @@ void freyja_callback_get_image_data_rgb24(const char *filename,
 	freyja::PixelBuffer* pixbuf = freyja::PixelBuffer::Create( filename );
 	if ( pixbuf )
 	{
-		pixbuf->Scale(256, 256);
-		pixbuf->ConvertPixelFormat( freyja::RGBA_32bpp );
+		pixbuf->Scale( 256, 256 );
+		pixbuf->ConvertPixelFormat( freyja::RGB_24bpp );
 		*image = pixbuf->CopyPixmap();
 		*width = pixbuf->GetWidth();
 		*height = pixbuf->GetHeight();
-		delete pixbuf;
 	}
 }
 

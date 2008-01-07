@@ -6,7 +6,9 @@
 
  Kagura alpha, 0.10.0.0
 
- * 
+ * Tinkering with Wedge based meshes. ( no commit )
+ * Camera got minor update.
+ * Fix for PixelBuffer ConvertFormat().
  * New material implementation with resource and ABI.
  * New material implementation with stubbed ABI.
  * ResourceManager checked in.

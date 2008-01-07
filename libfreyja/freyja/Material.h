@@ -225,6 +225,22 @@ class Material :
 	 *
 	 ------------------------------------------------------*/
 
+	const char* GetTexture0( ) const
+	{ return mTexture0.c_str(); }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void SetTexture0( const char* name )
+	{ mTexture0 = name; }
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	int16 GetTexture0Id( ) const
 	{ return mTexture0Id; }
 	/*------------------------------------------------------
@@ -530,12 +546,14 @@ class Material :
 
 	vec_t mTransparency;              /* Alpha 0.0f to 1.0f. */
 
-	PixelBuffer* mDiffuseMap;         /* Various specific texture maps. */
+	PixelBuffer* mDiffuseMap;         /* Various specific texture maps. OBSOLETED */
 	PixelBuffer* mDecalMap;
 	PixelBuffer* mEmissiveMap;
 	PixelBuffer* mHeightMap;
 	PixelBuffer* mNormalMap;
 	PixelBuffer* mSpecularMap;
+
+	mstl::String mTexture0;           /* For use of import/export system. */
 
 	int16 mTexture0Id;                /* For use of generated textures. */
 	int16 mTexture1Id;

@@ -32,15 +32,19 @@ using namespace hel;
 freyja_ptr 
 freyjaMeshCreate( const char* name )
 {
-#warning FIXME
-	return NULL;
+	Mesh* mesh = new Mesh( name );
+	return mesh->ToPtr();
 }
 
 
 void
-freyjaMeshDelete( freyja_ptr mesh )
+freyjaMeshDelete( freyja_ptr mesh_ptr )
 {
-#warning FIXME
+	Mesh* mesh = Mesh::Cast( mesh_ptr );
+	if ( mesh )
+	{
+		delete mesh;
+	}
 }
 
 
@@ -106,6 +110,23 @@ freyjaMeshSetPosition( freyja_ptr meshIndex,
 {
 #warning FIXME
 }
+
+
+////////////////////////////////////////////////////////////////
+// Face ABI
+////////////////////////////////////////////////////////////////
+
+freyja_ptr freyjaFaceCreate( freyja_ptr mesh_ptr )
+{
+	Mesh* mesh = Mesh::Cast( mesh_ptr );
+	freyja_ptr face = NULL;
+	if ( mesh ) 
+	{
+		face = (freyja_ptr)mesh->CreateFace( );
+	}
+	return face;
+}
+
 
 
 ////////////////////////////////////////////////////////////////
@@ -274,6 +295,20 @@ freyjaMeshCreateTube(vec3_t origin,
 ///////////////////////////////////////////////////////////////////////
 // Vertex
 ///////////////////////////////////////////////////////////////////////
+
+freyja_ptr 
+freyjaVertexCreate3fv( freyja_ptr mesh_ptr, 
+					   vec3_t xyz )
+{
+	Mesh* mesh = Mesh::Cast( mesh_ptr );
+	freyja_ptr vertex = NULL;
+	if ( mesh ) 
+	{
+		vertex = (freyja_ptr)mesh->CreateVertex( Vec3( xyz ) );
+	}
+	return vertex;
+}
+
 
 void
 freyjaVertexGetTexCoord2fv( freyja_ptr vertex, 

@@ -327,6 +327,13 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
+	void freyjaMaterialSetTexture0( freyja_ptr material, const char* texture );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 } // extern "C"
 
 #endif // GUARD__FREYJA_MATERIALABI__H_

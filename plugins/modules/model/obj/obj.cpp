@@ -40,21 +40,21 @@
 
 #include "ObjModel.h"
 
-#define OBJ_EXPORT_ENABLED 1
+#define OBJ_EXPORT_ENABLED 0
 #define OBJ_EXPORT_SKELETON_AS_COMMENT 0
 
 using namespace mstl;
 
 extern "C" {
 
-	int freyja_model__obj_check(char *filename);
-	int freyja_model__obj_import(char *filename);
-	int freyja_model__obj_export(char *filename);
-	int import_model(char *filename);
-	void freyja_init();
+	void freyja_module_init( );
+	int freyja_model_check__obj( const char* filename );
+	int freyja_model_import__obj( const char* filename );
+	int freyja_model_export__obj( const char* filename );
 }
 
-void freyja_init()
+
+void freyja_module_init()
 {
 	freyjaPluginName1s("obj");
 	freyjaPluginDescription1s("Wavefront OBJ (*.obj)");
@@ -64,21 +64,13 @@ void freyja_init()
 	freyjaPluginArg1f("scale", 1.0f);
 }
 
-int import_model(char *filename)
+
+int freyja_model_check__obj( const char* filename )
 {
-	if (!freyja_model__obj_check(filename))
-		return freyja_model__obj_import(filename);
-
-	return -1;
-}
-
-
-int freyja_model__obj_check(char *filename)
-{
-	if (SystemIO::File::CompareFilenameExtention(filename, ".obj") == 0 ||
-		SystemIO::File::CompareFilenameExtention(filename, ".OBJ") == 0)
+	if ( SystemIO::File::CompareFilenameExtention(filename, ".obj") == 0 ||
+		 SystemIO::File::CompareFilenameExtention(filename, ".OBJ") == 0 )
 	{
-		freyjaPrintMessage("obj.so: '%s' is an obj model", filename);
+		freyja_print( "obj.so: '%s' is an obj model", filename );
 		return 0;
 	}
 
@@ -86,36 +78,33 @@ int freyja_model__obj_check(char *filename)
 }
 
 
-int freyja_model__obj_import(char *filename)
+int freyja_model_import__obj( const char* filename )
 {
 	ObjModel obj;
-	mstl::Vector<int> uvmap;
-
+	
 	if (!obj.Load(filename))
 	{
 		return -1;
 	}
 
-	index_t model = freyjaModelCreate();
-	uint32 m, v, f, i;
-	
-	foreach (obj.mTextures, i)
+	uint32 m, v, f, i;	
+	foreach ( obj.mTextures, i )
 	{
-		index_t mat = freyjaMaterialCreate();
-		freyjaMaterialTextureName(mat, obj.mTextures[i].c_str());
+		freyja_ptr mat = freyjaMaterialCreate( NULL );
+		freyjaMaterialSetTexture0( mat, obj.mTextures[i].c_str() );
 	}
+
+	freyja_ptr scene = freyjaSceneCreate( );
+	mstl::Vector<int> uvmap;
 
 	foreach (obj.mMeshes, m)
 	{
-		index_t mesh = freyjaMeshCreate();
-		freyjaModelAddMesh(model, mesh);
+		freyja_ptr mesh = freyjaMeshCreate();
+		freyjaSceneAddNode( scene, mesh );
 
 		foreach (obj.mMeshes[m].mVertices, v)
 		{
-			i = freyjaMeshVertexCreate3fv(mesh, obj.mMeshes[m].mVertices[v].mVec);
-			// FIXME Polymapped not supported this way
-			if (obj.mMeshes[m].mHasNormals)
-				freyjaMeshVertexNormal3fv(mesh, i, obj.mMeshes[m].mNormals[v].mVec);
+			freyja_ptr vertex = freyjaVertexCreate3fv( mesh, obj.mMeshes[m].mVertices[v].mVec );
 		}
 
 		if (obj.mMeshes[m].mHasTexCoords)
@@ -128,13 +117,33 @@ int freyja_model__obj_import(char *filename)
 
 		foreach (obj.mMeshes[m].mFaces, f)
 		{
-			index_t face = freyjaMeshPolygonCreate(mesh);
-			freyjaMeshPolygonMaterial(mesh, face, obj.mMeshes[m].mFaces[f].mTexture);
-			freyjaMeshPolygonGroup1u(mesh, face, obj.mMeshes[m].mFaces[f].mSmoothingGroup);
+			freyja_ptr face = freyjaCreateFace(mesh);
+			freyjaFaceSetMaterial1i( face, obj.mMeshes[m].mFaces[f].mTexture );
+			freyjaFaceSetGroup1i( face, obj.mMeshes[m].mFaces[f].mSmoothingGroup );
 
 			foreach (obj.mMeshes[m].mFaces[f].mVertexRefs, v)
 			{
-				freyjaMeshPolygonAddVertex1i(mesh, face, obj.mMeshes[m].mFaces[f].mVertexRefs[v]);
+				freyja_ptr vertex = vmap[ obj.mMeshes[m].mFaces[f].mVertexRefs[v] ];
+				freyjaFaceAddVertex( face, vertex );
+
+				if (obj.mMeshes[m].mHasNormals)
+				{
+					freyjaFaceSetNormal3fv( face, vertex, obj.mMeshes[m].mNormals[v].mVec );
+				}
+
+				if (obj.mMeshes[m].mHasTexCoords)
+				{
+					freyjaFaceSetTexcoord2fv( face, vertex, 
+				}
+			}
+
+			if (obj.mMeshes[m].mHasNormals)
+			{
+				foreach (obj.mMeshes[m].mFaces[f].mVertexRefs, v)
+				{				
+					freyjaFaceSetNormal3fv( face, vertex, obj.mMeshes[m].mNormals[v].mVec );
+					freyjaFaceAddVertex1i( face, obj.mMeshes[m].mFaces[f].mVertexRefs[v] );
+				}
 			}
 
 			if (obj.mMeshes[m].mHasTexCoords)
@@ -149,13 +158,11 @@ int freyja_model__obj_import(char *filename)
 		
 	}
 
-	
-
 	return 0;
 }
 
 
-int freyja_model__obj_export(char *filename)
+int freyja_model_export__obj( const char* filename )
 {
 #if OBJ_EXPORT_ENABLED
 	SystemIO::TextFileWriter w;

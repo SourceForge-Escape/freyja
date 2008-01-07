@@ -48,6 +48,7 @@ Material::Material( const char* name ) :
 	mHeightMap( NULL ),
 	mNormalMap( NULL ),
 	mSpecularMap( NULL ),
+	mTexture0( ),
 	mTexture0Id( -1 ),
 	mTexture1Id( -1 ),
 	mTexture2Id( -1 ),
