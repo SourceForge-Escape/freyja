@@ -351,3 +351,13 @@ void freyjaMaterialSetBlendDestination(freyja_ptr material_ptr, const char* fact
 		material->SetBlendDest( factor );
 	}
 }
+
+
+void freyjaMaterialSetTexture0( freyja_ptr material_ptr, const char* texture )
+{
+	Material* material = Material::Cast( material_ptr );
+	if ( material )
+	{
+		material->SetTexture0( texture );
+	}
+}

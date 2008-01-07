@@ -77,6 +77,9 @@ bool PixelBuffer::ConvertPixelFormat( PixelFormat mode )
 	if ( !mImage || mWidth < 1 || mHeight < 1 )
 		return false;
 
+	if ( mode == mPixelFormat )
+		return true;
+
 	bool converted = false;
 
 	/* Note:
@@ -89,7 +92,6 @@ bool PixelBuffer::ConvertPixelFormat( PixelFormat mode )
 		switch ( mPixelFormat )
 		{
 		case Indexed_8bpp:
-			converted = true;
 			break;
 
 		case RGB_24bpp: 
@@ -157,14 +159,13 @@ bool PixelBuffer::ConvertPixelFormat( PixelFormat mode )
 			break;
 
 		case RGB_24bpp:
-			converted = true;
 			break;
 
 		case RGBA_32bpp:
 			{
-				byte* image = new byte[mWidth * mHeight * 3];
-			
-				for (uint32 i = 0, size = mWidth * mHeight; i < size; ++i)
+				byte* image = new byte[ mWidth * mHeight * 3 ];
+
+				for ( uint32 i = 0, size = mWidth * mHeight; i < size; ++i )
 				{
 					const unsigned int idx = i*3;
 					const unsigned int idx2 = i*4;
@@ -185,7 +186,7 @@ bool PixelBuffer::ConvertPixelFormat( PixelFormat mode )
 			;
 
 		}
-
+		break;
 
 	case RGBA_32bpp:
 
