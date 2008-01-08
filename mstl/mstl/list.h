@@ -104,7 +104,7 @@ namespace mstl
 		{
 		public:
 			iterator(listnode<T> *node) 
-				: cur(node) 
+				: mCursor(node) 
 			{}
 			/*--------------------------------------------------------
 			 * Pre  : 
@@ -121,7 +121,7 @@ namespace mstl
 			 --------------------------------------------------------*/
 
 			const T& operator*()
-			{ return cur ? cur->GetData() : list<T>::mDefault; }
+			{ return mCursor ? mCursor->GetData() : list<T>::mDefault; }
 			/*--------------------------------------------------------
 			 * Pre  : 
 			 * Post : 
@@ -129,7 +129,7 @@ namespace mstl
 			 --------------------------------------------------------*/
 
 			bool operator!=(const iterator &it)
-			{ return ( cur != it.cur ); } 
+			{ return ( mCursor != it.mCursor ); } 
 			/*--------------------------------------------------------
 			 * Pre  : 
 			 * Post : 
@@ -138,8 +138,8 @@ namespace mstl
 			
 			iterator operator++(int i)
 			{ 
-				listnode<T> *prev = cur;
-				cur = cur ? cur->GetNext() : NULL; 
+				listnode<T> *prev = mCursor;
+				mCursor = mCursor ? mCursor->GetNext() : NULL; 
 				return iterator( prev ); 
 			}
 			/*--------------------------------------------------------
@@ -150,7 +150,7 @@ namespace mstl
 			
 			iterator& operator++()
 			{ 
-				cur = cur ? cur->GetNext() : NULL; 
+				mCursor = mCursor ? mCursor->GetNext() : NULL; 
 				return *this; 
 			}
 			/*--------------------------------------------------------
@@ -159,9 +159,25 @@ namespace mstl
 			 *
 			 --------------------------------------------------------*/
 
+			iterator end()
+			{ return iterator( NULL ); }
+			/*--------------------------------------------------------
+			 * Pre  : 
+			 * Post : 
+			 *
+			 --------------------------------------------------------*/
+
+			listnode<T>* _get_cursor( )
+			{ return mCursor; }
+			/*--------------------------------------------------------
+			 * Pre  : 
+			 * Post : Used internally by list<>.
+			 *
+			 --------------------------------------------------------*/
+
 
 		protected:
-			listnode<T> *cur;
+			listnode<T>* mCursor;
 		};
 		
  
@@ -280,6 +296,12 @@ namespace mstl
 		 *
 		 --------------------------------------------------------*/
 
+		unsigned int size( );
+		/*--------------------------------------------------------
+		 * Pre  : 
+		 * Post : 
+		 *
+		 --------------------------------------------------------*/
 
 	protected: 
 
@@ -289,6 +311,7 @@ namespace mstl
 		
 		listnode<T> *mTail;         /* Tail of the list */
 
+		unsigned int mSize;         /* Element count. */
 	}; 
 
 
@@ -358,11 +381,11 @@ namespace mstl
 
 
 	template <typename T> 
-	void list<T>::erase(iterator pos)
+	void list<T>::erase( iterator pos )
 	{
-		listnode<T> *cur = pos.cur ? (listnode<T> *)pos.cur : NULL;
+		listnode<T> *cur = pos._get_cursor();
 
-		if (cur)
+		if ( cur )
 		{
 			if ( cur->GetNext() )
 			{
@@ -383,6 +406,8 @@ namespace mstl
 			{
 				mTail = cur->GetPrev();
 			}
+
+			--mSize;
 		} 	
 	}
 
@@ -390,9 +415,9 @@ namespace mstl
 	template <typename T> 
 	class list<T>::iterator list<T>::insert(iterator pos, const T& data)
 	{
-		listnode<T> *cur = pos.cur ? (listnode<T> *)pos.cur : NULL;
+		listnode<T> *cur = pos._get_cursor();
 
-		if (!cur)
+		if ( !cur )
 		{
 			return iterator(NULL);
 		} 
@@ -405,6 +430,8 @@ namespace mstl
 		{
 			node->GetNext()->SetPrev( node );
 		}
+
+		++mSize;
 	   
 		return iterator( node );  
 	}
@@ -423,6 +450,8 @@ namespace mstl
 			}
 
 			mTail = node;
+
+			--mSize;
 		}
 	} 
 
@@ -442,6 +471,7 @@ namespace mstl
 			delete mHead; // ??
 
 			mHead = node;
+			--mSize;
 		}
 	} 
 
@@ -461,6 +491,8 @@ namespace mstl
 			node->SetPrev( mTail );
 			mTail = node;
 		}
+
+		++mSize;
 	}
 
 
@@ -479,26 +511,34 @@ namespace mstl
 			node->SetNext( mHead );
 			mHead = node;
 		}
+
+		++mSize;
 	}
 
 
 	template <typename T> 
-	void list<T>::remove(const T& data)
+	void list<T>::remove( const T& data )
 	{
-		listnode<T> *cur = mHead;
+		listnode<T>* cur = mHead;
 
 		while( cur )
 		{
 			if ( cur->GetData() == data )
 			{
-				listnode<T> *tmp = cur->GetNext();
-				erase( iterator(cur) );
+				erase( iterator( cur ) );
 			}
 			else
 			{
 				cur = cur->GetNext();
 			}
 		}
+	}
+
+
+	template <typename T> 
+	unsigned int list<T>::size( )
+	{
+		return mSize;
 	}
 
 

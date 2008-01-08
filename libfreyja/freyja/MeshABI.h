@@ -348,11 +348,16 @@ extern "C" {
 	 * Post : Returns min and max of axis aligned bounding volume.
 	 ------------------------------------------------------*/
 
-	void freyjaGetMeshBoundingSphere(index_t mesh, 
-									 vec3_t origin, vec_t &radius);
+	vec_t freyjaGetMeshBoundingSphereRadius(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Returns min and max of spherical bounding volume.
+	 * Post : Returns radius of spherical bounding volume.
+	 ------------------------------------------------------*/
+
+	void freyjaGetMeshBoundingSphereCenter(index_t mesh, vec3_t center);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Returns center of spherical bounding volume.
 	 ------------------------------------------------------*/
 
 	uint32 freyjaGetMeshFlags(index_t mesh);
@@ -571,16 +576,7 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	index_t freyjaMeshCreateLattice(vec3_t origin, vec_t size, 
-									uint32 rows, uint32 columns, uint32 layers);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Quadrilateral lattice mesh is created.
-	 *        <layers> tall with <rows> x <cols> of quads div per layer.
-	 *
-	 *        Useful for quickier extruding.
-	 *
-	 ------------------------------------------------------*/
+
 
 	index_t freyjaMeshCreateCube(vec3_t origin, vec_t size);
 	/*------------------------------------------------------

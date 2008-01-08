@@ -39,7 +39,6 @@ int (*Material::mLoadShaderFunc)(const char *filename) = NULL;
 
 Material::Material() :
 	mId(-1),
-	mFlags(0),
 	mParent(-1),
 	mShininess(0.0f),
 	mTransparency(1.0f),
@@ -48,13 +47,17 @@ Material::Material() :
 	mTexture(0),
 	mShaderId(0),
 	mHasAlphaChannel(false),
+	mMultitexture( false ),
+	mBlending( false ),
+	mName(),
 	mBlendSrcString("GL_ONE"),
 	mBlendDestString("GL_ONE"),
 	mTextureFilename(),
 	mShaderFilename(),
-	mMetaData()
+	mMetaData(),
+	mMultiTextureIds( 5 )
 {
-	mName[0] = '\0';
+	mMultiTextureIds.assign_all( -1 );
 
 	mAmbient[0]  = mAmbient[1]  = mAmbient[2]  = 0.2;
 	mAmbient[3]  = 1.0;
@@ -81,16 +84,6 @@ Material::~Material()
 // Public Accessors
 ////////////////////////////////////////////////////////////
 
-const char *Material::GetShaderFilename()
-{
-	return mShaderFilename.c_str();
-}
-
-
-const char *Material::GetTextureFilename()
-{
-	return mTextureFilename.c_str();
-}
 
 
 uint32 Material::GetSerializeSize()
@@ -114,13 +107,39 @@ uint32 Material::GetSerializeSize()
 }
 
 
+uint32 Material::GetFlags()
+{
+	uint32 flags = fFreyjaMaterial_Texture;
+
+	if ( IsBlendingEnabled() )
+		flags |= fFreyjaMaterial_Blending;
+
+	if ( IsMultitextureEnabled() )
+		flags |= fFreyjaMaterial_MultiTexture;
+
+	// No longer support normalization requests in materials.
+	// fFreyjaMaterial_Normalize
+	return flags;
+}
+
+
+void Material::SetFlags( uint32 flags )
+{
+	if ( flags & fFreyjaMaterial_Blending )
+		EnableBlending();
+
+	if ( flags & fFreyjaMaterial_MultiTexture )
+		EnableMultitexture();
+}
+
+
 bool Material::Serialize(SystemIO::TextFileWriter &w)
 {
 	w.Print("[Material]\n");
 	w.Print("\tmVersion %u\n", mVersion);
 	w.Print("\tmId %u\n", mId);
-	w.Print("\tmName \"%s\"\n", mName);
-	w.Print("\tmFlags %u\n", mFlags);
+	w.Print("\tmName \"%s\"\n", mName.c_str() );
+	w.Print("\tmFlags %u\n", GetFlags() );
 	w.Print("\tmBlendSrc %u\n", mBlendSrc);
 	w.Print("\tmBlendDest %u\n", mBlendDest);
 	w.Print("\tmTextureName \"%s\"\n", 
@@ -162,8 +181,8 @@ bool Material::Serialize(SystemIO::FileWriter &w)
 	uint32 length = 0;
 
 	w.WriteInt32U(mVersion);
-	w.WriteString(64, mName);
-	w.WriteInt32U(mFlags);
+	w.WriteString(64, mName.c_str() );
+	w.WriteInt32U( GetFlags() );
 	w.WriteInt32U(mBlendSrc);
 	w.WriteInt32U(mBlendDest);
 
@@ -225,8 +244,8 @@ bool Material::Serialize(TiXmlElement *container)
 	TiXmlElement *mat = new TiXmlElement("material");
 
 	mat->SetAttribute("version", 3);
-	mat->SetAttribute("name", mName);
-	mat->SetAttribute("flags", mFlags);
+	mat->SetAttribute("name", mName.c_str() );
+	mat->SetAttribute("flags", GetFlags() );
 
 	if (mTextureFilename.c_str() != 0x0)
 	{
@@ -329,7 +348,8 @@ bool Material::Unserialize(TiXmlElement *mat)
 	SetName( mat->Attribute("name") );
 
 	mat->QueryIntAttribute("flags", &attr);
-	mFlags = attr < 0 ? INDEX_INVALID : attr;
+	SetFlags( attr );
+	//mFlags = attr < 0 ? INDEX_INVALID : attr;
 
 	TiXmlElement *child = mat->FirstChildElement();
 	for( ; child; child = child->NextSiblingElement() )
@@ -443,7 +463,8 @@ bool Material::Serialize(SystemIO::TextFileReader &r)
 		}
 		else if (strcmp(symbol, "mFlags") == 0)
 		{
-			mFlags = r.ParseInteger();
+			uint32 flags = r.ParseInteger();
+			SetFlags( flags );
 		}
 		else if (strcmp(symbol, "mBlendSrc") == 0)
 		{
@@ -532,18 +553,20 @@ bool Material::Serialize(SystemIO::TextFileReader &r)
 bool Material::Serialize(SystemIO::FileReader &r)
 {
 	uint32 version = r.ReadInt32U();
-	uint32 length = 0;
-
 
 	if (version != mVersion)
 		return false;
 
-	r.ReadString(64, mName);
-	mFlags = r.ReadInt32U();
+	{
+		char tmp[64];
+		r.ReadString(64, tmp);
+		mName = tmp;
+	}
+	/*mFlags =*/ SetFlags( r.ReadInt32U() );
 	mBlendSrc = r.ReadInt32U();
 	mBlendDest = r.ReadInt32U();
 
-	length = r.ReadInt32U();
+	uint32 length = r.ReadInt32U();
 
 	if (length > 0)
 	{
@@ -593,46 +616,7 @@ bool Material::Serialize(SystemIO::FileReader &r)
 }
 
 
-void Material::SetName(const char *name)
-{
-	int len;
 
-
-	if (!name || !name[0])
-	{
-		return;
-	}
-
-	len = strlen(name);
-
-	if (len > 63)
-		len = 63;
-
-	strncpy(mName, name, len);
-	mName[len] = 0;
-}
-
-
-void Material::SetTextureFilename(const char *name)
-{
-	if (!name || !name[0])
-	{
-		return;
-	}
-
-	mTextureFilename = name;
-}
-
-
-void Material::SetShaderFilename(const char *name)
-{
-	if (!name || !name[0])
-	{
-		return;
-	}
-
-	mShaderFilename = name;
-}
 
 
 ////////////////////////////////////////////////////////////

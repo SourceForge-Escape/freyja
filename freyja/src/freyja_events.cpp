@@ -53,6 +53,8 @@
 
 void freyja3d_misc_events_attach();
 
+Lua gLuaVM;
+
 
 using namespace freyja3d;
 
@@ -997,6 +999,31 @@ int FreyjaDebugInfoCallbackHandler(const char *file, unsigned int line,
 }
 
 
+bool freyja3d_execute_lua_script( const char* filename )
+{
+	bool ret = true;
+
+	if ( !mstl::SystemIO::File::DoesFileExist( filename ) )
+	{
+		FREYJA_ASSERTMSG(0, "Lua script '%s' could not be accessed.\n", 
+						 filename );
+	}
+	else
+	{
+		if ( !gLuaVM.ExecuteFile( filename ) )
+		{
+			FREYJA_ASSERTMSG(0, "Lua error '%s':\n%s\n", filename, gLuaVM.GetLastError() );
+		}
+		else
+		{
+			ret = true;
+		}
+	}
+
+	return ret;
+}
+
+
 int main(int argc, char *argv[])
 {
 	/* 'Link' up mgtk library stubs to these implementations */
@@ -1042,8 +1069,9 @@ int main(int argc, char *argv[])
 	/* Hookup resource to event system */
 	ResourceEvent::setResource(&FreyjaControl::GetInstance()->GetResource());
 
-	/* Export Lua mgtk functions to libfreyja VM. */
-	mgtk_lua_register_functions( freyjaGetLuaVM() );
+	/* Do Lua bindings for the mgtk and freyja libraries. */
+	mgtk_lua_register_functions( gLuaVM );
+	freyja_lua_register_functions( gLuaVM.GetState() );
 
 	mgtk_init(argc, argv);
 

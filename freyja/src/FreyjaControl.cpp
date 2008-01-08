@@ -132,7 +132,7 @@ FreyjaControl::FreyjaControl() :
 	mRecentLua("freyja-dev-recent-lua", "eRecentLua"),
 	mRecentPython("freyja-dev-recent-python", "eRecentPython"),
 
-	mTexture(),
+	mTexture(NULL),
 	mRender(NULL),
 	mCurrentlyOpenFilename(),
 	mControlScheme(eScheme_Model),
@@ -150,6 +150,8 @@ FreyjaControl::FreyjaControl() :
 	mFullScreen(false),
 	mToken(false)
 {
+	mTexture = Texture::GetInstance();
+
 	/* Start up libfreyja backend, and redirect its print/logging. */
 	freyjaSpawn();
 	extern void freyja__setPrinter(Printer *printer, bool freyjaManaged);
@@ -175,7 +177,7 @@ FreyjaControl::FreyjaControl() :
 	rgba[0] = rgba[1] = rgba[2] = 0.01f;
 	freyjaMaterialSpecular(mIndex, rgba);
 	freyjaMaterialShininess(mIndex, 0.0f);
-	freyjaMaterialSetFlag(mIndex, fFreyjaMaterial_Texture); // texture on!
+	//freyjaMaterialSetFlag(mIndex, fFreyjaMaterial_Texture); // texture on!
 
 	/* 0th camera */
 	mIndex = freyjaCameraCreate();
@@ -1725,6 +1727,22 @@ bool FreyjaControl::MotionEvent(int x, int y)
 {
 	switch (GetControlScheme())
 	{
+	case eScheme_Material:
+		if ( mMouseButton == MOUSE_BTN_LEFT )
+		{ 
+			// FIXME: Backport the mouse event system from 10.x to avoid this static bullshit for delta?
+			static float old_x = x;
+			const float treshold = 1.0f;
+
+			if ( x > old_x + treshold )
+				mRender->SetMaterialYaw( mRender->GetMaterialYaw() + 1.0f );
+			else if ( x < old_x - treshold )
+				mRender->SetMaterialYaw( mRender->GetMaterialYaw() - 1.0f );
+			
+			old_x = x;
+		}
+		break;
+
 	case eScheme_Animation:
 	case eScheme_Model:
 
@@ -4677,11 +4695,9 @@ void FreyjaControl::LoadResource()
 	// Setup the UI
 #if LUA_UI
 	String s = freyja_rc_map_string( FREYJA_UI_SCRIPT );
-	Lua* lua = (Lua*)&freyjaGetLuaVM();
-
-	if ( !lua->ExecuteFile( s.c_str() ) )
+	if ( !freyja3d_execute_lua_script( s.c_str() ) )
 	{
-		FREYJA_ASSERTMSG(0, "ERROR: Resource file '%s':\n%s\n", s.c_str(), lua->GetLastError() );
+		//FREYJA_ASSERTMSG(0, "ERROR: Resource file '%s':\n%s\n", s.c_str(), lua->GetLastError() );
 		freyja_event_shutdown();
 	}
 #else
@@ -4724,9 +4740,8 @@ bool FreyjaControl::LoadUserPreferences()
 {
 #if LUA_UI
 	String s = freyja_rc_map_string( FREYJA_USER_PREF_FILE );
-	Lua* lua = (Lua*)&freyjaGetLuaVM();
-
-	if ( !lua->ExecuteFile( s.c_str() ) )
+	//Lua* lua = (Lua*)&freyjaGetLuaVM();
+	if ( !freyja3d_execute_lua_script( s.c_str() ) )
 	{
 		// Who cares if this file is missing...
 
@@ -5663,7 +5678,8 @@ void FreyjaControl::EvLoadLuaScript()
 
 	if (filename)
 	{
-		freyjaLuaScript1s(filename);
+		freyja3d_execute_lua_script(filename);
+		//freyjaLuaScript1s(filename);
 		mRecentLua.AddFilename(filename);
 	}
 
@@ -5774,7 +5790,8 @@ void FreyjaControl::EvRecentKeyframe(uint32 value)
 
 void FreyjaControl::EvRecentLua(uint32 value)
 {
-	freyjaLuaScript1s( mRecentLua.GetFilename(value) );
+	freyja3d_execute_lua_script( mRecentLua.GetFilename(value) );
+	//freyjaLuaScript1s( mRecentLua.GetFilename(value) );
 }
 
 

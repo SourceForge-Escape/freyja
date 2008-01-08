@@ -332,7 +332,7 @@ def UpdateBindings():
 		print "#define USING_PYTHON"
 
 	for i in li:
-		if re.match('.*ABI.h', i) and not re.match('(Plugin|Legacy|.*~)', i):
+		if re.match('.*ABI.h', i) and not re.match('(Query|Plugin|Legacy|Lua|.*~)', i):
 			print "#include \"" + i + '"'
 			sucess = ImportBindings(gPath, i)
 

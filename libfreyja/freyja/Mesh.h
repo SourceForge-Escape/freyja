@@ -1167,23 +1167,23 @@ public:
 	void SetBBox(const vec3_t min, const vec3_t max)
 	{
 		// Update bbox
-		helCopyVec3(min, mBoundingVolume.mBox.mMin);
-		helCopyVec3(max, mBoundingVolume.mBox.mMax);
+		helCopyVec3(min, mBoundingVolume.mBox.mMin.mVec);
+		helCopyVec3(max, mBoundingVolume.mBox.mMax.mVec);
 
 		// Update sphere
 		hel::Vec3 vMin(min), vMax(max);
 		hel::Vec3 origin = ( vMin + vMax ) * 0.5; // midpoint
 		vec_t radius = hel::Vec3(origin - vMax).Magnitude();
 
-		origin.Get(mBoundingVolume.mSphere.mCenter);
+		origin.Get(mBoundingVolume.mSphere.mCenter.mVec);
 		mBoundingVolume.mSphere.mRadius = radius;
 	}
 
 
 	void GetBBox(vec3_t min, vec3_t max)
 	{
-		helCopyVec3(mBoundingVolume.mBox.mMin, min);
-		helCopyVec3(mBoundingVolume.mBox.mMax, max);
+		helCopyVec3(mBoundingVolume.mBox.mMin.mVec, min);
+		helCopyVec3(mBoundingVolume.mBox.mMax.mVec, max);
 	}
 
 

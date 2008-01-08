@@ -32,10 +32,9 @@
 
 #include <hel/math.h>
 #include <mstl/SystemIO.h>
+#include <mstl/Vector.h>
 #include <mstl/String.h>
 #include "FreyjaTexture.h"
-
-using namespace mstl;
 
 
 namespace freyja {
@@ -43,11 +42,6 @@ namespace freyja {
 class Material
 {
  public:
-
-	typedef enum {
-		fMaterial_DetailTexure = 1,		
-	} Flags;
-
 
 	////////////////////////////////////////////////////////////
 	// Constructors
@@ -94,37 +88,43 @@ class Material
 	 * Post : Returns number of unique materials
 	 ------------------------------------------------------*/
 
-	uint32 GetFlags();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get currently set flags
-	 ------------------------------------------------------*/
-
 	uint32 GetId();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns unique material id ( 1..N, or 0 if invalid )
 	 ------------------------------------------------------*/
 
-	const char *GetMetaData() { return mMetaData.c_str(); }
+	const char* GetMetaData() //const
+	{ return mMetaData.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets metadata
 	 ------------------------------------------------------*/
 
-	const char *GetName() { return mName; }
+	const char* GetName() //const
+	{ return mName.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns Material's name or NULL
 	 ------------------------------------------------------*/
 
-	const char *GetShaderFilename();
+	int16 GetMultiTexture( const uint16 i ) const
+	{ return ( i < mMultiTextureIds.size() ) ? mMultiTextureIds[i] : -1; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	const char* GetShaderFilename() //const
+	{ return mShaderFilename.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets Material's shader filename or NULL
 	 ------------------------------------------------------*/
 
-	const char *GetTextureFilename();
+	const char* GetTextureFilename() //const
+	{ return mTextureFilename.c_str(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets Material's texture filename or NULL
@@ -153,10 +153,46 @@ class Material
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
-	void ClearFlag(Flags flag) { mFlags &= ~flag; }
+	void DisableMultitexture()
+	{ mMultitexture = false; }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Unsets passed flag
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void EnableMultitexture()
+	{ mMultitexture = true; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	const bool IsMultitextureEnabled() const
+	{ return mMultitexture; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void DisableBlending()
+	{ mBlending = false; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	void EnableBlending()
+	{ mBlending = true; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 ------------------------------------------------------*/
+
+	const bool IsBlendingEnabled() const
+	{ return mBlending; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
 	 ------------------------------------------------------*/
 
 	virtual bool Serialize(SystemIO::TextFileReader &r);
@@ -187,41 +223,65 @@ class Material
 	 ------------------------------------------------------*/
 #endif
 
-	void SetFlag(Flags flag) { mFlags |= flag; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Sets passed flag
-	 ------------------------------------------------------*/
-
-	void SetName(const char *name);
+	void SetName(const char *name)
+	{ if (name && name[0]) mName = name; }
 	/*------------------------------------------------------
 	 * Pre  : Name is valid string
 	 * Post : Sets Material's name
 	 ------------------------------------------------------*/
 
-	void SetMetaData(const char *s) { mMetaData = s; }
+	void SetMetaData(const char *s) 
+	{ mMetaData = s; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Sets metadata
 	 ------------------------------------------------------*/
 
-	void SetShaderFilename(const char *name);
+	void SetMultiTextureName( const uint16 i, const char* name )
+	{ MARK_MSG("Not implemented."); }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void SetMultiTexture( const uint16 i, const uint16 id )
+	{ if ( i < mMultiTextureIds.size() ) mMultiTextureIds[i] = id; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void SetShaderFilename(const char *name)
+	{ if (name && name[0]) mShaderFilename = name; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets Material's shader filename or NULL
 	 ------------------------------------------------------*/
 
-	void SetTextureFilename(const char *name);
+	void SetTextureFilename(const char *name)
+	{ if (name && name[0]) mTextureFilename = name; }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Gets Material's texture filename or NULL
 	 ------------------------------------------------------*/
 
+	uint32 GetFlags();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Legacy C ABI flags support.
+	 ------------------------------------------------------*/
+
+	void SetFlags( uint32 flags );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Legacy C ABI flags support.
+	 ------------------------------------------------------*/
+
 	const static uint32 mVersion = 3;
 
 	int32 mId;                  /* Unique identifier */
-
-	uint32 mFlags;              /* Bit flags */
 
 	int32 mParent;              /* Linked material id, for shader use */
 
@@ -255,29 +315,36 @@ class Material
 	// int load_shader(const char *filename)
 	static int (*mLoadShaderFunc)(const char *filename);
 
- private:
+
+ protected:
 
 
 	////////////////////////////////////////////////////////////
-	// Private Accessors
+	// Protected Accessors
 	////////////////////////////////////////////////////////////
 
 
 	////////////////////////////////////////////////////////////
-	// Private Mutators
+	// Protected Mutators
 	////////////////////////////////////////////////////////////
 
-	char mName[64];             /* Material name */
+	bool mMultitexture;               /* Multitexture use state. */
 
-	String mBlendSrcString;     /* Blending source human readable string */
+	bool mBlending;                   /* Blending use state. */
 
-	String mBlendDestString;    /* Blending source human readable string */
+	mstl::String mName;               /* Material name. */
 
-	String mTextureFilename;    /* This is used for file I/O to map classes */
+	mstl::String mBlendSrcString;     /* Blending source human readable string */
 
-	String mShaderFilename;     /* This is used for file I/O to map classes */
+	mstl::String mBlendDestString;    /* Blending source human readable string */
 
-	String mMetaData;           /* Useful for additional plugin material data */
+	mstl::String mTextureFilename;    /* This is used for file I/O to map classes */
+
+	mstl::String mShaderFilename;     /* This is used for file I/O to map classes */
+
+	mstl::String mMetaData;           /* Useful for additional plugin material data */
+
+	mstl::Vector<int16> mMultiTextureIds;
 };
 
 } // End namespace freyja

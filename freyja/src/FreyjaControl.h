@@ -1261,7 +1261,7 @@ private:
 
 	RecentFiles mRecentPython;
 
-	Texture mTexture;                       /* Collection of Texture utils */	
+	Texture* mTexture;                      /* Collection of Texture utils */	
 
 	FreyjaRender *mRender;                  /* OpenGL renderer */
 
@@ -1379,12 +1379,13 @@ freyja_transform_action_t FreyjaControl::GetEventAction()
 inline
 void FreyjaControl::InitTexture()
 {
-	mTexture.reset();
-	mTexture.setMaxTextureCount(64);
-	mTexture.setFlag(Texture::fUseMipmaps);
+	mTexture = Texture::GetInstance();
+	mTexture->reset();
+	mTexture->setMaxTextureCount(64);
+	mTexture->setFlag(Texture::fUseMipmaps);
 
 	unsigned char rgba[4] = {255, 255, 255, 255};
-	mTexture.loadColorTexture(rgba, 32, 32);
+	mTexture->loadColorTexture(rgba, 32, 32);
 	//mTextureId = 1;
 }
 

@@ -154,19 +154,10 @@ extern "C" {
 	 * Post : 
 	 ------------------------------------------------------*/
 
-	const char *freyjaGetBoneNameString(index_t boneIndex);
+	const char* freyjaGetBoneNameString(index_t boneIndex);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
-	 ------------------------------------------------------*/
-
-	void freyjaGetBoneName(index_t boneIndex, uint32 size, char *name);
-	/*------------------------------------------------------
-	 * Pre  : <name> must be allocated to <size> width
-	 *        A <size> of 64 is recommended
-	 *
-	 * Post : Gets bone[index]'s name as '\0' terminated string
-	 *        Returns FREYJA_PLUGIN_ERROR on error
 	 ------------------------------------------------------*/
 
 	index_t freyjaGetBoneParent(index_t boneIndex);

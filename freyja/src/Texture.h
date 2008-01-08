@@ -61,18 +61,12 @@ class Texture
 	// Constructors
 	////////////////////////////////////////////////////////////
 
-   Texture();
+	static Texture* GetInstance()
+	{ return (mInstance) ? mInstance : mInstance = new Texture(); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of Texture
+	 * Post : 
 	 *
-	 *-- History ------------------------------------------
-	 *
-	 * 2001.05.29:
-	 * Mongoose - Big code clean up, documentation
-	 *
-	 * 2000.10.05: 
-	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
    ~Texture();
@@ -301,13 +295,18 @@ class Texture
 	 * Mongoose - Created
 	 ------------------------------------------------------*/
 
-	static Texture *mSingleton;
+	void Bind( GLenum texture_unit, uint16 id ) const;
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 
- private:
+protected:
 
 	////////////////////////////////////////////////////////////
-	// Private Accessors
+	// Protected Accessors
 	////////////////////////////////////////////////////////////
 
 	int nextPower(int seed);
@@ -335,8 +334,22 @@ class Texture
 
 
 	////////////////////////////////////////////////////////////
-	// Private Mutators
+	// Protected Mutators
 	////////////////////////////////////////////////////////////
+
+   Texture();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of Texture
+	 *
+	 *-- History ------------------------------------------
+	 *
+	 * 2001.05.29:
+	 * Mongoose - Big code clean up, documentation
+	 *
+	 * 2000.10.05: 
+	 * Mongoose - Created
+	 ------------------------------------------------------*/
 
 	GLuint *mTextureIds;		/* GL texture list */
 
@@ -349,6 +362,10 @@ class Texture
 	int mTextureId;					/* Currently bound texture id */
 	
 	int mTextureId2;				/* Multitexture Texture Id */
+
+ private:
+
+	static Texture* mInstance;
 };
 
 

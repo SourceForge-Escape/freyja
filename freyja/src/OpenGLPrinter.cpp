@@ -448,7 +448,7 @@ bool OpenGLPrinter::Init(const char *font,
 
 	// Bind texture in OpenGL
 #ifdef HAVE_OPENGL
-	int id = Texture::mSingleton->loadBuffer(image, width, width, Texture::RGBA, 32);
+	int id = Texture::GetInstance()->loadBuffer(image, width, width, Texture::RGBA, 32);
 #endif // HAVE_OPENGL
 
 	return GenerateFont(mFont, text, glyphs, id, image, width);

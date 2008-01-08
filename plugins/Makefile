@@ -398,17 +398,6 @@ model-plugin-nif4/fast:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-nif4.dir/build.make plugins/CMakeFiles/model-plugin-nif4.dir/build
 
 # Convenience name for target.
-plugins/CMakeFiles/model-plugin-nif5.dir/rule:
-	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-nif5.dir/rule
-
-# Convenience name for target.
-model-plugin-nif5: plugins/CMakeFiles/model-plugin-nif5.dir/rule
-
-# fast build rule for target.
-model-plugin-nif5/fast:
-	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f plugins/CMakeFiles/model-plugin-nif5.dir/build.make plugins/CMakeFiles/model-plugin-nif5.dir/build
-
-# Convenience name for target.
 plugins/CMakeFiles/model-plugin-nod.dir/rule:
 	cd /home/mongoose/Projects/freyja_0.9.5 && $(MAKE) -f CMakeFiles/Makefile2 plugins/CMakeFiles/model-plugin-nod.dir/rule
 
@@ -631,7 +620,6 @@ help::
 	@echo "... model-plugin-milkshape"
 	@echo "... model-plugin-nad"
 	@echo "... model-plugin-nif4"
-	@echo "... model-plugin-nif5"
 	@echo "... model-plugin-nod"
 	@echo "... model-plugin-obj"
 	@echo "... model-plugin-psk"

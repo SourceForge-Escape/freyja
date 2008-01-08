@@ -1616,7 +1616,7 @@ bool Mesh::Intersect(hel::Ray &r, vec_t &t)
 	r.Norm();
 
 	// Sphere test
-	if (!r.IntersectSphere(mBoundingVolume.mSphere.mCenter, 
+	if (!r.IntersectSphere(mBoundingVolume.mSphere.mCenter.mVec, 
 						   mBoundingVolume.mSphere.mRadius, t))
 	{
 		return false;

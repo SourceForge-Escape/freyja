@@ -500,6 +500,8 @@ class MaterialControl : public Control
 	int32 mTextureId;                   /* Currently active texture slot. */
 
 	RecentFiles mRecent;                /* Recent material files lists. */
+
+	uint16 mTexUnit;
 };
 
 

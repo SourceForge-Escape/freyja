@@ -168,6 +168,7 @@ extern	PFNGLGETINFOLOGARBPROC h_glGetInfoLogARB;
 extern  PFNGLDELETEOBJECTARBPROC h_glDeleteObjectARB;
 extern  PFNGLGETOBJECTPARAMETERIVARBPROC h_glGetObjectParameterivARB;
 extern  PFNGLGETUNIFORMLOCATIONARBPROC h_glGetUniformLocationARB;
+extern  PFNGLUNIFORM1IARBPROC h_glUniform1iARB;
 
 #elif defined(HAVE_OPENGL) && defined(USING_OPENGL_EXT) && defined(__APPLE__)
 
@@ -194,6 +195,7 @@ extern  PFNGLGETUNIFORMLOCATIONARBPROC h_glGetUniformLocationARB;
 #   define h_glDeleteObjectARB glDeleteObjectARB
 #   define h_glGetObjectParameterivARB glGetObjectParameterivARB
 #   define h_glGetUniformLocationARB glGetUniformLocationARB
+#   define h_glUniform1iARB glUniform1iARB
 
 
 #else
@@ -220,7 +222,7 @@ extern	void *h_glGetInfoLogARB;
 extern  void *h_glDeleteObjectARB;
 extern  void *h_glGetObjectParameterivARB;
 extern  void *h_glGetUniformLocationARB;
-
+extern  void *h_glUniform1iARB;
 #endif
 
 #include <hel/math.h>
@@ -296,7 +298,7 @@ void mglGetOpenGLModelviewMatrix16fv(matrix_t modelview);
 
 void mglGetOpenGLProjectionMatrix16fv(matrix_t projection);
 
-void mglApplyMaterial(uint32 materialIndex);
+void mglApplyMaterial( int32 materialIndex );
 
 
 
@@ -345,37 +347,21 @@ class OpenGL
 	// Constructors
 	////////////////////////////////////////////////////////////
 
- protected:
-
-	OpenGL();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Constructs an object of OpenGL
-	 *
-	 ------------------------------------------------------*/
 
  public:
 
-	static OpenGL *Instance();
+	static OpenGL* Instance( )
+	{ return ( mSingleton ? mSingleton : ( mSingleton = new OpenGL() ) ); }
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of OpenGL if not already 
-	 *        allocated
+	 * Post : Get instace of this singleton.
 	 *
 	 ------------------------------------------------------*/
 
-	static const OpenGL *Singleton() { return mSingleton; }
+	~OpenGL( );
 	/*------------------------------------------------------
 	 * Pre  : 
-	 * Post : Constructs an object of OpenGL if not already 
-	 *        allocated
-	 *
-	 ------------------------------------------------------*/
-
-	~OpenGL();
-	/*------------------------------------------------------
-	 * Pre  : OpenGL object is allocated
-	 * Post : Deconstructs an object of OpenGL
+	 * Post : Destructor.
 	 *
 	 ------------------------------------------------------*/
 
@@ -553,7 +539,20 @@ class OpenGL
 	 * Post : 
 	 *
 	 ------------------------------------------------------*/
+	
+	static void Uniform1i( int32 programId, const char* symbol, uint32 value );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
+	static void BindTexture( GLenum texture_unit, uint16 id );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	////////////////////////////////////////////////////////////
 	// Public attributes
@@ -574,6 +573,17 @@ class OpenGL
 	static bool arb_shading_language_100;
 	static bool arb_vertex_buffer_object;
 	static bool ext_cg_shader;
+
+
+ protected:
+
+	OpenGL();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Constructs an object of OpenGL
+	 *
+	 ------------------------------------------------------*/
+
 
  private:
 

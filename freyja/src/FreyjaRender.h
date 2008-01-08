@@ -596,6 +596,22 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	vec_t GetMaterialYaw( )
+	{ return mMaterialViewVectorRotation_Y; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	void SetMaterialYaw( vec_t angle )
+	{ mMaterialViewVectorRotation_Y = ( angle < -360.0f || angle > 360.0f ) ? 0.0f : angle; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	static vec4_t mColorBackground;
 	static vec4_t mColorGridLine;
 	static vec4_t mColorVertex;
@@ -822,7 +838,7 @@ private:
 
 	vec2_t mUpperLeftText;
 
-	bool mScrollingUV_X;
+	vec_t mMaterialViewVectorRotation_Y;
 };
 
 
