@@ -90,10 +90,34 @@ extern "C" {
 	 *
 	 ------------------------------------------------------*/
 
-	uint32 freyjaGetMaterialFlags(index_t material);
+	void freyjaMaterialDisableMultiTexture( index_t material );
+
+	void freyjaMaterialEnableMultiTexture( index_t material );
+
+	uint32 freyjaGetMaterialMultiTextureEnabled( index_t material );
 	/*------------------------------------------------------
-	 * Pre  : Material <material> exists
-	 * Post : Returns flags or -1 on error
+	 * Pre  : Material <material> exists.
+	 * Post : Returns 0 if multitexture is enabled.
+	 *
+	 ------------------------------------------------------*/
+
+	
+	void freyjaMaterialDisableBlending( index_t material );
+
+	void freyjaMaterialEnableBlending( index_t material );
+
+	uint32 freyjaGetMaterialBlendingEnabled( index_t material );
+
+
+	void freyjaMaterialMultiTextureName( index_t material, uint32 texture_unit, const char* name );
+
+	void freyjaMaterialMultiTextureId( index_t material, uint32 texture_unit, int32 id );
+
+	int32 freyjaGetMaterialMultiTextureId( index_t material, uint32 texture_unit );
+	/*------------------------------------------------------
+	 * Pre  : Material <material> exists.
+	 * Post : Returns texture id assigned to texture_unit.
+	 *        Returns -1 if not used/set.
 	 *
 	 ------------------------------------------------------*/
 

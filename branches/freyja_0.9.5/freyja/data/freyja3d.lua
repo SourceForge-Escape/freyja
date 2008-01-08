@@ -1133,42 +1133,27 @@ function freyja3d_ui_dialogs()
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorVertex" ) )
-	mgtk_box_pack( hbox, mgtk_label( "Vertex color" ) ) -- 天頂の呈色
-
-	hbox = mgtk_hbox()
-	mgtk_box_pack( tab, hbox )
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorVertexHighlight" ) )
-	mgtk_box_pack( hbox, mgtk_label( "Vertex highlight" ) ) -- 現行天頂の呈色
+	--mgtk_box_pack( hbox, mgtk_label( "Vertex color" ) ) -- 天頂の呈色
+	mgtk_box_pack( hbox, mgtk_label( "Vertex color, highlight" ) ) -- 現行天頂の呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMesh" ) )
-	mgtk_box_pack( hbox, mgtk_label( "Wireframe color" ) ) -- Meshの呈色
-
-	hbox = mgtk_hbox()
-	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMesh" ) ) --Meshの呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorMeshHighlight" ) )
-	mgtk_box_pack( hbox, mgtk_label( "Wireframe highlight" ) ) -- 現行Meshの呈色
+	mgtk_box_pack( hbox, mgtk_label( "Wireframe color, highlight" ) ) -- 現行Meshの呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorBone" ) )
-	mgtk_box_pack( hbox, mgtk_label( "Bone color" ) ) -- 骨の呈色
-
-	hbox = mgtk_hbox()
-	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorBone" ) ) -- 骨の呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorBoneHighlight" ) )
-	mgtk_box_pack( hbox, mgtk_label( "Bone highlight" ) ) -- 現行骨の呈色
+	mgtk_box_pack( hbox, mgtk_label( "Bone color, highlight" ) ) -- 現行骨の呈色
 
 	hbox = mgtk_hbox()
 	mgtk_box_pack( tab, hbox )
-	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorJoint" ) )
-	mgtk_box_pack( hbox, mgtk_label( "Joint color" ) ) -- Jointの呈色
-
-	hbox = mgtk_hbox()
-	mgtk_box_pack( tab, hbox )
+	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorJoint" ) ) -- Jointの呈色
 	mgtk_box_pack( hbox, mgtk_colorbutton( "eColorJointHighlight" ) )
-	mgtk_box_pack( hbox, mgtk_label( "Joint highlight" ) ) -- 現行Jointの呈色
+	mgtk_box_pack( hbox, mgtk_label( "Joint color, highlight" ) ) -- 現行Jointの呈色
 
 	mgtk_box_pack( tab, mgtk_button( "Reset to defaults", "eResetColorsToDefault" ) )
 

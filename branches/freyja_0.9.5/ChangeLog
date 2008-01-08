@@ -4,8 +4,16 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
+ * Various API/ABI changes related to backports.
+ * PythonABI script update.
+ * Cleaner LuaABI metaprogramming script based on 10.x Lua script binding.
+ * Backported improved shader multitexture support from 10.x.
+ * Removed 0.9.6 subbranch.
+
+
  Kagura prealpha, 0.9.5.18 () -- "Kagura prealpha"
  TBD Terry 'Mongoose' Hendrix II <mongooseichiban@gmail.com>
+ - Forked libfreyja for 0.9.6 design changes. ( 0.10 )
  - Fix for mgtk_color_set().
  - Lua based user prefs script.
  - New scene based system design.

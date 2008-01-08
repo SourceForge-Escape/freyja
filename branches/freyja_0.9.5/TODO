@@ -4,37 +4,55 @@
 
  * Refining the Kagura roadmap, so expect some tasks to be out of order below.
 
-
- Freyja 0.9.5.18 	TBD
+ NOTES
  -----------------------------------------------------------------------------
 
- * Todo
-	- Finish freyja::Node 
-	- Rewrite Bone / Skeleton using the node/graph system first.
-		- Skeleton 
-			- map<string, bone>
-			- map<string, animation>
-			- list<Observer*>
-			- list<Bone*>
-		- Bone : Node
-	- Rewrite Keyframe system.
+ * Mesh vertex format change requires method call for translation.
+	- Default is polymapped vertices, texcoords, and normals. ( v3t2n3 )
+	- Vertex class vertices allow logical sharing. 
+	- Also need index buffer for faces.
 
+ libfreyja 0.10.0.0 	TBD
+ -----------------------------------------------------------------------------
 
- * Hot
-	- SceneGraph and SceneGraphIterator
-		· Merge / Select / Delete / Create SceneGraphs 
-	- New Keyframe system.
-		· Keyframes are toplevel containers with aggregates of typed keys.
+ * Scene.
+
+ * Vertex->mMesh, Face->mMesh, Weight->mMesh refereneces.
+	- Mostly for C ABI use to avoid lookups.
+
+ * Rewrite Bone / Skeleton using the node/graph system first.
+	- Skeleton 
+		- list<Observer*> via interface
+	- Keyframe
 		· MorphMesh, SkelMesh, MorphMeshWithTag
-	- New 2-way Reference index_t system.
-		· Parent / Children : delete / update signal methods
-	- Mutable mode ( readonly ) edit state support.
-	- Hidden property support to make object not rendered.
-	- Break up source files with many classes.
+	- Animation
+		· TrackGroup
+	- AnimationTrack / Track
+
+ * Rewrite Keyframe system.
+
+ * Update data structures for more optimal use with dictionaries.
+	- mstl::avl_tree for mstl::map lookup.
+	- mstl::list update.
+
+ * Replace C ABI functions' index_t use with freyja_ptr.
+	- Allows for threaded import/export plugins, etc.
+
+ * Node: Mutable state ( readonly ) edit state support.
+
+ * Renderable: Hidden property support to make object not rendered.
+
+ * Break up source files with many classes.
+
+ * Move 'util' methods out of Mesh and into delegate classes from a base class.
 
  * Library deallocator callbacks.
 
  * Have cmake generate Makefile.Core OBJ rules as included makefile snippet.
+
+
+ libfreyja 0.10.0.1 	TBD
+ -----------------------------------------------------------------------------
 
  * Modules.
 	- Md5 animation import/export.
@@ -47,14 +65,6 @@
 	- SMD import / export fixes.
 	- Nif5 import.
 	- COLLADA import/export.
-
- * UI
-	- Finish Custom TimeSlider.
-		· Send client events for creation / moving / deleting keys.
-		· Morph frame, etc keys.
-	- Finish Custom RangeSlider.
-		· Menu option to hide this element.
-		· Ability to drag the start/end sections of the range slider.
 
  * Finish up new AnimationControl, Track, Keyframe, Bone, and Mesh API.
 	- KeyframeInterface.
@@ -84,6 +94,24 @@
 		· Need a way to set mesh type before explict class system is finished.
 	- Enable curve editor for more than debugging.
 	- Fix remaining bugs in md5 animation support.
+
+
+ Freyja 0.10.0.0	TBD
+ -----------------------------------------------------------------------------
+
+ * UI
+	- Finish Custom TimeSlider.
+		· Send client events for creation / moving / deleting keys.
+		· Morph frame, etc keys.
+	- Finish Custom RangeSlider.
+		· Menu option to hide this element.
+		· Ability to drag the start/end sections of the range slider.
+
+ * Remove 0.9.5 ABI use, and rewrite renderer, etc for 0.10.0 API.
+
+
+ Freyja 0.10.0.2 	TBD
+ -----------------------------------------------------------------------------
 
  * libmgtk
  	- Splash screen for Plugin for user feedback on slow systems.
@@ -139,6 +167,10 @@
 	- Scenegraph needs to update on every object creation / name change / removal.
 		· Maybe use backend libfreyja signals?
 
+
+ Freyja 0.10.0.3 	TBD
+ -----------------------------------------------------------------------------
+
  * Low-poly model creation by vertices features.
 	- Fix vertex deletion.
 	- Vertex / Knife based face splitting (edge midpoint/sliding edge points).
@@ -179,7 +211,7 @@
 	- COLLADA 1.4 plugin with Import/Export.
 
 
- Freyja 0.9.5.19	TBD
+ Freyja 0.10.1.0	TBD
  -----------------------------------------------------------------------------
 
  * Single joint animation shishi odoshi tutorial demo.
@@ -251,7 +283,7 @@
 
 
 
- Freyja, Dancer/Kagura 0.9.6.0 (Alpha, TBD)
+ Freyja, Dancer/Kagura 0.10.2.0 (Alpha, TBD)
  -----------------------------------------------------------------------------
 
  * Skeletal animation refactor.
@@ -433,7 +465,7 @@
 
 
 
- Freyja, Dancer/Kagura 0.9.6.5 (Beta, TBD)
+ Freyja, Dancer/Kagura 0.10.3.0 (Beta, TBD)
  -----------------------------------------------------------------------------
 
  * Formalized unit tests and reporting.
@@ -500,7 +532,7 @@
 	- Letting the user move selected points in vertex morph mode.
 
 
- Freyja, Dancer/Kagura 0.9.6.10 (Release, TBD)
+ Freyja, Dancer/Kagura 0.10.4.0 (Release, TBD)
  -----------------------------------------------------------------------------
 
  * GNOME MIME setup script
@@ -528,6 +560,9 @@
 
  Freyja, Proposed (TBA)
  -----------------------------------------------------------------------------
+
+ * libfreyja using it's own memory pool system.
+
 
  Modeling
  -------------------------------------------------------------------------

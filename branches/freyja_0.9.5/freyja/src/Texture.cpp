@@ -32,16 +32,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
-
-#ifdef HAVE_FREYJA_IMAGE
-#   include <freyja/FreyjaImage.h>
-#endif
+#include <freyja/FreyjaImage.h>
 
 #include "FreyjaOpenGL.h"
 #include "Texture.h"
 
 
-Texture *Texture::mSingleton = NULL;
+Texture* Texture::mInstance = NULL;
 
 
 ////////////////////////////////////////////////////////////
@@ -57,14 +54,13 @@ Texture::Texture()
 	mTextureId2 = -1;
 	mTextureCount = 2; // FIXME: Use new OpenGL ext wrapper class
 	mTextureLimit = 2;
-
-	mSingleton = this;
 }
 
 
 Texture::~Texture()
 {
 	reset();
+	mInstance = NULL;
 }
 
 
@@ -229,6 +225,24 @@ void Texture::bindMultiTexture(int texture0, int texture1)
 		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, mTextureIds[texture1]);
 	}
+#endif
+}
+
+
+void Texture::Bind( GLenum texture_unit, uint16 id ) const
+{
+#if USING_OPENGL_EXT 
+	if ( h_glActiveTextureARB )
+	{
+		h_glActiveTextureARB( texture_unit );
+		glBindTexture( GL_TEXTURE_2D, mTextureIds[id] );
+	}
+	else
+	{
+		glBindTexture( GL_TEXTURE_2D, id );
+	}
+#else
+	glBindTexture( GL_TEXTURE_2D, id );
 #endif
 }
 

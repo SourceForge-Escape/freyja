@@ -194,11 +194,11 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	void MultiplyVertexArray(uint32 size, vec_t *array)
+	void MultiplyVertexArray( const uint32 size, vec_t* array ) const
 	{
 		for ( uint32 i = 0, j = 0; i < size; ++i, j += 3 )
 		{
-			vec_t x = array[  j], y = array[j+1], z = array[j+2];
+			const vec_t x = array[  j], y = array[j+1], z = array[j+2];
 			array[  j] = mMatrix[0]*x + mMatrix[4]*y + mMatrix[ 8]*z + mMatrix[12];
 			array[j+1] = mMatrix[1]*x + mMatrix[5]*y + mMatrix[ 9]*z + mMatrix[13];
 			array[j+2] = mMatrix[2]*x + mMatrix[6]*y + mMatrix[10]*z + mMatrix[14];
@@ -210,7 +210,7 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	void Multiply3fv(vec3_t v)
+	void Multiply3fv(vec3_t v) const
 	{
 		vec_t x = v[0], y = v[1], z = v[2];
 		v[0] = mMatrix[0]*x + mMatrix[4]*y + mMatrix[ 8]*z + mMatrix[12];
@@ -223,7 +223,7 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	void Multiply3fv(vec3_t v, vec3_t result)
+	void Multiply3fv(vec3_t v, vec3_t result) const
 	{
 		memcpy(result, v, sizeof(vec3_t));
 		Multiply3fv(result);

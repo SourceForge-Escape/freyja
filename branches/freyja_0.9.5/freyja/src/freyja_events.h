@@ -397,5 +397,12 @@ int freyja3d_load_shader(const char* filename);
  *
  ------------------------------------------------------*/
 
+bool freyja3d_execute_lua_script( const char* filename );
+/*------------------------------------------------------
+ * Pre  : 
+ * Post : Lua script execution wrapper.
+ *        Returns false on error.
+ *
+ ------------------------------------------------------*/
 
 #endif // GUARD__FREYJA3D_FREYJA_EVENT_H

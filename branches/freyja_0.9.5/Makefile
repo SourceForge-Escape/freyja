@@ -508,17 +508,6 @@ model-plugin-nif4/fast:
 	$(MAKE) -f plugins/CMakeFiles/model-plugin-nif4.dir/build.make plugins/CMakeFiles/model-plugin-nif4.dir/build
 
 #=============================================================================
-# Target rules for targets named model-plugin-nif5
-
-# Build rule for target.
-model-plugin-nif5: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 model-plugin-nif5
-
-# fast build rule for target.
-model-plugin-nif5/fast:
-	$(MAKE) -f plugins/CMakeFiles/model-plugin-nif5.dir/build.make plugins/CMakeFiles/model-plugin-nif5.dir/build
-
-#=============================================================================
 # Target rules for targets named model-plugin-nod
 
 # Build rule for target.
@@ -741,7 +730,6 @@ help::
 	@echo "... model-plugin-milkshape"
 	@echo "... model-plugin-nad"
 	@echo "... model-plugin-nif4"
-	@echo "... model-plugin-nif5"
 	@echo "... model-plugin-nod"
 	@echo "... model-plugin-obj"
 	@echo "... model-plugin-psk"

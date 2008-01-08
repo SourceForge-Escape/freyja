@@ -153,12 +153,12 @@ extern "C" {
 	} freyja_transform_action_t;
 
 
-	enum freyja_material_flags {
-		fFreyjaMaterial_Blending = 1,
-		fFreyjaMaterial_Texture = 2,
-		fFreyjaMaterial_DetailTexture = 4,
-		fFreyjaMaterial_Normalize = 8
-	};
+	typedef enum  {
+		fFreyjaMaterial_Blending     = 1,
+		fFreyjaMaterial_Texture      = 2,
+		fFreyjaMaterial_MultiTexture = 4,
+		fFreyjaMaterial_Normalize    = 8
+	} freyja_material_flags_t;
 
 
 	typedef enum {

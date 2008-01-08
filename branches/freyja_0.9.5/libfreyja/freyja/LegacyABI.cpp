@@ -2460,7 +2460,7 @@ int32 freyjaLoadModel(const char *filename)
 						if (textureIndex != INDEX_INVALID)
 						{
 							mat->mTexture = textureIndex;
-							mat->mFlags |= fFreyjaMaterial_Texture;
+							//mat->mFlags |= fFreyjaMaterial_Texture;
 						}
 					}
 				}
@@ -2559,7 +2559,8 @@ int32 freyjaSaveModel(const char *filename)
 		for (i = 0; i < count; ++i)
 		{
 			memset(buffer, 0, 64);
-			freyjaGetBoneName(index, 64, buffer);
+			if ( freyjaGetBoneNameString(index) )
+				 strcpy( buffer, freyjaGetBoneNameString(index) );
 			idx = freyjaGetBoneParent(index);
 
 			chunk.type = FREYJA_CHUNK_BONE;

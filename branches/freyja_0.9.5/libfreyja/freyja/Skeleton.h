@@ -140,6 +140,36 @@ class Skeleton
 	// Public Mutators
 	////////////////////////////////////////////////////////////
 
+#ifdef FREYJA_0_9_6_ALPHA
+	vector<Bone*> bone_array; // storage
+	vector<uint16> bone_id_map;
+	map<String, Bone*> bone_name_map; // dictionary
+	list<Observer*> mObservers;
+	map<String, Animation*> animation_map; // dictionary + storage
+
+	bool HasAnimation( const char* name );
+	void RemoveAnimation( const char* name );
+	freyja::Animation* GetAnimation( uint16 id );
+	freyja::Animation* GetAnimation( const char* name );	
+	freyja::Animation* CreateAnimation( const char* name, vec_t duration );	
+	uint32 GetAnimationCount();
+	
+	freyja::Bone* GetBone( uint16 id );
+	freyja::Bone* GetBone( const char* name );
+
+	freyja::Bone* CreateBone();
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Adds bone to this skeleton
+	 ------------------------------------------------------*/
+
+	virtual void CreateBone( freyja::Bone* bone );
+	/*------------------------------------------------------
+	 * Pre  :  
+	 * Post : Adds bone to this skeleton
+	 ------------------------------------------------------*/
+#endif
+
 	void AddBone(index_t bone);
 	/*------------------------------------------------------
 	 * Pre  :  

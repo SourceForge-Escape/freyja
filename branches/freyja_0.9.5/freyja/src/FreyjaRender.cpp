@@ -110,7 +110,8 @@ FreyjaRender::FreyjaRender() :
 	mFar(6000.0f),
 	mNear(0.1f),
 	mFovY(40.0f),
-	mNearHeight(20.0f)
+	mNearHeight(20.0f),
+	mMaterialViewVectorRotation_Y(0.0f)
 {
 	mAngles[0] = 18.0f;
 	mAngles[1] = 42.0f;
@@ -2801,51 +2802,14 @@ void FreyjaRender::DrawWindow(freyja_plane_t plane)
 }
 
 
-void FreyjaRender::DrawMaterialEditWindow()
+
+void draw_material_texture_square( int id, float x, float y, float z, float w, float h, float s )
 {
-	float pos[4] = {128.0, 128.0, 128.0, 1.0};
-
-
+	/* Texture square. */
 	glPushMatrix();
-	glTranslatef(-8.0f, 0.0f, 0.0f);
-
-	/* Setup lighting */	
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_LIGHTING);
-	glEnable(GL_LIGHT0);
-	glLightfv(GL_LIGHT0, GL_POSITION, pos);
-
-	vec4_t color;
-	freyjaGetLightAmbient(freyjaGetCurrentLight(), color);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, color);
-	freyjaLightDiffuse(freyjaGetCurrentLight(), color);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, color);
-	freyjaGetLightSpecular(freyjaGetCurrentLight(), color);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, color);
-
-
-	/* Cast light on sphere colored/detailed by material */
-	static vec_t dy = 0.0f;
-	dy += 0.5f;
-	if (dy > 360.0f) dy = 0.0f;
-	glPushMatrix();
-	glRotatef(dy, 0, 1, 0);
-	mglApplyMaterial(freyjaGetCurrentMaterial());
-
-#if USE_TORUS_TEST
-	mglDrawTorus(3.0, 10.0);
-#else
-	mglDrawSphere(128, 128, 13.0f);
-#endif
-
-	glPopMatrix();
-
-	const float x = 21.0f, y = -8.0f, z = 0.0f, w = 16.0f, h = 16.0f, s = 1.001f;
-
-	glPushMatrix();
-	glDisable(GL_LIGHTING);
-
 	glColor3fv(BLACK);
+	//glBindTexture( GL_TEXTURE_2D, 0 );
+	freyja3d::OpenGL::BindTexture( GL_TEXTURE0, 0 );
 	glBegin(GL_LINE_LOOP);
 	glVertex3f(x*s, y*s, z);
 	glVertex3f(x*s, (y+h)*s, z);
@@ -2855,50 +2819,114 @@ void FreyjaRender::DrawMaterialEditWindow()
 
 	glBegin(GL_LINES);
 	glVertex3f(x*s, y*s+h/2, z);
-	glVertex3f(8, y*s+h/2, z);
+	glVertex3f( 0.0f, 0.0f, z );
 	glEnd();
 
-
-	static vec_t xd = 0.0f;
-
-	if ( mScrollingUV_X )
-	{
-		xd += 0.001f;
-		if (xd > 1.0f) xd = 0.0f;
-	}
-
-	vec_t xAB = 1.0f * xd;
-	vec_t xCD = xAB + 1.0f;
-
 	glColor3fv(WHITE);
-	mglApplyMaterial(freyjaGetCurrentMaterial());
+	//glBindTexture( GL_TEXTURE_2D, id + 1 );
+	freyja3d::OpenGL::BindTexture( GL_TEXTURE0, id );
 	glBegin(GL_QUADS);
-	//glTexCoord2f(0.0, 1.0);
-	glTexCoord2f(xAB, 1.0f);
+	glTexCoord2f(0.0, 1.0);
 	glVertex3f(x, y, z);
-	//glTexCoord2f(0.0, 0.0);
-	glTexCoord2f(xAB, 0.0f);
+	glTexCoord2f(0.0, 0.0);
 	glVertex3f(x, y+h, z);
-	//glTexCoord2f(1.0, 0.0);
-	glTexCoord2f(xCD, 0.0f);
+	glTexCoord2f(1.0, 0.0);
 	glVertex3f(x+w, y+h, z);
-	//glTexCoord2f(1.0, 1.0);
-	glTexCoord2f(xCD, 1.0f);
+	glTexCoord2f(1.0, 1.0);
 	glVertex3f(x+w, y, z);
 	glEnd();	
 	glPopMatrix();
+	/* End texture square. */
+}
+
+
+void FreyjaRender::DrawMaterialEditWindow()
+{
+	/* Setup lighting */	
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+
+	{
+		float pos[4] = {128.0, 128.0, 128.0, 1.0};
+		glLightfv(GL_LIGHT0, GL_POSITION, pos);
+
+		vec4_t color;
+		freyjaGetLightAmbient(freyjaGetCurrentLight(), color);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, color);
+		freyjaLightDiffuse(freyjaGetCurrentLight(), color);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, color);
+		freyjaGetLightSpecular(freyjaGetCurrentLight(), color);
+		glLightfv(GL_LIGHT0, GL_SPECULAR, color);
+	}
+
+	/* Draw material preview mesh. */
+	glPushMatrix();
+	glTranslatef(-8.0f, 0.0f, 0.0f);
+	glRotatef( mMaterialViewVectorRotation_Y, 0, 1, 0 );
+
+	const uint32 matIndex = freyjaGetCurrentMaterial();
+	mglApplyMaterial( matIndex );
+
+#if USE_TORUS_TEST
+	mglDrawTorus(3.0, 10.0);
+#else
+	mglDrawSphere( 128, 128, 13.0f );
+#endif
+
 	glPopMatrix();
 
 
-	// OpenGLPrinter test
+	/* Disable shaders, blending, etc. */
+	mglApplyMaterial( -1 );
+	glDisable(GL_LIGHTING);
+
+	const float x = (21.0f - 8.0f), z = 0.0f, w = 16.0f, h = 16.0f, s = 1.001f, hh = 16.5f;
+	float y = -32.0f;
+
+	if ( freyjaGetMaterialMultiTextureEnabled( matIndex ) )
+	{
+		for ( uint32 i = 0; i < 5; ++i )
+		{
+			int id = freyjaGetMaterialMultiTextureId( matIndex, i );
+			if ( id > -1 )
+			{
+				draw_material_texture_square( id, x, y + ( hh* i), z, w, h, s );
+			}
+		}
+	}
+	else
+	{
+		int id = freyjaGetMaterialTexture( matIndex );
+		draw_material_texture_square( id, x, y, z, w, h, s );
+	}
+
+	/* Print text. */
 	glPushAttrib(GL_ENABLE_BIT);
 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	glEnable(GL_BLEND);
 	glColor3fv(WHITE);
 	mPrinter.Print2d(mUpperLeftText[0], mUpperLeftText[1], 0.05f, "Material");
-	mPrinter.Print2d(x*s-8, y*s+h+1, 0.04f, "Texture");
+
+	if ( freyjaGetMaterialMultiTextureEnabled( matIndex ) )
+	{
+		for ( uint32 i = 0; i < 5; ++i )
+		{
+			int id = freyjaGetMaterialMultiTextureId( matIndex, i );
+
+			if ( id > -1 )
+			{
+				mstl::String text;
+				text.Set("Texture%i", i);
+				mPrinter.Print2d( x*s-8, y*s+h+1+hh*i, 0.04f, text.c_str() );
+			}
+		}
+	}
+	else
+	{
+		mPrinter.Print2d( x*s-8, y*s+h+1, 0.04f, "Texture" );
+	}
+
 	glPopAttrib();
-	// End OpenGLPrinter test
 }
 
 

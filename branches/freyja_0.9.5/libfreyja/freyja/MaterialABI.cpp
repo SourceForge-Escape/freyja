@@ -374,18 +374,6 @@ const char *freyjaGetMaterialName(index_t materialIndex)
 }
 
 
-index_t freyjaGetMaterialFlags(index_t materialIndex)
-{
-	if (materialIndex < gFreyjaMaterials.size())
-	{
-		if (gFreyjaMaterials[materialIndex])
-			return gFreyjaMaterials[materialIndex]->mFlags;
-	}	
-
-	return INDEX_INVALID;
-}
-
-
 index_t freyjaGetMaterialShader(index_t material)
 {
 	if (material < gFreyjaMaterials.size())
@@ -554,43 +542,6 @@ void freyjaMaterialName(index_t materialIndex, const char *name)
 
 		gFreyjaMaterials[materialIndex]->SetName(name);
 	}	
-}
-
-
-void freyjaMaterialClearFlag(index_t materialIndex, uint32 flag)
-{
-	if (materialIndex < gFreyjaMaterials.size())
-	{
-		if (!gFreyjaMaterials[materialIndex])
-			return;
-
-		gFreyjaMaterials[materialIndex]->mFlags |= flag;
-		gFreyjaMaterials[materialIndex]->mFlags ^= flag;
-	}
-}
-
-
-void freyjaMaterialSetFlag(index_t materialIndex, uint32 flag)
-{
-	if (materialIndex < gFreyjaMaterials.size())
-	{
-		if (!gFreyjaMaterials[materialIndex])
-			return;
-
-		gFreyjaMaterials[materialIndex]->mFlags |= flag;
-	}
-}
-
-
-void freyjaMaterialFlags(index_t materialIndex, uint32 flags)
-{
-	if (materialIndex < gFreyjaMaterials.size())
-	{
-		if (!gFreyjaMaterials[materialIndex])
-			return;
-
-		gFreyjaMaterials[materialIndex]->mFlags = flags;
-	}
 }
 
 
@@ -764,4 +715,134 @@ bool freyjaMaterialLoadChunkTextJA(SystemIO::TextFileReader &r)
 	freyjaPrintMessage("> Reading in material %i...", mat);
 	Material *m = freyjaGetMaterialClass(mat);
 	return m ? m->Serialize(r) : false;
+}
+
+
+void freyjaMaterialDisableBlending( index_t materialIndex )
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+		{
+			gFreyjaMaterials[materialIndex]->DisableBlending();
+		}
+	}
+}
+
+
+void freyjaMaterialEnableBlending( index_t materialIndex )
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+		{
+			gFreyjaMaterials[materialIndex]->EnableBlending();
+		}
+	}
+}
+
+
+uint32 freyjaGetMaterialBlendingEnabled( index_t materialIndex )
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+		{
+			gFreyjaMaterials[materialIndex]->IsBlendingEnabled();
+		}
+	}	
+}
+
+
+void freyjaMaterialDisableMultiTexture( index_t materialIndex )
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+		{
+			gFreyjaMaterials[materialIndex]->DisableMultitexture();
+		}
+	}	
+}
+
+
+void freyjaMaterialEnableMultiTexture( index_t materialIndex )
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+		{
+			gFreyjaMaterials[materialIndex]->EnableMultitexture();
+		}
+	}	
+}
+
+
+void freyjaMaterialMultiTextureId( index_t materialIndex, uint32 texture_unit, int32 id )
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			gFreyjaMaterials[materialIndex]->SetMultiTexture(texture_unit, id);
+	}
+}
+
+
+uint32 freyjaGetMaterialMultiTextureEnabled( index_t materialIndex )
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->IsMultitextureEnabled();
+	}	
+
+	return 0;
+}
+
+
+int32 freyjaGetMaterialMultiTextureId( index_t materialIndex, uint32 texture_unit )
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->GetMultiTexture(texture_unit);
+	}
+
+	return -1;
+}
+
+
+void freyjaMaterialClearFlag(index_t material, uint32 flag)
+{
+	if ( flag & fFreyjaMaterial_Blending )
+		freyjaMaterialDisableBlending( material );
+
+	if ( flag & fFreyjaMaterial_MultiTexture )
+		freyjaMaterialDisableMultiTexture( material );
+}
+
+
+void freyjaMaterialSetFlag(index_t material, uint32 flag)
+{
+	freyjaMaterialFlags(material, flag);
+}
+
+
+void freyjaMaterialFlags(index_t materialIndex, uint32 flags)
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->SetFlags(flags);
+	}	
+}
+
+
+void freyjaMaterialMultiTextureName( index_t materialIndex, uint32 texture_unit, const char* name )
+{
+	if (materialIndex < gFreyjaMaterials.size())
+	{
+		if (gFreyjaMaterials[materialIndex])
+			return gFreyjaMaterials[materialIndex]->SetMultiTextureName( texture_unit, name );
+	}
 }

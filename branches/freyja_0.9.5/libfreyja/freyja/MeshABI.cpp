@@ -1067,15 +1067,21 @@ void freyjaGetMeshBoundingBox(index_t mesh, vec3_t min, vec3_t max)
 }
 
 
-void freyjaGetMeshBoundingSphere(index_t mesh, vec3_t origin, vec_t &radius)
+vec_t freyjaGetMeshBoundingSphereRadius(index_t mesh)
+{
+	Mesh *m = freyjaGetMeshClass(mesh);
+	return (m) ? m->GetBoundingVolumeRadius() : 0.0f;
+}
+
+
+void freyjaGetMeshBoundingSphereCenter(index_t mesh, vec3_t center)
 {
 	Mesh *m = freyjaGetMeshClass(mesh);
 
 	if (m)
 	{
 		Vec3 o = m->GetBoundingVolumeCenter();
-		o.Get(origin);
-		radius = m->GetBoundingVolumeRadius();
+		o.Get(center);
 	}
 }
 
@@ -1500,7 +1506,15 @@ index_t freyjaMeshCopy(index_t meshIndex)
 	return INDEX_INVALID;
 }
 
-
+//index_t freyjaMeshCreateLattice(vec3_t origin, vec_t size, uint32 rows, uint32 columns, uint32 layers);
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Quadrilateral lattice mesh is created.
+	 *        <layers> tall with <rows> x <cols> of quads div per layer.
+	 *
+	 *        Useful for quickier extruding.
+	 *
+	 ------------------------------------------------------*/
 void freyjaMeshUVMapSpherical(index_t meshIndex)
 {
 	int32 i, vertexCount;

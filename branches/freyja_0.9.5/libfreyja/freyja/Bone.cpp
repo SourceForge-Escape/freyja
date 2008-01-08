@@ -482,37 +482,6 @@ void Bone::DuplicateChildren(Bone *orig_parent, Bone *parent,
 }
 
 
-#if 0
-
-
-
-Bone *Bone::DuplicateWithNewParent(index_t parent)
-{
-	// We don't duplicate children/tracks in this method.
-	Bone *b = Duplicate();
-	b->mParent = (parent == INDEX_INVALID) ? mParent : parent;
-
-	return b;
-}
-
-
-index_t Bone::DuplicateChain(index_t start, mtsl::Vector<index_t> end)
-{
-	Bone *cur = GetBone(start);
-
-	if (!cur)
-		return INDEX_INVALID;
-
-	Bone *b = cur->Duplicate();
-	b->mSkeleton = cur->mSkeleton;
-	b->AddToPool();
-	freyjaSkeletonAddBone(b->mSkeleton, b->GetUID());
-
-	return b->GetUID();
-}
-#endif
-
-
 void Bone::ResetPool()
 {
 	uint32 i;

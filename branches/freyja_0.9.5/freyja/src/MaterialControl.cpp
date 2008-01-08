@@ -38,9 +38,13 @@ MaterialControl *MaterialControl::mInstance = NULL;
 ////////////////////////////////////////////////////////////
 
 MaterialControl::MaterialControl() : 
-	EvSelectId(0), EvShineId(0), EvSetNameId(0), 
-	EvSetTextureNameId(0), mFlags(fNone),
-	mRecent("freyja-dev-recent-material", "eRecentMaterial")
+	EvSelectId(0),
+	EvShineId(0),
+	EvSetNameId(0), 
+	EvSetTextureNameId(0),
+	mFlags(fNone),
+	mRecent("freyja-dev-recent-material", "eRecentMaterial"),
+	mTexUnit(0)
 {
 	// We move to class based index_t later instead integer ids
 	for (uint32 i = 0; i < 4; ++i)
@@ -124,7 +128,7 @@ bool MaterialControl::LoadMaterial(const char *filename)
 					if (mTextureId > -1)
 					{
 						freyjaMaterialTexture(matIndex, mTextureId-1);
-						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
+						//freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
 					}
 				}
 			}
@@ -138,7 +142,7 @@ bool MaterialControl::LoadMaterial(const char *filename)
 					{
 						freyjaMaterialTextureName(matIndex, s);
 						freyjaMaterialTexture(matIndex, mTextureId-1);
-						freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
+						//freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
 					}
 				}
 			}
@@ -149,7 +153,7 @@ bool MaterialControl::LoadMaterial(const char *filename)
 			else if  (strncmp(buffer, "EnableBlending", 14) == 0)
 			{
 				if (r.ParseBool())
-					freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Blending);
+					freyjaMaterialEnableBlending(matIndex);//freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Blending);
 			}
 			else if (strncmp(buffer, "BlendSource", 11) == 0)
 			{
@@ -310,7 +314,7 @@ bool MaterialControl::LoadMaterial(const char *filename)
 
 			LoadTextureBuffer( pixmap, width, height, 24, 3 );
 			freyjaMaterialTexture(matIndex, mTextureId-1);
-			freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
+			//freyjaMaterialSetFlag(matIndex, fFreyjaMaterial_Texture);
 
 			delete [] bitmap; // FIXME: Should have library deallocator handle this.
 		}
@@ -360,8 +364,7 @@ bool MaterialControl::SaveMaterial(const char *filename)
 
 	/* Blend factors */
 	w.Print("EnableBlending = %s\n", 
-			(freyjaGetMaterialFlags(matIndex) & fFreyjaMaterial_Blending) ? 
-			"true" : "false");
+			(freyjaGetMaterialBlendingEnabled(matIndex)) ? "true" : "false");
 
 	uint32 blend_src = freyjaGetMaterialBlendSource(matIndex);
 	w.Print("BlendSource = %s\n", OpenGL::BlendIntToString(blend_src));
@@ -494,13 +497,11 @@ void MaterialControl::RefreshInterface()
 	uint32 dest = freyjaGetMaterialBlendDestination(mIndex);
 	mgtk_option_menu_value_set(eBlendDestMenu, dest);
 
-	uint32 flags = freyjaGetMaterialFlags(mIndex);
+	//uint32 flags = freyjaGetMaterialFlags(mIndex);
 
-	mgtk_togglebutton_value_set(EvEnableBlendingId, 
-								(flags & fFreyjaMaterial_Blending));
+	mgtk_togglebutton_value_set(EvEnableBlendingId, freyjaGetMaterialBlendingEnabled(mIndex) ); //(flags & fFreyjaMaterial_Blending));
 
-	mgtk_togglebutton_value_set(EvEnableTextureId, 
-								(flags & fFreyjaMaterial_Texture));
+	mgtk_togglebutton_value_set(EvEnableTextureId, 1); //(flags & fFreyjaMaterial_Texture));
 
 	// Just go ahead and render a new frame in case the function calling
 	// this fails to do so.
@@ -665,7 +666,7 @@ bool MaterialControl::LoadTexture(const char *filename)
 			if (err >= 0)
 			{
 				freyjaMaterialTexture(freyjaGetCurrentMaterial(), err);
-				freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+				//freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
 				Print("Material[%i].texture = { %i }", freyjaGetCurrentMaterial(), err);
 				RefreshInterface();
 			}
@@ -697,13 +698,13 @@ bool MaterialControl::LoadTextureBuffer(byte *image, uint32 width, uint32 height
 
 	if (mFlags & fLoadTextureInSlot)
 	{
-		err = Texture::mSingleton->loadBufferSlot(image, width, height, 
-												  type, bpp, mTextureId);
+		err = 
+		Texture::GetInstance()->loadBufferSlot(image, width, height, type, bpp, mTextureId);
 	}
 	else
 	{
 		err = mTextureId = 
-		Texture::mSingleton->loadBuffer(image, width, height, type, bpp);
+		Texture::GetInstance()->loadBuffer(image, width, height, type, bpp);
 	}
 
 	if (err < 0)
@@ -956,34 +957,34 @@ void MaterialControl::EvEnableDetailTexture(uint32 value)
 {
 	if (value)
 	{
-		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-							  fFreyjaMaterial_DetailTexture);
+		freyjaMaterialEnableMultiTexture( freyjaGetCurrentMaterial() );
+		//freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
 	}
 	else
 	{
-		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-								fFreyjaMaterial_DetailTexture);
+		freyjaMaterialDisableMultiTexture( freyjaGetCurrentMaterial() );
+		//freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_DetailTexture);
 	}
-	freyja_print("Material detail texturing is [%s]", value ? "ON" : "OFF");
+	freyja_print("Material multitexture is [%s]", value ? "ON" : "OFF");
 	freyja_event_gl_refresh();
 }
 
 
 void MaterialControl::EvEnableNormalize(uint32 value)
 {
+#if OBSOLETE
 	if (value)
 	{
-		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-							  fFreyjaMaterial_Normalize);
+		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(),  fFreyjaMaterial_Normalize);
 	}
 	else
 	{
-		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-								fFreyjaMaterial_Normalize);
+		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Normalize);
 	}
 
 	freyja_print("Material normalization is [%s]", value ? "ON" : "OFF");
 	freyja_event_gl_refresh();
+#endif
 }
 
 
@@ -991,13 +992,13 @@ void MaterialControl::EvEnableBlending(uint32 value)
 {
 	if (value)
 	{
-		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-							  fFreyjaMaterial_Blending);
+		freyjaMaterialEnableBlending(freyjaGetCurrentMaterial());
+		//freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Blending);
 	}
 	else
 	{
-		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-								fFreyjaMaterial_Blending);
+		freyjaMaterialDisableBlending(freyjaGetCurrentMaterial());
+		//freyjaMaterialClearFlag(freyjaGetCurrentMaterial(),	fFreyjaMaterial_Blending);
 	}
 
 	freyja_print("Material blending [%s]", value ? "ON" : "OFF");
@@ -1007,19 +1008,19 @@ void MaterialControl::EvEnableBlending(uint32 value)
 
 void MaterialControl::EvEnableTexture(uint32 value)
 {
+#if OBSOLETE
 	if (value)
 	{
-		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), 
-							  fFreyjaMaterial_Texture);
+		freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
 	}
 	else
 	{
-		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), 
-								fFreyjaMaterial_Texture);
+		freyjaMaterialClearFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
 	}
 
 	freyja_print("Material texture usage is [%s]", value ? "ON" : "OFF");
 	freyja_event_gl_refresh();
+#endif
 }
 
 
@@ -1089,9 +1090,17 @@ void MaterialControl::EvSetShader(uint32 value)
 
 void MaterialControl::EvSetTexture(uint32 value)
 {
-	SetSelected(value);
-	freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
-	RefreshContext();
+	if ( freyjaGetMaterialMultiTextureEnabled( freyjaGetCurrentMaterial() ) )
+	{
+		mTexUnit = value;
+		Print( "texture unit = %i", value);
+	}
+	else
+	{
+		SetSelected(value);
+		freyjaMaterialTexture(freyjaGetCurrentMaterial(), value);
+		RefreshContext();
+	}
 }
 
 
@@ -1108,15 +1117,15 @@ void MaterialControl::EvTextureUpload(uint32 id)
 		switch (type)
 		{
 		case RGBA_32:
-			Texture::mSingleton->loadBuffer(image, w, h, Texture::RGBA, 32);
+			Texture::GetInstance()->loadBuffer(image, w, h, Texture::RGBA, 32);
 			break;
 			
 		case RGB_24:
-			Texture::mSingleton->loadBuffer(image, w, h, Texture::RGB, 24);
+			Texture::GetInstance()->loadBuffer(image, w, h, Texture::RGB, 24);
 			break;
 
 		case INDEXED_8:
-			Texture::mSingleton->loadBuffer(image, w, h, Texture::INDEXED, 8);
+			Texture::GetInstance()->loadBuffer(image, w, h, Texture::INDEXED, 8);
 			break;
 			
 		default:
@@ -1138,11 +1147,36 @@ void MaterialControl::EvOpenTexture(char *text)
 		uint32 texture = mTextureId - 1;
 		uint32 mat = freyjaGetCurrentMaterial();
 
-		mgtk_textentry_value_set(e, text);
-		freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
-		mgtk_spinbutton_value_set(EvSetTextureId, texture);
-		freyjaMaterialTexture(mat, texture);
-		freyjaMaterialTextureName(mat, text);
+		{
+			mstl::String basename = text;
+#if WIN32
+			const char sep = '\\';
+#else
+			const char sep = '/';
+#endif
+			int i = basename.find_last_of( sep );
+			if ( i > 0 )
+			{
+				basename = ( basename.c_str()+i+1 );
+			}
+			
+			mgtk_textentry_value_set( e, basename.c_str() );
+		}
+
+		//mgtk_textentry_value_set(e, text);
+		//mgtk_spinbutton_value_set(EvSetTextureId, texture);
+
+		if ( freyjaGetMaterialMultiTextureEnabled( mat ) )
+		{
+			freyjaMaterialMultiTextureId( mat, mTexUnit, texture );
+			freyjaMaterialMultiTextureName( mat, mTexUnit, text );
+		}
+		else
+		{
+			freyjaMaterialTexture(mat, texture);
+			freyjaMaterialTextureName(mat, text);
+			mgtk_spinbutton_value_set(EvSetTextureId, texture);
+		}
 
 		RefreshContext(); //Dirty();
 	}
@@ -1177,16 +1211,30 @@ void MaterialControl::EvOpenShader(char *text)
 		ResourceEvent::GetResourceIdBySymbol("eSetMaterialShaderFilename");
 		
 		//uint32 texture = mTextureId - 1;
-		mgtk_textentry_value_set(e, text);
-		
+		//	mgtk_textentry_value_set(e, text);
+		{
+			mstl::String basename = text;
+#if WIN32
+			const char sep = '\\';
+#else
+			const char sep = '/';
+#endif
+			int i = basename.find_last_of( sep );
+			if ( i > 0 )
+			{
+				basename = ( basename.c_str()+i+1 );
+			}
+			
+			mgtk_textentry_value_set( e, basename.c_str() );
+		}
+
 		// Propagate to material backend
-#if 1
 		uint32 mat = freyjaGetCurrentMaterial();
 		//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Shader);
 		mgtk_spinbutton_value_set(EvSetShaderId, fragmentId);
 		freyjaMaterialShader(mat, fragmentId);
 		freyjaMaterialShaderName(mat, text);
-#endif
+
 		Print("Loaded fragment program %i", fragmentId);
 		RefreshContext();
 	}
