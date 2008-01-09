@@ -335,6 +335,7 @@ freyja_ptr
 freyjaWeightGetBone( freyja_ptr weight )
 {
 #warning FIXME
+	return NULL;
 }
 
 
@@ -342,12 +343,14 @@ vec_t
 freyjaWeightGetValue( freyja_ptr weight )
 {
 #warning FIXME
+	return 0.0f;
 }
 
 
 freyja_ptr
 freyjaWeightGetVertex( freyja_ptr weight )
 {
+	return NULL;
 #warning FIXME
 }
 

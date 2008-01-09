@@ -49,6 +49,42 @@ PixelBuffer::~PixelBuffer()
 }
 
 
+PixelBuffer*
+PixelBuffer::CreateSolidColor( Pixel& pixel,
+							   uint16 width, 
+							   uint16 height )
+{
+	freyja::PixelBuffer* pb = new PixelBuffer();
+
+	if ( pb )
+	{
+		pb->mPixelFormat = RGBA_32bpp;
+		pb->mImage = new byte[height*width*4];
+		pb->mWidth = width;
+		pb->mWidth = height;
+
+		if ( !pb->mImage )
+		{
+			delete pb;
+			pb = NULL;
+		}
+		else
+		{
+			for ( uint32 i = 0, size = width*height; i < size; ++i )
+			{
+				const uint32 idx = i*4;
+				pb->mImage[idx]   = (byte)pixel.r;
+				pb->mImage[idx+1] = (byte)pixel.g;
+				pb->mImage[idx+2] = (byte)pixel.b;
+				pb->mImage[idx+3] = (byte)pixel.a;
+			}
+		}
+	}
+
+	return pb;
+}
+
+
 PixelBuffer* 
 PixelBuffer::Create( byte* pixmap,
 				     uint16 width, 
@@ -82,163 +118,23 @@ bool PixelBuffer::ConvertPixelFormat( PixelFormat mode )
 
 	bool converted = false;
 
-	/* Note:
-	 * If this is called 'Indexed_8' is considered merely greyscale.
-	 */
-
 	switch ( mode )
 	{
 	case Indexed_8bpp:
-		switch ( mPixelFormat )
-		{
-		case Indexed_8bpp:
-			break;
-
-		case RGB_24bpp: 
-			{
-				byte* pixmap = new byte[ mWidth * mHeight ];
-		
-				for ( uint32 i = 0, n = mWidth * mHeight; i < n; ++i )
-				{
-					const unsigned int idx = i * 3;
-					pixmap[i] = ( ( mImage[idx  ] >> 2 ) +  // ~30%
-								  ( mImage[idx+1] >> 1 ) +  // ~59%
-								  ( mImage[idx+2] >> 3 ) ); // ~11%
-				}
-
-				delete [] mImage;
-				mImage = pixmap;
-				mPixelFormat = Indexed_8bpp;
-				converted = true;
-			}
-			break;
-
-		case RGBA_32bpp: 
-			{
-				byte* pixmap = new byte[ mWidth * mHeight ];
-		
-				for ( uint32 i = 0, n = mWidth * mHeight; i < n; ++i )
-				{
-					const unsigned int idx = i * 4;
-					pixmap[i] = ( ( mImage[idx  ] >> 2 ) +  // ~30%
-								  ( mImage[idx+1] >> 1 ) +  // ~59%
-								  ( mImage[idx+2] >> 3 ) ); // ~11%
-				}
-
-				delete [] mImage;
-				mImage = pixmap;
-				mPixelFormat = Indexed_8bpp;
-				converted = true;
-			}
-			break;
-
-		default:
-			;
-		}
+		/* Note: If this is called 'Indexed_8' is considered merely greyscale. */
+		converted = ConvertPixelFormatToIndexed_8( mode );
 		break;
 
 	case RGB_24bpp:
-
-		switch ( mPixelFormat )
-		{
-		case Indexed_8bpp:
-			{
-				byte* pixmap = new byte[ mWidth * mHeight * 3 ];
-		
-				for ( uint32 i = 0, n = mWidth * mHeight; i < n; ++i )
-				{
-					const unsigned int idx = i * 3;
-					pixmap[idx] = pixmap[idx+1] = pixmap[idx+2] = mImage[i];
-				}
-
-				delete [] mImage;
-				mImage = pixmap;
-				mPixelFormat = RGB_24bpp;
-				converted = true;
-			}
-			break;
-
-		case RGB_24bpp:
-			break;
-
-		case RGBA_32bpp:
-			{
-				byte* image = new byte[ mWidth * mHeight * 3 ];
-
-				for ( uint32 i = 0, size = mWidth * mHeight; i < size; ++i )
-				{
-					const unsigned int idx = i*3;
-					const unsigned int idx2 = i*4;
-					image[idx  ] = mImage[idx2  ];
-					image[idx+1] = mImage[idx2+1];
-					image[idx+2] = mImage[idx2+2];
-					// Alpha component not used in RGB_24.
-				}
-
-				delete [] mImage;
-				mImage = image;
-				mPixelFormat = RGB_24bpp;
-				converted = true;
-			}
-			break;
-		
-		default:
-			;
-
-		}
+		converted = ConvertPixelFormatToRGB_24( mode );
 		break;
 
 	case RGBA_32bpp:
+		converted = ConvertPixelFormatToRGBA_32( mode );
+		break;
 
-		switch ( mPixelFormat )
-		{
-		case Indexed_8bpp:
-			{
-				byte* pixmap = new byte[ mWidth * mHeight * 4 ];
-		
-				for ( uint32 i = 0, n = mWidth * mHeight; i < n; ++i )
-				{
-					const unsigned int idx = i * 4;
-					pixmap[idx] = pixmap[idx+1] = pixmap[idx+2] = mImage[i];
-					pixmap[idx+3] = 255;
-				}
-
-				delete [] mImage;
-				mImage = pixmap;
-				mPixelFormat = RGBA_32bpp;
-				converted = true;
-			}
-			break;
-
-		case RGB_24bpp:
-			{
-				byte* image = new byte[mWidth * mHeight * 4 ];
-			
-				for (uint32 i = 0, size = mWidth * mHeight; i < size; ++i)
-				{
-					const unsigned int idx = i*4;
-					const unsigned int idx2 = i*3;
-					image[idx  ] = mImage[idx2  ];
-					image[idx+1] = mImage[idx2+1];
-					image[idx+2] = mImage[idx2+2];
-					image[idx+3] = 255;
-				}
-
-				delete [] mImage;
-				mImage = image;
-				mPixelFormat = RGBA_32bpp;
-				converted = true;
-			}
-			break;
-
-		case RGBA_32bpp:
-			converted = true;
-			break;
-		
-		default:
-			;
-
-		}
+	default:
+		;
 	}
 
 	return converted;
@@ -355,6 +251,49 @@ bool PixelBuffer::BrightenPalette( PixelFormat format, byte* palette, uint32 siz
 	}
 
 	return ret;
+}
+
+
+void PixelBuffer::Invert()
+{
+	if ( !mImage )
+		return;
+
+	switch ( mPixelFormat )
+	{
+	case Indexed_8bpp:
+		
+		for ( uint32 i = 0, size = mWidth*mHeight; i < size; ++i )
+		{
+			mImage[i] = (byte)( ( 1.0f - ( ((float)mImage[i]) / 256.0f ) ) * 256.0f );
+		}    
+		break;
+
+	case RGB_24bpp:
+		for ( uint32 i = 0, size = mWidth*mHeight; i < size; ++i )
+		{
+			const uint32 idx = i * 3;
+			mImage[idx  ] = (byte)( ( 1.0f - ( ((float)mImage[idx  ]) / 256.0f ) ) * 256.0f );
+			mImage[idx+1] = (byte)( ( 1.0f - ( ((float)mImage[idx+1]) / 256.0f ) ) * 256.0f );
+			mImage[idx+2] = (byte)( ( 1.0f - ( ((float)mImage[idx+2]) / 256.0f ) ) * 256.0f );
+		}    
+		break;
+
+	case RGBA_32bpp:
+		for ( uint32 i = 0, size = mWidth*mHeight; i < size; ++i )
+		{
+			const uint32 idx = i * 4;
+			mImage[idx  ] = (byte)( ( 1.0f - ( ((float)mImage[idx  ]) / 256.0f ) ) * 256.0f );
+			mImage[idx+1] = (byte)( ( 1.0f - ( ((float)mImage[idx+1]) / 256.0f ) ) * 256.0f );
+			mImage[idx+2] = (byte)( ( 1.0f - ( ((float)mImage[idx+2]) / 256.0f ) ) * 256.0f );
+
+			// Ignore alpha values. Invert() is only for typical image case, not shader data.
+		}    
+		break;
+
+	default:
+		;
+	}
 }
 
 
@@ -792,6 +731,188 @@ byte* PixelBuffer::GenerateCheckerBoard(byte bg[4], byte fg[4],
 	return image;
 }
 #endif
+
+
+
+bool PixelBuffer::ConvertPixelFormatToIndexed_8( PixelFormat mode )
+{
+	bool converted = false;
+
+	switch ( mPixelFormat )
+	{
+	case Indexed_8bpp:
+		break;
+
+	case RGB_24bpp: 
+		{
+			byte* pixmap = new byte[ mWidth * mHeight ];
+		
+			for ( uint32 i = 0, n = mWidth * mHeight; i < n; ++i )
+			{
+				const unsigned int idx = i * 3;
+				pixmap[i] = ( ( mImage[idx  ] >> 2 ) +  // ~30%
+							  ( mImage[idx+1] >> 1 ) +  // ~59%
+							  ( mImage[idx+2] >> 3 ) ); // ~11%
+			}
+
+			delete [] mImage;
+			mImage = pixmap;
+			mPixelFormat = Indexed_8bpp;
+			converted = true;
+		}
+		break;
+
+	case RGBA_32bpp: 
+		{
+			byte* pixmap = new byte[ mWidth * mHeight ];
+		
+			for ( uint32 i = 0, n = mWidth * mHeight; i < n; ++i )
+			{
+				const unsigned int idx = i * 4;
+				pixmap[i] = ( ( mImage[idx  ] >> 2 ) +  // ~30%
+							  ( mImage[idx+1] >> 1 ) +  // ~59%
+							  ( mImage[idx+2] >> 3 ) ); // ~11%
+			}
+
+			delete [] mImage;
+			mImage = pixmap;
+			mPixelFormat = Indexed_8bpp;
+			converted = true;
+		}
+		break;
+
+	default:
+		;
+	}
+
+	return converted;
+}
+
+
+bool PixelBuffer::ConvertPixelFormatToRGB_24( PixelFormat mode )
+{
+	bool converted = false;
+
+	switch ( mPixelFormat )
+	{
+	case Indexed_8bpp:
+		{
+			byte* pixmap = new byte[ mWidth * mHeight * 3 ];
+		
+			for ( uint32 i = 0, n = mWidth * mHeight; i < n; ++i )
+			{
+				const unsigned int idx = i * 3;
+				pixmap[idx] = pixmap[idx+1] = pixmap[idx+2] = mImage[i];
+			}
+
+			delete [] mImage;
+			mImage = pixmap;
+			mPixelFormat = RGB_24bpp;
+			converted = true;
+		}
+		break;
+
+	case RGB_24bpp:
+		break;
+
+	case RGBA_32bpp:
+		{
+			byte* image = new byte[ mWidth * mHeight * 3 ];
+
+			for ( uint32 i = 0, size = mWidth * mHeight; i < size; ++i )
+			{
+				const unsigned int idx = i*3;
+				const unsigned int idx2 = i*4;
+				image[idx  ] = mImage[idx2  ];
+				image[idx+1] = mImage[idx2+1];
+				image[idx+2] = mImage[idx2+2];
+				// Alpha component not used in RGB_24.
+			}
+
+			delete [] mImage;
+			mImage = image;
+			mPixelFormat = RGB_24bpp;
+			converted = true;
+		}
+		break;
+		
+	default:
+		;
+
+	}
+
+	return converted;
+}
+
+
+bool PixelBuffer::ConvertPixelFormatToRGBA_32( PixelFormat mode )
+{	
+	bool converted = false;
+	
+	switch ( mPixelFormat )
+	{
+	case Indexed_8bpp:
+		{
+			byte* pixmap = new byte[ mWidth * mHeight * 4 ];
+		
+			for ( uint32 i = 0, n = mWidth * mHeight; i < n; ++i )
+			{
+				const unsigned int idx = i * 4;
+				pixmap[idx] = pixmap[idx+1] = pixmap[idx+2] = mImage[i];
+				pixmap[idx+3] = 255;
+			}
+
+			delete [] mImage;
+			mImage = pixmap;
+			mPixelFormat = RGBA_32bpp;
+			converted = true;
+		}
+		break;
+
+	case RGB_24bpp:
+		{
+			byte* image = new byte[mWidth * mHeight * 4 ];
+			
+			for (uint32 i = 0, size = mWidth * mHeight; i < size; ++i)
+			{
+				const unsigned int idx = i*4;
+				const unsigned int idx2 = i*3;
+				image[idx  ] = mImage[idx2  ];
+				image[idx+1] = mImage[idx2+1];
+				image[idx+2] = mImage[idx2+2];
+				image[idx+3] = 255;
+			}
+
+			delete [] mImage;
+			mImage = image;
+			mPixelFormat = RGBA_32bpp;
+			converted = true;
+		}
+		break;
+
+	case ARGB_32bpp:
+		for ( uint32 i = 0, size = mWidth*mHeight; i < size; ++i)
+		{
+			const unsigned int idx = i*4;
+			byte swap = mImage[idx+3];
+			mImage[idx]   = mImage[idx+1];
+			mImage[idx+1] = mImage[idx+2];
+			mImage[idx+2] = mImage[idx+3];
+			mImage[idx+3] = swap;
+		}
+		converted = true;
+		break;
+
+	case RGBA_32bpp:
+		converted = true;
+		break;
+		
+	default:
+		;
+	}
+
+	return converted;
+}
 
 
 ////////////////////////////////////////////////////////////

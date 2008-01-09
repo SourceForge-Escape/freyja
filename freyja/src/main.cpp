@@ -42,6 +42,7 @@
 #include "Plugins.h"
 #include "Control.h"
 #include "FreyjaRender.h"
+#include "FreyjaOpenGL.h"
 #include "MaterialControl.h"
 #include "freyja_events.h"
 #include "freyja3d_scenegraph.h"
@@ -147,8 +148,9 @@ freyja3d_shutdown( )
 	freyja3d_save_user_preferences( );
 
 	/* Deallocate singletons. */
-	delete FreyjaRender::GetInstance( );
-	delete MaterialControl::GetInstance( );
+	FreyjaRender::Destroy( );
+	MaterialControl::Destroy( );;
+	OpenGL::Destroy( );
 
 	/* Shutdown libraries. */	
 	mgtk_event_shutdown( );
