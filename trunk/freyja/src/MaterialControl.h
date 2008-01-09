@@ -57,8 +57,11 @@ class MaterialControl : public Control
 	 *
 	 ------------------------------------------------------*/
 
-	~MaterialControl( )
-	{ mInstance = NULL; }
+	static void Destroy( )
+	{ 
+		delete mInstance;
+		mInstance = NULL; 
+	}
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Deconstructor for MaterialControl.
@@ -156,14 +159,6 @@ class MaterialControl : public Control
 	 ------------------------------------------------------*/
 
 	bool LoadTexture(const char *filename);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Returns true if sucessful.
-	 *
-	 ------------------------------------------------------*/
-
-	bool LoadTextureBuffer(byte *image, uint32 width, uint32 height, 
-						   uint32 bpp, uint32 colortype);
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns true if sucessful.
@@ -472,6 +467,14 @@ protected:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Constructor for MaterialControl.
+	 *
+	 ------------------------------------------------------*/
+
+	~MaterialControl( )
+	{  }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Deconstructor for MaterialControl.
 	 *
 	 ------------------------------------------------------*/
 

@@ -20,6 +20,8 @@
  *            Normalized the API to be more consistant
  ==========================================================================*/
 
+#include "opengl_config.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
@@ -30,15 +32,26 @@
 #include <mstl/SystemIO.h>
 
 #include "Cursor.h"
-#include "Texture.h"
 #include "FreyjaOpenGL.h"
 
+using namespace freyja3d;
+using namespace freyja;
 using namespace hel;
 
+OpenGL* OpenGL::mInstance = NULL;
+uint32 OpenGL::mObjects = 0;
+void* OpenGL::mTextureIds = NULL;
 
-// FIXME: Merge with OpenGL class.
-Texture gTexture;
-
+bool OpenGL::arb_multitexture = false;
+bool OpenGL::arb_texture_env_combine = false;
+bool OpenGL::arb_vertex_shader = false;
+bool OpenGL::arb_fragment_shader = false;
+bool OpenGL::arb_shader_objects = false;
+bool OpenGL::arb_shadow = false;
+bool OpenGL::arb_depth_texture = false;
+bool OpenGL::arb_shading_language_100 = false;
+bool OpenGL::arb_vertex_buffer_object = false;
+bool OpenGL::ext_cg_shader = false;
 
 #if defined(__APPLE__)
    // Nothing to see here
@@ -96,36 +109,20 @@ void *h_glGetUniformLocationARB = NULL;
 void *h_glUniform1iARB = NULL;
 #endif
 
-using namespace freyja3d;
-using namespace hel;
-
-bool OpenGL::arb_multitexture = false;
-bool OpenGL::arb_texture_env_combine = false;
-bool OpenGL::arb_vertex_shader = false;
-bool OpenGL::arb_fragment_shader = false;
-bool OpenGL::arb_shader_objects = false;
-bool OpenGL::arb_shadow = false;
-bool OpenGL::arb_depth_texture = false;
-bool OpenGL::arb_shading_language_100 = false;
-bool OpenGL::arb_vertex_buffer_object = false;
-bool OpenGL::ext_cg_shader = false;
-
 
 ////////////////////////////////////////////////////////////
 // Constructors
 ////////////////////////////////////////////////////////////
 
-OpenGL* OpenGL::mSingleton = NULL;
-uint32 OpenGL::mObjects = 0;
-
-
-OpenGL::OpenGL() :
+OpenGL::OpenGL() :	
+	mInit(false), 
+	mWidth(0),
+	mHeight(0),
 	mTextureUnitCount(2),
 	mMaxLightsCount(2),
-	mFlags(fNone),
-	mTextureIds(NULL),
-	mTextureCount(2), // FIXME: Use new OpenGL ext wrapper class
-	mTextureLimit(64),
+	mUseMipmaps(true),
+	mTextureCount( 0 ),
+	mTextureLimit( 128 ),
 	mTextureId(1),
 	mTextureId2(-1)
 {
@@ -134,16 +131,22 @@ OpenGL::OpenGL() :
 	freyja3d_print("\tVendor     : %s", glGetString(GL_VENDOR));
 	freyja3d_print("\tRenderer   : %s", glGetString(GL_RENDERER));
 	freyja3d_print("\tVersion    : %s", glGetString(GL_VERSION));
-	freyja3d_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
+	freyja3d_print("\tExtensions : %s", (const char*)glGetString(GL_EXTENSIONS));
 
-	FREYJA_ASSERTMSG(glGetString(GL_RENDERER) != NULL, "OpenGL Context creation failed");
+	const char* renderer = (const char*)glGetString( GL_RENDERER );
+	FREYJA_ASSERTMSG( renderer != NULL, "OpenGL Context creation failed");
 
-	// Get hardware info
-	glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &mTextureUnitCount);
-	freyja3d_print("\tGL_MAX_TEXTURE_UNITS_ARB \t\t[%i]", mTextureUnitCount);
+	/* Get hardware info */
+	{
+		GLint value;
+		glGetIntegerv(GL_MAX_TEXTURE_UNITS_ARB, &value);
+		mTextureUnitCount = value;
+		freyja3d_print("\tGL_MAX_TEXTURE_UNITS_ARB \t\t[%i]", mTextureUnitCount);
 
-	glGetIntegerv(GL_MAX_LIGHTS, &mMaxLightsCount);
-	freyja3d_print("\tGL_MAX_LIGHTS            \t\t[%i]", mMaxLightsCount);
+		glGetIntegerv(GL_MAX_LIGHTS, &value);
+		value = mMaxLightsCount;
+		freyja3d_print("\tGL_MAX_LIGHTS            \t\t[%i]", mMaxLightsCount);
+	}
 
 	arb_multitexture = mglHardwareExtTest("GL_ARB_multitexture");
 	arb_texture_env_combine = mglHardwareExtTest("GL_ARB_texture_env_combine");
@@ -157,9 +160,6 @@ OpenGL::OpenGL() :
 	arb_shader_objects = mglHardwareExtTest("GL_ARB_shader_objects");
 	arb_shading_language_100 = mglHardwareExtTest("GL_ARB_shading_language_100");
 	ext_cg_shader = mglHardwareExtTest("GL_EXT_Cg_shader");
-
-	// Depends on class Texture replacement
-	//SetMaxTextureCount(mTextureLimit);
 
 	GLint stencil;
 	glGetIntegerv(GL_STENCIL_BITS, &stencil);
@@ -199,25 +199,265 @@ OpenGL::OpenGL() :
 #endif
 
 
-	// InitTexture()
-	gTexture.reset();
-	gTexture.setMaxTextureCount(64);
-	gTexture.setFlag( Texture::fUseMipmaps );
-	unsigned char rgba[4] = {255, 255, 255, 255};
-	gTexture.loadColorTexture(rgba, 32, 32);
-	//mTextureId = 1;
+	/* InitTexture() */
+	{
+		ResetTextures( );
+		SetMaxTextureCount( mTextureLimit );
 
-	mSingleton = this;
+		Pixel pixel;
+		pixel.r = pixel.g = pixel.b = pixel.a = 1.0f;
+		LoadTexture( pixel, 32, 32 );
+	}
 }
 
 
 OpenGL::~OpenGL()
 {
-	if (mTextureIds) 
-		delete [] mTextureIds;
+	for ( uint32 i = 0; i < mObjects; --i )
+	{
+		DeleteFragmentGLSL( i );
+	}
+
+	mObjects = 0;
 	
-	for (uint32 i = 0; i < mObjects; --i)
-		DeleteFragmentGLSL(i);
+	ResetTextures();
+}
+
+
+void OpenGL::ResetTextures()
+{
+	glEnable(GL_TEXTURE_2D);
+
+	if ( mTextureIds )
+	{
+		glDeleteTextures( mTextureLimit, (GLuint*)mTextureIds );
+		delete [] (GLuint*)mTextureIds;
+	}
+
+	mTextureIds = NULL;
+	mTextureCount = 0;
+	mTextureLimit = 0;
+}
+
+
+int OpenGL::LoadTexture( const char* filename, int overwrite_id )
+{
+	int tid = -1;
+	PixelBuffer* pb = PixelBuffer::Create( filename );
+
+	if ( pb )
+	{
+		byte* image = pb->CopyPixmap();
+		tid = LoadTexture( image, pb->GetWidth(), pb->GetHeight(), pb->GetPixelFormat(), overwrite_id );
+
+		if ( image )
+		{
+			delete [] image;
+		}
+	}
+	
+	return tid;
+}
+
+
+int OpenGL::LoadTexture( freyja::Pixel& pixel, uint32 width, uint32 height )
+{
+	PixelBuffer* pb = PixelBuffer::CreateSolidColor( pixel, width, height );
+	int tid = -1;
+
+	if ( pb )
+	{
+		tid = LoadTexture( (byte*)pb->GetImage(), pb->GetWidth(), pb->GetHeight(), pb->GetPixelFormat() );
+		delete pb;
+	}
+
+	return tid;
+}
+
+
+int OpenGL::LoadTexture( byte* image, uint32 width, uint32 height, 
+						 freyja::PixelFormat format, int overwrite_id )
+{
+	if ( !mTextureIds || overwrite_id >= (int)mTextureLimit )
+	{
+		freyja3d_print( "%s ERROR Not initalizied or out of free slots.\n", __func__ );
+		return -1;
+	}
+
+	if ( !width || !height || !image )
+	{
+		freyja3d_print( "%s ERROR Assertion 'image is valid' failed\n", __func__ );
+		return -1;
+	}
+
+	/* Convert pixelformat to OpenGL image format. */
+	uint32 glcMode;
+	switch ( format )
+	{
+	case Indexed_8bpp:
+		glcMode = GL_LUMINANCE;
+		break;
+
+	case RGB_24bpp:
+		glcMode = GL_RGB;
+		break;
+
+	case ARGB_32bpp:
+		for ( uint32 i = 0, size = width*height; i < size; ++i )
+		{
+			// I don't see any const in the parm list do you?  :3
+			const unsigned int idx = i*4;
+			byte swap = image[idx+3];
+			image[idx  ] = image[idx+1];
+			image[idx+1] = image[idx+2];
+			image[idx+2] = image[idx+3];
+			image[idx+3] = swap;
+		}
+
+		glcMode = GL_RGBA;
+		break;
+
+	case RGBA_32bpp:
+		glcMode = GL_RGBA;
+		break;
+
+	default:
+		freyja3d_print( "%s ERROR Unknown pixel format: %i\n", __func__, format );
+		return -1;
+	}
+
+	int slot = overwrite_id;
+	if ( slot < 0 ) 
+	{
+		slot = mTextureCount++;
+	}
+
+	uint16 bytes = PixelBuffer::GetBytesPerPixel( format );
+
+	glClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+
+	glEnable(GL_DEPTH_TEST);
+	glShadeModel(GL_SMOOTH);
+  
+	glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
+	glBindTexture( GL_TEXTURE_2D, ((GLuint*)mTextureIds)[slot] );
+
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+
+	if ( mUseMipmaps )
+	{
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR );
+		//glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+		gluBuild2DMipmaps(GL_TEXTURE_2D, bytes, width, height, glcMode, GL_UNSIGNED_BYTE, image );
+	}
+	else
+	{
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexImage2D( GL_TEXTURE_2D, 0, glcMode, width, height, 0, glcMode, GL_UNSIGNED_BYTE, image );
+	}
+
+	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+
+	return slot;
+}
+
+
+void OpenGL::InitContext( uint32 width, uint32 height )
+{
+	if ( mInit )
+		return;
+
+	mInit = true;
+	mWidth = width;
+	mHeight = height;
+
+	if ( mWidth == 0 )
+		mWidth = 16;
+
+	if ( mHeight == 0 )
+		mHeight = 16;
+
+	////////////////////////////////////////////////////////////////////////////////
+	// NOTE:
+	// Due to whacky bullshit we're seriously going to have to use
+	// GL_LESS depth and GL_FRONT culling or the interface will break.
+	//
+	// The 'whacky bullshit' is due to various windings and
+	// 'native' formats are allowed, so until that changes don't change this.
+	////////////////////////////////////////////////////////////////////////////////
+
+	/* Set up Z buffer. */
+	glEnable(GL_DEPTH_TEST);
+	//glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
+	//glClearDepth(1.0f);
+
+	/* Stencil. */
+	//glClearStencil(0);
+
+	/* Set up culling. */
+	//glEnable(GL_CULL_FACE);
+	//glCullFace(GL_FRONT);
+	//glFrontFace(GL_CCW);
+	//glCullFace(GL_BACK);
+
+	/* Set background to black. */
+	glClearColor(BLACK[0], BLACK[1], BLACK[2], BLACK[3]);
+
+	/* Setup shading. */
+	glShadeModel(GL_SMOOTH);
+
+#if 0
+	if (fastCard) 
+	{
+		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+		glHint(GL_FOG_HINT, GL_NICEST);
+		glEnable(GL_DITHER);
+		
+		// AA polygon edges
+		//glEnable(GL_LINE_SMOOTH);
+		//glEnable(GL_POLYGON_SMOOTH);
+		//glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
+	}
+	else
+	{
+		glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
+		glHint(GL_FOG_HINT, GL_FASTEST);
+		glDisable(GL_COLOR_MATERIAL);
+		glDisable(GL_DITHER);
+		glDisable(GL_POLYGON_SMOOTH);
+	}
+#else
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	glEnable(GL_DITHER);
+#endif
+
+	/* Set various states. */
+	glDisable(GL_LIGHTING);
+	glDisable(GL_POINT_SMOOTH);
+	glDisable(GL_LINE_SMOOTH);
+	glDisable(GL_AUTO_NORMAL);
+	glDisable(GL_LOGIC_OP);
+	glDisable(GL_TEXTURE_1D);
+	glDisable(GL_STENCIL_TEST);
+	glDisable(GL_FOG);
+	glDisable(GL_NORMALIZE);
+	glDisableClientState(GL_NORMAL_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_EDGE_FLAG_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+
+	glEnable(GL_TEXTURE_2D);
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	glPolygonMode(GL_FRONT, GL_FILL);
+	glMatrixMode(GL_MODELVIEW);
+
+	//SetNearHeight(mScaleEnv);
+	//ResizeContext( mWidth, mHeight );
 }
 
 
@@ -269,108 +509,56 @@ const char *OpenGL::BlendIntToString(int32 i)
 }
 
 
-// Very, very old TGA screenshot code - slightly updated
-void OpenGL::TakeScreenShot(const char *base, uint32 width, uint32 height)
+bool OpenGL::TakeScreenShot( const char* basename, const char* format )
 {
-	if (!width || !height)
+	if ( !mWidth || !mHeight )
 	{
-		freyja3d_print("OpenGL::TakeScreenShot() ERROR: Invalid image size!\n");
-		return;
+		freyja3d_print( "%s ERROR: Invalid context size.\n", __func__ );
+		return false;
 	}
 
-	// Don't overwrite old screenshots...
-	static int count = 0;
-	char filename[1024];
-	bool done = false;
+	/* Capture from frame buffer. */
+	byte* image = new byte[ mWidth*mHeight*3 ];
 
-	FILE *f = fopen(filename, "wb");
-
-	while (!done)
+	if ( !image )
 	{
-		snprintf(filename, 1024, "%s-%04i.tga", base, count++);
-		f = fopen(filename, "rb");
-		(f) ? fclose(f) : done = true;
+		freyja3d_print( "%s ERROR: Image buffer could not be allocated.\n", __func__ );
+		return false;
 	}
 
-	if (!f)
-	{
-		freyja3d_print("OpenGL::TakeScreenShot() ERROR: Couldn't write screenshot.\n");
-		perror("OpenGL::TakeScreenShot() ERROR: ");
-		return;
-	}
-
-	int sz = width * height;
-	byte *image = new byte[sz*3];
-
-	// Capture frame buffer
-	glReadPixels(0, 0, width, height, GL_RGB, GL_UNSIGNED_BYTE, image);
-
-	byte *swap_row = new byte[width*3];
-
-	// Flip vertical
-	for (uint32 i = 0, j = height-1; i < height/2; ++i, --j)
-	{
-		memcpy(swap_row, &image[i*width*3], width*3);
-		memcpy(&image[i*width*3], &image[j*width*3], width*3);
-		memcpy(&image[j*width*3], swap_row, width*3);
-	}
-
-	delete [] swap_row;
-
-	// Build a TGA header
-	char comment[32] = "Mongoose TGA 0.0.1\0";
-	byte comment_lenght = strlen(comment);
-	byte colormap_type = 0;
-	byte image_type = 2;
-	unsigned short colormap_index = 0;
-	unsigned short colormap_lenght = 0;
-	byte colormap_bbp = 0;
-	unsigned short origin_x = 0, origin_y = 0;
-	unsigned short swidth = width;
-	unsigned short sheight = height;
-	byte bpp = 24;
-	byte desc_flags = 32;
-
-	// Write TGA header
-	fwrite(&comment_lenght, 1, 1, f);
-	fwrite(&colormap_type, 1, 1, f); 
-	fwrite(&image_type, 1, 1, f);
-	fwrite(&colormap_index, 2, 1, f);
-	fwrite(&colormap_lenght, 2, 1, f);
-	fwrite(&colormap_bbp, 1, 1, f);
-	fwrite(&origin_x, 2, 1, f);
-	fwrite(&origin_y, 2, 1, f);
-	fwrite(&swidth, 2, 1, f);
-	fwrite(&sheight, 2, 1, f);
-	fwrite(&bpp, 1, 1, f);
-	fwrite(&desc_flags, 1, 1, f);
-
-	// Write comment
-	fwrite(&comment, 1, comment_lenght, f);
-
-	uint32 size = width * height * 3;
- 
-	for (uint32 i = 0; i < size; i += 3)
-	{
-		byte tmp = image[i];
-		image[i] = image[i + 2];
-		image[i + 2] = tmp;
-	}
-
-	// Write image data
-	if (fwrite(image, size, 1, f) < 1)
-	{
-		freyja3d_print("OpenGL::TakeScreenShot()  Disk write failed.\n");
-		perror("OpenGL::TakeScreenShot() \n");
-		fclose(f);
-		return;
-	}
-
-	fclose(f);
-
+	glReadPixels( 0, 0, mWidth, mHeight, GL_RGB, GL_UNSIGNED_BYTE, image );
+	freyja::PixelBuffer* pixbuf = freyja::PixelBuffer::Create( image, mWidth, mHeight, freyja::RGB_24bpp );
 	delete [] image;
 
-	freyja3d_print("Took screenshot '%s'.\n", filename);
+	/* Only try for a unique filename a limited number of times. */
+	mstl::String filename;
+	bool done = false;
+	uint32 id = 0;
+
+	for ( uint32 i = 0; i < 1024; ++i )
+	{
+		filename.Set( "%s-%04i.%s", basename, i, format );
+
+		if ( !mstl::SystemIO::File::DoesFileExist( filename.c_str() ) )
+		{
+			id = i;
+			done = true;
+			break;
+		}
+	}
+	
+	if ( pixbuf )
+	{
+		if ( done )
+		{
+			done = pixbuf->Export( filename.c_str(), "tga" );
+			freyja3d_print("Took screenshot '%s'.\n", filename.c_str() );
+		}
+
+		delete pixbuf;
+	}
+
+	return done;
 }
 
 
@@ -378,15 +566,17 @@ void OpenGL::TakeScreenShot(const char *base, uint32 width, uint32 height)
 // Public Mutators
 ////////////////////////////////////////////////////////////
 
-void OpenGL::SetMaxTextureCount(uint32 max)
+void OpenGL::SetMaxTextureCount( uint32 max )
 {
 	mTextureLimit = max;
 
-	if (mTextureIds) 
-		delete [] mTextureIds;
+	if ( mTextureIds ) 
+	{
+		delete [] (GLuint*)mTextureIds;
+	}
 
 	mTextureIds = new GLuint[max];
-	glGenTextures(max, mTextureIds);
+	glGenTextures(max, (GLuint*)mTextureIds );
 }
 
 
@@ -603,12 +793,19 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 			mObjects = program;
 	}
 
+#if 0
 	// FIXME: Testing new setup with hardcoded uniforms for a specific series of vert/frag programs.
 	Uniform1i( fragmentId, "decalMap",   0 );
 	Uniform1i( fragmentId, "glossMap",   1 );
 	Uniform1i( fragmentId, "normalMap",  2 );
 	Uniform1i( fragmentId, "heightMap",  3 );
 	Uniform1i( fragmentId, "parallaxMapping", 0 );
+#else
+	Uniform1i( fragmentId, "tex0",  0 );
+	Uniform1i( fragmentId, "tex1",  1 );
+	Uniform1i( fragmentId, "tex2",  2 );
+	Uniform1i( fragmentId, "tex3",  3 );
+#endif
 
 	r.Close();
 	r2.Close();
@@ -703,22 +900,6 @@ void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 }
 
 
-byte *OpenGL::GenerateColorTexture(byte rgba[4], uint32 width, uint32 height)
-{
-	byte *image = new unsigned char[height*width*4];
-
-	for (uint32 i = 0, size = width*height; i < size; ++i)
-	{
-		/* RBGA */
-		image[i*4]   = rgba[0];
-		image[i*4+1] = rgba[1];
-		image[i*4+2] = rgba[2];
-		image[i*4+3] = rgba[3];
-	}
-
-	return image;
-}
-
 
 ////////////////////////////////////////////////////////////
 // Private Accessors
@@ -729,72 +910,7 @@ byte *OpenGL::GenerateColorTexture(byte rgba[4], uint32 width, uint32 height)
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
-void OpenGLContext::Init(uint32 width, uint32 height)
-{
-	/* Log OpenGL driver support information */
-	freyja3d_print("[GL Driver Info]");
-	freyja3d_print("\tVendor     : %s", glGetString(GL_VENDOR));
-	freyja3d_print("\tRenderer   : %s", glGetString(GL_RENDERER));
-	freyja3d_print("\tVersion    : %s", glGetString(GL_VERSION));
-	freyja3d_print("\tExtensions : %s", (char*)glGetString(GL_EXTENSIONS));
-
-	/* Test for extentions */
-	if (mglHardwareExtTest("GL_ARB_multitexture"))
-		;
-
-	// Set up Z buffer
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-
-	glEnable(GL_TEXTURE_2D);
-
-	// Set up culling
-	//glEnable(GL_CULL_FACE);
-	//glFrontFace(GL_CCW);
-
-	// Set background to black
-	glClearColor(BLACK[0], BLACK[1], BLACK[2], BLACK[3]);
-
-	// Disable lighting 
-	glDisable(GL_LIGHTING);
-
-	// Setup shading
-	glShadeModel(GL_SMOOTH);
-
-	// Use some hints
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-	glHint(GL_FOG_HINT, GL_NICEST);
-	glEnable(GL_DITHER);
-		
-	// AA polygon edges
-	//glEnable(GL_POLYGON_SMOOTH);
-	//glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-
-	glDisable(GL_POINT_SMOOTH);
-	glDisable(GL_LINE_SMOOTH);
-	glDisable(GL_AUTO_NORMAL);
-	glDisable(GL_LOGIC_OP);
-	glDisable(GL_TEXTURE_1D);
-	glDisable(GL_STENCIL_TEST);
-	glDisable(GL_FOG);
-
-	glDisable(GL_NORMALIZE);
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_EDGE_FLAG_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-	glDisableClientState(GL_NORMAL_ARRAY);
-
-	glPolygonMode(GL_FRONT, GL_FILL);
-
-	glMatrixMode(GL_MODELVIEW);
-
-	mWidth = width;
-	mHeight = height;
-	mInitContext = true;
-}
-
-void OpenGLContext::Resize(uint32 width, uint32 height) 
+void OpenGL::ResizeContext(uint32 width, uint32 height) 
 {
 	if (!width || !height)
 	{
@@ -834,10 +950,19 @@ void OpenGLContext::Resize(uint32 width, uint32 height)
 }
 
 
-void OpenGL::Bind( GLenum texture_unit, uint16 id )
+void OpenGL::BindTexture( GLenum texture_unit, uint16 id )
 {
-	gTexture.Bind( texture_unit, id );
+#if USING_OPENGL_EXT 
+	if (h_glActiveTextureARB)
+	{
+		h_glActiveTextureARB( texture_unit );
+	}
+#endif
+
+	// In case glActiveTextureARB isn't found or EXT are disabled.
+	glBindTexture( GL_TEXTURE_2D, ((GLuint*)mTextureIds)[id] );
 }
+
 
 ////////////////////////////////////////////////////////////
 // Unit Test code

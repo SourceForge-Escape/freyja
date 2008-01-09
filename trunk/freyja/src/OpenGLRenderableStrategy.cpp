@@ -17,6 +17,8 @@
 
 #define TEST_OGL_STRATEGY 0
 
+#include "opengl_config.h"
+
 #include "FreyjaOpenGL.h" /* Includes windows.h, so avoid header interaction. */
 #include "OpenGLRenderableStrategy.h"
 
@@ -34,15 +36,15 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 		glDisable( GL_BLEND );
 		glColor3fv( WHITE );
 		//glBindTexture( GL_TEXTURE_2D, 0 );
-		freyja3d::OpenGL::Bind( GL_TEXTURE0, 0 );
-		freyja3d::OpenGL::BindFragmentGLSL( 0 );
+		OpenGL::BindTexture( GL_TEXTURE0, 0 );
+		OpenGL::BindFragmentGLSL( 0 );
 		return;
 	}
 
 	{
 		// Id 0 disables ( no weird index scheme here )
 		int programId = ( mat->GetShaderId() == -1 ) ? 0 : mat->GetShaderId();
-		freyja3d::OpenGL::BindFragmentGLSL( programId );
+		OpenGL::BindFragmentGLSL( programId );
 	}
 
 	glMaterialfv(GL_FRONT, GL_AMBIENT, mat->GetAmbientColor() );
@@ -54,7 +56,7 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 	/* Texture maps. */
 	if ( mat->GetTexture0Id() != -1 )
 	{
-		freyja3d::OpenGL::Bind( GL_TEXTURE0, mat->GetTexture0Id() );
+		OpenGL::BindTexture( GL_TEXTURE0, mat->GetTexture0Id() );
 	}
 	else if ( 0 ) // flags & fTextured )
 	{
@@ -70,31 +72,31 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 	/* Multitexture, Normal maps, etc... */
 #if 0
 	if ( mat->GetDecalMapId() != -1 )
-		freyja3d::OpenGL::Bind( GL_TEXTURE1, mat->GetDecalMapId() );
+		OpenGL::BindTexture( GL_TEXTURE1, mat->GetDecalMapId() );
 
 	if ( mat->GetSpecularMapId() != -1 )
-		freyja3d::OpenGL::Bind( GL_TEXTURE1, mat->GetSpecularMapId() );
+		OpenGL::BindTexture( GL_TEXTURE1, mat->GetSpecularMapId() );
 	
 	if ( mat->GetNormalMapId() != -1 )
-		freyja3d::OpenGL::Bind( GL_TEXTURE2, mat->GetNormalMapId() );
+		OpenGL::BindTexture( GL_TEXTURE2, mat->GetNormalMapId() );
 	
 	if ( mat->GetHeightMapId() != -1 )
-		freyja3d::OpenGL::Bind( GL_TEXTURE3, mat->GetHeightMapId() );
+		OpenGL::BindTexture( GL_TEXTURE3, mat->GetHeightMapId() );
 	
 	if ( mat->GetEmissiveMapId() != -1 )
-		freyja3d::OpenGL::Bind( GL_TEXTURE4, mat->GetEmissiveMapId() );
+		OpenGL::BindTexture( GL_TEXTURE4, mat->GetEmissiveMapId() );
 #else
 	if ( mat->GetTexture1Id() != -1 )
-		freyja3d::OpenGL::Bind( GL_TEXTURE1, mat->GetTexture1Id() );
+		OpenGL::BindTexture( GL_TEXTURE1, mat->GetTexture1Id() );
 	
 	if ( mat->GetTexture2Id() != -1 )
-		freyja3d::OpenGL::Bind( GL_TEXTURE2, mat->GetTexture2Id() );
+		OpenGL::BindTexture( GL_TEXTURE2, mat->GetTexture2Id() );
 	
 	if ( mat->GetTexture3Id() != -1 )
-		freyja3d::OpenGL::Bind( GL_TEXTURE3, mat->GetTexture3Id() );
+		OpenGL::BindTexture( GL_TEXTURE3, mat->GetTexture3Id() );
 	
 	if ( mat->GetTexture4Id() != -1 )
-		freyja3d::OpenGL::Bind( GL_TEXTURE4, mat->GetTexture4Id() );
+		OpenGL::BindTexture( GL_TEXTURE4, mat->GetTexture4Id() );
 #endif
 
 	if ( mat->IsBlendingEnabled() )

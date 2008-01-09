@@ -108,7 +108,6 @@ set(Objs
 	src/OpenGLRenderableStrategy
 	src/Plugins
 	src/RecentFiles
-	src/Texture
 )
 
 add_executable( ${Name} ${Objs} )

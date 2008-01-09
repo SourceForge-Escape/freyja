@@ -26,13 +26,10 @@
  * Mongoose - Created, based on old 2001 midgard codebase.
  ==========================================================================*/
 
+#include "opengl_config.h"
+
 #include <mstl/SystemIO.h>
-
-#ifdef HAVE_OPENGL
-#   include "FreyjaOpenGL.h"
-#   include "Texture.h"
-#endif // HAVE_OPENGL
-
+#include "FreyjaOpenGL.h"
 #include "OpenGLPrinter.h"
 
 using namespace freyja3d;
@@ -68,7 +65,7 @@ OpenGLPrinter::OpenGLPrinter() :
 OpenGLPrinter::~OpenGLPrinter()
 {
 #ifdef HAVE_OPENGL
-	glDeleteLists(mFont.mListBase, mFont.mCount);
+	glDeleteLists( mFont.mListBase, mFont.mCount );
 #endif // HAVE_OPENGL
 }
 
@@ -100,7 +97,8 @@ bool OpenGLPrinter::GenerateFont(Font &font,
 	font.mOffset = (int)text[0];
 	font.mListBase = glGenLists(font.mCount);
 	glColor3f(1.0f, 1.0f, 1.0f);
-	glBindTexture(GL_TEXTURE_2D, textureId);
+	//glBindTexture(GL_TEXTURE_2D, textureId);
+	OpenGL::BindTexture( GL_TEXTURE0, textureId );
 
 	const float spacing = 4.0f;
 	const float invWidth = 1.0f / (float)image_width;
@@ -258,7 +256,8 @@ void OpenGLPrinter::Print2d(float x, float y, float scale, const char *text)
 
 #ifdef HAVE_OPENGL
 	glPushMatrix();
-	glBindTexture(GL_TEXTURE_2D, mFont.mTextureId);
+	//glBindTexture(GL_TEXTURE_2D, mFont.mTextureId);
+	OpenGL::BindTexture( GL_TEXTURE0, mFont.mTextureId );
 	glTranslatef(x, y, 0);
 	glScalef(scale, scale, 1);
 	
@@ -278,7 +277,8 @@ void OpenGLPrinter::Print3d(float x, float y, float z,
 
 #ifdef HAVE_OPENGL
 	glPushMatrix();
-	glBindTexture(GL_TEXTURE_2D, mFont.mTextureId);
+	//glBindTexture(GL_TEXTURE_2D, mFont.mTextureId);
+	OpenGL::BindTexture( GL_TEXTURE0, mFont.mTextureId );
 	glTranslatef(x, y, z);
 	glRotatef(roll,  1, 0, 0);
 	glRotatef(yaw,   0, 1, 0);
@@ -456,11 +456,8 @@ bool OpenGLPrinter::Init(const char* font,
 
 		if ( GenerateTexture(font, pt, dpi, text, glyphs, image, width) )
 		{
-#ifdef HAVE_OPENGL
 			/* Bind texture in OpenGL. */
-			int id = Texture::mSingleton->loadBuffer(image, width, width, Texture::RGBA, 32);
-#endif // HAVE_OPENGL
-		
+			int id = OpenGL::GetInstance()->LoadTexture( image, width, width, freyja::RGBA_32bpp );		
 			mInit = GenerateFont(mFont, text, glyphs, id, image, width);
 		}
 	}

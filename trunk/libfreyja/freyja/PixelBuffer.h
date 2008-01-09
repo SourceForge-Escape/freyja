@@ -32,10 +32,26 @@
 
 namespace freyja {
 
+	//	typedef enum {
+	//	GREYSCALE = 1,
+	//	INDEXED,
+	//	RGB,
+	//	RGBA,
+	//	ARGB
+	//} ColorMode;
+
 enum PixelFormat {
 	Indexed_8bpp = 1,
 	RGB_24bpp,
+	ARGB_32bpp,
 	RGBA_32bpp
+};
+
+
+class Pixel
+{
+public:
+	float r, g, b, a;
 };
 
 
@@ -59,6 +75,15 @@ class PixelBuffer
 	 * Pre  : filename must be for a valid image file.
 	 *
 	 * Post : Conditional Constructor returns PixelBuffer.
+	 *        Returns NULL on invalid precondition.
+	 *
+	 ------------------------------------------------------*/
+
+	static PixelBuffer* CreateSolidColor( Pixel& pixel, 
+										  uint16 width, uint16 height );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Conditional Constructor returns PixelBuffer. 
 	 *        Returns NULL on invalid precondition.
 	 *
 	 ------------------------------------------------------*/
@@ -162,6 +187,13 @@ class PixelBuffer
 	 *
 	 ------------------------------------------------------*/
 
+	void Invert();
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	void FlipVertical();
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -223,6 +255,27 @@ class PixelBuffer
 	 ------------------------------------------------------*/
 
  protected:
+
+	bool ConvertPixelFormatToIndexed_8( PixelFormat mode );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool ConvertPixelFormatToRGB_24( PixelFormat mode );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	bool ConvertPixelFormatToRGBA_32( PixelFormat mode );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
 
 	PixelBuffer();
 	/*------------------------------------------------------

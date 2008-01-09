@@ -25,7 +25,10 @@
 
 #include "config.h"
 
-#include "FreyjaOpenGL.h" // Includes windows.h, so avoid header interaction
+#warning FIXME This class should not be using OpenGL directly.
+#include "opengl_config.h" // Includes windows.h, so avoid header interaction
+
+#include "FreyjaOpenGL.h"
 
 #include <sys/time.h>
 #include <stdlib.h>
@@ -923,110 +926,15 @@ void FreyjaRender::ClearFlag(flags_t flag)
 
 void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
 {
-	if ( width > 0 && height > 0 )
-	{
-		OpenGL::Instance( );
+	OpenGL::GetInstance()->InitContext( width, height );
 
-		// Due to whacky bullshit we're seriously going to have to use
-		// GL_LESS depth and GL_FRONT culling or the interface will break
-
-		// NOTE: The 'whacky bullshit' is due to various windings and
-		// 'native' formats are allowed, so until that changes don't change this
-
-		// Set up Z buffer
-		glEnable(GL_DEPTH_TEST);
-		//glDepthFunc(GL_LESS);
-		glDepthFunc(GL_LEQUAL);
-		//glClearDepth(1.0f);
-
-		// Stencil
-		//glClearStencil(0);
-
-		// Set up culling
-		//glEnable(GL_CULL_FACE);
-		//glCullFace(GL_FRONT);
-		//glFrontFace(GL_CCW);
-		//glCullFace(GL_BACK);
-
-		// Set background to black
-		glClearColor(BLACK[0], BLACK[1], BLACK[2], BLACK[3]);
-
-		// Setup shading
-		glShadeModel(GL_SMOOTH);
-
-		if (fastCard) 
-		{
-			glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-			glHint(GL_FOG_HINT, GL_NICEST);
-			glEnable(GL_DITHER);
-		
-			// AA polygon edges
-			//glEnable(GL_LINE_SMOOTH);
-			//glEnable(GL_POLYGON_SMOOTH);
-			//glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
-		}
-		else
-		{
-			glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
-			glHint(GL_FOG_HINT, GL_FASTEST);
-			glDisable(GL_COLOR_MATERIAL);
-			glDisable(GL_DITHER);
-			glDisable(GL_POLYGON_SMOOTH);
-		}
-
-		// Setup some general states
-		glDisable(GL_LIGHTING);
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_POINT_SMOOTH);
-		glDisable(GL_LINE_SMOOTH);
-		glDisable(GL_AUTO_NORMAL);
-		glDisable(GL_LOGIC_OP);
-		glDisable(GL_TEXTURE_1D);
-		glDisable(GL_STENCIL_TEST);
-		glDisable(GL_FOG);
-		glDisable(GL_NORMALIZE);
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glDisableClientState(GL_NORMAL_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glDisableClientState(GL_EDGE_FLAG_ARRAY);
-		glDisableClientState(GL_COLOR_ARRAY);
-
-		glPolygonMode(GL_FRONT, GL_FILL);
-		glMatrixMode(GL_MODELVIEW);
-
-		SetNearHeight(mScaleEnv);
-
-		mWidth = width;
-		mHeight = height;
-		mInitContext = true;
-
-		ResizeContext( width, height );
-	}
+	// FIXME: These should go under OpenGL also.
+	SetNearHeight( mScaleEnv );
+	mWidth = width;
+	mHeight = height;
+	mInitContext = true;
+	ResizeContext( width, height );
 }
-
-
-#if 0
-void FreyjaRender::DisplayByPolling()
-{
-	if (GetMode() & fFPSCap)
-	{
-		static unsigned int frames = 0;
-		static mstl::Timer timer;
-		
-		float fps = (float)frames/((float)timer.GetTicks() / 1000.0f);
-		
-		freyja_print("! %f fps, %i ticks", fps, timer.GetTicks());
-		
-		if (fps > 60.0f)
-			return;
-		else
-			++frames;
-	}
-
-	Display();
-}
-#endif
 
 
 void FreyjaRender::Display() 
@@ -2893,8 +2801,7 @@ void draw_material_texture_square( int id, float x, float y, float z, float w, f
 	/* Texture square. */
 	glPushMatrix();
 	glColor3fv(BLACK);
-	//glBindTexture( GL_TEXTURE_2D, 0 );
-	freyja3d::OpenGL::Bind( GL_TEXTURE0, 0 );
+	OpenGL::BindTexture( GL_TEXTURE0, 0 );
 	glBegin(GL_LINE_LOOP);
 	glVertex3f(x*s, y*s, z);
 	glVertex3f(x*s, (y+h)*s, z);
@@ -2908,8 +2815,7 @@ void draw_material_texture_square( int id, float x, float y, float z, float w, f
 	glEnd();
 
 	glColor3fv(WHITE);
-	//glBindTexture( GL_TEXTURE_2D, id + 1 );
-	freyja3d::OpenGL::Bind( GL_TEXTURE0, id );
+	OpenGL::BindTexture( GL_TEXTURE0, id );
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0, 1.0);
 	glVertex3f(x, y, z);
@@ -3040,7 +2946,8 @@ void FreyjaRender::DrawMaterialEditWindow()
 
 void FreyjaRender::EvScreenShot()
 {
-	OpenGL::TakeScreenShot("Freyja", GetWindowWidth(), GetWindowHeight());
+	if ( !OpenGL::GetInstance()->TakeScreenShot( "Freyja", "png" ) )
+		OpenGL::GetInstance()->TakeScreenShot( "Freyja", "tga" );
 }
 
 

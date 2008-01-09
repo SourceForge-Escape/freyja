@@ -15,4 +15,5 @@
 
  * Arcball implementation to remove legacy vector angles.
 
+ * Merge most of FreyjaRender with freyja3d::OpenGL.
 

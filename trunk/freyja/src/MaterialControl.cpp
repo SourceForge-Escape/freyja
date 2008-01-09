@@ -21,7 +21,6 @@
 #include <freyja/PixelBuffer.h>
 #include <freyja/MaterialABI.h>
 #include <freyja/PerlinNoise.h>
-#include "Texture.h"
 #include "FreyjaOpenGL.h"
 
 #include "MaterialControl.h"
@@ -43,8 +42,8 @@ MaterialControl::MaterialControl() :
 	EvSetNameId(0), 
 	EvSetTextureNameId(0),
 	mFlags(fNone),
-	mRecent("freyja-dev-recent-material", "eRecentMaterial"),
-	mTextureMap( 0 )
+	mTextureMap( 0 ),
+	mRecent("freyja-dev-recent-material", "eRecentMaterial")
 {
 	// We move to class based index_t later instead integer ids
 	for (uint32 i = 0; i < 4; ++i)
@@ -573,80 +572,20 @@ void MaterialControl::AttachMethodListeners()
 
 bool MaterialControl::LoadTexture( const char* filename )
 {
-	int err = -1;
-
-	Print("[MaterialControl::LoadTexture]\n");
-	Print(" Loading texture '%s'\n", filename);
-
-	PixelBuffer* img = PixelBuffer::Create( filename );
-	if ( img )
-	{
-		byte* image = img->CopyPixmap();
-		uint32 w = img->GetWidth();
-		uint32 h = img->GetHeight();
-		uint16 components = PixelBuffer::GetBytesPerPixel( img->GetPixelFormat() );
-
-		if ( components )
-		{
-			err = LoadTextureBuffer( image, w, h, components*8, components );
-		}
-		else
-		{
-			Print("MaterialManager: Use RGB_24 and RGBA_32 images only.\n");
-			
-			if (image)
-				delete [] image;
-
-			if (err >= 0)
-			{
-				//freyjaMaterialTexture(freyjaGetCurrentMaterial(), err);
-				//freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
-				//Print("Material[%i].texture = { %i }", freyjaGetCurrentMaterial(), err);
-				RefreshInterface();
-			}
-
-			return false;
-		}
-		
-		delete [] image;
-		
-		//printf("[Success]\n");
-
-		return true;
-	}
+	Print( "[MaterialControl::LoadTexture]\n" );
+	Print( " Loading texture '%s'\n", filename );
 	
-	return false;
-}
-
-
-bool MaterialControl::LoadTextureBuffer(byte *image, uint32 width, uint32 height, 
-								   uint32 bpp, uint32 colortype)
-{
-	if (image == NULL || width == 0 || height == 0 || bpp == 0)
-		return false;
-
-	int err = 0;
-	Texture::ColorMode type = ((colortype == 4) ? Texture::RGBA :
-							   (colortype == 3) ? Texture::RGB :
-							   Texture::INDEXED);
-
-	if (mFlags & fLoadTextureInSlot)
+	int tid = OpenGL::GetInstance()->LoadTexture( filename );
+ 
+	if ( tid >= 0 )
 	{
-		err = Texture::mSingleton->loadBufferSlot(image, width, height, 
-												  type, bpp, mTextureId);
-	}
-	else
-	{
-		err = mTextureId = 
-		Texture::mSingleton->loadBuffer(image, width, height, type, bpp);
+		//freyjaMaterialTexture(freyjaGetCurrentMaterial(), err);
+		//freyjaMaterialSetFlag(freyjaGetCurrentMaterial(), fFreyjaMaterial_Texture);
+		//Print("Material[%i].texture = { %i }", freyjaGetCurrentMaterial(), err);
+		RefreshInterface();
 	}
 
-	if (err < 0)
-	{
-		printf("MaterialControl::LoadTextureBuffer() ERROR Loading buffer\n");
-	}
-
-	return (err == 0);
+	return ( tid >= 0 );
 }
 
 
@@ -1044,86 +983,68 @@ void MaterialControl::EvTextureUpload(uint32 id)
 }
 
 
-void MaterialControl::EvOpenTexture( char *text )
+void MaterialControl::EvOpenTexture( char* filename )
 {
-	if ( text == NULL || text[0] == 0 ) 
+	if ( filename == NULL || filename[0] == 0 ) 
 		return;
 
-	PixelBuffer* img = PixelBuffer::Create( text );
-	bool loaded = false;
+	int tid = OpenGL::GetInstance()->LoadTexture( filename );
 
-	if ( img )
+	if ( tid > -1 )
 	{
-		byte* image = img->CopyPixmap();
-		uint32 w = img->GetWidth();
-		uint32 h = img->GetHeight();
-		uint16 components = PixelBuffer::GetBytesPerPixel( img->GetPixelFormat() );
+		freyja::Material* mat = GetCurrentMaterial();
 
-		if ( image && components )
+		if ( mat )
 		{
-			int err = LoadTextureBuffer( image, w, h, components*8, components );
-			uint32 e = resourceGetEventId1s("eSetTextureNameA");
-			uint32 texture = mTextureId - 1;
-			freyja::Material* mat = GetCurrentMaterial();
-
-			if ( mat )
-			{
-				mstl::String basename = text;
+			mstl::String basename = filename;
 #if WIN32
-				const char sep = '\\';
+			const char sep = '\\';
 #else
-				const char sep = '/';
+			const char sep = '/';
 #endif
-				int i = basename.find_last_of( sep );
-				if ( i > 0 )
-				{
-					basename = ( basename.c_str()+i+1 );
-				}
-
-				mgtk_textentry_value_set( e, basename.c_str() );
-
-				/* Now the spin button sets the texel unit instead of the texture id. */
-				mgtk_spinbutton_value_set( EvSetTextureId, mTextureMap ); //texture);
-
-				switch ( mTextureMap )
-				{
-				case 1:
-					mat->SetTexture1Id( texture );
-					break;
-
-				case 2:
-					mat->SetTexture2Id( texture );
-					break;
-
-				case 3:
-					mat->SetTexture3Id( texture );
-					break;
-
-				case 4:
-					mat->SetTexture4Id( texture );
-					break;
-
-				default:
-					mat->SetTexture0Id( texture );
-				}
-
-				//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
-				//mat->SetTextureId( texture );
-				//freyjaMaterialTextureName(mat, text);
-
-				RefreshContext(); 
+			int i = basename.find_last_of( sep );
+			if ( i > 0 )
+			{
+				basename = ( basename.c_str()+i+1 );
 			}
 
-			loaded = true; // In OpenGL at least.
+			uint32 e = resourceGetEventId1s("eSetTextureNameA");
+			mgtk_textentry_value_set( e, basename.c_str() );
+			
+			/* Now the spin button sets the texel unit instead of the texture id. */
+			mgtk_spinbutton_value_set( EvSetTextureId, mTextureMap ); 
+
+			switch ( mTextureMap )
+			{
+			case 1:
+				mat->SetTexture1Id( tid );
+				break;
+
+			case 2:
+				mat->SetTexture2Id( tid );
+				break;
+
+			case 3:
+				mat->SetTexture3Id( tid );
+				break;
+
+			case 4:
+				mat->SetTexture4Id( tid );
+				break;
+
+			default:
+				mat->SetTexture0Id( tid );
+			}
+
+			//freyjaMaterialSetFlag(mat, fFreyjaMaterial_Texture);
+			//mat->SetTextureId( texture );
+			//freyjaMaterialTextureName(mat, text);
+
+			RefreshContext(); 
 		}
-
-		if ( image )
-			delete [] image;
-
-		delete img;
 	}
 
-	Print( "%s %s", text, loaded ? "loaded" : "failed to load" );
+	Print( "%s %s", filename, ( tid >= 0 ) ? "loaded" : "failed to load" );
 }
 
 

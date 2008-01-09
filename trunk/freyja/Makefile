@@ -265,18 +265,6 @@ src/RecentFiles.s:
 	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/RecentFiles.s
 
 # target to build an object file
-src/Texture.o:
-	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Texture.o
-
-# target to preprocess a source file
-src/Texture.i:
-	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Texture.i
-
-# target to generate assembly for a file
-src/Texture.s:
-	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/Texture.s
-
-# target to build an object file
 src/freyja3d_scenegraph.o:
 	cd /home/mongoose/Projects/freyja/trunk && $(MAKE) -f freyja/CMakeFiles/freyja.dir/build.make freyja/CMakeFiles/freyja.dir/src/freyja3d_scenegraph.o
 
@@ -368,9 +356,6 @@ help::
 	@echo "... src/RecentFiles.o"
 	@echo "... src/RecentFiles.i"
 	@echo "... src/RecentFiles.s"
-	@echo "... src/Texture.o"
-	@echo "... src/Texture.i"
-	@echo "... src/Texture.s"
 	@echo "... src/freyja3d_scenegraph.o"
 	@echo "... src/freyja3d_scenegraph.i"
 	@echo "... src/freyja3d_scenegraph.s"

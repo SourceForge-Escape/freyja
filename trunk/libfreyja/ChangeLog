@@ -6,6 +6,7 @@
 
  Kagura alpha, 0.10.0.0
 
+ * PixelBuffer update with a few more features and code clean up.
  * Tinkering with Wedge based meshes. ( no commit )
  * Camera got minor update.
  * Fix for PixelBuffer ConvertFormat().

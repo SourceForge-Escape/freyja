@@ -19,6 +19,9 @@
  * Mongoose - Created, moved into it's own header from FreyjaModel 'test'
  ==========================================================================*/
 
+#warning FIXME This class should not be using OpenGL directly.
+#include "opengl_config.h"
+
 #include <hel/math.h>
 #include <hel/Ray.h>
 #include <hel/Mat44.h>
@@ -103,9 +106,11 @@ void Cursor::Display()
 		glPopAttrib();
 		break;
 
-	default:
 	case freyja3d::Cursor::Invisible:
 		break;
+
+	default:
+		;
 	}
 
 	glPopMatrix();
