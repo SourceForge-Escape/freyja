@@ -164,7 +164,7 @@ depend:
 
 targets: $(TARGETS)
 
-PROG_OBJS=$(BUILDDIR)/PSKModel.o
+PROG_OBJS=$(BUILDDIR)/PSKModel.o $(BUILDDIR)/freyja9.o
 
 $(BUILDDIR)/$(MODULE) : $(PROG_OBJS)
 	$(CC) $(CFLAGS) $(LD_FLAGS) -o $@ $(PROG_OBJS)
