@@ -589,19 +589,10 @@ bool OpenGL::LoadFragmentGLSL(const char *filename, uint32 &fragmentId)
 			mObjects = program;
 	}
 
-#if 0
-	// FIXME: Testing new setup with hardcoded uniforms for a specific series of vert/frag programs.
-	Uniform1i( fragmentId, "decalMap",   0 );
-	Uniform1i( fragmentId, "glossMap",   1 );
-	Uniform1i( fragmentId, "normalMap",  2 );
-	Uniform1i( fragmentId, "heightMap",  3 );
-	Uniform1i( fragmentId, "parallaxMapping", 0 );
-#else
 	Uniform1i( fragmentId, "tex0",  0 );
 	Uniform1i( fragmentId, "tex1",  1 );
 	Uniform1i( fragmentId, "tex2",  2 );
 	Uniform1i( fragmentId, "tex3",  3 );
-#endif
 
 	r.Close();
 	r2.Close();
@@ -1716,9 +1707,10 @@ void mglApplyMaterial( int32 materialIndex )
 	if ( materialIndex < 0 || materialIndex > freyjaGetMaterialCount() )
 	{
 		/* Diable shader, disable blending and use 'color' texture. */
-		freyja3d::OpenGL::BindFragmentGLSL( 0 );
 		glDisable( GL_BLEND );
+		glColor3fv( WHITE );
 		OpenGL::BindTexture( GL_TEXTURE0, 0 );
+		freyja3d::OpenGL::BindFragmentGLSL( 0 );
 		return;
 	}
 
@@ -1754,12 +1746,8 @@ void mglApplyMaterial( int32 materialIndex )
 		glMaterialfv(GL_FRONT, GL_SHININESS, &(shininess));
 	}
 
-
-	// 2006.07.15 - Hey, these should use Texture class binding to
-	// make sure the array ids match in the gl texture binding
-	if ( freyjaGetMaterialMultiTextureEnabled( materialIndex ) ) // flags & fFreyjaMaterial_DetailTexture)
+	if ( freyjaGetMaterialMultiTextureEnabled( materialIndex ) ) 
 	{
-#if 1
 		for ( uint32 i = 0; i < 5; ++i )
 		{
 			int id = freyjaGetMaterialMultiTextureId( materialIndex, i );
@@ -1768,40 +1756,20 @@ void mglApplyMaterial( int32 materialIndex )
 				OpenGL::BindTexture( GL_TEXTURE0+i, id );
 			}
 		}
-#else
-		int id = freyjaGetMaterialMultiTextureId( materialIndex, 0 );
-		if ( id > -1 ) OpenGL::BindTexture( GL_TEXTURE0, id );
-
-		id = freyjaGetMaterialMultiTextureId( materialIndex, 1 );
-		if ( id > -1 ) OpenGL::BindTexture( GL_TEXTURE1, id );
-
-		id = freyjaGetMaterialMultiTextureId( materialIndex, 2 );
-		if ( id > -1 ) OpenGL::BindTexture( GL_TEXTURE2, id );
-
-		id = freyjaGetMaterialMultiTextureId( materialIndex, 3 );
-		if ( id > -1 ) OpenGL::BindTexture( GL_TEXTURE3, id );
-
-		//id = freyjaGetMaterialMultiTextureId( materialIndex, 4 );
-		//if ( id > -1 ) OpenGL::BindTexture( GL_TEXTURE4, id );	
-#endif
 	}
-	else //if (flags & fFreyjaMaterial_Texture) // Non-colored is ( id + 1)
+	else 
 	{
-		glDisable( GL_TEXTURE_2D );  // hack to avoid unit enabled/disabled issues in legacy renderer.
+		// Hack to flush active.
+		glDisable( GL_TEXTURE_2D );  
 		glEnable( GL_TEXTURE_2D );
+
 		uint32 texture = freyjaGetMaterialTexture(materialIndex);
-		//glBindTexture(GL_TEXTURE_2D, texture+1);
 		OpenGL::BindTexture( GL_TEXTURE0, texture );
 	}
-	//else // Colored, first texture is a generated WHITE 32x32
-	//{
-	//	//glBindTexture(GL_TEXTURE_2D, 0);
-	//	OpenGL::BindTexture( GL_TEXTURE0, 0 );
-	//}
 
 	freyja3d::OpenGL::BindFragmentGLSL( freyjaGetMaterialShader( materialIndex ) );
 
-	if ( freyjaGetMaterialBlendingEnabled( materialIndex ) ) //flags & fFreyjaMaterial_Blending )
+	if ( freyjaGetMaterialBlendingEnabled( materialIndex ) ) 
 	{
 		uint32 blendSrc = freyjaGetMaterialBlendSource(materialIndex);
 		uint32 blendDest = freyjaGetMaterialBlendDestination(materialIndex);

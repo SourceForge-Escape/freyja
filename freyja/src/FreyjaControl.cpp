@@ -3295,6 +3295,7 @@ void FreyjaControl::SelectObject(vec_t mouseX, vec_t mouseY, bool set)
 					return;
 
 				freyjaCurrentLight(selected);
+				SetSelectedLight( selected );
 				vec4_t p;
 				freyjaGetLightPosition4v(selected, p);
 				mCursor.mPos.Set(p);
@@ -4012,10 +4013,12 @@ void FreyjaControl::MoveObject(vec_t vx, vec_t vy)
 
 	case tLight:
 		{
-			vec3_t pos;
+			vec4_t pos;
 			freyjaGetLightPosition4v(GetSelectedLight(), pos);
 			mCursor.mLastPos = hel::Vec3(pos);
-			freyjaLightPosition4v(GetSelectedLight(), mCursor.mPos.mVec);
+
+			mCursor.mPos.Get( pos );
+			freyjaLightPosition4v(GetSelectedLight(), pos);
 		}
 		break;
 
