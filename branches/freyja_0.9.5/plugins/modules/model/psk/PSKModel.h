@@ -56,7 +56,6 @@
  * Mongoose - Created
  ================================================================*/
 
-
 #ifndef GUARD__FREYJA_MONGOOSE_PSKMODEL_H_
 #define GUARD__FREYJA_MONGOOSE_PSKMODEL_H_
 
