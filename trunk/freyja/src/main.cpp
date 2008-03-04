@@ -152,15 +152,16 @@ freyja3d_shutdown( )
 	MaterialControl::Destroy( );;
 	OpenGL::Destroy( );
 
-	/* Shutdown libraries. */	
-	mgtk_event_shutdown( );
-	freyja_shutdown( );
-
+	/* Log clean shutdown footer. */
 	freyja3d_print( "Thanks for using %s", PROGRAM_NAME );
 	freyja3d_print( "   Build date: %s @ %s", __DATE__, __TIME__ );
 	freyja3d_print( "   Build host: %s", BUILD_HOST );
 	freyja3d_print( "   Email addr: %s", EMAIL_ADDRESS );
 	freyja3d_print( "   Web site  : %s", PROJECT_URL );
+
+	/* Shutdown libraries. */	
+	mgtk_event_shutdown( );
+	freyja_shutdown( );
 
 	ControlPrinter::StopLogging( );
 }
@@ -171,8 +172,7 @@ freyja3d_quit( )
 {
 	// There is some bug with some Gtk+ builds that allow this function
 	// to be called again before this exits.  
-	// Also relates to the Cancel doesn't cancel bug.
-	//FreyjaControl::GetInstance()->Shutdown();
+	// Also relates to the "Cancel doesn't cancel" bug.
 	bool exiting = true;
 
 	if ( gScene->GetModified( ) && !mgtk::ExecuteConfirmationDialog("ExitWarningDialog") )
@@ -288,7 +288,7 @@ void
 freyja3d_initialize_canvas( )
 {
 	/* Start the renderer context with a default size. */
-	FreyjaRender::GetInstance()->InitContext( 1024, 768, true );
+	OpenGL::GetInstance()->InitContext( 1024, 768 );
 
 	/* Setup OpenGL font renderer. */
 	{

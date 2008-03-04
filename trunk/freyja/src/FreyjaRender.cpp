@@ -63,7 +63,7 @@
 using namespace freyja;
 using namespace freyja3d;
 
-FreyjaRender *FreyjaRender::mInstance = 0x0;
+FreyjaRender *FreyjaRender::mInstance = NULL;
 
 hel::Ray FreyjaRender::mTestRay;
 OpenGLPrinter FreyjaRender::mPrinter;
@@ -91,10 +91,10 @@ unsigned int FreyjaRender::mBoneRenderType = 2;
 unsigned char FreyjaRender::mJointRenderType = 1;
 int FreyjaRender::mPatchDisplayList = -1;
 
-vec_t FreyjaRender::mBoneLineWidth = 3.0;        /* Custom artifact size */
-vec_t FreyjaRender::mBonePointSize = 5.0;
-vec_t FreyjaRender::mDefaultPointSize = 3.5;
-vec_t FreyjaRender::mDefaultLineWidth = 1.0;
+vec_t FreyjaRender::mBoneLineWidth = 3.0f;        /* Custom artifact size */
+vec_t FreyjaRender::mBonePointSize = 5.0f;
+vec_t FreyjaRender::mDefaultPointSize = 3.5f;
+vec_t FreyjaRender::mDefaultLineWidth = 1.0f;
 vec_t FreyjaRender::mVertexPointSize = 3.5f;
 
 int FreyjaRender::EvModeAutoKeyframeId = -1;
@@ -120,27 +120,16 @@ FreyjaRender::FreyjaRender() :
 				fBoundingVolumes |
 				fFPSCap |
 				fGroupColors),
-	mWidth(640),
-	mHeight(480),
-	mZoom(1.0f),
-	mTextureId(0),
-	mInitContext( false ),
-	mScroll( 0.0f, -18.0f, 0.0f ),
-	mScaleEnv(35.0f), // 40.0f is about too much, Use a larger number for higher res -- 35.0f is default
-	mFar(6000.0f),
-	mNear(0.1f),
-	mFovY(40.0f),
-	mNearHeight(20.0f),
 	mSelectedView( PLANE_FREE ),
 	mSelectedViewport( 0 ),
+	mZoom(1.0f),
+	mScroll( 0.0f, -18.0f, 0.0f ),
 	mMaterialYAngle( 0.0f )
 {
 	mAngles[0] = 18.0f;
 	mAngles[1] = 42.0f;
 	mAngles[2] = 0.0f;
 
-	mUpperLeftText[0] = -mScaleEnv - 8;
-	mUpperLeftText[1] = mScaleEnv - 1.5f;
 
 	for (long i = 0; i < 3; ++i)
 	{
@@ -292,7 +281,7 @@ void FreyjaRender::DrawCamWindow()
 
 	glMatrixMode(GL_PROJECTION); 
 	glLoadIdentity(); 
-	gluPerspective(90.0f, ((GLdouble)mWidth)/((GLdouble)mHeight), 4.0f, 9000.0f);
+	gluPerspective(90.0f, OpenGL::GetInstance()->GetAspectRatio(), 4.0f, 9000.0f);
 
 	gluLookAt(pos.mX, pos.mY, pos.mZ,
 			  target.mX, target.mY,target.mZ,
@@ -308,7 +297,7 @@ void FreyjaRender::DrawCamWindow()
 		glEnable(GL_LIGHTING);
 		glEnable(GL_TEXTURE_2D);
 		glColor3fv(WHITE);
-		OpenGLRenderableStrategy::ApplyMaterial(GetSelectedMaterial());
+		OpenGLRenderableStrategy::ApplyMaterial( GetSelectedMaterial() );
 		mglDrawPlane(50.0f, 2.0f, 1.0f);
 		glPopAttrib();
 	}
@@ -411,18 +400,26 @@ void FreyjaRender::DrawCamWindow()
 	// FIXME: Use camera data to fix projections and status...
 
 #if PLANE_NOTIFY_WITH_AXIS
-	glPushMatrix();
-	glTranslatef(-mScaleEnv + 2.5f, -mScaleEnv + 2.5f, 10.0);
-	//glRotatef(mAngles[0], 1.0, 0.0, 0.0);
-	//glRotatef(mAngles[1], 0.0, 1.0, 0.0);
-	//glRotatef(mAngles[2], 0.0, 0.0, 1.0);
+	{
+		glPushMatrix();
+   
+		float scaleEnv = OpenGL::GetInstance()->GetNearHeight();
+		glTranslatef(-scaleEnv + 2.5f, -scaleEnv + 2.5f, 10.0);
+		//glRotatef(mAngles[0], 1.0, 0.0, 0.0);
+		//glRotatef(mAngles[1], 0.0, 1.0, 0.0);
+		//glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
-	glClear(GL_DEPTH_BUFFER_BIT);
-	mglDrawEditorAxis();
-	glPopMatrix();
+		glClear(GL_DEPTH_BUFFER_BIT);
+		mglDrawEditorAxis();
+		glPopMatrix();
+	}
 #endif
 
-	ResizeContext(mWidth, mHeight); // reset for other windows
+	{
+		float height = OpenGL::GetInstance()->GetContextHeight();
+		float width = OpenGL::GetInstance()->GetContextWidth();
+		OpenGL::GetInstance()->ResizeContext(width, height); // reset for other windows
+	}
 
 	// OpenGLPrinter test
 	glPushAttrib(GL_ENABLE_BIT);
@@ -570,15 +567,19 @@ void FreyjaRender::DrawFreeWindow()
 
 
 #if PLANE_NOTIFY_WITH_AXIS
-	glPushMatrix();
-	glTranslatef(-mScaleEnv + 2.5f, -mScaleEnv + 2.5f, 10.0);
-	glRotatef(mAngles[0], 1.0, 0.0, 0.0);
-	glRotatef(mAngles[1], 0.0, 1.0, 0.0);
-	glRotatef(mAngles[2], 0.0, 0.0, 1.0);
+	{   
+		float scaleEnv = OpenGL::GetInstance()->GetNearHeight();
+		
+		glPushMatrix();
+		glTranslatef(-scaleEnv + 2.5f, -scaleEnv + 2.5f, 10.0);
+		glRotatef(mAngles[0], 1.0, 0.0, 0.0);
+		glRotatef(mAngles[1], 0.0, 1.0, 0.0);
+		glRotatef(mAngles[2], 0.0, 0.0, 1.0);
 
-	glClear(GL_DEPTH_BUFFER_BIT);
-	mglDrawEditorAxis();
-	glPopMatrix();
+		glClear(GL_DEPTH_BUFFER_BIT);
+		mglDrawEditorAxis();
+		glPopMatrix();
+	}
 #endif
 
 	// OpenGLPrinter test
@@ -725,7 +726,7 @@ void FreyjaRender::DrawIcons()
 	//glDisable(GL_TEXTURE_2D);
 	//glDisable(GL_BLEND);
 
-	BindColorTexture();
+	OpenGL::BindColorTexture();
 
 	if (mRenderMode & fLighting)
 	{
@@ -846,72 +847,6 @@ void FreyjaRender::AttachMethodListeners()
 // Private Mutators
 ////////////////////////////////////////////////////////////
 
-void FreyjaRender::BindColorTexture()
-{
-	if (0 != mTextureId)
-	{
-		mTextureId = 1024; // FIXME: -1
-		// First texture is reserved for 'white texture' for color
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-}
-
-
-void FreyjaRender::BindTexture(uint32 texture)
-{
-	if (texture != mTextureId)
-	{
-		mTextureId = texture;
-		// First texture is reserved for 'white texture' for color
-		glBindTexture(GL_TEXTURE_2D, mTextureId + 1);
-	}
-}
-
-
-void FreyjaRender::DrawQuad(float x, float y, float w, float h)
-{
-	if (!(mRenderMode & fMaterial))
-	{
-		//glPushAttrib(GL_ENABLE_BIT);
-		//glDisable(GL_TEXTURE_2D);
-
-		glColor3fv(WHITE);
-		BindColorTexture();
-
-		glBegin(GL_QUADS);
-		glColor3f(0.0f, 1.0f, 0.5f);
-		glVertex2f(x, y);
-		glColor3f(0.0f, 0.0f, 0.5f);
-		glVertex2f(x, y + h);
-		glColor3f(1.0f, 0.0f, 0.5f);
-		glVertex2f(x + w, y + h);
-		glColor3f(1.0f, 1.0f, 0.5f);
-		glVertex2f(x + w, y);
-		glEnd();
-
-		//glPopAttrib();
-	}
-	else  // If fTexture draw textured quad
-	{
-		glPushAttrib(GL_ENABLE_BIT);
-		glEnable(GL_TEXTURE_2D);
-		glColor3fv(WHITE);
-		OpenGLRenderableStrategy::ApplyMaterial(GetSelectedMaterial());
-
-		glBegin(GL_QUADS);
-		glTexCoord2f(0.0, 1.0);
-		glVertex2f(x, y);		
-		glTexCoord2f(0.0, 0.0);
-		glVertex2f(x, y+h);
-		glTexCoord2f(1.0, 0.0);
-		glVertex2f(x+w, y+h);
-		glTexCoord2f(1.0, 1.0);
-		glVertex2f(x+w, y);
-		glEnd();
-
-		glPopAttrib();
-	}
-}
 
 
 ////////////////////////////////////////////////////////////
@@ -924,27 +859,17 @@ void FreyjaRender::ClearFlag(flags_t flag)
 }
 
 
-void FreyjaRender::InitContext(uint32 width, uint32 height, bool fastCard)
-{
-	OpenGL::GetInstance()->InitContext( width, height );
-
-	// FIXME: These should go under OpenGL also.
-	SetNearHeight( mScaleEnv );
-	mWidth = width;
-	mHeight = height;
-	mInitContext = true;
-	ResizeContext( width, height );
-}
-
-
 void FreyjaRender::Display() 
 { 
-	if ( !mInitContext ||
+	if ( //!mInitContext ||
 		 (GetMode() & fFPSCap) && mTimer.GetTicks() < 16 ) // ~60.0 fps cap
 	{
 		//freyja_print("%ims since last frame", mTimer.GetTicks());
 		return;
 	}
+
+	mUpperLeftText[0] = -OpenGL::GetInstance()->GetNearHeight( ) - 8;
+	mUpperLeftText[1] = OpenGL::GetInstance()->GetNearHeight( ) - 1.5f;
 
 	glClearColor(mColorBackground[0], mColorBackground[1], mColorBackground[2], 1.0);
 	
@@ -1064,7 +989,10 @@ void FreyjaRender::Display()
 	glEnable(GL_BLEND);
 	glDisable(GL_LIGHTING);
 	glColor3fv(GREEN);
-	mPrinter.Print2d(15.0f, mScaleEnv - 1.5f, 0.04f, FREYJA_WATERMARK );
+	{
+		float scaleEnv = OpenGL::GetInstance()->GetNearHeight();
+		mPrinter.Print2d(15.0f, scaleEnv - 1.5f, 0.04f, FREYJA_WATERMARK );
+	}
 	glPopAttrib();
 
 	//CHECK_OPENGL_ERROR( glFlush() );
@@ -1073,65 +1001,6 @@ void FreyjaRender::Display()
 	mTimer.Reset();
 }
 
-
-void FreyjaRender::ResizeContext(uint32 width, uint32 height) 
-{
-	if ( !mInitContext || !width || !height )
-	{
-		return;
-	}
-
-	mWidth = width;
-	mHeight = height;
-	mAspectRatio = (float)width / (float)height;
-
-	glViewport(0, 0, width, height); 
-	glMatrixMode(GL_PROJECTION); 
-	glLoadIdentity(); 
-
-	glOrtho(-mScaleEnv * mAspectRatio,
-			mScaleEnv * mAspectRatio, 
-			-mScaleEnv, mScaleEnv, 
-			-400.0, // zNear
-			400.0);
-
-	glMatrixMode(GL_MODELVIEW);
-}
-
-
-// FIXME: This is obsolete now, since viewports now walk the earth
-void CameraResizeContext(uint32 width, uint32 height) 
-{
-#if 0
-	if (!width || !height)
-	{
-		return;
-	}
-
-	mWidth = width;
-	mHeight = height;
-	mAspectRatio = (float)width / (float)height;
-
-	glViewport(0, 0, width, height); 
-	glMatrixMode(GL_PROJECTION); 
-	glLoadIdentity(); 
-
-	// Old method used gluPerspective()
-	//gluPerspective(mFovY, mAspectRatio, mNear * 100, mFar * 100);
-
-	mNearHeight = 10.0f;
-	mNear = 10.0f;
-	mFar = 1000.0f;
-	
-	glFrustum( -mNearHeight * mAspectRatio, 
-			   mNearHeight * mAspectRatio,
-			   -mNearHeight, mNearHeight, 
-			   mNear,
-			   mFar );
-
-	glMatrixMode(GL_MODELVIEW);
-#endif
-}
 
 
 void FreyjaRender::SetFlag(flags_t flag)
@@ -1195,981 +1064,9 @@ void FreyjaRender::ApplyLights()
 }
 
 
-// This sure has a lot of branching...
-void FreyjaRender::RenderMesh(index_t mesh)
-{
-#if FIXME
-	Mesh *m = freyjaGetMeshClass(mesh);
-
-	if (!m)
-		return;
-
-	glPushMatrix();
-
-	glPushAttrib(GL_ENABLE_BIT);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_BLEND);
-	glPointSize(mVertexPointSize);
-
-
-	// 'World effects'
-
-
-	// NOTE: Right here if you swap out the vertex array 'array', then
-	// all the elements to be rendered will use that instead of the 
-	// the current mesh vertex array.  Good for animation, skinning, etc.
-	vec_t *array = m->GetVertexArray();
-	vec_t *normalArray = m->GetNormalArray();
-	vec_t *texcoordArray = m->GetTexCoordArray();
-
-	// Keyframe animation
-	if (mRenderMode & fKeyFrameAnimation)
-	{
-		uint32 a = GetSelectedAnimation();
-		uint32 k = GetSelectedKeyFrame();	
-
-		// Mesh animation
-		TransformTrack &tt = m->GetTransformTrack(a);
-		vec_t time = (vec_t)k / tt.GetRate();
-		hel::Vec3 pos, rot, scale;
-		tt.GetTransform(time, pos, rot, scale);
-
-		glTranslatef(pos.mVec[0], pos.mVec[1], pos.mVec[2]);	
-		glRotatef(rot.mVec[0], 1,0,0);
-		glRotatef(rot.mVec[1], 0,1,0);
-		glRotatef(rot.mVec[2], 0,0,1);
-		glScalef(scale.mVec[0], scale.mVec[1], scale.mVec[2]);
-
-		// FIXME: You'll have to store a cache for this array in anim/track
-		//        really.  You have to be dynamic in an editor  =)
-		VertexAnimTrack &vat = m->GetVertexAnimTrack(a);
-		VertexAnimKeyFrame *kv = vat.GetKeyframe(k);
-
-		if (kv && kv->GetVertexCount() == m->GetVertexCount())
-		{
-			array = kv->GetVertexArray();
-		}
-
-		if (mRenderMode & fSkeletalVertexBlending)
-		{
-#warning "FIXME: Still using update in render request for blending!"
-			// FIXME: Only updating in render loop for testing only!
-			freyjaMeshUpdateBlendVertices(mesh, a, time);
-
-			if (freyjaGetMeshBlendVertices(mesh))
-				array = freyjaGetMeshBlendVertices(mesh);
-		}
-	}
-
-	// NOTE: Once we switch to more advanced arrays we have to
-	//       start locking the dynamic reallocation.
-	glPushClientAttrib(GL_NORMAL_ARRAY);
-	glEnableClientState(GL_NORMAL_ARRAY);
-	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-
-	// Load vertex array
-	glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, array);
-	glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
-	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
-
-	if (GetSelectedMesh() == mesh)
-	{
-#if FIXME
-		if (GetObjectMode() == FreyjaControl::tMesh && gControlPoints.size() == 0)
-		{
-			Cursor &cur = FreyjaControl::GetInstance()->GetCursor();
-
-			switch (cur.GetMode())
-			{
-			case Cursor::Rotation: // About mesh center ( matrix abuse )
-				glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
-							 m->GetBoundingVolumeCenter().mVec[1],
-							 m->GetBoundingVolumeCenter().mVec[2]);
-				
-				glRotatef(cur.mRotate.mVec[0], 1,0,0);
-				glRotatef(cur.mRotate.mVec[1], 0,1,0);
-				glRotatef(cur.mRotate.mVec[2], 0,0,1);
-				
-				glTranslatef(-m->GetBoundingVolumeCenter().mVec[0],
-							 -m->GetBoundingVolumeCenter().mVec[1],
-							 -m->GetBoundingVolumeCenter().mVec[2]);
-				break;
-				
-			case Cursor::Scale:
-				// Haven't got the backend / frontend ready for this yet
-				if (FreyjaControl::GetInstance()->GetCursor().mSelected)
-				{
-					hel::Vec3 u = cur.mScale;
-					glScalef(u.mVec[0], u.mVec[1], u.mVec[2]);
-				}
-				break;
-
-			case Cursor::Translation:
-				// Haven't got the backend / frontend ready for this yet
-				if (cur.mSelected)
-				{
-					hel::Vec3 u = (cur.mPos - cur.mLastPos);
-					glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
-				}
-				break;
-				
-			default:
-				;
-			}
-		}
-#endif
-
-		if (GetFlags() & fBoundingVolumes)
-		{
-			vec3_t min, max;
-
-			// Box
-			m->GetBBox(min, max);
-			mglDrawSelectBox(min, max, WHITE);
-
-			// Sphere
-			mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
-							m->GetBoundingVolumeRadius(), 
-							64, 0, false);
-			mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
-							m->GetBoundingVolumeRadius(), 
-							64, 2, false);
-		}	
-	}
-	 
-
-
-	/* Render outline */
-	if ( !(mRenderMode & fWireframe) && 
-		 (mRenderMode & fFace) &&
-		 ( m->GetFlags() & Mesh::fSelected ||
-		   mesh == FreyjaControl::GetInstance()->GetSelectedMesh() ) )
-	{
-		const vec_t scale = 1.0002f;
-
-		glPushAttrib(GL_POLYGON_BIT);
-		glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glPolygonMode(GL_BACK, GL_LINE);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
-
-		glDisable(GL_DEPTH_TEST);
-
-		glLineWidth(3.0f);
-
-		glPushMatrix();
-		glScalef(scale, scale, scale);
-
-		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
-		{
-			Face *f = m->GetFace(i);
-
-			if (!f) 
-				continue;
-
-			// NOTE: This is a test rendering, since you can't
-			//       guarantee a plugin won't fuck up Vertex:mVertexIndex
-			//       mappings in the Mesh.   =)
-			glColor3fv(mColorWireframeHighlight);
-			glDrawElements(GL_POLYGON, //GL_LINE_LOOP
-						   f->mIndices.size(), 
-						   GL_UNSIGNED_INT,
-						   f->mIndices.get_array());
-		}
-
-		glPopMatrix();
-
-		glPopAttrib(); // GL_LINE_BIT | GL_DEPTH_BUFFER_BIT
-
-		glPolygonMode(GL_FRONT, GL_FILL);
-		glCullFace(GL_BACK);
-
-		glPopAttrib(); // GL_POLYGON_BIT
-	}
-
-
-	if (mRenderMode & fPoints)
-	{
-		Vertex *vertex;
-
-		glBegin(GL_POINTS);
-			
-		for (uint32 i = 0; i < m->GetVertexCount(); ++i)
-		{
-			vertex = m->GetVertex(i);
-
-			if (vertex)
-			{
-				glColor3fv(	(vertex->mFlags & Vertex::fSelected) ?
-							mColorVertexHighlight : mColorVertex );
-				glArrayElement(vertex->mVertexIndex);
-			}
-		}
-
-		glEnd();
-	}
-
-	if (mRenderMode & fNormals)
-	{
-		Vertex *vertex;
-		hel::Vec3 v, n;
-
-		glBegin(GL_LINES);
-		glColor3fv(mColorVertexHighlight);
-			
-		for (uint32 i = 0; i < m->GetVertexCount(); ++i)
-		{
-			vertex = m->GetVertex(i);
-
-			if (vertex)
-			{
-				v.mVec[0] = array[vertex->mVertexIndex*3];
-				v.mVec[1] = array[vertex->mVertexIndex*3+1];
-				v.mVec[2] = array[vertex->mVertexIndex*3+2];
-				glVertex3fv(v.mVec);
-
-				m->GetNormal(i, n.mVec);
-				n = v + (n*1.75f);
-				glVertex3fv(n.mVec);
-			}
-		}
-
-		glEnd();
-	}
-
-	/* Render face as wireframe */
-	if ( mRenderMode & fWireframe )
-	{
-		const vec_t scale = 1.0001f;
-
-		glPushMatrix();
-		glScalef(scale, scale, scale);
-		glColor3fv(mColorWireframe);
-
-		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
-		{
-			Face *f = m->GetFace(i);
-
-			if (!f) 
-				continue;
-
-			// NOTE: Can't guarantee Vertex:mVertexIndex after plugin 
-			//       operation if they fail to Repack() the Mesh.
-			glDrawElements(GL_LINE_LOOP, 
-						   f->mIndices.size(), 
-						   GL_UNSIGNED_INT,
-						   f->mIndices.get_array());
-		}
-
-		glPopMatrix();
-	}
-
-	glPopAttrib();
-
-
-	/* Render solid face with material, color, or whatever you got */
-	if (mRenderMode & fFace)
-	{
-		uint32 material = 99999;
-
-		glPushAttrib(GL_ENABLE_BIT);
-
-		if (mRenderMode & fMaterial)
-		{
-			//glEnable(GL_TEXTURE_2D);
-			mglApplyMaterial(material);
-		}
-		else
-		{
-			glDisable(GL_TEXTURE_2D);
-		}
-
-		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
-		{
-			Face *f = m->GetFace(i);
-
-			if (!f) 
-				continue;
-
-			// Replaces group branching on bitflags
-			if (f->mFlags & Face::fSelected)
-			{
-				glColor3fv(RED);
-			}
-			else if (GetFlags() & fGroupColors)
-			{
-				glColor3fv(mColors[f->mSmoothingGroup]);
-			}
-			else
-			{
-				glColor3fv(WHITE);
-			}
-
-			if (!mRenderMode & fMaterial)
-			{
-				// NOTE: This is a test rendering, since you can't
-				//       guarantee a plugin won't fuck up Vertex:mVertexIndex
-				//       mappings in the Mesh  =)
-				glDrawElements(GL_POLYGON, 
-							   f->mIndices.size(), 
-							   GL_UNSIGNED_INT,
-							   f->mIndices.get_array());
-				continue;
-			}
-			else if ( f->mMaterial != material )
-			{
-				mglApplyMaterial(f->mMaterial);
-				material = f->mMaterial;
-			}
-
-			Vector<index_t> &texcoordIndices = ((f->mFlags & 
-												 Face::fPolyMappedTexCoords) ? 
-												f->mTexCoordIndices :
-												f->mIndices);
-
-			glBegin(GL_POLYGON);
-
-			for (uint32 j = 0; j < f->mIndices.size(); ++j)
-			{
-				//m->GetTexCoord(texcoordIndices[j], v.mVec);
-				//glTexCoord2fv(v.mVec);
-				glTexCoord2fv(texcoordArray + texcoordIndices[j]*3);
-
-				//m->GetNormal(f->mIndices[j], v.mVec);
-				//glNormal3fv(v.mVec);
-				glNormal3fv(normalArray + f->mIndices[j]*3);
-
-				glArrayElement(f->mIndices[j]);
-			}
-			
-			glEnd();
-		}
-
-		glPopAttrib();
-	}
-
-	glPopClientAttrib();
-
-	glPopMatrix();
-
-#endif
-}
-
-
-// TEST
-//mstl::Vector<vec_t> gVertexBufferTranslated;
-mstl::Vector<vec_t> gShadowVolume;
-
-void FreyjaRender::RenderMeshShadowVolume(index_t mesh)
-{
-	glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT |
-				 GL_POLYGON_BIT | GL_STENCIL_BUFFER_BIT);
-
-	glDisable(GL_LIGHTING);
-
-#if TEST_SHADOW_VOLUME_SURFACES
-	glEnable(GL_BLEND);
-	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
-
-	glFrontFace(GL_CCW);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glDepthMask(GL_FALSE);
-	glDepthFunc(GL_LEQUAL);
-
-	RenderMeshShadowVolumeSurfaces(mesh);
-#else
-	/* Disable color, disable depth, and enable stencil */
-	glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-	glEnable(GL_CULL_FACE);
-	glDepthMask(GL_FALSE);
-	glEnable(GL_STENCIL_TEST);
-	glStencilFunc(GL_ALWAYS, 0, ~0); // 1's comp of 0 should fill for size
-
-	glFrontFace(GL_CCW);
-
-	// Front zfail pass
-	glStencilOp(GL_KEEP, GL_INCR, GL_KEEP);
-	glCullFace(GL_FRONT);
-	RenderMeshShadowVolumeSurfaces(mesh);
-
-	// Back zfail pass
-	glStencilOp(GL_KEEP, GL_DECR, GL_KEEP);
-	glCullFace(GL_BACK);
-	//RenderMeshShadowVolumeSurfaces(mesh);
-
-	// Shadow color pass
-	{
-		glDisable(GL_CULL_FACE);
-
-		/* Enable color, blending, and setup shadow color value with alpha. */
-		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-		glColor4f(0.0f, 0.0f, 0.0f, 0.4f);
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-		glStencilFunc(GL_NOTEQUAL, 0, ~0);
-		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
-		glDepthMask(GL_TRUE);
-
-		glPushMatrix();
-		glLoadIdentity();
-		glBegin(GL_QUADS);
-		glVertex3f(-40.0f, 40.0f, 100);
-		glVertex3f(-40.0f, -40.0f, 100);
-		glVertex3f(40.0f, -40.0f, 100);
-		glVertex3f(40.0f, 40.0f, 100);
-		glEnd();
-		glPopMatrix();
-	}
-#endif
-
-	glPopAttrib();
-}
-
-
-void FreyjaRender::RenderMeshShadowVolumeSurfaces(index_t mesh)
-{
-#if FIXME
-	Mesh *m = freyjaGetMeshClass(mesh);
-	vec_t *shadow = NULL, *array = NULL;
-
-	if (m)
-	{
-		vec3_t pos = {0.0f, 0.0f, 0.0f};
-		const vec_t oco = 100.0f;  //0.0f;
-
-		// Only allow light #0 for now
-		vec4_t lightPos;
-		freyjaGetLightPosition4v(0, lightPos);
-
-		if (mRenderMode & fSkeletalVertexBlending)
-		{
-			if (freyjaGetMeshBlendVertices(mesh))
-			{
-				array = freyjaGetMeshBlendVertices(mesh);
-			}
-
-			if ( m->GetBlendShadowVolume(gShadowVolume, lightPos, pos, oco) )
-			{
-				shadow = gShadowVolume.get_array();
-			}
-		}
-		else
-		{
-			// There is no need to translate as long as mesh: world = local...
-			//m->CopyVertexBuffer(gVertexBufferTranslated);
-			// translate gVertexBufferTranslated by pos
-			//vec_t *array = gVertexBufferTranslated.get_array();
-			array = m->GetVertexArray();
-			
-			if ( m->GetShadowVolume(gShadowVolume, lightPos, pos, oco) )
-			{
-				shadow = gShadowVolume.get_array();
-			}
-		}
-	}
-
-
-	if ( !shadow || !array )
-		return;
-
-	mstl::Vector<index_t> indices;
-	indices.reserve(4);
-
-	// Render caps for any polygon edge count
-	for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
-	{
-		Face *f = m->GetFace(i);
-
-		if (!f) 
-			continue;
-
-		/* Just go ahead and store this for edges here, and use for cap too. */
-		for (int k = f->mIndices.size() - 1; k > -1; --k)
-		{
-			indices.push_back(f->mIndices[k]);
-		}
-
-#if SHADOW_VOLUME_WITH_ARRAYS
-		/* Back cap, which is the reverse order of front. */
-		glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, array);
-		glDrawElements(GL_POLYGON, 
-					   f->mIndices.size(), 
-					   GL_UNSIGNED_INT,
-					   f->mIndices.get_array());
-
-		/* Front cap */
-		glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, shadow);
-		glDrawElements(GL_POLYGON, 
-					   indices.size(), 
-					   GL_UNSIGNED_INT,
-					   indices.get_array());
-
-#else // Don't have OpenGL 1.1?  Should I care?
-
-		/* Back cap, which is the reverse order of front. */
-		glBegin(GL_POLYGON);
-			
-		{
-			uint32 j;
-			foreach (f->mIndices, j)
-			{
-				glVertex3fv(array + f->mIndices[j]*3);
-			}
-		}
-
-		glEnd();
-
-		/* Front cap */
-		glBegin(GL_POLYGON);
-			
-		{
-			uint32 j;
-			foreach (indices, j)
-			{
-				glVertex3fv(shadow + indices[j]*3);
-			}
-		}
-
-		glEnd();
-#endif
-
-#if 1
-		/* Edges */
-		glBegin(GL_QUAD_STRIP);
-		glVertex3fv(array + f->mIndices[0]*3);
-		glVertex3fv(shadow + indices[0]*3);
-
-		for (uint32 k = 1, kn = indices.size(); k < kn; ++k)
-		{
-			uint32 idx = k % kn;
-			glVertex3fv(array + f->mIndices[idx]*3);
-			glVertex3fv(shadow + indices[idx]*3);
-		}
-			
-		glEnd();
-#endif
-
-		/* Just reset counter don't reallocate. */
-		indices.clear();
-	}
-#endif // FIXME
-}
-
-
 void FreyjaRender::Flag(flags_t flag, bool t)
 {
 	t ? SetFlag(flag) : ClearFlag(flag);
-}
-
-
-void FreyjaRender::RenderModel(index_t model)
-{
-	glPushMatrix();
-
-	/* Render meshes */
-	glPushMatrix();
-	
-#if FIXME
-	if ( GetObjectMode() == FreyjaControl::tModel )
-	{
-		switch ( GetCursor().GetMode() )
-		{
-		case freyja3d::Cursor::Rotation: // About model center ( matrix abuse )
-			glRotatef( GetCursor().mRotate.mVec[0], 1,0,0);
-			glRotatef( GetCursor().mRotate.mVec[1], 0,1,0);
-			glRotatef( GetCursor().mRotate.mVec[2], 0,0,1);
-			break;
-				
-		case freyja3d::Cursor::Translation:
-			{
-				hel::Vec3 u = (GetCursor().mPos - GetCursor().mLastPos);
-				glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
-			}
-			break;
-
-		default:
-			;
-		}
-	}
-#endif
-
-	if (mRenderMode & fShadowVolume)
-	{
-#if FIXME
-		// Render each mesh of this model in turn
-		for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
-		{
-			index_t mesh = freyjaGetModelMeshIndex(model, i);
-			
-			if (freyjaIsMeshAllocated(mesh))
-			{
-				RenderMesh(mesh);
-			}
-		}
-
-		for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
-		{
-			index_t mesh = freyjaGetModelMeshIndex(model, i);
-			
-			if (freyjaIsMeshAllocated(mesh))
-			{
-				RenderMeshShadowVolume(mesh);
-			}
-		}
-	}
-	else
-	{
-		// Render each mesh of this model in turn
-		for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
-		{
-			index_t mesh = freyjaGetModelMeshIndex(model, i);
-			
-			if (freyjaIsMeshAllocated(mesh))
-			{
-				RenderMesh(mesh);
-			}
-		}
-#endif
-	}
-
-
-	glPopMatrix();
-
-	/* Disable GLSL shaders */
-	freyja3d::OpenGL::BindFragmentGLSL(0);
-
-	/* This handles all skeleton/ctrlpnt setup to avoid repeated 
-	 * state changes and clears.
-	 */
-	//if (mRenderMode & fBones || mRenderMode & fBones2 || 
-	// mRenderMode & fBones3 || mRenderMode & fBoneName)
-	{
-		glPushAttrib(GL_ENABLE_BIT); //GL_LIGHTING_BIT | GL_TEXTURE_BIT
-		glDisable(GL_BLEND);
-
-		if (mRenderMode & fBonesNoZbuffer)
-		{
-			glClear(GL_DEPTH_BUFFER_BIT);
-		}
-
-		glEnable(GL_LIGHTING);
-		glEnable(GL_COLOR_MATERIAL);
-		glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-		
-		glBindTexture(GL_TEXTURE_2D, 0); // 'Color' TextureId
-	}
-
-#if FIXME
-	{
-		Vector<hel::Vec3> ctrlpnts = GetControlPoints();
-
-		glColor3fv(RED);
-
-		uint32 i;
-		foreach (ctrlpnts, i)
-		{
-			hel::Vec3 p = ctrlpnts[i];
-
-			glPushMatrix();
-			glTranslatef(p.mVec[0], p.mVec[1], p.mVec[2]);
-			mglDrawControlPoint();
-			glPopMatrix();
-		}
-
-		if (mRenderMode & fBoundingVolSelection && ctrlpnts.size() == 2)
-		{ 
-			hel::Vec3 min = ctrlpnts[0];
-			hel::Vec3 max = ctrlpnts[1];
-			mglDrawSelectionBox(min.mVec, max.mVec, DARK_YELLOW);
-		}
-	}
-#endif
-
-#if FIXME
-	/* Render 'old' skeleton, which is comprised of z,y,x rotations. */
-	if (mRenderMode & fBones)
-	{
-		FreyjaRender::mSelectedBone = FreyjaControl::GetInstance()->GetSelectedBone();
-		RenderSkeleton(freyjaGetModelSkeleton(model), 0, 1.0f);
-	}
-
-	/* Point type setting shows actual bind pose skeleton */
-	if ( mRenderMode & fBones2 && !(mRenderMode & fKeyFrameAnimation) )
-	{
-		hel::Vec3 p, r;
-
-		/* Render spheres and bone geometery */
-		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
-		{
-			glPushMatrix();
-			glMultMatrixf(freyjaGetBoneBindPose16fv(i));
-
-			(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
-			glColor3fv(FreyjaRender::mColorJointHighlight) : 
-			glColor3fv(FreyjaRender::mColorJoint);
-
-			mglDrawControlPoint();
-
-			glPopMatrix();
-
-			index_t parent = freyjaGetBoneParent(i);
-			if (parent != INDEX_INVALID)
-			{
-				glPushMatrix();
-				glMultMatrixf( freyjaGetBoneBindPose16fv(parent) );
-
-				(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
-				glColor3fv(FreyjaRender::mColorBoneHighlight) : 
-				glColor3fv(FreyjaRender::mColorBone);
-
-				freyjaGetBoneTranslation3fv(i, p.mVec);
-
-				if (FreyjaRender::mBoneRenderType == 2)
-				{
-					mglDrawBoneSolid(p.mVec);
-				}
-				else
-				{
-					mglDrawBone(2, p.mVec);
-				}
-
-				glPopMatrix();
-			}
-		}
-
-		//glPopAttrib();
-	}
-
-
-	/* Render transformed bones */
-	if (mRenderMode & fBones2 && mRenderMode & fKeyFrameAnimation ||
-		mRenderMode & fBones3 )
-	{
-		hel::Vec3 p;
-		hel::Mat44 combined;
-
-		// Render spheres and lines
-		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
-		{
-			Bone *bone = Bone::GetBone(i);
-
-			if (!bone)
-				continue;
-
-			glPushMatrix();
-			//combined = bone->GetInverseBindPose() * bone->mTrack.mWorld;
-			//glMultMatrixf( combined.mMatrix );
-			
-			freyjaGetBoneWorldPos3fv(i, p.mVec);
-			glTranslatef(p.mX, p.mY, p.mZ);
-
-#if 0
-			(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
-			glColor3fv(WHITE) : glColor3fv(DARK_RED);
-			mglDrawControlPoint();
-#else
-			(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
-			glColor3fv(FreyjaRender::mColorJointHighlight) : 
-			glColor3fv(FreyjaRender::mColorJoint);
-#endif
-
-			glPopMatrix();
-
-			Bone *parent = Bone::GetBone(freyjaGetBoneParent(i));
-
-			if (parent)
-			{
-				combined = parent->GetWorldPose();
-
-				glPushMatrix();
-				glMultMatrixf( combined.mMatrix );
-
-#if 0
-				(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
-				glColor3fv(WHITE) : glColor3fv(DARK_GREEN);
-#else
-				(FreyjaControl::GetInstance()->GetSelectedBone() == i) ?
-				glColor3fv(FreyjaRender::mColorBoneHighlight) : 
-				glColor3fv(FreyjaRender::mColorBone);
-#endif
-
-				freyjaGetBoneTranslation3fv(i, p.mVec);
-
-				if (FreyjaRender::mBoneRenderType == 2)
-				{
-					mglDrawBoneSolid(p.mVec);
-				}
-				else
-				{
-					mglDrawBone(2, p.mVec);
-				}
-
-				glPopMatrix();
-			}
-		}
-	}
-
-
-	/* Render bone names */
-	if (mRenderMode & fBoneName)
-	{
-		
-		glEnable(GL_BLEND);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-		glDisable(GL_LIGHTING);
-
-		glColor3fv(WHITE);
-
-		hel::Vec3 p;
-
-		for (uint32 i = 0; i < freyjaGetBoneCount(); ++i)
-		{
-			if (mRenderMode & fBones3)
-			{
-				freyjaGetBoneWorldPos3fv(i, p.mVec);
-			}
-			else
-			{
-				freyjaBoneBindTransformVertex(i, p.mVec, 1.0f);
-			}
-
-			// Slightly broken b/c mAngles are not computed from quaternion.
-			mPrinter.Print3d(p.mX, p.mY, p.mZ, 
-							 -mAngles[2], -mAngles[1], -mAngles[0], 
-							 0.05f, 
-							 freyjaGetBoneNameString(i));
-		}
-
-		
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-#endif // FIXME	
-
-	//if (mRenderMode & fBones || mRenderMode & fBones2
-	//	|| mRenderMode & fBones3 || mRenderMode & fBoneName)
-	{
-		glPopAttrib();
-	}
-
-	glPopMatrix();
-}
-
-
-void FreyjaRender::RenderSkeleton(index_t skeleton, uint32 bone, vec_t scale)
-{
-#if FIXME
-	const unsigned char x = 0, y = 1, z = 2;
-	const unsigned char xr = 0, yr = 1, zr = 2;
-
-	if (!freyjaGetSkeletonBoneCount(skeleton))
-		return;
-
-	index_t boneIndex = freyjaGetSkeletonBoneIndex(skeleton, bone);
-
-	if (!freyjaIsBoneAllocated(boneIndex))
-		return;
-
-	hel::Vec3 pos, rot;
-
-	/* Scale bones to match mesh scaling */
-	freyjaGetBoneTranslation3fv(boneIndex, pos.mVec);
-
-	/* Get orientation */
-	freyjaGetBoneRotationEuler3fv(boneIndex, rot.mVec);
-
-	/* Animation, if any... */
-	if (FreyjaControl::GetInstance()->GetControlScheme() == 
-		FreyjaControl::eScheme_Animation)
-	{
-		Bone *b = Bone::GetBone(boneIndex);
-
-		if (b)
-		{
-			hel::Vec3 p, o;
-			uint32 k = FreyjaControl::GetInstance()->GetSelectedKeyFrame();
-			uint32 a = FreyjaControl::GetInstance()->GetSelectedAnimation();
-			BoneTrack &track = b->GetTrack(a);
-
-			if (track.GetRot((vec_t)k / track.GetRate(), o))
-			{
-				rot += o;
-			}
-
-			if (track.GetLoc((vec_t)k / track.GetRate(), p))
-			{
-				pos += p;
-			}
-		}
-	}
-
-	/* Radians to degrees */
-	rot *= 57.295779513082323f;
-
-	/* Scale bones to match mesh scaling */
-	pos *= scale;
-
-	/* Render bone joint */
-	((FreyjaRender::mSelectedBone == boneIndex) ? 
-	 glColor3fv(RED) : glColor3fv(GREEN));
-	mglDrawJoint(FreyjaRender::mJointRenderType, pos.mVec);
-
-	/* Render bone */
-	((FreyjaRender::mSelectedBone == boneIndex) ? 
-	 glColor3fv(FreyjaRender::mColorBoneHighlight) : 
-	 glColor3fv(FreyjaRender::mColorBone));
-
-	if (FreyjaRender::mBoneRenderType == 2)
-	{
-		mglDrawBone(3, pos.mVec);		
-	}
-	else
-	{
-		mglDrawBone(FreyjaRender::mBoneRenderType, pos.mVec);
-	}
-
-
-	/* Transform child bones */
-	glPushMatrix();
-
-	glTranslatef(pos.mVec[x], pos.mVec[y], pos.mVec[z]);
-
-#if ALLOW_BONE1_NAMES
-	if (mRenderMode & fBoneName)
-	{
-		// OpenGLPrinter test
-		glPushAttrib(GL_ENABLE_BIT);
-		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
-		glEnable(GL_BLEND);
-		glEnable(GL_TEXTURE_2D);
-		glColor3fv(WHITE);
-		mPrinter.Print3d(0,0,0,  0,0,0, 0.05f, freyjaGetBoneNameString(boneIndex));
-		glPopAttrib();
-		// End OpenGLPrinter test
-	}
-#endif
-
-	glRotatef(rot.mVec[zr], 0, 0, 1);
-	glRotatef(rot.mVec[yr], 0, 1, 0);
-	glRotatef(rot.mVec[xr], 1, 0, 0);
-
-	for (uint32 i = 0, n = freyjaGetBoneChildCount(boneIndex); i < n; ++i)
-	{
-		index_t idx = freyjaGetBoneChild(boneIndex, i);
-
-		if (idx != boneIndex)
-		{
-			RenderSkeleton(skeleton, idx, scale);
-		}
-	}
-
-	glPopMatrix();
-#endif // FIXME
 }
 
 
@@ -2387,14 +1284,14 @@ void FreyjaRender::DrawCurveWindow()
 
 void FreyjaRender::DrawUVWindow()
 {
-	unsigned int width = GetWindowWidth();
-	unsigned int height = GetWindowHeight();
+	unsigned int width = OpenGL::GetInstance()->GetContextWidth();
+	unsigned int height = OpenGL::GetInstance()->GetContextHeight();
 
 	glPushMatrix();
 
 	mgl2dProjection(width, height);
 
-	DrawQuad(0.0f, 0.0f, width, height);
+	OpenGL::GetInstance()->DrawQuad(0.0f, 0.0f, width, height);
 
 	glPushAttrib(GL_ENABLE_BIT);
 	glDisable(GL_LIGHTING);
@@ -2482,7 +1379,7 @@ void FreyjaRender::DrawUVWindow()
 
 	glPopAttrib();
 
-	ResizeContext(width, height);
+	OpenGL::GetInstance()->ResizeContext(width, height);
 	glPopMatrix();
 }
 
@@ -2635,11 +1532,18 @@ void FreyjaRender::DrawWindow( freyja_plane_t plane )
 	glBindTexture(GL_TEXTURE_2D, 0); // color
 
 	if (mRenderMode & fGrid)
-		DrawGrid(plane, GetWindowWidth(), GetWindowHeight(), 10);
+		DrawGrid(plane,
+				 OpenGL::GetInstance()->GetContextWidth(), 
+				 OpenGL::GetInstance()->GetContextHeight(), 
+				 10);
 
 #if PLANE_NOTIFY_WITH_AXIS
 	glPushMatrix();
-	glTranslatef(-mScaleEnv + 2.5f, -mScaleEnv + 2.5f, 10.0);
+
+	{
+		float scaleEnv = OpenGL::GetInstance()->GetNearHeight();
+		glTranslatef(-scaleEnv + 2.5f, -scaleEnv + 2.5f, 10.0);
+	}
 
 	switch (plane)
 	{

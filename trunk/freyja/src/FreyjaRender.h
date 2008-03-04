@@ -421,41 +421,6 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void RenderMeshShadowVolumeSurfaces(index_t mesh);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Mostly for debugging the vertex buffers and fun.
-	 *
-	 ------------------------------------------------------*/
-
-	void RenderMeshShadowVolumeSurface(index_t mesh, index_t face);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	void RenderMeshShadowVolume(index_t mesh);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	void RenderShadowMap();
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	const vec_t &GetWindowAspectRatio() { return mAspectRatio; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Get GL context window aspect ratio
-	 *
-	 ------------------------------------------------------*/
-
 	unsigned int GetMode() 
 	{ return mRenderMode; }
 	/*------------------------------------------------------
@@ -469,27 +434,6 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	const vec_t &GetNearHeight() { return mScaleEnv; } 
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : GL context window height
-	 *
-	 ------------------------------------------------------*/
-
-	const unsigned int &GetWindowWidth() { return mWidth; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : GL context window width 
-	 *
-	 ------------------------------------------------------*/
-
-	const unsigned int &GetWindowHeight() { return mHeight; }
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : GL context window height
 	 *
 	 ------------------------------------------------------*/
 
@@ -526,34 +470,10 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
-	void InitContext(uint32 width, uint32 height, bool fastCard);
-	/*------------------------------------------------------
-	 * Pre  : <width> and <height> are the GL context dimensions 
-	 *        <fastCard> is true if GL hw accel is present
-	 *
-	 * Post : Sets up GL parms for GL context
-	 *
-	 ------------------------------------------------------*/
-
-	void ResizeContext(unsigned int width, unsigned int height);
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : Resizes GL context
-	 *
-	 ------------------------------------------------------*/
-
 	void SetFlag(flags_t flag);
 	/*------------------------------------------------------
 	 * Pre  : Flag is valid
 	 * Post : Sets control flag for model
-	 *
-	 ------------------------------------------------------*/
-
-	void SetNearHeight(vec_t scale) 
-	{ mScaleEnv = scale; ResizeContext(mWidth, mHeight); } 
-	/*------------------------------------------------------
-	 * Pre  : 
-	 * Post : 
 	 *
 	 ------------------------------------------------------*/
 
@@ -821,7 +741,7 @@ private:
 	// Private Mutators
 	////////////////////////////////////////////////////////////
 
-	void BindColorTexture();
+	//void BindColorTexture();
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Binds a generated white texture used for colors,
@@ -840,14 +760,6 @@ private:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : 
-	 *
-	 ------------------------------------------------------*/
-
-	void DrawQuad(float x, float y, float w, float h);
-	/*------------------------------------------------------
-	 * Pre  : X, Y, W, H define a 2d quad
-	 * Post : Draws a quad orthogonal to GL context
-	 *        as a solid or with current texture
 	 *
 	 ------------------------------------------------------*/
 
@@ -977,11 +889,9 @@ private:
 
 	uint32 mRenderMode;                        /* Rendering mode */
 
-	uint32 mWidth;                             /* Width of context */
+	freyja_plane_t mSelectedView;
 
-	uint32 mHeight;                            /* Height of context */
-
-	vec_t mAspectRatio;                        /* Cached context aspect ratio */
+	uint32 mSelectedViewport;
 
 	vec_t mZoom;                               /* Used to cache zoom */
 
@@ -993,19 +903,9 @@ private:
 
 	vec3_t mAngles;                            /* Scene Used to rotate the scene */
 
-	vec_t mScaleEnv;                           /* OpenGL context use */
-	vec_t mFar;
-	vec_t mNear;
-	vec_t mFovY;
-	vec_t mNearHeight;
-
 	vec2_t mUpperLeftText;
 
 	bool mScrollingUV_X;
-
-	freyja_plane_t mSelectedView;
-
-	uint32 mSelectedViewport;
 
 	static int EvModeAutoKeyframeId;
 

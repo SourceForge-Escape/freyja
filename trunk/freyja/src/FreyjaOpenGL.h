@@ -24,6 +24,7 @@
 #define GUARD__FREYJA3D_OPENGL_H__
 
 #include "config.h"
+#include <freyja/Material.h>
 #include <freyja/PixelBuffer.h>
 
 
@@ -121,10 +122,26 @@ public:
 	 *
 	 ------------------------------------------------------*/
 
+	static void BindColorTexture( );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Bind white texture to modulate to given color.
+	 *
+	 ------------------------------------------------------*/
+
 	static void BindTexture( uint32 texture_unit, uint16 id );
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Multitexture bind texture map to texel unit.
+	 *
+	 ------------------------------------------------------*/
+
+	static void DrawQuad( float x, float y, float w, float h, 
+						  freyja::Material* material = NULL );
+	/*------------------------------------------------------
+	 * Pre  : X, Y, W, H define a 2d quad
+	 * Post : Draws a quad orthogonal to GL context
+	 *        as a solid or with passed material.
 	 *
 	 ------------------------------------------------------*/
 
@@ -146,6 +163,46 @@ public:
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Dump a TGA of the context if format isn't supported.
+	 *
+	 ------------------------------------------------------*/
+
+	void SetNearHeight(vec_t scale) 
+	{ mScaleEnv = scale; ResizeContext(mWidth, mHeight); } 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
+	const vec_t& GetAspectRatio( ) const 
+	{ return mAspectRatio; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : Get GL context window aspect ratio
+	 *
+	 ------------------------------------------------------*/
+
+	const vec_t& GetNearHeight( ) const 
+	{ return mScaleEnv;/*mNear;*/ } 
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : GL context window height
+	 *
+	 ------------------------------------------------------*/
+
+	const uint32& GetContextWidth() const
+	{ return mWidth; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : GL context window width 
+	 *
+	 ------------------------------------------------------*/
+
+	const uint32& GetContextHeight( ) const
+	{ return mHeight; }
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : GL context window height
 	 *
 	 ------------------------------------------------------*/
 
@@ -273,10 +330,14 @@ public:
 	static uint32 mObjects;     /* Count how many objects we load */
 
 	/* Only support one context again. */
-	bool mInit;
-	uint32 mWidth;
-	uint32 mHeight;
-	vec_t mAspectRatio;
+	bool mContextInit;	                       /* True if context is ready for gl calls. */
+
+	uint32 mWidth;                             /* Width of context */
+
+	uint32 mHeight;                            /* Height of context */
+
+	vec_t mAspectRatio;                        /* Cached context aspect ratio */
+
 	vec_t mNearHeight;
 	vec_t mNear;
 	vec_t mFar;
@@ -299,8 +360,6 @@ public:
 	
 	int32 mTextureId;	    	/* Currently bound texture id */
 	
-	int32 mTextureId2;			/* Multitexture Texture Id */
-
 
  private:
 
