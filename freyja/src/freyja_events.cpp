@@ -41,6 +41,7 @@
 #include <mgtk/ConfirmationDialog.h>
 #include <mgtk/QueryDialog.h>
 
+#include "FreyjaOpenGL.h"
 #include "FreyjaRender.h"
 #include "Control.h"
 #include "MaterialControl.h"
@@ -405,7 +406,7 @@ void freyja_handle_gldisplay()
 
 void freyja_handle_glresize(unsigned int width, unsigned int height)
 {
-	FreyjaRender::GetInstance()->ResizeContext(width, height);
+	OpenGL::GetInstance()->ResizeContext( width, height );
 }
 
 

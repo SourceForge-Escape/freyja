@@ -70,22 +70,6 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 	}
 
 	/* Multitexture, Normal maps, etc... */
-#if 0
-	if ( mat->GetDecalMapId() != -1 )
-		OpenGL::BindTexture( GL_TEXTURE1, mat->GetDecalMapId() );
-
-	if ( mat->GetSpecularMapId() != -1 )
-		OpenGL::BindTexture( GL_TEXTURE1, mat->GetSpecularMapId() );
-	
-	if ( mat->GetNormalMapId() != -1 )
-		OpenGL::BindTexture( GL_TEXTURE2, mat->GetNormalMapId() );
-	
-	if ( mat->GetHeightMapId() != -1 )
-		OpenGL::BindTexture( GL_TEXTURE3, mat->GetHeightMapId() );
-	
-	if ( mat->GetEmissiveMapId() != -1 )
-		OpenGL::BindTexture( GL_TEXTURE4, mat->GetEmissiveMapId() );
-#else
 	if ( mat->GetTexture1Id() != -1 )
 		OpenGL::BindTexture( GL_TEXTURE1, mat->GetTexture1Id() );
 	
@@ -97,7 +81,6 @@ void OpenGLRenderableStrategy::ApplyMaterial( freyja::Material* mat )
 	
 	if ( mat->GetTexture4Id() != -1 )
 		OpenGL::BindTexture( GL_TEXTURE4, mat->GetTexture4Id() );
-#endif
 
 	if ( mat->IsBlendingEnabled() )
 	{

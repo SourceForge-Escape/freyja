@@ -32,6 +32,7 @@
 #include <mstl/SystemIO.h>
 
 #include "Cursor.h"
+#include "OpenGLRenderableStrategy.h"
 #include "FreyjaOpenGL.h"
 
 using namespace freyja3d;
@@ -115,16 +116,19 @@ void *h_glUniform1iARB = NULL;
 ////////////////////////////////////////////////////////////
 
 OpenGL::OpenGL() :	
-	mInit(false), 
+	mContextInit(false), 
 	mWidth(0),
 	mHeight(0),
+	mNearHeight(20.0f),
+	mNear(0.1f),
+	mFar(6000.0f),
+	mScaleEnv(35.0f), // 40.0f is about too much, Use a larger number for higher res -- 35.0f is default
 	mTextureUnitCount(2),
 	mMaxLightsCount(2),
 	mUseMipmaps(true),
 	mTextureCount( 0 ),
 	mTextureLimit( 128 ),
-	mTextureId(1),
-	mTextureId2(-1)
+	mTextureId(1)
 {
 	/* Log OpenGL driver support information */
 	freyja3d_print("[GL Driver Info]");
@@ -367,10 +371,10 @@ int OpenGL::LoadTexture( byte* image, uint32 width, uint32 height,
 
 void OpenGL::InitContext( uint32 width, uint32 height )
 {
-	if ( mInit )
+	if ( mContextInit || !width || !height )
 		return;
 
-	mInit = true;
+	mContextInit = true;
 	mWidth = width;
 	mHeight = height;
 
@@ -458,6 +462,12 @@ void OpenGL::InitContext( uint32 width, uint32 height )
 
 	//SetNearHeight(mScaleEnv);
 	//ResizeContext( mWidth, mHeight );
+
+	SetNearHeight( mScaleEnv );
+	mWidth = width;
+	mHeight = height;
+	mContextInit = true;
+	ResizeContext( width, height );
 }
 
 
@@ -912,6 +922,28 @@ void OpenGL::DebugFragmentGLSL(const char *comment, int32 obj)
 
 void OpenGL::ResizeContext(uint32 width, uint32 height) 
 {
+#if 1
+	if ( !mContextInit || !width || !height )
+	{
+		return;
+	}
+
+	mWidth = width;
+	mHeight = height;
+	mAspectRatio = (float)width / (float)height;
+
+	glViewport(0, 0, width, height); 
+	glMatrixMode(GL_PROJECTION); 
+	glLoadIdentity(); 
+
+	glOrtho(-mScaleEnv * mAspectRatio,
+			mScaleEnv * mAspectRatio, 
+			-mScaleEnv, mScaleEnv, 
+			-400.0, // zNear
+			400.0);
+
+	glMatrixMode(GL_MODELVIEW);
+#else
 	if (!width || !height)
 	{
 		return;
@@ -947,6 +979,51 @@ void OpenGL::ResizeContext(uint32 width, uint32 height)
 	}
 
 	glMatrixMode(GL_MODELVIEW);
+#endif
+}
+
+
+#if FIXME
+// FIXME: This is obsolete now, since viewports now walk the earth
+void CameraResizeContext() 
+{
+#if 0
+	if (!width || !height)
+	{
+		return;
+	}
+
+	mWidth = width;
+	mHeight = height;
+	mAspectRatio = (float)width / (float)height;
+
+	glViewport(0, 0, width, height); 
+	glMatrixMode(GL_PROJECTION); 
+	glLoadIdentity(); 
+
+	// Old method used gluPerspective()
+	//	mFovY(40.0f),
+	//gluPerspective(mFovY, mAspectRatio, mNear * 100, mFar * 100);
+
+	mNearHeight = 10.0f;
+	mNear = 10.0f;
+	mFar = 1000.0f;
+	
+	glFrustum( -mNearHeight * mAspectRatio, 
+			   mNearHeight * mAspectRatio,
+			   -mNearHeight, mNearHeight, 
+			   mNear,
+			   mFar );
+
+	glMatrixMode(GL_MODELVIEW);
+#endif
+}
+#endif
+
+
+void OpenGL::BindColorTexture( )
+{
+	glBindTexture( GL_TEXTURE_2D, ((GLuint*)mTextureIds)[0] );
 }
 
 
@@ -961,6 +1038,24 @@ void OpenGL::BindTexture( GLenum texture_unit, uint16 id )
 
 	// In case glActiveTextureARB isn't found or EXT are disabled.
 	glBindTexture( GL_TEXTURE_2D, ((GLuint*)mTextureIds)[id] );
+}
+
+
+void OpenGL::DrawQuad( float x, float y, float w, float h, freyja::Material* material )
+{
+	glColor3fv(WHITE);
+	OpenGLRenderableStrategy::ApplyMaterial( material );
+
+	glBegin(GL_QUADS);
+	glColor3f(0.0f, 1.0f, 0.5f);
+	glVertex2f(x, y);
+	glColor3f(0.0f, 0.0f, 0.5f);
+	glVertex2f(x, y + h);
+	glColor3f(1.0f, 0.0f, 0.5f);
+	glVertex2f(x + w, y + h);
+	glColor3f(1.0f, 1.0f, 0.5f);
+	glVertex2f(x + w, y);
+	glEnd();
 }
 
 
