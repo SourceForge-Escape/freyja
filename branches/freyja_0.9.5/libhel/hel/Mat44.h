@@ -137,7 +137,8 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	bool GetInverse(Mat44 &m) { m = *this; return m.Invert(); }
+	bool GetInverse(Mat44 &m) 
+	{ m = *this; return m.Invert(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns true if a copy of this matrix inverted.
@@ -158,10 +159,50 @@ class Mat44
 	 *
 	 ------------------------------------------------------*/
 
-	void GetTranspose(Mat44 &m) { m = *this; m.Transpose(); }
+	void GetTranspose(Mat44 &m) 
+	{ m = *this; m.Transpose(); }
 	/*------------------------------------------------------
 	 * Pre  : 
 	 * Post : Returns a copy of this matrix transposed
+	 *
+	 ------------------------------------------------------*/
+
+	void InvertRT()
+	{
+		helSwap2f( mMatrix[1], mMatrix[4] );
+		helSwap2f( mMatrix[2], mMatrix[8] );
+		helSwap2f( mMatrix[6], mMatrix[9] );
+		mMatrix[12] = -mMatrix[12];
+		mMatrix[13] = -mMatrix[13];
+		mMatrix[14] = -mMatrix[14];
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : This matrix is inverted if composed only of rotations and translations.
+	 *
+	 ------------------------------------------------------*/
+
+	void NegateTranslation()
+	{
+		mMatrix[12] = -mMatrix[12];
+		mMatrix[13] = -mMatrix[13];
+		mMatrix[14] = -mMatrix[14];
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : This matrix is inverted if composed only of translations.
+	 *
+	 ------------------------------------------------------*/
+
+	void Transpose3x3()
+	{
+		helSwap2f( mMatrix[1], mMatrix[4] );
+		helSwap2f( mMatrix[2], mMatrix[8] );
+		helSwap2f( mMatrix[6], mMatrix[9] );
+	}
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : This matrix is inverted if composed only of rotations.
 	 *
 	 ------------------------------------------------------*/
 

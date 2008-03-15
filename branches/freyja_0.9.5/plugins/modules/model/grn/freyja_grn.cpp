@@ -260,6 +260,55 @@ int freyja_model__grn_import(char *filename)
 								  bone->translate.points[2]*scale, 
 								  -bone->translate.points[1]*scale);
 
+			// FIXME: Incorrect but the same result as legacy code.
+			// wxyz
+			freyjaBoneRotateQuat4f(index, \
+									bone->quaternion.points[3], \
+									bone->quaternion.points[0], \
+									bone->quaternion.points[2], \
+									-bone->quaternion.points[1]); 
+
+
+			/* Handle no parent. */
+			if (bone->parent == bone->id)
+			{
+				freyjaBoneParent(index, INDEX_INVALID);
+			}
+
+			for (j = 0; j < bones.bones.size(); ++j)
+			{
+				Bone *child = bones.bones[j];
+
+				if (child->parent == bone->id && child->id != bone->id)
+				{
+					printf("+child %li\n", child->id);
+					freyjaBoneAddChild(index, child->id);
+				}
+			}
+
+			freyjaEnd(); // FREYJA_BONE
+		}
+
+		freyjaEnd(); // FREYJA_SKELETON
+
+		/* Weights */
+		for (i = 0; i < mesh.weights.size(); ++i)
+		{
+			BoneWeight w = mesh.weights[i];
+
+			for (j = 0; j < w.numWeights; ++j)
+			{
+				freyjaVertexWeight(i, w.weights[j], w.bones[j]);
+			}
+		}
+	}
+
+	freyjaEnd(); // FREYJA_MODEL
+
+	return 0;
+}
+
+#if LEGACY
 #define GRN_QUAT_STACK
 #ifdef GRN_QUAT_STACK
 			Quat r, r2, q;
@@ -319,40 +368,6 @@ int freyja_model__grn_import(char *filename)
 
 
 #endif
+#endif
 
-			if (bone->parent == bone->id)
-				freyjaBoneParent(index, INDEX_INVALID);
-
-			for (j = 0; j < bones.bones.size(); ++j)
-			{
-				Bone *child = bones.bones[j];
-
-				if (child->parent == bone->id && child->id != bone->id)
-				{
-					printf("+child %li\n", child->id);
-					freyjaBoneAddChild(index, child->id);
-				}
-			}
-
-			freyjaEnd(); // FREYJA_BONE
-		}
-
-		freyjaEnd(); // FREYJA_SKELETON
-
-		/* Weights */
-		for (i = 0; i < mesh.weights.size(); ++i)
-		{
-			BoneWeight w = mesh.weights[i];
-
-			for (j = 0; j < w.numWeights; ++j)
-			{
-				freyjaVertexWeight(i, w.weights[j], w.bones[j]);
-			}
-		}
-	}
-
-	freyjaEnd(); // FREYJA_MODEL
-
-	return 0;
-}
 

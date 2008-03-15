@@ -1209,6 +1209,281 @@ void FreyjaRender::ApplyLights()
 }
 
 
+void FreyjaRender::RenderMeshOutline( index_t mesh )
+{
+	Mesh *m = freyjaGetMeshClass( mesh );
+
+	if (!m)
+		return;
+
+	glPushMatrix();
+
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	glPointSize(mVertexPointSize);
+
+
+	// 'World effects'
+
+
+	// NOTE: Right here if you swap out the vertex array 'array', then
+	// all the elements to be rendered will use that instead of the 
+	// the current mesh vertex array.  Good for animation, skinning, etc.
+	vec_t *array = m->GetVertexArray();
+	vec_t *normalArray = m->GetNormalArray();
+	vec_t *texcoordArray = m->GetTexCoordArray();
+
+	// Keyframe animation
+	if (mRenderMode & fKeyFrameAnimation)
+	{
+		uint32 a = FreyjaControl::GetInstance()->GetSelectedAnimation();
+		uint32 k = FreyjaControl::GetInstance()->GetSelectedKeyFrame();	
+
+		// Mesh animation
+		TransformTrack &tt = m->GetTransformTrack(a);
+		vec_t time = (vec_t)k / tt.GetRate();
+		hel::Vec3 pos, rot, scale;
+		tt.GetTransform(time, pos, rot, scale);
+
+		glTranslatef(pos.mVec[0], pos.mVec[1], pos.mVec[2]);	
+		glRotatef(rot.mVec[0], 1,0,0);
+		glRotatef(rot.mVec[1], 0,1,0);
+		glRotatef(rot.mVec[2], 0,0,1);
+		glScalef(scale.mVec[0], scale.mVec[1], scale.mVec[2]);
+
+		// FIXME: You'll have to store a cache for this array in anim/track
+		//        really.  You have to be dynamic in an editor  =)
+		VertexAnimTrack &vat = m->GetVertexAnimTrack(a);
+		VertexAnimKeyFrame *kv = vat.GetKeyframe(k);
+
+		if (kv && kv->GetVertexCount() == m->GetVertexCount())
+		{
+			array = kv->GetVertexArray();
+		}
+
+		if (mRenderMode & fSkeletalVertexBlending)
+		{
+#warning "FIXME: Still using update in render request for blending!"
+			// FIXME: Only updating in render loop for testing only!
+			freyjaMeshUpdateBlendVertices(mesh, a, time);
+
+			if (freyjaGetMeshBlendVertices(mesh))
+				array = freyjaGetMeshBlendVertices(mesh);
+		}
+	}
+
+	// NOTE: Once we switch to more advanced arrays we have to
+	//       start locking the dynamic reallocation.
+	glPushClientAttrib(GL_NORMAL_ARRAY);
+	//glEnableClientState(GL_NORMAL_ARRAY);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	// Load vertex array
+	glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, array);
+	//glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
+	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
+	 
+	/* Render outline */
+	//if ( !(mRenderMode & fWireframe) && 
+	//	 (mRenderMode & fFace) ) // &&
+		 //  //( m->GetFlags() & Mesh::fSelected ||
+		  // //mesh == FreyjaControl::GetInstance()->GetSelectedMesh() ) )
+	{
+		const vec_t scale = 1.0002f;
+
+		glPushAttrib(GL_POLYGON_BIT);
+		glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
+
+		glPolygonMode(GL_BACK, GL_LINE);
+		glEnable(GL_CULL_FACE);
+		glCullFace(GL_FRONT);
+
+		glDisable(GL_DEPTH_TEST);
+
+		glLineWidth(3.0f);
+
+		glPushMatrix();
+		glScalef(scale, scale, scale);
+
+		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
+		{
+			Face *f = m->GetFace(i);
+
+			if (!f) 
+				continue;
+
+			// NOTE: This is a test rendering, since you can't
+			//       guarantee a plugin won't fuck up Vertex:mVertexIndex
+			//       mappings in the Mesh.   =)
+			glColor3fv(mColorWireframeHighlight);
+			glDrawElements(GL_POLYGON, //GL_LINE_LOOP
+						   f->mIndices.size(), 
+						   GL_UNSIGNED_INT,
+						   f->mIndices.get_array());
+		}
+
+		glPopMatrix();
+
+		glPopAttrib(); // GL_LINE_BIT | GL_DEPTH_BUFFER_BIT
+
+		glPolygonMode(GL_FRONT, GL_FILL);
+		glCullFace(GL_BACK);
+
+		glPopAttrib(); // GL_POLYGON_BIT
+	}
+
+	glPopAttrib();
+
+	glPopClientAttrib();
+	glPopMatrix();
+}
+
+
+void FreyjaRender::RenderSelectedMesh( index_t mesh )
+{
+	Mesh *m = freyjaGetMeshClass( mesh );
+
+	if (!m)
+		return;
+
+	glPushMatrix();
+
+	glPushAttrib(GL_ENABLE_BIT);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_BLEND);
+	glPointSize(mVertexPointSize);
+
+	// NOTE: Right here if you swap out the vertex array 'array', then
+	// all the elements to be rendered will use that instead of the 
+	// the current mesh vertex array.  Good for animation, skinning, etc.
+	vec_t *array = m->GetVertexArray();
+	//vec_t *normalArray = m->GetNormalArray();
+	//vec_t *texcoordArray = m->GetTexCoordArray();
+
+	// Keyframe animation
+	if (mRenderMode & fKeyFrameAnimation)
+	{
+		uint32 a = FreyjaControl::GetInstance()->GetSelectedAnimation();
+		uint32 k = FreyjaControl::GetInstance()->GetSelectedKeyFrame();	
+
+		// Mesh animation
+		TransformTrack &tt = m->GetTransformTrack(a);
+		vec_t time = (vec_t)k / tt.GetRate();
+		hel::Vec3 pos, rot, scale;
+		tt.GetTransform(time, pos, rot, scale);
+
+		glTranslatef(pos.mVec[0], pos.mVec[1], pos.mVec[2]);	
+		glRotatef(rot.mVec[0], 1,0,0);
+		glRotatef(rot.mVec[1], 0,1,0);
+		glRotatef(rot.mVec[2], 0,0,1);
+		glScalef(scale.mVec[0], scale.mVec[1], scale.mVec[2]);
+
+		// FIXME: You'll have to store a cache for this array in anim/track
+		//        really.  You have to be dynamic in an editor  =)
+		VertexAnimTrack &vat = m->GetVertexAnimTrack(a);
+		VertexAnimKeyFrame *kv = vat.GetKeyframe(k);
+
+		if (kv && kv->GetVertexCount() == m->GetVertexCount())
+		{
+			array = kv->GetVertexArray();
+		}
+
+		if (mRenderMode & fSkeletalVertexBlending)
+		{
+#warning "FIXME: Still using update in render request for blending!"
+			// FIXME: Only updating in render loop for testing only!
+			freyjaMeshUpdateBlendVertices(mesh, a, time);
+
+			if (freyjaGetMeshBlendVertices(mesh))
+				array = freyjaGetMeshBlendVertices(mesh);
+		}
+	}
+
+	// NOTE: Once we switch to more advanced arrays we have to
+	//       start locking the dynamic reallocation.
+	//glPushClientAttrib(GL_NORMAL_ARRAY);
+	//glEnableClientState(GL_NORMAL_ARRAY);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	// Load vertex array
+	glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, array);
+	//glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
+	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
+
+	//if (FreyjaControl::GetInstance()->GetSelectedMesh() == mesh)
+	{
+		if (FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tMesh &&
+			FreyjaControl::mControlPoints.size() == 0)
+		{
+			Cursor &cur = FreyjaControl::GetInstance()->GetCursor();
+
+			switch (cur.GetMode())
+			{
+			case Cursor::Rotation: // About mesh center ( matrix abuse )
+				glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
+							 m->GetBoundingVolumeCenter().mVec[1],
+							 m->GetBoundingVolumeCenter().mVec[2]);
+				
+				glRotatef(cur.mRotate.mVec[0], 1,0,0);
+				glRotatef(cur.mRotate.mVec[1], 0,1,0);
+				glRotatef(cur.mRotate.mVec[2], 0,0,1);
+				
+				glTranslatef(-m->GetBoundingVolumeCenter().mVec[0],
+							 -m->GetBoundingVolumeCenter().mVec[1],
+							 -m->GetBoundingVolumeCenter().mVec[2]);
+				break;
+				
+			case Cursor::Scale:
+				// Haven't got the backend / frontend ready for this yet
+				if (FreyjaControl::GetInstance()->GetCursor().mSelected)
+				{
+					hel::Vec3 u = cur.mScale;
+					glScalef(u.mVec[0], u.mVec[1], u.mVec[2]);
+				}
+				break;
+
+			case Cursor::Translation:
+				// Haven't got the backend / frontend ready for this yet
+				if (cur.mSelected)
+				{
+					hel::Vec3 u = (cur.mPos - cur.mLastPos);
+					glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
+				}
+				break;
+				
+			default:
+				;
+			}
+		}
+
+		if (GetFlags() & fBoundingVolumes)
+		{
+			vec3_t min, max;
+
+			// Box
+			m->GetBBox(min, max);
+			mglDrawSelectBox(min, max, WHITE);
+
+			// Sphere
+			mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
+							m->GetBoundingVolumeRadius(), 
+							64, 0, false);
+			mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
+							m->GetBoundingVolumeRadius(), 
+							64, 2, false);
+		}	
+	}
+	 
+	glPopAttrib();
+
+	glPopClientAttrib();
+	glPopMatrix();
+}
+
+
 // This sure has a lot of branching...
 void FreyjaRender::RenderMesh(index_t mesh)
 {
@@ -1285,122 +1560,6 @@ void FreyjaRender::RenderMesh(index_t mesh)
 	glVertexPointer(3, GL_FLOAT, sizeof(vec_t)*3, array);
 	glNormalPointer(GL_FLOAT, sizeof(vec_t)*3, normalArray);
 	//glTexCoordPointer(3, GL_FLOAT, sizeof(vec_t)*3, texcoordArray);
-
-	if (FreyjaControl::GetInstance()->GetSelectedMesh() == mesh)
-	{
-		if (FreyjaControl::GetInstance()->GetObjectMode() == FreyjaControl::tMesh &&
-			FreyjaControl::mControlPoints.size() == 0)
-		{
-			Cursor &cur = FreyjaControl::GetInstance()->GetCursor();
-
-			switch (cur.GetMode())
-			{
-			case Cursor::Rotation: // About mesh center ( matrix abuse )
-				glTranslatef(m->GetBoundingVolumeCenter().mVec[0],
-							 m->GetBoundingVolumeCenter().mVec[1],
-							 m->GetBoundingVolumeCenter().mVec[2]);
-				
-				glRotatef(cur.mRotate.mVec[0], 1,0,0);
-				glRotatef(cur.mRotate.mVec[1], 0,1,0);
-				glRotatef(cur.mRotate.mVec[2], 0,0,1);
-				
-				glTranslatef(-m->GetBoundingVolumeCenter().mVec[0],
-							 -m->GetBoundingVolumeCenter().mVec[1],
-							 -m->GetBoundingVolumeCenter().mVec[2]);
-				break;
-				
-			case Cursor::Scale:
-				// Haven't got the backend / frontend ready for this yet
-				if (FreyjaControl::GetInstance()->GetCursor().mSelected)
-				{
-					hel::Vec3 u = cur.mScale;
-					glScalef(u.mVec[0], u.mVec[1], u.mVec[2]);
-				}
-				break;
-
-			case Cursor::Translation:
-				// Haven't got the backend / frontend ready for this yet
-				if (cur.mSelected)
-				{
-					hel::Vec3 u = (cur.mPos - cur.mLastPos);
-					glTranslatef(u.mVec[0], u.mVec[1], u.mVec[2]);
-				}
-				break;
-				
-			default:
-				;
-			}
-		}
-
-		if (GetFlags() & fBoundingVolumes)
-		{
-			vec3_t min, max;
-
-			// Box
-			m->GetBBox(min, max);
-			mglDrawSelectBox(min, max, WHITE);
-
-			// Sphere
-			mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
-							m->GetBoundingVolumeRadius(), 
-							64, 0, false);
-			mglDraw3dCircle(m->GetBoundingVolumeCenter().mVec, 
-							m->GetBoundingVolumeRadius(), 
-							64, 2, false);
-		}	
-	}
-	 
-
-
-	/* Render outline */
-	if ( !(mRenderMode & fWireframe) && 
-		 (mRenderMode & fFace) &&
-		 ( m->GetFlags() & Mesh::fSelected ||
-		   mesh == FreyjaControl::GetInstance()->GetSelectedMesh() ) )
-	{
-		const vec_t scale = 1.0002f;
-
-		glPushAttrib(GL_POLYGON_BIT);
-		glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
-
-		glPolygonMode(GL_BACK, GL_LINE);
-		glEnable(GL_CULL_FACE);
-		glCullFace(GL_FRONT);
-
-		glDisable(GL_DEPTH_TEST);
-
-		glLineWidth(3.0f);
-
-		glPushMatrix();
-		glScalef(scale, scale, scale);
-
-		for (uint32 i = 0, n = m->GetFaceCount(); i < n; ++i)
-		{
-			Face *f = m->GetFace(i);
-
-			if (!f) 
-				continue;
-
-			// NOTE: This is a test rendering, since you can't
-			//       guarantee a plugin won't fuck up Vertex:mVertexIndex
-			//       mappings in the Mesh.   =)
-			glColor3fv(mColorWireframeHighlight);
-			glDrawElements(GL_POLYGON, //GL_LINE_LOOP
-						   f->mIndices.size(), 
-						   GL_UNSIGNED_INT,
-						   f->mIndices.get_array());
-		}
-
-		glPopMatrix();
-
-		glPopAttrib(); // GL_LINE_BIT | GL_DEPTH_BUFFER_BIT
-
-		glPolygonMode(GL_FRONT, GL_FILL);
-		glCullFace(GL_BACK);
-
-		glPopAttrib(); // GL_POLYGON_BIT
-	}
-
 
 	if (mRenderMode & fPoints)
 	{
@@ -1811,6 +1970,22 @@ void FreyjaRender::RenderModel(index_t model)
 		}
 	}
 
+	/* Render mesh outlines. */
+	for (uint32 i = 0, count = freyjaGetModelMeshCount(model); i < count; ++i)
+	{
+		index_t mesh = freyjaGetModelMeshIndex(model, i);
+			
+		if (freyjaIsMeshAllocated(mesh))
+		{
+			Mesh* m = freyjaGetMeshClass( mesh );
+			if ( m->GetFlags() & Mesh::fSelected ||
+			     mesh == FreyjaControl::GetInstance()->GetSelectedMesh() )
+				RenderMeshOutline ( mesh );
+		}
+	}
+
+	/* Render the current edit subject with outline, etc. */
+	RenderSelectedMesh( FreyjaControl::GetInstance()->GetSelectedMesh() );
 
 	if (mRenderMode & fShadowVolume)
 	{
@@ -1848,7 +2023,6 @@ void FreyjaRender::RenderModel(index_t model)
 			}
 		}
 	}
-
 
 	glPopMatrix();
 

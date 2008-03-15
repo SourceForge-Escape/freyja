@@ -83,9 +83,9 @@ typedef	union {
 inline
 void helSwap2f(vec_t& a, vec_t& b) 
 { 
-	vec_t c = b; 
+	vec_t swap = b; 
 	b = a; 
-	a = c; 
+	a = swap; 
 }
 
 
