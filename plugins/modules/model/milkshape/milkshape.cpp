@@ -798,11 +798,11 @@ int freyja_model__milkshape_export(char *filename)
 		}
 		else
 		{
-			freyjaGetBoneName(boneIndex, 32, name);
+			strncpy( name, freyjaGetBoneNameString(boneIndex), 32 );
 		}
 		w.WriteString(32, name); // this bone's name
 
-		freyjaGetBoneName(freyjaGetBoneParent(boneIndex), 32, name);
+		strncpy( name, freyjaGetBoneNameString(freyjaGetBoneParent(boneIndex)), 32 );
 		w.WriteString(32, name); // parent name
 
 		freyjaGetBoneRotationEuler3fv(boneIndex, xyz);

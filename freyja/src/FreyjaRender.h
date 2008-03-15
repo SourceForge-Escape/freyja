@@ -766,6 +766,20 @@ private:
 	 *
 	 ------------------------------------------------------*/
 
+	void RenderMeshOutline( index_t mesh );
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders mesh with outline, etc.
+	 *
+	 ------------------------------------------------------*/
+
+	void RenderSelectedMesh( index_t mesh );
+	/*------------------------------------------------------
+	 * Pre  : Called from proper method
+	 * Post : Renders mesh with outline, etc.
+	 *
+	 ------------------------------------------------------*/
+
 	void RenderMesh(index_t mesh);
 	/*------------------------------------------------------
 	 * Pre  : Called from proper method

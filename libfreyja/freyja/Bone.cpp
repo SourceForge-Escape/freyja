@@ -536,7 +536,14 @@ void Bone::UpdateBindPose()
 		mBindPose = mLocalTransform;
 	}
 
-	mBindPose.GetInverse(mBindToWorld);
+	//mBindPose.GetInverse(mBindToWorld);
+	mBindToWorld = mBindPose;
+	mBindToWorld.InvertRT( );
+
+
+	// FIXME: Need to remove child -> parent updates first.
+	// Update children
+	//UpdateBindPose(mBindPose); 
 }
 
 
@@ -563,10 +570,9 @@ void Bone::UpdateBindPoseForParent()
 		mBindPose = mLocalTransform;
 	}
 
-	mBindPose.GetInverse(mBindToWorld);
-
-	// Update children
-	//UpdateBindPose(mBindPose); // BAD IDEA, don't write code after 0400 ;)
+	//mBindPose.GetInverse(mBindToWorld);
+	mBindToWorld = mBindPose;
+	mBindToWorld.InvertRT( );
 }
 
 
@@ -604,9 +610,8 @@ void Bone::UpdateWorldPose(index_t track, vec_t time)
 	t.mLocal.Translate(loc);
 
 	/* Relative animations are currently being used... */
-	helMatrixPostMultiply(mLocalTransform.mMatrix,  
-						  t.mLocal.mMatrix,
-						  t.mLocal.mMatrix);
+	helMatrixPostMultiply( mLocalTransform.mMatrix, 
+						   t.mLocal.mMatrix, t.mLocal.mMatrix );
 
 	/* Update pose completely to be sure ancestors haven't changed. */
 	Bone *parent = Bone::GetBone( GetParent() );
@@ -614,10 +619,8 @@ void Bone::UpdateWorldPose(index_t track, vec_t time)
 	if (parent)
 	{
 		parent->UpdateWorldPose(track, time);
-
-		helMatrixPostMultiply(parent->GetWorldPose().mMatrix,  
-							  t.mLocal.mMatrix,
-							  t.mWorld.mMatrix);
+		helMatrixPostMultiply( parent->GetWorldPose().mMatrix,  
+							   t.mLocal.mMatrix, t.mWorld.mMatrix );
 	}
 	else
 	{

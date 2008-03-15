@@ -1621,78 +1621,60 @@ void freyjaMeshUVMapCylindrical(index_t meshIndex)
 
 #include "Bone.h"
 
-void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
+void freyjaMeshUpdateBlendVertices( index_t meshId, index_t track, vec_t time )
 {
-	Mesh *m = freyjaGetMeshClass(mesh);
+	Mesh* mesh = freyjaGetMeshClass( meshId );
 	
-	if (m)
+	if ( mesh )
 	{
-		// Make sure we have enough blend vertices, and
-		// this is 'smart' enough not to reallocate if we do
-		m->SyncBlendVertices();
-		vec_t *array = m->GetBlendVerticesArray();
-		m->ResetBlendVertices();
+		/* Make sure we have a large enough blend vertices array. */
+		mesh->SyncBlendVertices();
 
-		// Forget about 'cobbling' random skeletons with reused weights!
-		//Skeleton *s = Skeleton::getSkeleton(skeleton);
+		/* Reset all vertices to <0,0,0>. */
+		mesh->ResetBlendVertices();
+
+		/* Get the array pointer for editing. */
+		vec_t* array = mesh->GetBlendVerticesArray();
 		
 		// Good case for threads if we cache all the uses of a bone and
 		// divide among vertices
 
-
-		/* Matrix animation transform lists */
-		for (uint32 i = 0, n = Bone::GetCount(); i < n; ++i)
+		/* Matrix animation transform lists. */
+		for ( uint32 i = 0, n = Bone::GetCount(); i < n; ++i )
 		{
-			Bone *b = Bone::GetBone(i);
+			Bone* bone = Bone::GetBone( i );
 
-			if (b)
+			if ( bone )
 			{
-				b->UpdateWorldPose(track, time);
+				bone->UpdateWorldPose( track, time );
 			}
 		}
 
-		// Looks like I might go with relative transforms for now...
-
-		// FIXME: Decide on which skinning method to enforce.
-		// FIXME: Come back and rework this to avoid all this branching.
-		for (uint32 i = 0, n = m->GetWeightCount(); i < n; ++i)
+		/* Skeletal animation using relative transforms. */
+		for ( uint32 i = 0, n = mesh->GetWeightCount(); i < n; ++i )
 		{
-			Weight *w = m->GetWeight(i);
+			Weight* weight = mesh->GetWeight(i);
 
-			if (!w)
-				continue;
+			// FIXME: Come back and rework 9.x to avoid all this branching.
+			if ( weight )
+			{
+				Bone* bone = Bone::GetBone(weight->mBoneIndex);
+				Vertex* vertex = mesh->GetVertex(weight->mVertexIndex);
 
-			Bone *b = Bone::GetBone(w->mBoneIndex);
+				if ( bone && vertex )
+				{
+					Vec3 p;
+					mesh->GetVertexArrayPos(vertex->mVertexIndex, p.mVec);
 
-			if (!b)
-				continue;
+					p = ( bone->GetInverseBindPose() * p );
+					p = ( bone->GetWorldPose() * p );
+					p *= weight->mWeight;
 
-			Vertex *v = m->GetVertex(w->mVertexIndex);
-
-			if (!v)
-				continue;
-
-			Vec3 p;
-			m->GetVertexArrayPos(v->mVertexIndex, p.mVec);
-
-
-#if 0
-			// The 'right' way
-			hel::Mat44 combined;	
-			helPostMatrixMultiply(b->GetInverseBindPose().mMatrix,
-								  b->GetWorldPose().mMatrix,
-								  combined.mMatrix);
-
-			p = (combined * p) * w->mWeight;
-#else
-			p = (b->GetInverseBindPose() * p);
-			p = (b->GetWorldPose() * p);
-			p *= w->mWeight;
-#endif
-
-			array[v->mVertexIndex*3  ] += p.mVec[0]; 
-			array[v->mVertexIndex*3+1] += p.mVec[1]; 
-			array[v->mVertexIndex*3+2] += p.mVec[2]; 
+					array[vertex->mVertexIndex*3  ] += p.mX; 
+					array[vertex->mVertexIndex*3+1] += p.mY; 
+					array[vertex->mVertexIndex*3+2] += p.mZ; 
+				}
+			}
 		}
 	}
 }
@@ -1700,11 +1682,8 @@ void freyjaMeshUpdateBlendVertices(index_t mesh, index_t track, vec_t time)
 
 vec_t *freyjaGetMeshBlendVertices(index_t mesh)
 {
-
-	Mesh *m = freyjaGetMeshClass(mesh);
-	
+	Mesh* m = freyjaGetMeshClass(mesh);
 	if (m) return m->GetBlendVerticesArray();
-
 	return NULL;
 }
 

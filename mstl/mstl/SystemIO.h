@@ -200,6 +200,13 @@ typedef int (*AssertCallback)(const char *file, unsigned int line,
 	 *
 	 ------------------------------------------------------*/
 
+	static const char GetPathSep( );
+	/*------------------------------------------------------
+	 * Pre  : 
+	 * Post : 
+	 *
+	 ------------------------------------------------------*/
+
 	static void *ImportFunction(void *handle, const char *name);
 	/*------------------------------------------------------
 	 * Pre  : 
@@ -646,6 +653,18 @@ void PrintErrorArgs(const char *format, va_list *args)
 		buffer[l-1] = 0;
 
 	fprintf(stderr, "%s\n", buffer);
+}
+
+
+static inline
+const char GetPathSep( )
+{
+#if WIN32
+			const char sep = '\\';
+#else
+			const char sep = '/';
+#endif
+	return sep;
 }
 
 

@@ -26,7 +26,7 @@
 #include "PakABI.h"
 #include "MeshABI.h"
 #include "CameraABI.h"
-#include "ControlPointABI.h.old"
+//#include "ControlPointABI.h.old"
 #include "freyja.h"
 #ifdef USING_PYTHON
 #include <python2.4/Python.h>

@@ -158,7 +158,7 @@ int freyja_model__psk_import(char *filename)
 	{
 		idx = i * 3; 
 		// FIXME: Don't cheat around coord conversion once multibone is fixed ;)
-		Vec3 v(psk.mVertices[idx], psk.mVertices[idx+2], -psk.mVertices[idx+1]);
+		Vec3 v(psk.mVertices[idx], psk.mVertices[idx+1], psk.mVertices[idx+2]);
 		v *= scale;
 		/*index_t vertex =*/ freyjaMeshVertexCreate3fv(mesh, v.mVec);
 	}
@@ -207,18 +207,20 @@ int freyja_model__psk_import(char *filename)
 	index_t skeleton = freyjaSkeletonCreate();
 	freyjaModelAddSkeleton(model, skeleton);
 
-	for (uint32 i = 0; i < psk.mNumBones; ++i)
+	for ( uint32 i = 0; i < psk.mNumBones; ++i )
 	{
 		hel::Vec3 t( psk.mBones[i].restLoc[0],
-					 psk.mBones[i].restLoc[2],
-					 -psk.mBones[i].restLoc[1] );
+					 psk.mBones[i].restLoc[1],
+					 psk.mBones[i].restLoc[2] );
 		t *= scale;
 
 		// FIXME: Incorrect, but the same result as the last implemenation.
 		hel::Quat q( psk.mBones[i].restDir[3],
 		             psk.mBones[i].restDir[0],
-		             psk.mBones[i].restDir[2],
-		             -psk.mBones[i].restDir[1] );		
+		             psk.mBones[i].restDir[1],
+		             psk.mBones[i].restDir[2] );		
+
+		//printf( "*** xyzw %f %f %f %f\n", q.mX, q.mY, q.mZ, q.mW );
 
 		/* Create a new bone for the skeleton. */
 		index_t bone = freyjaBoneCreate(skeleton);

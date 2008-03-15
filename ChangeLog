@@ -4,6 +4,8 @@
  Freyja 0.9.5, Kagura prealpha ( Development branch )
  =====================================================================
 
+ * Mesh outline rendering minor fix.
+ * Fix for light transform.
  * Various API/ABI changes related to backports.
  * PythonABI script update.
  * Cleaner LuaABI metaprogramming script based on 10.x Lua script binding.

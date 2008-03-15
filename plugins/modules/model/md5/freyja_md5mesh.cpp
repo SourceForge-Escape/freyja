@@ -186,7 +186,7 @@ int freyja_model__md5_import(char *filename)
 
 		/* Generate normals to be pretty */
 		freyjaMeshGenerateVertexNormals(meshIdx);
-		freyjaMeshNormalFlip(meshIdx);
+		//freyjaMeshNormalFlip(meshIdx);
 	}
 
 
@@ -433,7 +433,7 @@ int freyja_model__md5_export(char *filename)
 			vertex.numbones = freyjaGetMeshVertexWeightCount(meshIdx, j);
 			vertex.weight = freyjaGetMeshVertexWeightIndex(meshIdx, j, 0);
 			
-			// This is done to ensure proper ordering... and avoid vector.
+			// This is done to ensure proper ordering and avoid caching.
 			for (unsigned int k = 0, kn = vertex.numbones;
 				 k < kn; ++k, ++wcount)
 			{

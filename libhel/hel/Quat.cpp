@@ -140,7 +140,7 @@ void Quat::GetMatrix(matrix_t m) const
 	m[ 9] = 2.0f * (mY*mZ + mW*mX);
 	m[10] = 1.0 - 2.0f * (mX*mX + mY*mY);
 	m[11] = 0.0f;
-	
+
 	m[12] = 0.0f;
 	m[13] = 0.0f;
 	m[14] = 0.0f;

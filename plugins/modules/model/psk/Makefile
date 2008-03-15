@@ -210,7 +210,7 @@ test:
 	@-mkdir -p $(BUILD_TEST_DIR)
 	$(MAKE) targets NAME=PSKModel SHLIBEXT=.test BUILDDIR=$(BUILD_TEST_DIR) \
 	PROG_OBJS="$(BUILD_TEST_DIR)/SDLUnitTest.o $(BUILD_TEST_DIR)/Texture.o $(BUILD_TEST_DIR)/Resource.o $(BUILD_TEST_DIR)/PSKModel.o $(BUILD_TEST_DIR)/UTPackage.o  $(BUILD_TEST_DIR)/URTexture.o" \
-	CFLAGS="-Wall -g -O0 -DUNIT_TEST_PSKMODEL  $(MSTL_INC) $(SDLUNIT_CFLAGS)" \
+	CFLAGS="-Wall -g -O0 -DUNIT_TEST_PSKMODEL $(MSTL_INC) $(SDLUNIT_CFLAGS)" \
 	LD_FLAGS="$(HEL_LIB) $(SDLUNIT_LDFLAGS) -lm -ldl -lstdc++ -lhel0 -lfreyja"
 
 

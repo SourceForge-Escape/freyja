@@ -314,7 +314,7 @@ function freyja3d_ui_shelf_view( shelf )
 	-- Render joints.
 	mgtk_toolbar_separator( toolbar )
 	mgtk_toolbar_togglebutton(toolbar, "Bones2", "eRenderSkeleton2", false, "icons/24x24/bone-tag.png", "Show joints." )
-	--mgtk_toolbar_togglebutton(toolbar, "Bones", "eRenderSkeleton", false, "icons/24x24/bone-tag.png", "(debug) Show legacy skeleton." )
+	mgtk_toolbar_togglebutton(toolbar, "Bones", "eRenderSkeleton", false, "icons/24x24/bone-tag.png", "(debug) Show legacy skeleton." )
 	--mgtk_toolbar_togglebutton(toolbar, "Bones2", "eRenderSkeleton2", false, "icons/24x24/bone-tag.png", "Show bind pose skeleton." )
 	--mgtk_toolbar_togglebutton(toolbar, "Bones3", "eRenderSkeleton3", false, "icons/24x24/bone-tag.png", "(debug) Show transformed skeleton." )
 	mgtk_toolbar_togglebutton(toolbar, "BoneName", "eRenderBoneName", false, "icons/24x24/bone-name.png", "Show joint names." )

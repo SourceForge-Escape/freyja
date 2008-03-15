@@ -108,11 +108,10 @@ bool Mat44::Invert()
 	Mat22 tmp = (d - c * invAb);
 	tmp.Invert();
 
-	Mat22 ra, rb, rc, rd;
-	ra = invA + invAb * tmp * cinvA;
-	rb = -invAb * tmp;
-	rc = -tmp * cinvA;
-	rd = tmp; // very redundant 
+	Mat22 ra = invA + invAb * tmp * cinvA;
+	Mat22 rb = -invAb * tmp;
+	Mat22 rc = -tmp * cinvA;
+	Mat22 rd = tmp; // very redundant 
 
 	mMatrix[ 0] = ra.mA[0]; mMatrix[ 4] = ra.mB[0];
 	mMatrix[ 1] = ra.mA[1]; mMatrix[ 5] = ra.mB[1];
