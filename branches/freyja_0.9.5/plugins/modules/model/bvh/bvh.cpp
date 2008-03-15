@@ -424,11 +424,13 @@ int freyja_model__bvh_export(char *filename)
 		}
 		else
 		{
-			freyjaGetBoneName(boneIndex, 32, name);
+			const char* s = freyjaGetBoneNameString(boneIndex);
+			 snprintf(name, 32, s);
 		}
 		w.WriteString(32, name); // this bone's name
 
-		freyjaGetBoneName(freyjaGetBoneParent(boneIndex), 32, name);
+		const char* s = freyjaGetBoneNameString(freyjaGetBoneParent(boneIndex));
+		snprintf(name, 32, s);
 		w.WriteString(32, name); // parent name
 
 		freyjaGetBoneRotationEuler3fv(boneIndex, xyz);
